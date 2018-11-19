@@ -15,6 +15,7 @@ import com.TheRPGAdventurer.ROTD.server.cmd.CommandDragon;
 import com.TheRPGAdventurer.ROTD.server.entity.EntityCarriage;
 import com.TheRPGAdventurer.ROTD.server.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.server.handler.DragonEggBlockHandler;
+import com.TheRPGAdventurer.ROTD.server.handler.MountHandler;
 
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.server.MinecraftServer;
@@ -54,7 +55,9 @@ public class ServerProxy {
     }
     
     
-    public void Initialization(FMLInitializationEvent evt) {         MinecraftForge.EVENT_BUS.register(new DragonEggBlockHandler());
+    public void Initialization(FMLInitializationEvent evt) {
+    	MinecraftForge.EVENT_BUS.register(new DragonEggBlockHandler());
+    	MinecraftForge.EVENT_BUS.register(new MountHandler());
 //        EntityRegistry.addSpawn(EntityTameableDragon.class, 1, 1, 1, EnumCreatureType.AMBIENT, biomes);
         network = NetworkRegistry.INSTANCE.newSimpleChannel("DragonControls");
     }
