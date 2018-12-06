@@ -49,12 +49,10 @@ public class EntityAIDragonPlayerControl extends EntityAIDragonBase implements P
     
     @Override
     public void updateTask() {
+        Vec3d wp = rider.getLookVec();
         double x = dragon.posX;
         double y = dragon.posY;
         double z = dragon.posZ;
-        
-        boolean isMovingUpwards = entityIsJumping(rider);
-        boolean isMovingDownwards = rider.isSneaking();
         
         if(dragon.getBreedType() == EnumDragonBreed.SYLPHID) {
         	PotionEffect watereffect = new PotionEffect(MobEffects.WATER_BREATHING, 20*10);
@@ -74,37 +72,24 @@ public class EntityAIDragonPlayerControl extends EntityAIDragonBase implements P
         
                 
         // control direction with movement keys
-        if (rider.moveStrafing != 0 || rider.moveForward != 0 || isMovingUpwards || isMovingDownwards) {
-            Vec3d front = rider.getLookVec();
-            
-            Vec3d wp = Vec3d.ZERO;
-            
-            if (rider.moveForward > 0 ) {
-            	wp = front;
-            }
-            else if (rider.moveForward < 0) {
-                wp = wp.add(front.rotateYaw(MathX.PI_F));
-            }
-            if (rider.moveStrafing > 0) {
-                wp = wp.add(front.rotateYaw(MathX.PI_F * 0.5f));
-            }
-            else if (rider.moveStrafing < 0) {
-                wp = wp.add(front.rotateYaw(MathX.PI_F * -0.5f));
-            }
-            if( isMovingUpwards )
-            	wp = wp.addVector(0, 1, 0);
-            if( isMovingDownwards )
-            	wp = wp.addVector(0, -1, 0);
-            wp = wp.normalize();
+        if (rider.moveStrafing != 0 || rider.moveForward != 0) {
+            if (rider.moveForward < 0) {
+                wp = wp.rotateYaw(MathX.PI_F);
+            } else if (rider.moveStrafing > 0) {
+                wp = wp.rotateYaw(MathX.PI_F * 0.5f);
+            } else if (rider.moveStrafing < 0) {
+                wp = wp.rotateYaw(MathX.PI_F * -0.5f);
+            } 
             
             x += wp.x * 10;
             y += wp.y * 10;
             z += wp.z * 10;
+            
         }
       
         // lift off from a jump
         if (!dragon.isFlying()) {
-            if (isMovingUpwards) {
+            if (entityIsJumping(rider)) {
                 dragon.liftOff();
             }
         } 
