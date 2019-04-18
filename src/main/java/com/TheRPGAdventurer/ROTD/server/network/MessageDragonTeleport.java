@@ -61,12 +61,7 @@ public class MessageDragonTeleport extends AbstractMessage<MessageDragonTeleport
             EntityTameableDragon dragon = (EntityTameableDragon) entity;
             dragon.setPosition(player.getPosition().getX() + 4, player.getPosition().getY(), player.getPosition().getZ());
             dragon.nothing();
-<<<<<<< HEAD
-            player.world.playSound((EntityPlayer) null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ENDERMEN_TELEPORT, SoundCategory.NEUTRAL, 1, 1);
-
-=======
             world.playSound((EntityPlayer) null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ENDERMEN_TELEPORT, SoundCategory.NEUTRAL, 1, 1);
->>>>>>> 63de1c6... Whistle Sit Prep
         }
     }
 }
