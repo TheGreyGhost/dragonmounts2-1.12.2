@@ -1,12 +1,19 @@
 package com.TheRPGAdventurer.ROTD.client.gui;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.server.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.server.network.MessageDragonGui;
 import com.TheRPGAdventurer.ROTD.server.network.MessageDragonTeleport;
 import com.TheRPGAdventurer.ROTD.server.network.MessageDragonWhistle;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import org.lwjgl.input.Keyboard;
 
@@ -17,6 +24,7 @@ public class GuiDragonWhistle extends GuiScreen {
     private final MessageDragonWhistle dcw = new MessageDragonWhistle();
     private float mousePosX;
     private float mousePosY;
+    private EntityTameableDragon dragon;
     World world;
 
     ItemStack whistle;
@@ -41,32 +49,39 @@ public class GuiDragonWhistle extends GuiScreen {
 
     @Override
     public void initGui() {
+    	
         buttonList.clear();
 
         Keyboard.enableRepeatEvents(true);
 
-        nothing = new GuiButton(0, width / 2 - 50, height / 2 + 10,
+        nothing = new GuiButton(0, width / 2 - 50, height / 2 - 60,
                 98, 20, I18n.format("gui.nothing"));
 
-        circle = new GuiButton(0, width / 2 + 100 - 50, height / 2 + 10,
+        circle = new GuiButton(0, width / 2, height / 2 + 15,
                 98, 20, I18n.format("gui.circle"));
 
-        followFlying = new GuiButton(0, width / 2 - 100 - 50, height / 2 + 10,
+        followFlying = new GuiButton(0, width / 2 - 100, height / 2 + 15,
                 98, 20, I18n.format("gui.followFlying"));
 
-        come = new GuiButton(0, width / 2 - 50, height / 2 - 15,
+        come = new GuiButton(0, width / 2 - 50, height / 2 - 10,
                 98, 20, I18n.format("gui.goToPlayer"));
 
-        homePos = new GuiButton(0, width / 2 - 50, height / 2 + 35,
+        homePos = new GuiButton(0, width / 2, height / 2 - 35,
                 98, 20, I18n.format("gui.homePos"));
+        
+        sit = new GuiButton(0, width / 2 - 100, height / 2 - 35,
+        		98, 20, I18n.format("gui.sit"));
 
         buttonList.add(nothing);
         buttonList.add(circle);
         buttonList.add(followFlying);
         buttonList.add(come);
         buttonList.add(homePos);
+        buttonList.add(sit);
     }
 
+    
+    //
     private byte getState() {
         return state;
     }
@@ -104,6 +119,11 @@ public class GuiDragonWhistle extends GuiScreen {
     public void homepos(boolean come) {
         setStateField(4, come);
     }
+    
+    public void sit(boolean sit)
+    {
+    	setStateField(5, sit);
+    }
 
     @Override
     protected void actionPerformed(GuiButton button) {
@@ -113,6 +133,7 @@ public class GuiDragonWhistle extends GuiScreen {
             follow(button == followFlying);
             come(button == come);
             circle(button == circle);
+            sit(button == sit);
             byte controlState = getState();
 
             if (controlState != previousState) {
@@ -122,9 +143,11 @@ public class GuiDragonWhistle extends GuiScreen {
             if (button == homePos) {
 		   	    DragonMounts.NETWORK_WRAPPER.sendToServer(new MessageDragonTeleport(uuid));
             }
+            //Close GUI when option is selected
+            Minecraft.getMinecraft().displayGuiScreen(null);
         }
     }
-
+    
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.mousePosX = mouseX;

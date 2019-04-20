@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageDragonGui extends AbstractMessage<MessageDragonGui> {
 
-    private int dragonId;
+    public int dragonId;
     private boolean sit;
 
     public MessageDragonGui(int dragonId) {
@@ -25,19 +25,15 @@ public class MessageDragonGui extends AbstractMessage<MessageDragonGui> {
     @Override
     public void fromBytes(ByteBuf buf) {
         dragonId = buf.readInt();
-
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(dragonId);
-
     }
 
     @Override
     public void onClientReceived(Minecraft arg0, MessageDragonGui arg1, EntityPlayer arg2, MessageContext arg3) {
-
-
     }
 
     @Override

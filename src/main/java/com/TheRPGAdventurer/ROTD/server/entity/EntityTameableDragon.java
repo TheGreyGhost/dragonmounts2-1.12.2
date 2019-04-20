@@ -15,6 +15,7 @@ import com.TheRPGAdventurer.ROTD.client.inventory.ContainerDragon;
 import com.TheRPGAdventurer.ROTD.client.message.DragonBreathMessage;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
 import com.TheRPGAdventurer.ROTD.client.sound.ModSounds;
+import com.TheRPGAdventurer.ROTD.server.blocks.tileentities.TileEntityDragonShulker;
 import com.TheRPGAdventurer.ROTD.server.entity.ai.air.EntityAIAirPoint;
 import com.TheRPGAdventurer.ROTD.server.entity.ai.ground.EntityAIDragonSit;
 import com.TheRPGAdventurer.ROTD.server.entity.ai.path.PathNavigateFlying;
@@ -24,6 +25,7 @@ import com.TheRPGAdventurer.ROTD.server.entity.helper.*;
 import com.TheRPGAdventurer.ROTD.server.entity.helper.breath.DragonBreathHelper;
 import com.TheRPGAdventurer.ROTD.server.entity.interact.DragonInteractHelper;
 import com.TheRPGAdventurer.ROTD.server.initialization.ModArmour;
+import com.TheRPGAdventurer.ROTD.server.initialization.ModBlocks;
 import com.TheRPGAdventurer.ROTD.server.initialization.ModItems;
 import com.TheRPGAdventurer.ROTD.server.initialization.ModKeys;
 import com.TheRPGAdventurer.ROTD.server.initialization.ModTools;
@@ -534,6 +536,11 @@ public class EntityTameableDragon extends EntityTameable implements IShearable, 
     public boolean homepos() {
         return (dataManager.get(WHISTLE_STATE)) == 4;
     }
+    
+    public boolean sit()
+    {
+    	return (dataManager.get(WHISTLE_STATE)) == 5;
+    }
 
     public void setnothing(boolean nothing) {
         setStateField(0, nothing);
@@ -553,6 +560,11 @@ public class EntityTameableDragon extends EntityTameable implements IShearable, 
 
     public void sethomepos(boolean homepos) {
         setStateField(4, homepos);
+    }
+    
+    public void setsit(boolean sit)
+    {
+    	setStateField(5, sit);
     }
 
     /**
@@ -756,7 +768,8 @@ public class EntityTameableDragon extends EntityTameable implements IShearable, 
     /**
      * Returns the distance to the ground while the entity is flying.
      */
-    public double getAltitude() {
+    public double getAltitude()
+    {
         BlockPos groundPos = world.getHeight(getPosition());
         double altitude = posY - groundPos.getY();
         return altitude;
@@ -887,19 +900,24 @@ public class EntityTameableDragon extends EntityTameable implements IShearable, 
      *
      * @return True if so
      */
-    public boolean onSolidGround() {
+    public boolean onSolidGround()
+    {
         double[] xz = {-2, -1, 0, 1, 2};
-
-        for (double x : xz) {
-            for (double z : xz) {
-                if (isBlockSolid(posX + x, posY - 1, posZ + z)
-                        || isBlockSolid(posX + x, posY - 2, posZ + z)
-                        || (isBlockSolid(posX + x, posY - 3, posZ + z) && this.getScale() > 0.70)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        
+        //Array not needed for y, only used once (In fact its better this way) @Wolf
+    	for (double y = -3.0; y <= -1.0; ++y)
+    	{
+    		for (double x : xz)
+    		{
+    			for (double z : xz)
+    			{
+    				if (isBlockSolid(posX + x, posY + y, posZ + z) && this.getScale() > 0.70)
+    				{
+    					return true;
+    				}
+    			}
+    		}
+    	} return false;
     }
 
     /*
@@ -1077,10 +1095,10 @@ public class EntityTameableDragon extends EntityTameable implements IShearable, 
     }
 
     public void generateChest(World world, BlockPos pos, ItemStack essenceStack) {
-        world.setBlockState(pos, Blocks.CHEST.getDefaultState(), 1);
+        world.setBlockState(pos, ModBlocks.dragonshulker.getDefaultState(), 1);
         TileEntity te = world.getTileEntity(pos);
-        if (te instanceof TileEntityChest) {
-            ((TileEntityChest) te).setInventorySlotContents(1, essenceStack);
+        if (te instanceof TileEntityDragonShulker) {
+            ((TileEntityDragonShulker) te).setInventorySlotContents(0, essenceStack);
         }
     }
 
