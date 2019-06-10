@@ -9,8 +9,13 @@
  */
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitter;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFactory;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFire;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundController;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeapon;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponP;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.DamageSource;
@@ -76,4 +81,41 @@ public class DragonBreedFire extends DragonBreed {
 	        }
         }
     }
+
+  /** return a new fire breathweapon FX emitter
+   * @return
+   */
+  @Override
+  public BreathWeaponFXEmitter getBreathWeaponFXEmitter(EntityTameableDragon dragon)
+  {
+    return new BreathWeaponFXEmitterFire();
+  }
+
+  @Override
+  public BreathWeaponSpawnType getBreathWeaponSpawnType(EntityTameableDragon dragon)
+  {
+    return BreathWeaponSpawnType.NODES;
+  }
+
+  /** return a new BreathWeapon based on breed
+   * @return
+   */
+  @Override
+  public BreathWeaponP getBreathWeapon(EntityTameableDragon dragon)
+  {
+    return new BreathWeaponFire(dragon);
+  }
+
+  @Override
+  public BreathNodeFactory getBreathNodeFactory(EntityTameableDragon dragon)
+  {
+    return new BreathNodeFire.BreathNodeFireFactory();
+  }
+
+  @Override
+  public SoundEffectBreathWeapon getSoundEffectBreathWeapon(SoundController i_soundController,
+                                                            SoundEffectBreathWeapon.WeaponSoundUpdateLink i_weaponSoundUpdateLink) {
+    return new SoundEffectBreathWeaponFire(i_soundController, i_weaponSoundUpdateLink);
+  }
+
 }

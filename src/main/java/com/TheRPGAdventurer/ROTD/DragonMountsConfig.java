@@ -32,6 +32,7 @@ public class DragonMountsConfig {
 	// config properties
 	private static boolean disableBlockOverride = false;
 	private static boolean debug = false;
+  private static boolean prototypeBreathWeapons = false;
 	public static boolean shouldChangeBreedViaHabitatOrBlock = true;
 	public static boolean canDragonDespawn = true;
 
@@ -122,9 +123,8 @@ public class DragonMountsConfig {
 
   public static boolean isOrbTargetAutoLock() {verifyLoaded(); return true;} //todo update later if dragon orb gets reintroduced
   public static boolean isOrbHighlightTarget() {verifyLoaded(); return true;}
-  public static boolean isPrototypeBreathweapons() {verifyLoaded(); return isDebug();} // turn off prototype breathweapons if not debugging
+  public static boolean isPrototypeBreathweapons() {verifyLoaded(); return isDebug() && prototypeBreathWeapons;} // turn off prototype breathweapons if not debugging
 	public static boolean doBreathweaponsAffectBlocks() {verifyLoaded(); return true;} // todo implement later
-
 
   private static void verifyLoaded() {
     if (configHasLoaded) return;
@@ -147,6 +147,11 @@ public class DragonMountsConfig {
 		prop.setComment("Debug mode. You need to restart Minecraft for the change to take effect.  Unless you're a developer or are told to activate it, you don't want to set this to true.");
 		debug = prop.getBoolean();
 		propOrder.add(prop.getName());
+
+    prop = config.get(CATEGORY_MAIN, "prototype breath weapons", prototypeBreathWeapons);
+    prop.setComment("Use prototype breath weapons (Debug mode only).  Unless you're a developer or are told to activate it, you don't want to set this to true.");
+    prototypeBreathWeapons = prop.getBoolean();
+    propOrder.add(prop.getName());
 
 		prop = config.get(CATEGORY_MAIN, "can eggs change breeds", shouldChangeBreedViaHabitatOrBlock);
 		prop.setComment("Enables changing of egg breeds via block or environment");
