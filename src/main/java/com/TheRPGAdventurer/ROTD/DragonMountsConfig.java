@@ -125,6 +125,7 @@ public class DragonMountsConfig {
   public static boolean isOrbHighlightTarget() {verifyLoaded(); return true;}
   public static boolean isPrototypeBreathweapons() {verifyLoaded(); return isDebug() && prototypeBreathWeapons;} // turn off prototype breathweapons if not debugging
 	public static boolean doBreathweaponsAffectBlocks() {verifyLoaded(); return true;} // todo implement later
+	public static boolean isOrbHolderImmune() {verifyLoaded(); return true;} //todo implement later
 
   private static void verifyLoaded() {
     if (configHasLoaded) return;

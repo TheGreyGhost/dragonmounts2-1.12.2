@@ -4,6 +4,8 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.node
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.Optional;
+
 /**
  * Created by TGG on 7/12/2015.
  */
@@ -20,10 +22,11 @@ public class BreathWeaponFXEmitterFire extends BreathWeaponFXEmitter
                                            int tickCount, float partialTickHeadStart)
   {
     BreathFXFire breathFXFire = BreathFXFire.createBreathFXFire(world,
-            spawnOrigin.xCoord, spawnOrigin.yCoord, spawnOrigin.zCoord,
-            spawnDirection.xCoord, spawnDirection.yCoord, spawnDirection.zCoord,
-            power,
-            partialTickHeadStart, debugBreathFXSettings);
+                                                                spawnOrigin.x, spawnOrigin.y, spawnOrigin.z,
+                                                                spawnDirection.x, spawnDirection.y, spawnDirection.z,
+                                                                power,
+                                                                partialTickHeadStart,
+                                                                Optional.of(debugBreathFXSettings));
     return breathFXFire;
   }
 

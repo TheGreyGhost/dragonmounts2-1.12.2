@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathMode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
+import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -20,7 +21,7 @@ import java.util.Random;
  */
 public abstract class BreathWeaponFXEmitter
 {
-
+  protected DebugBreathFXSettings debugBreathFXSettings = new DebugBreathFXSettings(); // used to debug the breath appearance
   protected Vec3d origin;
   protected Vec3d direction;
 

@@ -79,9 +79,9 @@ public class BreathFXFire extends BreathFX {
     this.particleAlpha = MAX_ALPHA;  // a value less than 1 turns on alpha blending
 
     //undo random velocity variation of vanilla EntityFX constructor
-    motionX = motion.xCoord;
-    motionY = motion.yCoord;
-    motionZ = motion.zCoord;
+    motionX = motion.x;
+    motionY = motion.y;
+    motionZ = motion.z;
     if (debugBreathFXSettings.isPresent() && debugBreathFXSettings.get().freezeMotion) {
       motionX = 0; motionY = 0; motionZ = 0;
     }
@@ -101,11 +101,11 @@ public class BreathFXFire extends BreathFX {
     return 1;
   }
 
-  // this function is used by EffectRenderer.addEffect() to determine whether depthmask writing should be on or not.
+  // this function is used by ParticleManager.updateEffects() to determine whether depthmask writing should be on or not.
   // BreathFXWater uses alphablending but we want depthmask writing on, otherwise translucent objects (such as water)
   //   render over the top of our breath.
   @Override
-  public boolean isTransparent()
+  public boolean shouldDisableDepth()
   {
     return true;
   }

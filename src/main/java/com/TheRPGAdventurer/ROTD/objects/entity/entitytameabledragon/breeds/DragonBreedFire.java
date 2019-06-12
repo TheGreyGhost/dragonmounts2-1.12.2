@@ -10,11 +10,15 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitter;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitterFire;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFactory;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFire;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundController;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeapon;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponFire;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponP;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponFireP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponP;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
@@ -65,7 +69,7 @@ public class DragonBreedFire extends DragonBreed {
 	
 	@Override
 	public void onLivingUpdate(EntityTameableDragon dragon) {
-		if(dragon.isInLava() || dragon.world.isMaterialInBB(dragon.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.FIRE)) doParticles(dragon);
+		if(dragon.isInLava() || dragon.world.isMaterialInBB(dragon.getEntityBoundingBox().grow(-0.1, -0.4, -0.1), Material.FIRE)) doParticles(dragon);
 	}
 	
     @SideOnly(Side.CLIENT)
@@ -103,7 +107,7 @@ public class DragonBreedFire extends DragonBreed {
   @Override
   public BreathWeaponP getBreathWeapon(EntityTameableDragon dragon)
   {
-    return new BreathWeaponFire(dragon);
+    return new BreathWeaponFireP(dragon);
   }
 
   @Override
@@ -113,8 +117,8 @@ public class DragonBreedFire extends DragonBreed {
   }
 
   @Override
-  public SoundEffectBreathWeapon getSoundEffectBreathWeapon(SoundController i_soundController,
-                                                            SoundEffectBreathWeapon.WeaponSoundUpdateLink i_weaponSoundUpdateLink) {
+  public SoundEffectBreathWeaponP getSoundEffectBreathWeapon(SoundController i_soundController,
+                                                            SoundEffectBreathWeaponP.WeaponSoundUpdateLink i_weaponSoundUpdateLink) {
     return new SoundEffectBreathWeaponFire(i_soundController, i_weaponSoundUpdateLink);
   }
 
