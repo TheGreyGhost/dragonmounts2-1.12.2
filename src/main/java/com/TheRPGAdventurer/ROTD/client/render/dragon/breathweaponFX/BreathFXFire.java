@@ -6,6 +6,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.node
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.RotatingQuad;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.entity.Entity;
@@ -15,6 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.nio.Buffer;
 import java.util.Optional;
 import java.util.Random;
 
@@ -130,7 +132,7 @@ public class BreathFXFire extends BreathFX {
    *   by half the quad's height.
    * NB edgeLRdirectionY is not provided because it's always 0, i.e. the top of the viewer's screen is always directly
    *    up so moving left-right on the viewer's screen doesn't affect the y coordinate position in the world
-   * @param vertexBuffer
+   * @param bufferBuilder
    * @param entity
    * @param partialTick
    * @param edgeLRdirectionX edgeLRdirection[XYZ] is the vector direction pointing left-right on the player's screen
@@ -140,7 +142,7 @@ public class BreathFXFire extends BreathFX {
    * @param edgeUDdirectionZ edgeUDdirection[XYZ] is the vector direction pointing up-down on the player's screen
    */
   @Override
-  public void renderParticle(VertexBuffer vertexBuffer, Entity entity, float partialTick,
+  public void renderParticle(BufferBuilder bufferBuilder, Entity entity, float partialTick,
                              float edgeLRdirectionX, float edgeUDdirectionY, float edgeLRdirectionZ,
                              float edgeUDdirectionX, float edgeUDdirectionZ)
   {
@@ -169,28 +171,28 @@ public class BreathFXFire extends BreathFX {
     // centre of rendering is now y midpt not ymin
     double z = this.prevPosZ + (this.posZ - this.prevPosZ) * partialTick - interpPosZ;
 
-    vertexBuffer.pos(x - edgeLRdirectionX * scaleLR - edgeUDdirectionX * scaleUD,
-                     y - edgeUDdirectionY * scaleUD,
-                     z - edgeLRdirectionZ * scaleLR - edgeUDdirectionZ * scaleUD)
+    bufferBuilder.pos(x - edgeLRdirectionX * scaleLR - edgeUDdirectionX * scaleUD,
+            y - edgeUDdirectionY * scaleUD,
+            z - edgeLRdirectionZ * scaleLR - edgeUDdirectionZ * scaleUD)
                 .tex(tex.getU(0), tex.getV(0))
                 .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
             .lightmap(skyLightTimes16, blockLightTimes16)
                 .endVertex();
-    vertexBuffer.pos(x - edgeLRdirectionX * scaleLR + edgeUDdirectionX * scaleUD,
-                                 y + edgeUDdirectionY * scaleUD,
-                                 z - edgeLRdirectionZ * scaleLR + edgeUDdirectionZ * scaleUD)
+    bufferBuilder.pos(x - edgeLRdirectionX * scaleLR + edgeUDdirectionX * scaleUD,
+            y + edgeUDdirectionY * scaleUD,
+            z - edgeLRdirectionZ * scaleLR + edgeUDdirectionZ * scaleUD)
             .tex(tex.getU(1), tex.getV(1))
                 .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
             .lightmap(skyLightTimes16, blockLightTimes16)
             .endVertex();
-    vertexBuffer.pos(x + edgeLRdirectionX * scaleLR + edgeUDdirectionX * scaleUD,
+    bufferBuilder.pos(x + edgeLRdirectionX * scaleLR + edgeUDdirectionX * scaleUD,
             y + edgeUDdirectionY * scaleUD,
             z + edgeLRdirectionZ * scaleLR + edgeUDdirectionZ * scaleUD)
             .tex(tex.getU(2), tex.getV(2))
                 .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
             .lightmap(skyLightTimes16, blockLightTimes16)
             .endVertex();
-    vertexBuffer.pos(x + edgeLRdirectionX * scaleLR - edgeUDdirectionX * scaleUD,
+    bufferBuilder.pos(x + edgeLRdirectionX * scaleLR - edgeUDdirectionX * scaleUD,
             y - edgeUDdirectionY * scaleUD,
             z + edgeLRdirectionZ * scaleLR - edgeUDdirectionZ * scaleUD)
             .tex(tex.getU(3),  tex.getV(3))
@@ -261,7 +263,7 @@ public class BreathFXFire extends BreathFX {
    * @param dz
    */
   @Override
-  public void moveEntity(double dx, double dy, double dz) {
+  public void move(double dx, double dy, double dz) {
     moveAndResizeParticle(dx, dy, dz, this.width, this.height);
   }
 

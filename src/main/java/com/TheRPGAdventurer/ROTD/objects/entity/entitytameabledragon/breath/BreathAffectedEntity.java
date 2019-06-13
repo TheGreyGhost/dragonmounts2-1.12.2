@@ -48,6 +48,11 @@ public class BreathAffectedEntity {
     timeSinceLastHit = 0;
   }
 
+  public void resetHitDensity()
+  {
+    hitDensity = 0;
+  }
+
   public float getHitDensity() {
     return hitDensity;
   }
