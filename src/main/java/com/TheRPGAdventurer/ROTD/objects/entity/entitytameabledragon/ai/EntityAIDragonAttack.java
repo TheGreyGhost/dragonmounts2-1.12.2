@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathWeaponTarget;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
@@ -206,8 +207,11 @@ public class EntityAIDragonAttack extends EntityAIDragonBase {
             this.dragon.swingArm(EnumHand.MAIN_HAND); 
             this.dragon.attackEntityAsMob(target); 
         } else  if(shouldUseRange) { 
-        	this.attackTick = 20;
-        	dragon.setUsingBreathWeapon(target.isEntityAlive());
+        	  this.attackTick = 20;
+            if (target.isEntityAlive()) {
+                BreathWeaponTarget breathWeaponTarget = BreathWeaponTarget.targetEntity(target);
+                dragon.getBreathHelperP().setBreathingTarget(breathWeaponTarget);
+            }
        	    dragon.getLookHelper().setLookPositionWithEntity(target, dragon.getHeadYawSpeed(), dragon.getHeadPitchSpeed());
         }
     }

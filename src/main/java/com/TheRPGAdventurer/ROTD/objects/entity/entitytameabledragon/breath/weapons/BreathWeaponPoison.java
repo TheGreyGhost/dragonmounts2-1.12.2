@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * 2) affectBlock() to apply an area of effect to the given block (eg set fire to it)
  * 3) affectEntity() to apply an area of effect to the given entity (eg damage it)
  */
-public class BreathWeaponPoison extends BreathWeapon implements PrivateAccessor {
+public class BreathWeaponPoison extends BreathWeapon {
 
     private int poisonDuration = 10 * 10;
 
@@ -57,7 +57,7 @@ public class BreathWeaponPoison extends BreathWeapon implements PrivateAccessor 
 
         Random rand = new Random();
 
-        if (!world.isRemote) {
+        if (!world.isRemote) {  //todo: this might generate a large amount of EntityAreaEffectClouds; might need to reduce it/ check for existing clouds nearby
             EntityAreaEffectCloud entityareaeffectcloud = new EntityAreaEffectCloud(world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
             entityareaeffectcloud.setOwner(this.dragon);
             entityareaeffectcloud.setRadius(1.3F);
@@ -87,18 +87,16 @@ public class BreathWeaponPoison extends BreathWeapon implements PrivateAccessor 
         checkNotNull(entityID);
         checkNotNull(currentHitDensity);
 
-        Entity entity = world.getEntityByID(entityID);
-        if (entity == null || !(entity instanceof EntityLivingBase) || entity.isDead) {
-            return null;
-        }
+        Entity entityAffected = world.getEntityByID(entityID);
+        if (isImmuneToBreath(entityAffected)) return null;
 
+        final float POISON_DAMAGE_PER_HIT_DENSITY = 1F;
         float hitDensity = currentHitDensity.getHitDensity();
-        final float DAMAGE_PER_HIT_DENSITY = POISON_DAMAGE * hitDensity;
+        final float DAMAGE_PER_HIT_DENSITY = POISON_DAMAGE_PER_HIT_DENSITY * hitDensity;
 
-        triggerDamageExceptions(entity, DAMAGE_PER_HIT_DENSITY, entityID, currentHitDensity);
-        entity.attackEntityFrom(DamageSource.causeMobDamage(dragon), DAMAGE_PER_HIT_DENSITY);
+        entityAffected.attackEntityFrom(DamageSource.causeMobDamage(dragon), DAMAGE_PER_HIT_DENSITY);
 
-        this.xp(entity);
+        this.xp(entityAffected);
 
         return currentHitDensity;
     }

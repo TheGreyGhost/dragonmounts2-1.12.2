@@ -113,27 +113,19 @@ public class BreathWeaponAether extends BreathWeapon {
         checkNotNull(world);
         checkNotNull(entityID);
         checkNotNull(currentHitDensity);
+
+        Entity entityAffected=world.getEntityByID(entityID);
+        if (isImmuneToBreath(entityAffected)) return null;
+
         float hitDensity=currentHitDensity.getHitDensity();
-        if (entityID==dragon.getEntityId()) return null;
 
-        Entity entity=world.getEntityByID(entityID);
-        if (entity==null || !(entity instanceof EntityLivingBase) || entity.isDead) {
-            return null;
+        if (entityAffected.isBurning()) {
+            entityAffected.extinguish();
         }
 
-        if (entity instanceof EntityPlayer) {
-            EntityPlayer entityPlayer=(EntityPlayer) entity;
-            if (entityPlayer.getRidingEntity()==dragon) {
-                return null;
-            }
-        }
+        final float AETHER_DAMAGE_PER_HIT_DENSITY = 1F;
 
-        if (entity.isBurning()) {
-            entity.extinguish();
-        }
-
-
-        final float DAMAGE_PER_HIT_DENSITY=FIRE_DAMAGE * hitDensity;
+        final float damage = AETHER_DAMAGE_PER_HIT_DENSITY * hitDensity;
 
         //    System.out.format("Old entity motion:[%.2f, %.2f, %.2f]\n", entity.motionX, entity.motionY, entity.motionZ);
         // push in the direction of the wind, but add a vertical upthrust as well
@@ -145,24 +137,25 @@ public class BreathWeaponAether extends BreathWeapon {
 
         final double WT_ENTITY=0.05;
         final double WT_AIR=1 - WT_ENTITY;
-        ((EntityLivingBase) entity).knockBack(entity, 0.8F, dragon.posX - entity.posX, dragon.posZ - entity.posZ);
-        entity.attackEntityFrom(DamageSource.causeMobDamage(dragon), DAMAGE_PER_HIT_DENSITY);
-        triggerDamageExceptions(entity, DAMAGE_PER_HIT_DENSITY,entityID, currentHitDensity);
+        if (entityAffected instanceof EntityLivingBase) {
+            EntityLivingBase entityLivingBase = (EntityLivingBase)entityAffected;
+            entityLivingBase.knockBack(entityLivingBase, 0.8F,
+                                       dragon.posX - entityLivingBase.posX,
+                                       dragon.posZ - entityLivingBase.posZ);
+        }
         final double UPFORCE_THRESHOLD=1.0;
         if (airForce > UPFORCE_THRESHOLD) {
             final double GRAVITY_OFFSET=-0.08;
             Vec3d up=new Vec3d(0, 1, 0);
             Vec3d upMotion=MathX.multiply(up, VERTICAL_FORCE_MULTIPLIER * airForce);
             //      System.out.format("upMotion:%s\n", upMotion);
-            entity.motionY=WT_ENTITY * (entity.motionY - GRAVITY_OFFSET) + WT_AIR * upMotion.y;
+            entityAffected.motionY=WT_ENTITY * (entityAffected.motionY - GRAVITY_OFFSET) + WT_AIR * upMotion.y;
         }
 
         //    System.out.format("airMotion:%s\n", airMotion);
         //    System.out.format("New entity motion:[%.2f, %.2f, %.2f]\n", entity.motionX, entity.motionY, entity.motionZ);
 
-        final int DELAY_UNTIL_DECAY=5;
-        final float DECAY_PERCENTAGE_PER_TICK=10.0F;
-        //        currentHitDensity.setDecayParameters(DECAY_PERCENTAGE_PER_TICK, DELAY_UNTIL_DECAY);
+        entityAffected.attackEntityFrom(DamageSource.causeMobDamage(dragon), damage);
 
         return currentHitDensity;
     }

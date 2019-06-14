@@ -13,15 +13,15 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.DragonMountsLootTables;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
+import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.inits.*;
 import com.TheRPGAdventurer.ROTD.inventory.ContainerDragon;
-import com.TheRPGAdventurer.ROTD.network.MessageDragonBreath;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonExtras;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonInventory;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitycarriage.EntityCarriage;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.ground.EntityAIDragonSit;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.path.PathNavigateFlying;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathHelper;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathHelperP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
@@ -31,6 +31,7 @@ import com.TheRPGAdventurer.ROTD.objects.items.ItemDragonAmulet;
 import com.TheRPGAdventurer.ROTD.objects.items.ItemDragonEssence;
 import com.TheRPGAdventurer.ROTD.objects.tileentities.TileEntityDragonShulker;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugFreezeAnimator;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import com.google.common.base.Optional;
 import net.minecraft.block.Block;
@@ -177,7 +178,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     public EntityEnderCrystal healingEnderCrystal;
     public DragonInventory dragonInv;
     private boolean hasChestVarChanged=false;
-    private boolean isUsingBreathWeapon;
+//    private boolean isUsingBreathWeapon;
     private boolean isGoingDown;
     private boolean isUnhovered;
     private boolean yLocked;
@@ -203,7 +204,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         addHelper(new DragonBreedHelper(this, DATA_BREED));
         addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION));
         addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
-        addHelper(new DragonBreathHelper(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
+        addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
         addHelper(new DragonInteractHelper(this));
 
         InitializeDragonInventory();
@@ -300,7 +301,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         nbt.setInteger(NBT_ARMOR, this.getArmor());
         nbt.setBoolean(NBT_CHESTED, this.isChested());
         nbt.setBoolean(NBT_SHEARED, this.isSheared());
-        nbt.setBoolean(NBT_BREATHING, this.isUsingBreathWeapon());
+//        nbt.setBoolean(NBT_BREATHING, this.isUsingBreathWeapon);
         nbt.setBoolean("down", this.isGoingDown());
         nbt.setBoolean(NBT_ISMALE, this.isMale());
         nbt.setBoolean(NBT_ISALBINO, this.isAlbino());
@@ -336,7 +337,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         this.setChested(nbt.getBoolean(NBT_CHESTED));
         this.setSheared(nbt.getBoolean(NBT_SHEARED));
         this.setHunger(nbt.getInteger("hunger"));
-        this.setUsingBreathWeapon(nbt.getBoolean(NBT_BREATHING));
+//        this.setUsingBreathWeapon(nbt.getBoolean(NBT_BREATHING));
         this.getLifeStageHelper().setTicksSinceCreation(nbt.getInteger("AgeTicks"));
         this.setArmor(nbt.getInteger(NBT_ARMOR));
         this.setMale(nbt.getBoolean(NBT_ISMALE));
@@ -591,23 +592,19 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
      * Returns true if the entity is breathing.
      */
     public boolean isUsingBreathWeapon() {
-        if (world.isRemote) {
-            boolean usingBreathWeapon=this.dataManager.get(DATA_BREATHING);
-            this.isUsingBreathWeapon=usingBreathWeapon;
-            return usingBreathWeapon;
-        }
-        return isUsingBreathWeapon;
+        BreathWeaponTarget breathWeaponTarget = this.getBreathHelperP().getPlayerSelectedTarget();
+        return (null == breathWeaponTarget);
     }
 
-    /**
-     * Set the breathing flag of the entity.
-     */
-    public void setUsingBreathWeapon(boolean usingBreathWeapon) {
-        this.dataManager.set(DATA_BREATHING, usingBreathWeapon);
-        if (!world.isRemote) {
-            this.isUsingBreathWeapon=usingBreathWeapon;
-        }
-    }
+//    /**
+//     * Set the breathing flag of the entity.
+//     */
+//    public void setUsingBreathWeapon(boolean usingBreathWeapon) {
+//        this.dataManager.set(DATA_BREATHING, usingBreathWeapon);
+//        if (!world.isRemote) {
+//            this.isUsingBreathWeapon=usingBreathWeapon;
+//        }
+//    }
 
     /**
      * Returns true if the entity is breathing.
@@ -751,13 +748,14 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     public void updateKeys() {
         Minecraft mc=Minecraft.getMinecraft();
         if ((hasControllingPlayer(mc.player) && getControllingPlayer()!=null) || (this.getRidingEntity() instanceof EntityPlayer && this.getRidingEntity()!=null && this.getRidingEntity().equals(mc.player)) || (getOwner()!=null && firesupport())) {
-            boolean isBreathing=ModKeys.KEY_BREATH.isKeyDown();
+            boolean breathKeyHeldDown=ModKeys.KEY_BREATH.isKeyDown();
             boolean isBoosting=ModKeys.BOOST.isKeyDown();
             boolean isDown=ModKeys.DOWN.isKeyDown();
             boolean unhover=ModKeys.KEY_HOVERCANCEL.isPressed();
             boolean followyaw=ModKeys.FOLLOW_YAW.isPressed();
             boolean locky=ModKeys.KEY_LOCKEDY.isPressed();
-            DragonMounts.NETWORK_WRAPPER.sendToServer(new MessageDragonBreath(getEntityId(), isBreathing));
+            //DragonMounts.NETWORK_WRAPPER.sendToServer(new MessageDragonBreath(getEntityId(), isBreathing));
+            DragonOrbControl.getInstance().setKeyBreathState(this, breathKeyHeldDown);
             DragonMounts.NETWORK_WRAPPER.sendToServer(new MessageDragonExtras(getEntityId(), unhover, followyaw, locky, isBoosting, isDown));
         }
     }
@@ -801,8 +799,10 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
     @Override
     public void onLivingUpdate() {
-        helpers.values().forEach(DragonHelper::onLivingUpdate);
-        getBreed().onLivingUpdate(this);
+        if (!DebugFreezeAnimator.isFrozen()) {
+            helpers.values().forEach(DragonHelper::onLivingUpdate);
+            getBreed().onLivingUpdate(this);
+        }
 
         if (isServer()) {
             final float DUMMY_MOVETIME=0;
@@ -889,9 +889,18 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
             }
         }
 
-        //        // if we're breathing at a target, look at it
-        if (this.isUsingBreathWeapon() && this.getBreed().canUseBreathWeapon() && this.getControllingPlayer()!=null && (this.isUsingBreathWeapon())) {
-            this.equalizeYaw(this.getControllingPlayer());
+//        if (this.isUsingBreathWeapon() && this.getBreed().canUseBreathWeapon() && this.getControllingPlayer()!=null && (this.isUsingBreathWeapon())) {
+//            this.equalizeYaw(this.getControllingPlayer());
+//        }
+
+        // if we're breathing at a target, look at it
+        if (isUsingBreathWeapon()) {
+            Vec3d dragonEyePos = this.getPositionVector().addVector(0, this.getEyeHeight(), 0);
+            BreathWeaponTarget breathWeaponTarget = this.getBreathHelperP().getPlayerSelectedTarget();
+            if (breathWeaponTarget != null) {
+                breathWeaponTarget.setEntityLook(this.world, this.getLookHelper(), dragonEyePos,
+                                                 this.getHeadYawSpeed(), this.getHeadPitchSpeed());
+            }
         }
 
         if (this.boosting() && this.getControllingPlayer() instanceof EntityPlayerSP) {
@@ -983,7 +992,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         }
 
         Random rand=new Random();
-        if (this.getBreed().getSneezeParticle()!=null && rand.nextInt(750)==1 && !this.isUsingBreathWeapon() && getScale() > getScale() * 0.14 && !isEgg()) {
+        if (this.getBreed().getSneezeParticle()!=null && rand.nextInt(750)==1 && !isUsingBreathWeapon() && getScale() > getScale() * 0.14 && !isEgg()) {
             double throatPosX=(this.getAnimator().getThroatPosition().x);
             double throatPosY=(this.getAnimator().getThroatPosition().z);
             double throatPosZ=(this.getAnimator().getThroatPosition().y + 1.7);
@@ -1808,13 +1817,12 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         return getHelper(DragonReproductionHelper.class);
     }
 
-    public DragonBreathHelper getBreathHelper() {
-        return getHelper(DragonBreathHelper.class);
-    }
+//    public DragonBreathHelper getBreathHelper() {
+//        return getHelper(DragonBreathHelper.class);
+//    }
 
-    public DragonBreathHelperP getBreathHelperP() {  // enable compilation only
-        throw new UnsupportedOperationException();
-        //return getHelper(DragonBreathHelperP.class);
+    public DragonBreathHelperP getBreathHelperP() {
+        return getHelper(DragonBreathHelperP.class);
     }
 
 

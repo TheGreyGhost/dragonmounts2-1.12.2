@@ -211,7 +211,8 @@ public class DragonBreathHelperP extends DragonHelper
   }
 
   /**
-   * For tamed dragons, returns the target that their controlling player has selected using the DragonOrb.
+   * For tamed dragons, returns the target that their controlling player has selected using the DragonOrb or riding
+   * while holding the breath key.
    * @return the player's selected target, or null if no player target or dragon isn't tamed.
    */
   public BreathWeaponTarget getPlayerSelectedTarget()
@@ -310,6 +311,7 @@ public class DragonBreathHelperP extends DragonHelper
     BreathWeaponTarget target = getTarget();
     updateBreathState(target);
     dragon.getBreed().getBreathWeapon(dragon).updateBreathWeaponMode();
+
     DragonBreathMode dragonBreathMode = dragon.getBreathHelperP().getBreathMode();
 
     switch (dragon.getBreed().getBreathWeaponSpawnType(dragon)) {

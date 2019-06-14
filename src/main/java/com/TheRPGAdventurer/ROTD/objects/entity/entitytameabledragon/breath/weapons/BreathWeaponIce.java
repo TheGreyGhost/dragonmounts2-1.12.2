@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * 2) affectBlock() to apply an area of effect to the given block (eg set fire to it)
  * 3) affectEntity() to apply an area of effect to the given entity (eg damage it)
  */
-public class BreathWeaponIce extends BreathWeapon implements PrivateAccessor {
+public class BreathWeaponIce extends BreathWeapon {
 
     public BreathWeaponIce(EntityTameableDragon i_dragon) {
         super(i_dragon);
@@ -101,30 +101,30 @@ public class BreathWeaponIce extends BreathWeapon implements PrivateAccessor {
         checkNotNull(entityID);
         checkNotNull(currentHitDensity);
 
-        Entity entity = world.getEntityByID(entityID);
-        if (entity == null || !(entity instanceof EntityLivingBase) || entity.isDead) {
-            return null;
-        }
+        Entity entityAffected = world.getEntityByID(entityID);
+        if (isImmuneToBreath(entityAffected)) return null;
 
+        final float FIRE_DAMAGE_PER_HIT_DENSITY = 1F;
         float hitDensity = currentHitDensity.getHitDensity();
-        final float DAMAGE_PER_HIT_DENSITY = ICE_DAMAGE * hitDensity;
-        triggerDamageExceptions(entity, DAMAGE_PER_HIT_DENSITY, entityID, currentHitDensity);
-        entity.attackEntityFrom(DamageSource.causeMobDamage(dragon), DAMAGE_PER_HIT_DENSITY);
-        ((EntityLivingBase) entity).knockBack(entity, 0.1F, dragon.posX - entity.posX, dragon.posZ - entity.posZ);
+        final float damage = FIRE_DAMAGE_PER_HIT_DENSITY * hitDensity;
+        entityAffected.attackEntityFrom(DamageSource.causeMobDamage(dragon), damage);
 
-
-        if (entity.isBurning()) {
-            entity.extinguish();
-            entity.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 1.0f, 0.0f);
+        if (entityAffected.isBurning()) {
+            entityAffected.extinguish();
+            entityAffected.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 1.0f, 0.0f);
         }
 
-        if((dragon.getControllingPlayer() != null && dragon.getControllingPlayer() != entity) || (dragon.getRidingEntity() != entity && dragon.getRidingEntity() != null)) {
-            entity.isWet();
+        entityAffected.isWet();
+
+        if (entityAffected instanceof EntityLivingBase) {
+            EntityLivingBase entityLivingBase = (EntityLivingBase) entityAffected;
+            entityLivingBase.knockBack(entityLivingBase, 0.2F, dragon.posX - entityLivingBase.posX,
+                                       dragon.posZ - entityLivingBase.posZ);
             PotionEffect iceEffect=new PotionEffect(MobEffects.SLOWNESS, 100);
-            ((EntityLivingBase) entity).addPotionEffect(iceEffect); // Apply a copy of the PotionEffect to the player
+            entityLivingBase.addPotionEffect(iceEffect); // Apply a copy of the PotionEffect to the player
         }
 
-        this.xp(entity);
+        this.xp(entityAffected);
 
         return currentHitDensity;
     }

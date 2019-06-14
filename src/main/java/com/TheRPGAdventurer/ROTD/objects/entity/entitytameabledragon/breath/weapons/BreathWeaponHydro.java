@@ -63,23 +63,23 @@ public class BreathWeaponHydro extends BreathWeapon {
         // world.setBlockState(sideToIgnite, Blocks.SNOW_LAYER.getDefaultState());} else
 
         world.spawnParticle(EnumParticleTypes.WATER_SPLASH, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0D,
-                4.0D, 1.0D);
+                            4.0D, 1.0D);
 
         if (block == Blocks.LAVA) {
             world.playSound(blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BLOCK_FIRE_EXTINGUISH,
-                    SoundCategory.BLOCKS, 0.7f, 1.0f, false);
+                            SoundCategory.BLOCKS, 0.7f, 1.0f, false);
             world.setBlockState(blockPos, Blocks.OBSIDIAN.getDefaultState());
         }
 
         if (block == Blocks.FLOWING_LAVA) {
             world.playSound(blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BLOCK_FIRE_EXTINGUISH,
-                    SoundCategory.BLOCKS, 0.7f, 1.0f, false);
+                            SoundCategory.BLOCKS, 0.7f, 1.0f, false);
             world.setBlockState(blockPos, Blocks.OBSIDIAN.getDefaultState());
         }
 
         if (block == Blocks.FIRE) {
             world.playSound(blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BLOCK_FIRE_EXTINGUISH,
-                    SoundCategory.BLOCKS, 0.7f, 1.0f, false);
+                            SoundCategory.BLOCKS, 0.7f, 1.0f, false);
             world.setBlockState(blockPos, Blocks.AIR.getDefaultState());
         }
 
@@ -106,45 +106,53 @@ public class BreathWeaponHydro extends BreathWeapon {
         checkNotNull(entityID);
         checkNotNull(currentHitDensity);
 
-        Entity entity = world.getEntityByID(entityID);
-        if (entity == null || !(entity instanceof EntityLivingBase) || entity.isDead) {
-            return null;
-        }
+        Entity entityAffected = world.getEntityByID(entityID);
+        if (isImmuneToBreath(entityAffected)) return null;
 
-
-        final float DAMAGE_PER_HIT_DENSITY = HYDRO_DAMAGE;
+        final float HYDRO_DAMAGE_PER_HIT_DENSITY = 1F;
         float hitDensity = currentHitDensity.getHitDensity();
 
-        if (entity instanceof EntityLivingBase) {
-            EntityLivingBase entity1 = (EntityLivingBase) entity;
-            if (entity1.isPotionActive(MobEffects.WATER_BREATHING)) {
-                return null;
-            } else {
-                entity1.attackEntityFrom(DamageSource.causeMobDamage(dragon), hitDensity * DAMAGE_PER_HIT_DENSITY);
-            }
-        }
-        triggerDamageExceptions(entity, hitDensity * DAMAGE_PER_HIT_DENSITY, entityID, currentHitDensity);
-
-
-        if (entity instanceof EntityWaterMob) {
-            EntityWaterMob watermob = (EntityWaterMob) entity;
-            watermob.attackEntityFrom(DamageSource.GENERIC, hitDensity * DAMAGE_PER_HIT_DENSITY + 4);
+        if (entityAffected instanceof EntityWaterMob) {
+            EntityWaterMob watermob = (EntityWaterMob) entityAffected;
+            watermob.attackEntityFrom(DamageSource.GENERIC, hitDensity * HYDRO_DAMAGE_PER_HIT_DENSITY + 4);
         }
 
-        if (entity.isBurning()) {
-            entity.extinguish();
-            entity.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 1.0f, 0.0f);
+        if (entityAffected.isBurning()) {
+            entityAffected.extinguish();
+            entityAffected.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 1.0f, 0.0f);
         }
 
-        entity.attackEntityFrom(DamageSource.causeMobDamage(dragon), hitDensity * DAMAGE_PER_HIT_DENSITY);
-        entity.isWet();
-        ((EntityLivingBase) entity).knockBack(entity, 0.2F, dragon.posX - entity.posX, dragon.posZ - entity.posZ);
+        entityAffected.attackEntityFrom(DamageSource.causeMobDamage(dragon), hitDensity * HYDRO_DAMAGE_PER_HIT_DENSITY);
+        entityAffected.isWet();
+        if (entityAffected instanceof EntityLivingBase) {
+            EntityLivingBase entityLivingBase = (EntityLivingBase) entityAffected;
+            entityLivingBase.knockBack(entityLivingBase, 0.2F, dragon.posX - entityLivingBase.posX,
+                                       dragon.posZ - entityLivingBase.posZ);
+        }
 //        PotionEffect iceEffect = new PotionEffect(MobEffects.SLOWNESS, 200);
 //        ((EntityLivingBase) entity).addPotionEffect(iceEffect); // Apply a copy of the PotionEffect to the entity
-        entity.playSound(SoundEvents.ENTITY_GENERIC_SPLASH, 0.4f, 1.0f);
+        entityAffected.playSound(SoundEvents.ENTITY_GENERIC_SPLASH, 0.4f, 1.0f);
 
-        this.xp(entity);
+        this.xp(entityAffected);
 
         return currentHitDensity;
+    }
+
+    /**
+     * check if the target entity is immune to the breath effects
+     * base checks plus additional check for fire resistance
+     *
+     * @param entityAffected
+     * @return
+     */
+    protected boolean isImmuneToBreath(Entity entityAffected) {
+        if (super.isImmuneToBreath(entityAffected)) return true;
+        if (entityAffected instanceof EntityLivingBase) {
+            EntityLivingBase entity1 = (EntityLivingBase) entityAffected;
+            if (entity1.isPotionActive(MobEffects.WATER_BREATHING)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

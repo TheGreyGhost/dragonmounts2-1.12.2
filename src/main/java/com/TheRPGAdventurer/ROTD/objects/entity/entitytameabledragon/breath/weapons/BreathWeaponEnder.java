@@ -93,18 +93,14 @@ public class BreathWeaponEnder extends BreathWeapon {
         checkNotNull(entityID);
         checkNotNull(currentHitDensity);
 
-        Entity entity = world.getEntityByID(entityID);
-        if (entity == null || !(entity instanceof EntityLivingBase) || entity.isDead) {
-            return null;
-        }
+        Entity entityAffected = world.getEntityByID(entityID);
+        if (isImmuneToBreath(entityAffected)) return null;
 
+        final float ENDER_DAMAGE_PER_HIT_DENSITY = 1.2F;
         float hitDensity = currentHitDensity.getHitDensity();
-        final float DAMAGE_PER_HIT_DENSITY = ENDER_DAMAGE * hitDensity;
+        final float damage = ENDER_DAMAGE_PER_HIT_DENSITY * hitDensity;
 
-        triggerDamageExceptions(entity, DAMAGE_PER_HIT_DENSITY, entityID, currentHitDensity);
-
-        entity.attackEntityFrom(DamageSource.causeMobDamage(dragon), DAMAGE_PER_HIT_DENSITY);
-
+        entityAffected.attackEntityFrom(DamageSource.causeMobDamage(dragon), damage);
         return currentHitDensity;
     }
 }

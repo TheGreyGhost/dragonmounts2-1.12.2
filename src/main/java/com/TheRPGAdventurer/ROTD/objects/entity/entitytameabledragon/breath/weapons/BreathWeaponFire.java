@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * Currently does fire only.  Intended to be subclassed later on for different weapon types.
  */
-public class BreathWeaponFire extends BreathWeapon implements PrivateAccessor {
+public class BreathWeaponFire extends BreathWeapon {
 
   public BreathWeaponFire(EntityTameableDragon dragon) {
     super(dragon);
