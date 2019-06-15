@@ -8,8 +8,80 @@ This bug is also present in net.ilexiconn.library.server.entity.multipart.PartEn
 func_72314_b - grow in 1.11 (stable 31)
 func_72314_b - expand in 1.10.2 (stable 29)
 
-
-
-
 P added to end of name means Prototype duplicate of existing class
 
+-------------------
+Moved breathing controls into DragonOrbControl, eliminated MessageDragonBreath
+
+Refactored BreathWeapon to move the one-for-each-type-of-breath-weapon code from the base class into the subclasses
+Refactored BreathWeapon to move the duplicated "is this entity immune to dragon breath" from the subclasses into the base class
+
+DragonBreed::continueAndUpdateBreathing and spawnBreathParticles moved out into
+  DragonBreathHelper:: onLivingUpdateServer and onLivingUpdateClient
+
+SoundEffectBreathWeapon refactored to use subclasses
+
+***Outstanding Questions during refactoring of DM2***
+DragonBreed.onLivingUpdate() - how to reintegrate?
+need to clean up doParticles and footprints
+refactoring getBreathWeaponSoundEffects out of DragonBreed into SoundEffectBreathWeapon
+EntityAIRangedBreathAttack vs new class EntityAIDragonAttack
+Extend the unimplemented methods in DragonBreed for non-fire
+
+D = DM2 only; P = prototype only; B = both
+
+B    AETHER(0, DragonBreedAir::new),
+B    FIRE(1, DragonBreedFire::new),
+B    FOREST(2, DragonBreedForest::new),
+B    SYLPHID(3, DragonBreedWater::new),
+B    ICE(4, DragonBreedIce::new),
+B    END(5, DragonBreedEnd::new),
+B    NETHER(6, DragonBreedNether::new),
+B    SKELETON(7, DragonBreedSkeleton::new), // ghost
+D    WITHER(8, DragonBreedWither::new),
+D    ENCHANT(9, DragonBreedEnchant::new),
+D    SUNLIGHT(10, DragonBreedSunlight::new),
+D    STORM(11, DragonBreedStorm::new),
+D    ZOMBIE(12, DragonBreedZombie::new),
+D    TERRA(13, DragonBreedTerra::new),
+D    MOONLIGHT(14, DragonBreedMoonlight::new);
+
+    // from prototypes
+//    AIR(0, DragonBreedAir::new),
+//    END(1, DragonBreedEnd::new),
+//    FIRE(2, DragonBreedFire::new),
+//    FOREST(3, DragonBreedForest::new),
+//    GHOST(4, DragonBreedGhost::new),
+//    ICE(5, DragonBreedIce::new),
+//    NETHER(6, DragonBreedNether::new),
+//    WATER(7, DragonBreedWater::new);
+
+Sound effects used by other breeds:
+Storm:
+//	public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
+//		final SoundEffectNames soundEffectNames[]={SoundEffectNames.ADULT_BREATHE_ICE_START, SoundEffectNames.ADULT_BREATHE_ICE_LOOP, SoundEffectNames.ADULT_BREATHE_ICE_STOP};
+//		return soundEffectNames;
+//	}
+
+Zombie:
+//    public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
+//
+//        final SoundEffectNames soundEffectNames[]={SoundEffectNames.ADULT_BREATHE_ICE_START, SoundEffectNames.ADULT_BREATHE_ICE_LOOP, SoundEffectNames.ADULT_BREATHE_ICE_STOP};
+//        return soundEffectNames;
+//    }
+
+Wither, Terra, Sunlight, Skeleton, Enchant:
+none
+
+Moonlight:
+//
+//	public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
+//		final SoundEffectNames soundEffectNames[]={SoundEffectNames.ADULT_BREATHE_ICE_START, SoundEffectNames.ADULT_BREATHE_ICE_LOOP, SoundEffectNames.ADULT_BREATHE_ICE_STOP};
+//
+//		return soundEffectNames;
+//
+
+Old method:
+FlameBreathFX is an entity (on client side); creates using static factory createFlameBreathFX
+BreathWeaponEmitter::spawnBreathParticles calls it
+from DragonBreathHelperP in onLivingUpdateClient which now does BreathWeaponFXemitter instead

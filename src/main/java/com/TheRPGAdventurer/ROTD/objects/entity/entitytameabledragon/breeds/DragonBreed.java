@@ -10,7 +10,6 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.node
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundController;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponNull;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponP;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectNames;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
@@ -44,7 +43,7 @@ public abstract class DragonBreed {
     private final Set<Block> breedBlocks=new HashSet<>();
     private final Set<Biome> biomes=new HashSet<>();
     protected final Random rand=new Random();
-    public static SoundEffectNames[] soundEffectNames;
+//    public static SoundEffectNames[] soundEffectNames;
 
     DragonBreed(String skin, int color) {
         this.skin=skin;
@@ -247,46 +246,46 @@ public abstract class DragonBreed {
         return true;
     }
 
-    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-        dragon.getBreathHelper().getBreathAffectedArea().continueBreathing(world, origin, endOfLook, power, dragon);
-        dragon.getBreathHelper().getBreathAffectedArea().updateTick(world);
-    }
+//    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+//        dragon.getBreathHelperP().getBreathAffectedArea().continueBreathing(world, origin, endOfLook, power, dragon);
+//        dragon.getBreathHelperP().getBreathAffectedArea().updateTick(world);
+//    }
+//
+//    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+//        dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
+//        dragon.getBreathHelperP().getEmitter().spawnBreathParticles(world, power, tickCounter);
+//    }
 
-    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-        dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
-        dragon.getBreathHelper().getEmitter().spawnBreathParticles(world, power, tickCounter);
-    }
-
-    public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
-        final SoundEffectNames hatchling[]={SoundEffectNames.HATCHLING_BREATHE_FIRE_START, SoundEffectNames.HATCHLING_BREATHE_FIRE_LOOP, SoundEffectNames.HATCHLING_BREATHE_FIRE_STOP};
-
-        final SoundEffectNames juvenile[]={SoundEffectNames.JUVENILE_BREATHE_FIRE_START, SoundEffectNames.JUVENILE_BREATHE_FIRE_LOOP, SoundEffectNames.JUVENILE_BREATHE_FIRE_STOP};
-
-        final SoundEffectNames adult[]={SoundEffectNames.ADULT_BREATHE_FIRE_START, SoundEffectNames.ADULT_BREATHE_FIRE_LOOP, SoundEffectNames.ADULT_BREATHE_FIRE_STOP};
-
-        switch (stage) {
-            case ADULT:
-                soundEffectNames=adult;
-                break;
-            case EGG:
-                break;
-            case HATCHLING:
-                soundEffectNames=hatchling;
-                break;
-            case INFANT:
-                soundEffectNames=hatchling;
-                break;
-            case JUVENILE:
-                soundEffectNames=juvenile;
-                break;
-            default:
-              DragonMounts.loggerLimit.error_once("Invalid life stage:" + stage);
-                break;
-        }
-
-        return soundEffectNames;
-
-    }
+//    public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
+//        final SoundEffectNames hatchling[]={SoundEffectNames.HATCHLING_BREATHE_FIRE_START, SoundEffectNames.HATCHLING_BREATHE_FIRE_LOOP, SoundEffectNames.HATCHLING_BREATHE_FIRE_STOP};
+//
+//        final SoundEffectNames juvenile[]={SoundEffectNames.JUVENILE_BREATHE_FIRE_START, SoundEffectNames.JUVENILE_BREATHE_FIRE_LOOP, SoundEffectNames.JUVENILE_BREATHE_FIRE_STOP};
+//
+//        final SoundEffectNames adult[]={SoundEffectNames.ADULT_BREATHE_FIRE_START, SoundEffectNames.ADULT_BREATHE_FIRE_LOOP, SoundEffectNames.ADULT_BREATHE_FIRE_STOP};
+//
+//        switch (stage) {
+//            case ADULT:
+//                soundEffectNames=adult;
+//                break;
+//            case EGG:
+//                break;
+//            case HATCHLING:
+//                soundEffectNames=hatchling;
+//                break;
+//            case INFANT:
+//                soundEffectNames=hatchling;
+//                break;
+//            case JUVENILE:
+//                soundEffectNames=juvenile;
+//                break;
+//            default:
+//              DragonMounts.loggerLimit.error_once("Invalid life stage:" + stage);
+//                break;
+//        }
+//
+//        return soundEffectNames;
+//
+//    }
 
     public void onLivingUpdate(EntityTameableDragon dragon) {
 

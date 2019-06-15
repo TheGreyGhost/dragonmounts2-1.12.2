@@ -14,9 +14,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.Random;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectNames;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
 
 public class DragonBreedStorm extends DragonBreed {
 
@@ -42,27 +39,27 @@ public class DragonBreedStorm extends DragonBreed {
 
 		
 	}
-	@Override
-    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-		dragon.getBreathHelper().getbreathAffectedAreaHydro().continueBreathing(world, origin, endOfLook, power, dragon);
-		dragon.getBreathHelper().getbreathAffectedAreaHydro().updateTick(world);
-    }
-    
-	@Override
-    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-        dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
-        dragon.getBreathHelper().getEmitter().spawnBreathParticlesforWaterDragon(world, power, tickCounter);
-    }
+//	@Override
+//    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+//		dragon.getBreathHelper().getbreathAffectedAreaHydro().continueBreathing(world, origin, endOfLook, power, dragon);
+//		dragon.getBreathHelper().getbreathAffectedAreaHydro().updateTick(world);
+//    }
+//
+//	@Override
+//    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+//        dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
+//        dragon.getBreathHelper().getEmitter().spawnBreathParticlesforWaterDragon(world, power, tickCounter);
+//    }
 	
 //	@Override
 //	public boolean isInfertile() {
 //		return true;
 //	}
-
-	public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
-		final SoundEffectNames soundEffectNames[]={SoundEffectNames.ADULT_BREATHE_ICE_START, SoundEffectNames.ADULT_BREATHE_ICE_LOOP, SoundEffectNames.ADULT_BREATHE_ICE_STOP};
-		return soundEffectNames;
-	}
+//
+//	public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
+//		final SoundEffectNames soundEffectNames[]={SoundEffectNames.ADULT_BREATHE_ICE_START, SoundEffectNames.ADULT_BREATHE_ICE_LOOP, SoundEffectNames.ADULT_BREATHE_ICE_STOP};
+//		return soundEffectNames;
+//	}
 	
 	@Override
 	public void onLivingUpdate(EntityTameableDragon dragon) {

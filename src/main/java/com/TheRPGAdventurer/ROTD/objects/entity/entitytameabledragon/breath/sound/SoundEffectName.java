@@ -53,6 +53,7 @@ public enum SoundEffectName
   public final double getDurationInSeconds() {return durationInSeconds;}
   public final int getDurationInTicks() {return (int)(durationInSeconds * 20.0);}
 
+
   /**
    * Information about the sound effect
    * @param i_jsonName

@@ -1,5 +1,6 @@
 package com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX;
 
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathMode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
@@ -29,6 +30,8 @@ public abstract class BreathWeaponFXEmitter
   protected Vec3d previousDirection;
   protected int previousTickCount;
 
+  protected BreathWeaponEmitter breathWeaponEmitterLegacy = new BreathWeaponEmitter();
+
   /**
    * Set the current beam origin and target destination (used to calculate direction).
    * Will smooth out between ticks.
@@ -49,6 +52,16 @@ public abstract class BreathWeaponFXEmitter
    * @param tickCount
    */
   abstract public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCount);
+
+  /**
+   * FOR LEGACY BREATHWEAPONS
+   * Spawn breath particles for this tick.  If the beam endpoints have moved, interpolate between them, unless
+   *   the beam stopped for a while (tickCount skipped one or more tick)
+   * @param world
+   * @param power the strength of the beam
+   * @param tickCount
+   */
+  abstract public void spawnBreathParticles(World world, BreathNode.Power power, int tickCount);
 
   public void changeBreathMode(DragonBreathMode newDragonBreathMode)
   {

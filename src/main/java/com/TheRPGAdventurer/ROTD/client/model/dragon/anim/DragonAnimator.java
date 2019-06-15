@@ -12,7 +12,7 @@ package com.TheRPGAdventurer.ROTD.client.model.dragon.anim;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathHelper;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathHelperP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.SegmentSizePositionRotation;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.Spline;
@@ -293,7 +293,7 @@ public class DragonAnimator {
 
 
         // update bite opening transition and breath transitions
-        DragonBreathHelper.BreathState breathState = dragon.getBreathHelper().getCurrentBreathState();
+        DragonBreathHelperP.BreathState breathState = dragon.getBreathHelperP().getCurrentBreathState();
         switch (breathState) {
             case IDLE: {  // breath is idle, handle bite attack
                 int ticksSinceLastAttack = dragon.getTicksSinceLastAttack();
@@ -310,11 +310,11 @@ public class DragonAnimator {
             }
             case STARTING: {
                 biteTimer.set(0.0F);
-                breathTimer.set(dragon.getBreathHelper().getBreathStateFractionComplete());
+                breathTimer.set(dragon.getBreathHelperP().getBreathStateFractionComplete());
                 break;
             }
             case STOPPING: {
-                float breathStateFractionComplete = dragon.getBreathHelper().getBreathStateFractionComplete();
+                float breathStateFractionComplete = dragon.getBreathHelperP().getBreathStateFractionComplete();
                 breathTimer.set(1.0F - breathStateFractionComplete);
                 break;
             }

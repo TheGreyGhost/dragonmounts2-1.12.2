@@ -1825,7 +1825,6 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         return getHelper(DragonBreathHelperP.class);
     }
 
-
     public DragonAnimator getAnimator() {
         return animator;
     }

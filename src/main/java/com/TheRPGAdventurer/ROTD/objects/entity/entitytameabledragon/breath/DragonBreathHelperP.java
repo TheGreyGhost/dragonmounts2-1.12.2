@@ -367,8 +367,13 @@ public class DragonBreathHelperP extends DragonHelper
           Vec3d destination = target.getTargetedPoint(dragon.world, origin);
           if (destination != null && currentBreathState == BreathState.SUSTAIN) {
             breathWeaponFXEmitter.setBeamEndpoints(origin, destination);
-            BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
-            breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter);
+            if (DragonMounts.instance.getConfig().isPrototypeBreathweapons()) {
+              BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+              breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter);
+            } else {
+              BreathNode.Power powerLegacy = dragon.getLifeStageHelper().getBreathPower();
+              breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), powerLegacy, tickCounter);
+            }
           }
         }
         break;

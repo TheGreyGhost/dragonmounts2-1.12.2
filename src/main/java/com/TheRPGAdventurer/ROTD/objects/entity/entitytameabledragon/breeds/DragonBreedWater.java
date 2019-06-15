@@ -10,9 +10,6 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectNames;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
 
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
@@ -56,17 +53,17 @@ public class DragonBreedWater extends DragonBreed {
 	@Override
 	public void onDeath(EntityTameableDragon dragon) {}
 
-	@Override
-    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-		dragon.getBreathHelper().getbreathAffectedAreaHydro().continueBreathing(world, origin, endOfLook, power, dragon);
-		dragon.getBreathHelper().getbreathAffectedAreaHydro().updateTick(world);
-    }
-    
-	@Override
-    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-        dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
-        dragon.getBreathHelper().getEmitter().spawnBreathParticlesforWaterDragon(world, power, tickCounter);
-    }
+//	@Override
+//    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+//		dragon.getBreathHelper().getbreathAffectedAreaHydro().continueBreathing(world, origin, endOfLook, power, dragon);
+//		dragon.getBreathHelper().getbreathAffectedAreaHydro().updateTick(world);
+//    }
+//
+//	@Override
+//    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+//        dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
+//        dragon.getBreathHelper().getEmitter().spawnBreathParticlesforWaterDragon(world, power, tickCounter);
+//    }
 
 	public void onLivingUpdate(EntityTameableDragon dragon) {
 		PotionEffect watereffect = new PotionEffect(MobEffects.WATER_BREATHING, 20*10, 0, false,false);
@@ -95,11 +92,11 @@ public class DragonBreedWater extends DragonBreed {
 		return null;
 	}
 
-	public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
-		final SoundEffectNames soundEffectNames[]={SoundEffectNames.ADULT_BREATHE_WATER_START, SoundEffectNames.ADULT_BREATHE_WATER_LOOP, SoundEffectNames.ADULT_BREATHE_WATER_STOP};
-
-		return soundEffectNames;
-
-	}
+//	public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
+//		final SoundEffectNames soundEffectNames[]={SoundEffectNames.ADULT_BREATHE_WATER_START, SoundEffectNames.ADULT_BREATHE_WATER_LOOP, SoundEffectNames.ADULT_BREATHE_WATER_STOP};
+//
+//		return soundEffectNames;
+//
+//	}
 	
 }

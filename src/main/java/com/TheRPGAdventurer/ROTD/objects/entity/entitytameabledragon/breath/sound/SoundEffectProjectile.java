@@ -25,7 +25,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *   3a) performTick() will call the ProjectileSoundUpdateLink.refreshSoundInfo(), which should return the
  *       current data relevant to the sound (eg what state the projectile is in, and its location)
  *
- * Is subclassed for different projectiles
+ * Is subclassed for different projectiles.  This is probably not necessary, might refactor at some point in the future
+ *   to make it less cumbersome to add more sounds
  *
  * Has a lot in common with SoundEffectBreathWeapon but in the end I kept them separate to make them easier to understand
  */

@@ -35,7 +35,7 @@ public abstract class SoundEffectBreathWeaponP
     soundController = i_soundController;
     weaponSoundUpdateLink = i_weaponSoundUpdateLink;
   }
-private final float HEAD_MIN_VOLUME = 0.02F;
+  private final float HEAD_MIN_VOLUME = 0.02F;
 
   public void startPlaying(EntityPlayerSP entityPlayerSP)
   {

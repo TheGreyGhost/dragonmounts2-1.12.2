@@ -1,5 +1,7 @@
 package com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -11,6 +13,15 @@ import java.util.Optional;
  */
 public class BreathWeaponFXEmitterFire extends BreathWeaponFXEmitter
 {
+  // for legacy breath weapons
+  @Override
+  public void spawnBreathParticles(World world, BreathNode.Power power, int tickCount)
+  {
+    breathWeaponEmitterLegacy.spawnBreathParticles(world, power, tickCount);
+  }
+
+  // for prototype breath weapons
+  @Override
   public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCount)
   {
     final int FIRE_PARTICLES_PER_TICK = 4;

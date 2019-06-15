@@ -8,9 +8,9 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.Drag
  *  Sounds effects for the dragon's mouth for fire
  *
  */
-public class SoundEffectBreathWeaponFire extends SoundEffectBreathWeaponP
+public class SoundEffectBreathWeaponFireP extends SoundEffectBreathWeaponP
 {
-  public SoundEffectBreathWeaponFire(SoundController i_soundController, WeaponSoundUpdateLink i_weaponSoundUpdateLink)
+  public SoundEffectBreathWeaponFireP(SoundController i_soundController, WeaponSoundUpdateLink i_weaponSoundUpdateLink)
   {
     super(i_soundController, i_weaponSoundUpdateLink);
   }

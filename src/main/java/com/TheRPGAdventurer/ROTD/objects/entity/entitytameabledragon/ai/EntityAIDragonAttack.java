@@ -116,12 +116,18 @@ public class EntityAIDragonAttack extends EntityAIDragonBase {
      */
     public void resetTask() {
         EntityLivingBase entitylivingbase = this.dragon.getAttackTarget();
+        // todo I don't understand why it does this reset check here and not elsewhere? i.e. in shouldContinueExecuting?  and why it doesn't clear the
+        //   setAttackTarget in all cases?
         if (entitylivingbase instanceof EntityPlayer && (((EntityPlayer)entitylivingbase).isSpectator() || ((EntityPlayer)entitylivingbase).isCreative())) {
             this.dragon.setAttackTarget(null);
-            dragon.setUsingBreathWeapon(false);
+//            dragon.setUsingBreathWeapon(false);
         }
         this.dragon.getNavigator().clearPath();
-        dragon.setUsingBreathWeapon(false);
+//        dragon.setUsingBreathWeapon(false);
+//        currentTarget = null;
+        dragon.getBreathHelperP().setBreathingTarget(null);
+//        dragon.getBreathHelperP().setBreathTargetForMoving(null);
+//        dragon.setAttackTarget(null);
     }
 
     /**
