@@ -85,3 +85,7 @@ Old method:
 FlameBreathFX is an entity (on client side); creates using static factory createFlameBreathFX
 BreathWeaponEmitter::spawnBreathParticles calls it
 from DragonBreathHelperP in onLivingUpdateClient which now does BreathWeaponFXemitter instead
+
+------------
+known bugs:
+DragonOrb itemtransforms broken
