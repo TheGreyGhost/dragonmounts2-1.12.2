@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponEmitter;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitter;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFactory;
@@ -8,7 +9,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.node
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathProjectileFactory;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundController;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponP;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponP;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.*;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonHelper;
 import net.minecraft.client.Minecraft;
@@ -56,6 +57,19 @@ public class DragonBreathHelperP extends DragonHelper
     dataParamBreathWeaponTarget = i_dataParamBreathWeaponTarget;
     dataParamBreathWeaponMode = i_dataParamBreathWeaponMode;
     refreshBreed(dragon);
+
+    breathAffectedArea=new BreathAffectedArea(new BreathWeapon(dragon));
+    breathAffectedAreaNether=new BreathAffectedArea(new BreathWeaponNether(dragon));
+    breathAffectedAreaIce=new BreathAffectedArea(new BreathWeaponIce(dragon));
+    breathAffectedAreaHydro=new BreathAffectedArea(new BreathWeaponHydro(dragon));
+    breathAffectedAreaEnder=new BreathAffectedArea(new BreathWeaponEnder(dragon));
+    breathAffectedAreaWither=new BreathAffectedArea(new BreathWeaponWither(dragon));
+    breathAffectedAreaPoison=new BreathAffectedArea(new BreathWeaponPoison(dragon));
+    breathAffectedAreaAether=new BreathAffectedArea(new BreathWeaponAether(dragon));
+        if (dragon.isClient()) {
+            breathWeaponEmitter=new BreathWeaponEmitter();
+        }
+
   }
 
   private DataParameter<String> dataParamBreathWeaponTarget;
@@ -310,8 +324,9 @@ public class DragonBreathHelperP extends DragonHelper
     refreshBreed(dragon);
     BreathWeaponTarget target = getTarget();
     updateBreathState(target);
-    dragon.getBreed().getBreathWeapon(dragon).updateBreathWeaponMode();
+    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()) return;
 
+    dragon.getBreed().getBreathWeapon(dragon).updateBreathWeaponMode();
     DragonBreathMode dragonBreathMode = dragon.getBreathHelperP().getBreathMode();
 
     switch (dragon.getBreed().getBreathWeaponSpawnType(dragon)) {
@@ -476,4 +491,62 @@ public class DragonBreathHelperP extends DragonHelper
   private BreathProjectileFactory breathProjectileFactory = null;
   private BreathNodeFactory breathNodeFactory = null;
   private DragonBreathMode breathWeaponMode = DragonBreathMode.DEFAULT;
+
+
+
+    public BreathAffectedArea breathAffectedAreaEnder=null;
+    public BreathAffectedArea breathAffectedAreaNether=null;
+    public BreathAffectedArea breathAffectedAreaIce=null;
+    public BreathAffectedArea breathAffectedAreaHydro=null;
+    public BreathAffectedArea breathAffectedAreaWither=null;
+    public BreathAffectedArea breathAffectedAreaPoison=null;
+    public BreathAffectedArea breathAffectedAreaAether=null;
+      protected BreathWeaponEmitter breathWeaponEmitter=null;
+
+  @Deprecated
+  public BreathWeaponEmitter getEmitter() {
+    return breathWeaponEmitter;
+  }
+
+  @Deprecated
+  public BreathAffectedArea getBreathAffectedArea() {
+    return breathAffectedArea;
+  }
+
+  @Deprecated
+  public BreathAffectedArea getBreathAffectedAreaNether() {
+    return breathAffectedAreaNether;
+  }
+
+  @Deprecated
+  public BreathAffectedArea getBreathAffectedAreaIce() {
+    return breathAffectedAreaIce;
+  }
+
+  @Deprecated
+  public BreathAffectedArea getBreathAffectedAreaEnd() {
+    return breathAffectedAreaEnder;
+  }
+
+  @Deprecated
+  public BreathAffectedArea getbreathAffectedAreaHydro() {
+    return breathAffectedAreaHydro;
+  }
+
+  @Deprecated
+  public BreathAffectedArea getbreathAffectedAreaWither() {
+    return breathAffectedAreaWither;
+  }
+
+  @Deprecated
+  public BreathAffectedArea getbreathAffectedAreaPoison() {
+    return breathAffectedAreaPoison;
+  }
+
+  @Deprecated
+  public BreathAffectedArea getbreathAffectedAreaAether() {
+    return breathAffectedAreaAether;
+  }
+
+
 }

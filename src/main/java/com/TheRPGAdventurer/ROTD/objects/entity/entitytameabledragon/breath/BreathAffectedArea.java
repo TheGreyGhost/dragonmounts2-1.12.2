@@ -44,6 +44,7 @@ public class BreathAffectedArea {
   private BreathWeaponP breathWeaponP;
   private DragonBreathMode dragonBreathMode;
 
+  @Deprecated
 
   public BreathAffectedArea(BreathWeapon i_breathWeapon) {
     breathWeapon = i_breathWeapon;
@@ -61,6 +62,7 @@ public class BreathAffectedArea {
    * @param destination the destination of the beam, used to calculate direction
    * @param power
    */
+  @Deprecated
   public void continueBreathing(World world, Vec3d origin, Vec3d destination, BreathNode.Power power, EntityTameableDragon dragon) {
     Vec3d direction = destination.subtract(origin).normalize();
 
@@ -86,12 +88,12 @@ public class BreathAffectedArea {
             breathNodeFactory, power, breathMode);
 
     entityBreathNodesP.add(newNode);
-    throw new UnsupportedOperationException();
+//    throw new UnsupportedOperationException();
   }
-
 
   /** updates the BreathAffectedArea, called once per tick
    */
+  @Deprecated
   public void updateTick(World world) {
     ArrayList<NodeLineSegment> segments = new ArrayList<>();
 

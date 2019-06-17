@@ -68,7 +68,7 @@ public class DragonBreedEnd extends DragonBreed {
 	        }
         }
     }
-	
+
 //	@Override
 //    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
 //		dragon.getBreathHelper().getBreathAffectedAreaEnd().continueBreathing(world, origin, endOfLook, power, dragon);
