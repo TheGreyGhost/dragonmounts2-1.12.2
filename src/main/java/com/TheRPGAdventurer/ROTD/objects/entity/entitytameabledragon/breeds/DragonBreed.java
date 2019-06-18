@@ -10,6 +10,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.node
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundController;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponNull;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponP;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponFireP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
@@ -246,10 +247,11 @@ public abstract class DragonBreed {
         return true;
     }
 
-//    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-//        dragon.getBreathHelperP().getBreathAffectedArea().continueBreathing(world, origin, endOfLook, power, dragon);
-//        dragon.getBreathHelperP().getBreathAffectedArea().updateTick(world);
-//    }
+    @Deprecated
+    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+        dragon.getBreathHelperP().getBreathAffectedArea().continueBreathing(world, origin, endOfLook, power, dragon);
+        dragon.getBreathHelperP().getBreathAffectedArea().updateTick(world);
+    }
 //
 //    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
 //        dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
@@ -316,9 +318,10 @@ public abstract class DragonBreed {
   // PROJECTILE = spawn a single Entity, similar to EntityFIreball for ghast
   // NODES = continuous stream of small nodes
 
-  public BreathWeaponSpawnType getBreathWeaponSpawnType(EntityTameableDragon dragon) // todo make abstract
+   public BreathWeaponSpawnType getBreathWeaponSpawnType(EntityTameableDragon dragon)
     {
-      throw new UnsupportedOperationException();
+      return BreathWeaponSpawnType.NODES;
+//      throw new UnsupportedOperationException();
     }
 
   /** return a new Breath Weapon FX Emitter based on breed
@@ -334,7 +337,8 @@ public abstract class DragonBreed {
    */
   public BreathWeaponP getBreathWeapon(EntityTameableDragon dragon)  //todo make abstract
     {
-        throw new UnsupportedOperationException();
+      return new BreathWeaponFireP(dragon); // todo just dummy for now to support legacy
+//        throw new UnsupportedOperationException();
     }
 
   public BreathNodeFactory getBreathNodeFactory(EntityTameableDragon dragon)

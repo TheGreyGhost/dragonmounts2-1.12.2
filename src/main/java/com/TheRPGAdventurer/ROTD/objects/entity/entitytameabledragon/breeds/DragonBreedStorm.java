@@ -105,5 +105,6 @@ public class DragonBreedStorm extends DragonBreed {
 	public EnumParticleTypes getSneezeParticle() {
 		return null;
 	}
-	
+
+
 }

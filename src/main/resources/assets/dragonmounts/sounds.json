@@ -253,151 +253,151 @@
   "mob.dragon.breathweaponp.fire.adultbreathefirestart": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/adultbreathefirestart"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/adultbreathefirestart"
     ]
   },
   "mob.dragon.breathweaponp.fire.adultbreathefireloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/adultbreathefireloop"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/adultbreathefireloop"
     ]
   },
   "mob.dragon.breathweaponp.fire.adultbreathefirestop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/adultbreathefirestop"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/adultbreathefirestop"
     ]
   },
   "mob.dragon.breathweaponp.fire.juvenilebreathefirestart": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/juvenilebreathefirestart"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/juvenilebreathefirestart"
     ]
   },
   "mob.dragon.breathweaponp.fire.juvenilebreathefireloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/juvenilebreathefireloop"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/juvenilebreathefireloop"
     ]
   },
   "mob.dragon.breathweaponp.fire.juvenilebreathefirestop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/juvenilebreathefirestop"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/juvenilebreathefirestop"
     ]
   },
   "mob.dragon.breathweaponp.fire.hatchlingbreathefirestart": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/hatchlingbreathefirestart"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/hatchlingbreathefirestart"
     ]
   },
   "mob.dragon.breathweaponp.fire.hatchlingbreathefireloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/hatchlingbreathefireloop"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/hatchlingbreathefireloop"
     ]
   },
   "mob.dragon.breathweaponp.fire.hatchlingbreathefirestop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/fire/hatchlingbreathefirestop"
+      "dragonmounts:mob/dragon/breathweapon_p/fire/hatchlingbreathefirestop"
     ]
   },
   "mob.dragon.breathweaponp.ice.breatheicestart": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/ice/breatheicestart"
+      "dragonmounts:mob/dragon/breathweapon_p/ice/breatheicestart"
     ]
   },
   "mob.dragon.breathweaponp.ice.breatheiceloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/ice/breatheiceloop"
+      "dragonmounts:mob/dragon/breathweapon_p/ice/breatheiceloop"
     ]
   },
   "mob.dragon.breathweaponp.ice.breatheicestop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/ice/breatheicestop"
+      "dragonmounts:mob/dragon/breathweapon_p/ice/breatheicestop"
     ]
   },
   "mob.dragon.breathweaponp.forest.breatheforeststart": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/forest/breatheforeststart"
+      "dragonmounts:mob/dragon/breathweapon_p/forest/breatheforeststart"
     ]
   },
   "mob.dragon.breathweaponp.forest.breatheforestloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/forest/breatheforestloop"
+      "dragonmounts:mob/dragon/breathweapon_p/forest/breatheforestloop"
     ]
   },
   "mob.dragon.breathweaponp.forest.breatheforeststop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/forest/breatheforeststop"
+      "dragonmounts:mob/dragon/breathweapon_p/forest/breatheforeststop"
     ]
   },
   "mob.dragon.breathweaponp.water.breathewaterstart": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/water/breathewaterstart"
+      "dragonmounts:mob/dragon/breathweapon_p/water/breathewaterstart"
     ]
   },
   "mob.dragon.breathweaponp.water.breathewaterloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/water/breathewaterloop"
+      "dragonmounts:mob/dragon/breathweapon_p/water/breathewaterloop"
     ]
   },
   "mob.dragon.breathweaponp.water.breathewaterstop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/water/breathewaterstop"
+      "dragonmounts:mob/dragon/breathweapon_p/water/breathewaterstop"
     ]
   },
   "mob.dragon.breathweaponp.air.breatheairstart": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/air/breatheairstart"
+      "dragonmounts:mob/dragon/breathweapon_p/air/breatheairstart"
     ]
   },
   "mob.dragon.breathweaponp.air.breatheairloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/air/breatheairloop"
+      "dragonmounts:mob/dragon/breathweapon_p/air/breatheairloop"
     ]
   },
   "mob.dragon.breathweaponp.air.breatheairstop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/air/breatheairstop"
+      "dragonmounts:mob/dragon/breathweapon_p/air/breatheairstop"
     ]
   },
   "mob.dragon.breathweaponp.ender.breatheenderspawn": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/ender/breatheenderspawn"
+      "dragonmounts:mob/dragon/breathweapon_p/ender/breatheenderspawn"
     ]
   },
   "mob.dragon.breathweaponp.ender.projectileenderloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/ender/projectileenderloop"
+      "dragonmounts:mob/dragon/breathweapon_p/ender/projectileenderloop"
     ]
   },
   "mob.dragon.breathweaponp.nether.breathenetherspawn": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/nether/breathenetherspawn"
+      "dragonmounts:mob/dragon/breathweapon_p/nether/breathenetherspawn"
     ]
   },
   "mob.dragon.breathweaponp.nether.projectilenetherloop": {
     "category": "neutral",
     "sounds": [
-      "dragonmounts:mob/dragon/breathweaponp/nether/projectilenetherloop"
+      "dragonmounts:mob/dragon/breathweapon_p/nether/projectilenetherloop"
     ]
   }
 

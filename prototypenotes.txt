@@ -86,6 +86,7 @@ FlameBreathFX is an entity (on client side); creates using static factory create
 BreathWeaponEmitter::spawnBreathParticles calls it
 from DragonBreathHelperP in onLivingUpdateClient which now does BreathWeaponFXemitter instead
 
+
 BLockModelShapes.registerBuiltInBlocks for Shulker
 ModelManager.getBlockModelShapes
 ItemModelMesher.getModelManager().
@@ -98,3 +99,7 @@ error occurs at end of
 Can get access to ModelManager through ModelBakeEvent
 
 ModelRegistryEvent?
+
+known bugs:
+DragonOrb itemtransforms broken
+
