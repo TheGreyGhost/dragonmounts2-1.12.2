@@ -140,9 +140,6 @@ public class ClientProxy extends ServerProxy {
         MinecraftForge.EVENT_BUS.register(new RenderDM2Cape());
         MinecraftForge.EVENT_BUS.register(ImmuneEntityItem.EventHandler.instance);
 
-      // I think this might work... having trouble getting it to work.  Also added block_dragon_shulker.json copy of vanilla shulker
-      Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getBlockModelShapes()
-               .registerBuiltInBlocks(ModBlocks.DRAGONSHULKER);
     }
 
     @SideOnly(Side.CLIENT)

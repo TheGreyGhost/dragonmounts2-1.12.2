@@ -58,7 +58,7 @@ public class DragonBreathHelperP extends DragonHelper
     dataParamBreathWeaponMode = i_dataParamBreathWeaponMode;
     refreshBreed(dragon);
 
-    breathAffectedArea=new BreathAffectedArea(new BreathWeapon(dragon));
+    breathAffectedArea=new BreathAffectedArea(new BreathWeaponFire(dragon));
     breathAffectedAreaNether=new BreathAffectedArea(new BreathWeaponNether(dragon));
     breathAffectedAreaIce=new BreathAffectedArea(new BreathWeaponIce(dragon));
     breathAffectedAreaHydro=new BreathAffectedArea(new BreathWeaponHydro(dragon));

@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
@@ -117,6 +118,13 @@ public class RegistryEventHandler {
 		}
 
       DMUtils.getLogger().info("Models Sucessfully Registered");
+    }
+
+
+    @SubscribeEvent
+    public static void registerTESRblockstates(ModelBakeEvent event) {
+        // prevent model errors for the shulker block by registering it like a vanilla chest
+        event.getModelManager().getBlockModelShapes().registerBuiltInBlocks(ModBlocks.DRAGONSHULKER);  //todo I think this will work...
     }
 
     public static void preInitRegistries() {
