@@ -19,6 +19,7 @@ import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.*;
 import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.event.DragonViewEvent;
+import com.TheRPGAdventurer.ROTD.inits.ModBlocks;
 import com.TheRPGAdventurer.ROTD.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.inits.ModKeys;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitycarriage.EntityCarriage;
@@ -67,7 +68,7 @@ public class ClientProxy extends ServerProxy {
         RenderingRegistry.registerEntityRenderingHandler(EntityTameableDragon.class, DragonRenderer::new);
 
         RenderingRegistry.registerEntityRenderingHandler(HydroBreathFX.class, RenderHydroBreathFX::new);
-//        RenderingRegistry.registerEntityRenderingHandler(FlameBreathFX.class, RenderFlameBreathFX::new);
+        RenderingRegistry.registerEntityRenderingHandler(FlameBreathFX.class, RenderFlameBreathFX::new);
         RenderingRegistry.registerEntityRenderingHandler(EnderBreathFX.class, RenderEnderBreathFX::new);
         RenderingRegistry.registerEntityRenderingHandler(NetherBreathFX.class, RenderNetherBreathFX::new);
         RenderingRegistry.registerEntityRenderingHandler(WitherBreathFX.class, RenderWitherBreathFX::new);
@@ -138,6 +139,10 @@ public class ClientProxy extends ServerProxy {
         MinecraftForge.EVENT_BUS.register(new DragonViewEvent());
         MinecraftForge.EVENT_BUS.register(new RenderDM2Cape());
         MinecraftForge.EVENT_BUS.register(ImmuneEntityItem.EventHandler.instance);
+
+      // I think this might work... having trouble getting it to work.  Also added block_dragon_shulker.json copy of vanilla shulker
+      Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getBlockModelShapes()
+               .registerBuiltInBlocks(ModBlocks.DRAGONSHULKER);
     }
 
     @SideOnly(Side.CLIENT)

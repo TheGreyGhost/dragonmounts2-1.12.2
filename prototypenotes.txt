@@ -85,3 +85,16 @@ Old method:
 FlameBreathFX is an entity (on client side); creates using static factory createFlameBreathFX
 BreathWeaponEmitter::spawnBreathParticles calls it
 from DragonBreathHelperP in onLivingUpdateClient which now does BreathWeaponFXemitter instead
+
+BLockModelShapes.registerBuiltInBlocks for Shulker
+ModelManager.getBlockModelShapes
+ItemModelMesher.getModelManager().
+RenderItem.getItemModelMesher
+Minecraft.getRenderItem().getItemModelMesher().getModelManager().getBlockModelShapes().registerBuiltInBlocks(shulker)
+
+error occurs at end of
+        this.mcResourceManager.registerReloadListener(this.modelManager);
+
+Can get access to ModelManager through ModelBakeEvent
+
+ModelRegistryEvent?
