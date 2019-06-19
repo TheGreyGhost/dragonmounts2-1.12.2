@@ -32,7 +32,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DragonBreedIce extends DragonBreedLegacy {
+public class DragonBreedIce extends DragonBreed {
 
     private static final Block FOOTPRINT=Blocks.SNOW_LAYER;
     private static final float FOOTPRINT_CHANCE=0.01f;
