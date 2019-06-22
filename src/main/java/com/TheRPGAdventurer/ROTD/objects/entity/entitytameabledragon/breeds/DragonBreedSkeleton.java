@@ -68,12 +68,17 @@ public class DragonBreedSkeleton extends DragonBreed {
 	public boolean canUseBreathWeapon() {
 		return false;
 	}
-	
-//	@Override
-//  public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-//		return;
-//   }
-    
+
+  @Override
+  public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+    // no legacy breath
+  }
+
+  @Override
+  public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+    // no legacy breath
+  }
+
 //	@Override
 //	public boolean isInfertile() {
 //		return true;

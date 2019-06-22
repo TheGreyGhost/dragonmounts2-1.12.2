@@ -58,7 +58,7 @@ public class DragonBreathHelperP extends DragonHelper {
     dataParamBreathWeaponMode = i_dataParamBreathWeaponMode;
     refreshBreed(dragon);
 
-    breathAffectedArea = new BreathAffectedArea(new BreathWeaponFire(dragon));
+    breathAffectedAreaFire = new BreathAffectedArea(new BreathWeaponFire(dragon));
     breathAffectedAreaNether = new BreathAffectedArea(new BreathWeaponNether(dragon));
     breathAffectedAreaIce = new BreathAffectedArea(new BreathWeaponIce(dragon));
     breathAffectedAreaHydro = new BreathAffectedArea(new BreathWeaponHydro(dragon));
@@ -388,7 +388,7 @@ public class DragonBreathHelperP extends DragonHelper {
       Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
       BreathNode.Power power = dragon.getLifeStageHelper().getBreathPower();
       if (endOfLook != null && currentBreathState == BreathState.SUSTAIN) {
-        dragon.getBreed().continueAndUpdateBreathing(dragon.getEntityWorld(), origin, endOfLook, power, dragon);
+        dragon.getBreed().continueAndUpdateBreathingLegacy(dragon.getEntityWorld(), origin, endOfLook, power, dragon);
       }
     }
   }
@@ -419,7 +419,7 @@ public class DragonBreathHelperP extends DragonHelper {
             breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter);
 //            } else {
 //              BreathNode.Power powerLegacy = dragon.getLifeStageHelper().getBreathPower();
-//              breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), powerLegacy, tickCounter);
+//              breathWeaponFXEmitter.spawnBreathParticlesForFireDragon(dragon.getEntityWorld(), powerLegacy, tickCounter);
 //            }
           }
         }
@@ -572,13 +572,21 @@ public class DragonBreathHelperP extends DragonHelper {
   private BreathNodeFactory breathNodeFactory = null;
   private DragonBreathMode breathWeaponMode = DragonBreathMode.DEFAULT;
 
-  private BreathAffectedArea breathAffectedArea;
+  @Deprecated
+  private BreathAffectedArea breathAffectedAreaFire = null;
+  @Deprecated
   public BreathAffectedArea breathAffectedAreaEnder = null;
+  @Deprecated
   public BreathAffectedArea breathAffectedAreaNether = null;
+  @Deprecated
   public BreathAffectedArea breathAffectedAreaIce = null;
+  @Deprecated
   public BreathAffectedArea breathAffectedAreaHydro = null;
+  @Deprecated
   public BreathAffectedArea breathAffectedAreaWither = null;
+  @Deprecated
   public BreathAffectedArea breathAffectedAreaPoison = null;
+  @Deprecated
   public BreathAffectedArea breathAffectedAreaAether = null;
 
   @Deprecated
@@ -590,8 +598,8 @@ public class DragonBreathHelperP extends DragonHelper {
   }
 
   @Deprecated
-  public BreathAffectedArea getBreathAffectedArea() {
-    return breathAffectedArea;
+  public BreathAffectedArea getBreathAffectedAreaFire() {
+    return breathAffectedAreaFire;
   }
 
   @Deprecated

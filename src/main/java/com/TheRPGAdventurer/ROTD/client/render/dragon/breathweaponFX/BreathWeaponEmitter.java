@@ -14,7 +14,7 @@ import net.minecraft.world.World;
  * Usage:
  * Each tick:
  * (1) setBeamEndpoints() to set the current beam origin and destination
- * (2) spawnBreathParticles() to spawn the particles()
+ * (2) spawnBreathParticlesForFireDragon() to spawn the particles()
  */
 public class BreathWeaponEmitter {
 
@@ -42,7 +42,7 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticles(World world, BreathNode.Power power, int tickCount) {
+  public void spawnBreathParticlesForFireDragon(World world, BreathNode.Power power, int tickCount) {
 	  EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCount != previousTickCount + 1) {
       previousDirection = direction;

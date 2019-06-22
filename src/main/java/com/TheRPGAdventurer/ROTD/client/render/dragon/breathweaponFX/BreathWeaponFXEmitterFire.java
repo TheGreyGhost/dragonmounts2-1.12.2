@@ -15,9 +15,9 @@ public class BreathWeaponFXEmitterFire extends BreathWeaponFXEmitter
 {
 //  // for legacy breath weapons
 //  @Override
-//  public void spawnBreathParticles(World world, BreathNode.Power power, int tickCount)
+//  public void spawnBreathParticlesForFireDragon(World world, BreathNode.Power power, int tickCount)
 //  {
-//    breathWeaponEmitterLegacy.spawnBreathParticles(world, power, tickCount);
+//    breathWeaponEmitterLegacy.spawnBreathParticlesForFireDragon(world, power, tickCount);
 //  }
 
   // for prototype breath weapons

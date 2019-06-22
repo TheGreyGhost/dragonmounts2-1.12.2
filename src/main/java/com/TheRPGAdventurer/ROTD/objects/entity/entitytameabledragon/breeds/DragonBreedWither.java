@@ -46,17 +46,17 @@ public class DragonBreedWither extends DragonBreed {
 		return false;
 	}
 	
-//	@Override
-//    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-//        dragon.getBreathHelper().getbreathAffectedAreaWither().continueBreathing(world, origin, endOfLook, power, dragon);
-//        dragon.getBreathHelper().getbreathAffectedAreaWither().updateTick(world);
-//    }
-//
-//	@Override
-//    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//        dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
-//        dragon.getBreathHelper().getEmitter().spawnBreathParticlesforWitherDragon(world, power, tickCounter);
-//    }
+	@Override
+    public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+        dragon.getBreathHelperP().getbreathAffectedAreaWither().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
+        dragon.getBreathHelperP().getbreathAffectedAreaWither().updateTick(world);
+    }
+
+	@Override
+    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+        dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
+        dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforWitherDragon(world, power, tickCounter);
+    }
 
 	@Override
 	public void onLivingUpdate(EntityTameableDragon dragon) {

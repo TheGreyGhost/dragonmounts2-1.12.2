@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
@@ -45,17 +46,17 @@ public class DragonBreedMoonlight extends DragonBreed {
     }
 
 
-//	@Override
-//	public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-//		dragon.getBreathHelper().getBreathAffectedAreaIce().continueBreathing(world, origin, endOfLook, power, dragon);
-//		dragon.getBreathHelper().getBreathAffectedAreaIce().updateTick(world);
-//	}
-//
-//	@Override
-//	public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//		dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
-//		dragon.getBreathHelper().getEmitter().spawnBreathParticlesforIceDragon(world, power, tickCounter);
-//	}
+	@Override
+	public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+		dragon.getBreathHelperP().getBreathAffectedAreaIce().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
+		dragon.getBreathHelperP().getBreathAffectedAreaIce().updateTick(world);
+	}
+
+	@Override
+	public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+		dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
+		dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforIceDragon(world, power, tickCounter);
+	}
 //
 //	public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
 //		final SoundEffectNames soundEffectNames[]={SoundEffectNames.ADULT_BREATHE_ICE_START, SoundEffectNames.ADULT_BREATHE_ICE_LOOP, SoundEffectNames.ADULT_BREATHE_ICE_STOP};

@@ -18,7 +18,7 @@ import java.util.Random;
  * Usage:
  * Each tick:
  * (1) setBeamEndpoints() to set the current beam origin and destination
- * (2) spawnBreathParticles() to spawn the particles()
+ * (2) spawnBreathParticlesForFireDragon() to spawn the particles()
  */
 public abstract class BreathWeaponFXEmitter
 {
@@ -61,7 +61,7 @@ public abstract class BreathWeaponFXEmitter
 //   * @param power the strength of the beam
 //   * @param tickCount
 //   */
-////  abstract public void spawnBreathParticles(World world, BreathNode.Power power, int tickCount);
+////  abstract public void spawnBreathParticlesForFireDragon(World world, BreathNode.Power power, int tickCount);
 
   public void changeBreathMode(DragonBreathMode newDragonBreathMode)
   {

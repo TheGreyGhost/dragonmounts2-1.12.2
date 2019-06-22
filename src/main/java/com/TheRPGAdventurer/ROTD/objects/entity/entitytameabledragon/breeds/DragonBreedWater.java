@@ -11,6 +11,7 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.MobEffects;
@@ -53,17 +54,17 @@ public class DragonBreedWater extends DragonBreed {
 	@Override
 	public void onDeath(EntityTameableDragon dragon) {}
 
-//	@Override
-//    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-//		dragon.getBreathHelper().getbreathAffectedAreaHydro().continueBreathing(world, origin, endOfLook, power, dragon);
-//		dragon.getBreathHelper().getbreathAffectedAreaHydro().updateTick(world);
-//    }
-//
-//	@Override
-//    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//        dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
-//        dragon.getBreathHelper().getEmitter().spawnBreathParticlesforWaterDragon(world, power, tickCounter);
-//    }
+	@Override
+    public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+		dragon.getBreathHelperP().getbreathAffectedAreaHydro().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
+		dragon.getBreathHelperP().getbreathAffectedAreaHydro().updateTick(world);
+    }
+
+	@Override
+    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+        dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
+        dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforWaterDragon(world, power, tickCounter);
+    }
 
 	public void onLivingUpdate(EntityTameableDragon dragon) {
 		PotionEffect watereffect = new PotionEffect(MobEffects.WATER_BREATHING, 20*10, 0, false,false);

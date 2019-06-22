@@ -189,7 +189,7 @@
 //      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
 //      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
 //        BreathNode.Power power = dragon.getLifeStageHelper().getBreathPower();
-//        dragon.getBreed().spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
+//        dragon.getBreed().spawnBreathParticlesForFireDragon(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
 //      }
 //    }
 //
@@ -219,7 +219,7 @@
 //          if (destination != null && currentBreathState == BreathState.SUSTAIN) {
 //            breathWeaponFXEmitter.setBeamEndpoints(origin, destination);
 //            BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPower();
-//            breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter);
+//            breathWeaponFXEmitter.spawnBreathParticlesForFireDragon(dragon.getEntityWorld(), power, tickCounter);
 //          }
 //        }
 //        break;

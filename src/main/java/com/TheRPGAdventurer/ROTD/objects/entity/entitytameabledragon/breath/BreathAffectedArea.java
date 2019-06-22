@@ -49,9 +49,8 @@ public class BreathAffectedArea {
     breathWeapon = i_breathWeapon;
   }
 
-  public BreathAffectedArea(BreathWeaponP i_breathWeapon) {  // dummy to enable compilation
+  public BreathAffectedArea(BreathWeaponP i_breathWeapon) {
     breathWeaponP = i_breathWeapon;
-//    throw new UnsupportedOperationException();
   }
 
   /**
@@ -62,7 +61,7 @@ public class BreathAffectedArea {
    * @param power
    */
   @Deprecated
-  public void continueBreathing(World world, Vec3d origin, Vec3d destination, BreathNode.Power power, EntityTameableDragon dragon) {
+  public void continueBreathingLegacy(World world, Vec3d origin, Vec3d destination, BreathNode.Power power, EntityTameableDragon dragon) {
     Vec3d direction = destination.subtract(origin).normalize();
 
     EntityBreathNode newNode = EntityBreathNode.createEntityBreathNodeServer(world, origin.x, origin.y, origin.z, direction.x, direction.y, direction.z, power);
@@ -78,7 +77,7 @@ public class BreathAffectedArea {
    * @param power
    */
   public void continueBreathing(World world, Vec3d origin, Vec3d destination,
-                                BreathNodeFactory breathNodeFactory,  BreathNodeP.Power power, DragonBreathMode breathMode)
+                                BreathNodeFactory breathNodeFactory, BreathNodeP.Power power, DragonBreathMode breathMode)
   {
     Vec3d direction = destination.subtract(origin).normalize();
 

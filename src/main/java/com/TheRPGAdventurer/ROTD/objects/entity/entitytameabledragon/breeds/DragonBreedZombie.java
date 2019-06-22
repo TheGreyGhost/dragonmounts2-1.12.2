@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
@@ -41,17 +42,17 @@ public class DragonBreedZombie extends DragonBreed {
 
     }
 
-//    @Override
-//    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-//        dragon.getBreathHelper().getbreathAffectedAreaPoison().continueBreathing(world, origin, endOfLook, power, dragon);
-//        dragon.getBreathHelper().getbreathAffectedAreaPoison().updateTick(world);
-//    }
-//
-//    @Override
-//    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//        dragon.getBreathHelper().getEmitter().setBeamEndpoints(origin, endOfLook);
-//        dragon.getBreathHelper().getEmitter().spawnBreathParticlesforPoisonDragon(world, power, tickCounter);
-//    }
+    @Override
+    public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+        dragon.getBreathHelperP().getbreathAffectedAreaPoison().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
+        dragon.getBreathHelperP().getbreathAffectedAreaPoison().updateTick(world);
+    }
+
+    @Override
+    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+        dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
+        dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforPoisonDragon(world, power, tickCounter);
+    }
 
     @Override
     public SoundEvent getLivingSound(EntityTameableDragon dragon) {

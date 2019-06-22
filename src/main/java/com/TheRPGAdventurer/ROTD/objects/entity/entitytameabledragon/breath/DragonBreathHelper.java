@@ -143,7 +143,7 @@
 ////            Vec3d endOfLook=origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
 ////            if (endOfLook!=null && currentBreathState==BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
 ////                BreathNode.Power power=dragon.getLifeStageHelper().getBreathPower();
-////                dragon.getBreed().spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
+////                dragon.getBreed().spawnBreathParticlesForFireDragon(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
 ////            }
 ////        }
 ////

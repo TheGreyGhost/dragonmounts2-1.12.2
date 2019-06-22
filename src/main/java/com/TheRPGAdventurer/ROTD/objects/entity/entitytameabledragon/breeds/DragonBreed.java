@@ -248,18 +248,12 @@ public abstract class DragonBreed {
     }
 
     @Deprecated
-    public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-        dragon.getBreathHelperP().getBreathAffectedArea().continueBreathing(world, origin, endOfLook, power, dragon);
-        dragon.getBreathHelperP().getBreathAffectedArea().updateTick(world);
-    }
+    abstract public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon);
 
     @Deprecated
-    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-        dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
-        dragon.getBreathHelperP().getEmitter().spawnBreathParticles(world, power, tickCounter);
-    }
+    abstract public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon);
 
-  @Deprecated
+    @Deprecated
     public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
         final SoundEffectNames hatchling[]={SoundEffectNames.HATCHLING_BREATHE_FIRE_START, SoundEffectNames.HATCHLING_BREATHE_FIRE_LOOP, SoundEffectNames.HATCHLING_BREATHE_FIRE_STOP};
 
@@ -349,7 +343,6 @@ public abstract class DragonBreed {
   public BreathNodeFactory getBreathNodeFactory(EntityTameableDragon dragon)
   {
     return new BreathNodeFire.BreathNodeFireFactory(); // todo just dummy for now to support legacy
-//    throw new UnsupportedOperationException();
   }
 
   public BreathProjectileFactory getBreathProjectileFactory(EntityTameableDragon dragon)

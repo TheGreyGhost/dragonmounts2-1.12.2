@@ -593,7 +593,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
      */
     public boolean isUsingBreathWeapon() {
         BreathWeaponTarget breathWeaponTarget = this.getBreathHelperP().getPlayerSelectedTarget();
-        return (null == breathWeaponTarget);
+        return (null != breathWeaponTarget);
     }
 
 //    /**
