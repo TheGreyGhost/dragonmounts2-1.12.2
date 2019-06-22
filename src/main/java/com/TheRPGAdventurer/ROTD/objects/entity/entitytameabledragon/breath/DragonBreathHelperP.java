@@ -8,6 +8,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.node
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathProjectileFactory;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundController;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeapon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.*;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.DragonBreed;
@@ -49,26 +50,25 @@ import org.apache.logging.log4j.Logger;
  *  4) getCurrentBreathState() and getBreathStateFractionComplete() should be called by animation routines for
  *     the dragon during breath weapon (eg jaw opening)
  */
-public class DragonBreathHelperP extends DragonHelper
-{
+public class DragonBreathHelperP extends DragonHelper {
   public DragonBreathHelperP(EntityTameableDragon dragon, DataParameter<String> i_dataParamBreathWeaponTarget,
-                                DataParameter<Integer> i_dataParamBreathWeaponMode) {
+                             DataParameter<Integer> i_dataParamBreathWeaponMode) {
     super(dragon);
     dataParamBreathWeaponTarget = i_dataParamBreathWeaponTarget;
     dataParamBreathWeaponMode = i_dataParamBreathWeaponMode;
     refreshBreed(dragon);
 
-    breathAffectedArea=new BreathAffectedArea(new BreathWeaponFire(dragon));
-    breathAffectedAreaNether=new BreathAffectedArea(new BreathWeaponNether(dragon));
-    breathAffectedAreaIce=new BreathAffectedArea(new BreathWeaponIce(dragon));
-    breathAffectedAreaHydro=new BreathAffectedArea(new BreathWeaponHydro(dragon));
-    breathAffectedAreaEnder=new BreathAffectedArea(new BreathWeaponEnder(dragon));
-    breathAffectedAreaWither=new BreathAffectedArea(new BreathWeaponWither(dragon));
-    breathAffectedAreaPoison=new BreathAffectedArea(new BreathWeaponPoison(dragon));
-    breathAffectedAreaAether=new BreathAffectedArea(new BreathWeaponAether(dragon));
-        if (dragon.isClient()) {
-            breathWeaponEmitter=new BreathWeaponEmitter();
-        }
+    breathAffectedArea = new BreathAffectedArea(new BreathWeaponFire(dragon));
+    breathAffectedAreaNether = new BreathAffectedArea(new BreathWeaponNether(dragon));
+    breathAffectedAreaIce = new BreathAffectedArea(new BreathWeaponIce(dragon));
+    breathAffectedAreaHydro = new BreathAffectedArea(new BreathWeaponHydro(dragon));
+    breathAffectedAreaEnder = new BreathAffectedArea(new BreathWeaponEnder(dragon));
+    breathAffectedAreaWither = new BreathAffectedArea(new BreathWeaponWither(dragon));
+    breathAffectedAreaPoison = new BreathAffectedArea(new BreathWeaponPoison(dragon));
+    breathAffectedAreaAether = new BreathAffectedArea(new BreathWeaponAether(dragon));
+    if (dragon.isClient()) {
+      breathWeaponEmitter = new BreathWeaponEmitter();
+    }
 
   }
 
@@ -76,8 +76,7 @@ public class DragonBreathHelperP extends DragonHelper
   private DataParameter<Integer> dataParamBreathWeaponMode;
 
   // changes the breath weapon after the breed is changed
-  public void refreshBreed(EntityTameableDragon dragon)
-  {
+  public void refreshBreed(EntityTameableDragon dragon) {
     DragonBreed newBreed = dragon.getBreed();
     if (currentBreed == newBreed) return;
     currentBreed = newBreed;
@@ -85,7 +84,7 @@ public class DragonBreathHelperP extends DragonHelper
     switch (currentBreed.getBreathWeaponSpawnType(dragon)) {
       case NODES: {
         BreathWeaponP breathWeapon = currentBreed.getBreathWeapon(dragon);
-        breathAffectedArea = new BreathAffectedArea(breathWeapon);
+        breathAffectedAreaP = new BreathAffectedArea(breathWeapon);
         breathNodeFactory = currentBreed.getBreathNodeFactory(dragon);
         if (dragon.isClient()) {
           breathWeaponFXEmitter = currentBreed.getBreathWeaponFXEmitter(dragon);
@@ -108,17 +107,18 @@ public class DragonBreathHelperP extends DragonHelper
 
   }
 
-  public void refreshBreedClientOnly(EntityTameableDragon dragon)
-  {
+  public void refreshBreedClientOnly(EntityTameableDragon dragon) {
     soundEffectBreathWeapon = dragon.getBreed().getSoundEffectBreathWeapon(getSoundController(dragon.getEntityWorld()), weaponInfoLink);
   }
 
 
-  public enum  BreathState {
+  public enum BreathState {
     IDLE, STARTING, SUSTAIN, STOPPING
-    }
+  }
 
-  public BreathState getCurrentBreathState() {return currentBreathState;}
+  public BreathState getCurrentBreathState() {
+    return currentBreathState;
+  }
 
   public float getBreathStateFractionComplete() {
     switch (currentBreathState) {
@@ -143,12 +143,13 @@ public class DragonBreathHelperP extends DragonHelper
     }
   }
 
-  /** set the target currently being breathed at.
+  /**
+   * set the target currently being breathed at.
    * server only.
+   *
    * @param target the new target the dragon is breathing at, null = no target
-    */
-  public void setBreathingTarget(BreathWeaponTarget target)
-  {
+   */
+  public void setBreathingTarget(BreathWeaponTarget target) {
     if (dragon.isServer()) {
       targetBeingBreathedAt = target;
       boolean updateDataWatcher = false;
@@ -172,35 +173,39 @@ public class DragonBreathHelperP extends DragonHelper
     updateBreathState(target);
   }
 
-  /** gets the target that the movement AI should move towards (or away from) to move to the optimal breathing distance
-  */
-   public BreathWeaponTarget getBreathTargetForMoving()
-  {
+  /**
+   * gets the target that the movement AI should move towards (or away from) to move to the optimal breathing distance
+   */
+  public BreathWeaponTarget getBreathTargetForMoving() {
     return breathWeaponTarget;
   }
 
-  /** sets the target that the movement AI should move towards (or away from) to move to the optimal breathing distance
+  /**
+   * sets the target that the movement AI should move towards (or away from) to move to the optimal breathing distance
+   *
    * @param targetForMoving the new target - NULL for no target
    */
-  public void setBreathTargetForMoving(BreathWeaponTarget targetForMoving)
-  {
+  public void setBreathTargetForMoving(BreathWeaponTarget targetForMoving) {
     breathWeaponTarget = targetForMoving;
   }
 
   /**
    * check if the dragon has a breath target that it should move towards (or away from)
+   *
    * @return true if the dragon has a movement target
    */
-  public boolean hasBreathTargetForMoving() { return breathWeaponTarget != null;}
+  public boolean hasBreathTargetForMoving() {
+    return breathWeaponTarget != null;
+  }
 
   /**
    * Get the current mode of the breath weapon (only relevant for some breath weapon types)
    * 1) On the client, from the datawatcher
    * 2) On the server- previously set by others
+   *
    * @return the current breath weapon mode
    */
-  public DragonBreathMode getBreathMode()
-  {
+  public DragonBreathMode getBreathMode() {
     if (dragon.isClient()) {
       return DragonBreathMode.createFromDataParameter(dataWatcher, dataParamBreathWeaponMode);
     } else {
@@ -209,13 +214,14 @@ public class DragonBreathHelperP extends DragonHelper
   }
 
 
-  /** set the breath weapon mode (only relevant for some breath weapon types)
+  /**
+   * set the breath weapon mode (only relevant for some breath weapon types)
    * server only.
+   *
    * @param newMode - new breath weapon mode (meaning depends on breath weapon type)
    */
 
-  public void setBreathMode(DragonBreathMode newMode)
-  {
+  public void setBreathMode(DragonBreathMode newMode) {
     if (dragon.isServer()) {
       breathWeaponMode = newMode;
       breathWeaponMode.writeToDataWatcher(dataWatcher, dataParamBreathWeaponMode);
@@ -227,10 +233,10 @@ public class DragonBreathHelperP extends DragonHelper
   /**
    * For tamed dragons, returns the target that their controlling player has selected using the DragonOrb or riding
    * while holding the breath key.
+   *
    * @return the player's selected target, or null if no player target or dragon isn't tamed.
    */
-  public BreathWeaponTarget getPlayerSelectedTarget()
-  {
+  public BreathWeaponTarget getPlayerSelectedTarget() {
     Entity owner = dragon.getOwner();
     if (owner == null) {
       return null;
@@ -240,7 +246,7 @@ public class DragonBreathHelperP extends DragonHelper
       return getTarget();
     }
 
-    EntityPlayerMP entityPlayerMP = (EntityPlayerMP)owner;
+    EntityPlayerMP entityPlayerMP = (EntityPlayerMP) owner;
     BreathWeaponTarget breathWeaponTarget = DragonOrbTargets.getInstance().getPlayerTarget(entityPlayerMP);
     return breathWeaponTarget;
   }
@@ -256,23 +262,28 @@ public class DragonBreathHelperP extends DragonHelper
   }
 
   @Override
-  public void writeToNBT(NBTTagCompound nbt) {}
+  public void writeToNBT(NBTTagCompound nbt) {
+  }
 
   @Override
-  public void readFromNBT(NBTTagCompound nbt) {}
+  public void readFromNBT(NBTTagCompound nbt) {
+  }
 
   @Override
-  public void applyEntityAttributes() {}
+  public void applyEntityAttributes() {
+  }
 
   @Override
-  public void onDeathUpdate() {}
+  public void onDeathUpdate() {
+  }
 
   @Override
-  public void onDeath() {}
+  public void onDeath() {
+  }
+
   private static final Logger L = LogManager.getLogger();
 
-  private void updateBreathState(BreathWeaponTarget targetBeingBreathedAt)
-  {
+  private void updateBreathState(BreathWeaponTarget targetBeingBreathedAt) {
     if (targetBeingBreathedAt == null) {
       playerHasReleasedTargetSinceLastBreath = true;
     }
@@ -313,18 +324,20 @@ public class DragonBreathHelperP extends DragonHelper
     }
   }
 
-  private void forceStop()
-  {
+  private void forceStop() {
     transitionStartTick = tickCounter;
     currentBreathState = BreathState.STOPPING;
   }
 
-  private void onLivingUpdateServer()
-  {
+  private void onLivingUpdateServer() {
     refreshBreed(dragon);
     BreathWeaponTarget target = getTarget();
     updateBreathState(target);
-    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()) return;
+    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()           // todo: currently - primary is legacy, secondary is prototype
+            || target.getWeaponUsed() == BreathWeaponTarget.WeaponUsed.PRIMARY) {
+      onLivingUpdateServerLegacy();
+      return;
+    }
 
     dragon.getBreed().getBreathWeapon(dragon).updateBreathWeaponMode();
     DragonBreathMode dragonBreathMode = dragon.getBreathHelperP().getBreathMode();
@@ -336,10 +349,10 @@ public class DragonBreathHelperP extends DragonHelper
           Vec3d destination = target.getTargetedPoint(dragon.world, origin);
           if (destination != null && currentBreathState == BreathState.SUSTAIN) {
             BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
-            breathAffectedArea.continueBreathing(dragon.getEntityWorld(), origin, destination, breathNodeFactory, power, dragonBreathMode);
+            breathAffectedAreaP.continueBreathing(dragon.getEntityWorld(), origin, destination, breathNodeFactory, power, dragonBreathMode);
           }
         }
-        breathAffectedArea.updateTick(dragon.world, dragonBreathMode);
+        breathAffectedAreaP.updateTick(dragon.world, dragonBreathMode);
         break;
       }
       case PROJECTILE: {
@@ -348,8 +361,8 @@ public class DragonBreathHelperP extends DragonHelper
           Vec3d destination = target.getTargetedPoint(dragon.world, origin);
           if (destination != null && currentBreathState == BreathState.SUSTAIN) {
             BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
-            boolean spawned =  breathProjectileFactory.spawnProjectile(dragon.getEntityWorld(), dragon,  // may not spawn anything if a projectile was spawned recently...
-                                                    origin, destination, power);
+            boolean spawned = breathProjectileFactory.spawnProjectile(dragon.getEntityWorld(), dragon,  // may not spawn anything if a projectile was spawned recently...
+                    origin, destination, power);
             if (spawned) {
               forceStop();
             }
@@ -366,11 +379,30 @@ public class DragonBreathHelperP extends DragonHelper
     }
   }
 
-  private void onLivingUpdateClient()
-  {
+  @Deprecated
+  private void onLivingUpdateServerLegacy() {
+//        updateBreathState(dragon.isUsingBreathWeapon());
+    if (dragon.isUsingBreathWeapon()) {
+      Vec3d origin = dragon.getAnimator().getThroatPosition();
+      Vec3d lookDirection = dragon.getLook(1.0f);
+      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
+      BreathNode.Power power = dragon.getLifeStageHelper().getBreathPower();
+      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN) {
+        dragon.getBreed().continueAndUpdateBreathing(dragon.getEntityWorld(), origin, endOfLook, power, dragon);
+      }
+    }
+  }
+
+  private void onLivingUpdateClient() {
     refreshBreed(dragon);
     BreathWeaponTarget target = getTarget();
     updateBreathState(target);
+
+    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()
+            && isLegacyBreath(target)) {
+      onLivingUpdateClientLegacy();
+      return;
+    }
 
     switch (dragon.getBreed().getBreathWeaponSpawnType(dragon)) {
       case NODES: {
@@ -382,13 +414,13 @@ public class DragonBreathHelperP extends DragonHelper
           Vec3d destination = target.getTargetedPoint(dragon.world, origin);
           if (destination != null && currentBreathState == BreathState.SUSTAIN) {
             breathWeaponFXEmitter.setBeamEndpoints(origin, destination);
-            if (DragonMounts.instance.getConfig().isPrototypeBreathweapons()) {
-              BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
-              breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter);
-            } else {
-              BreathNode.Power powerLegacy = dragon.getLifeStageHelper().getBreathPower();
-              breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), powerLegacy, tickCounter);
-            }
+//            if (DragonMounts.instance.getConfig().isPrototypeBreathweapons()) {
+            BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+            breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter);
+//            } else {
+//              BreathNode.Power powerLegacy = dragon.getLifeStageHelper().getBreathPower();
+//              breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), powerLegacy, tickCounter);
+//            }
           }
         }
         break;
@@ -413,13 +445,31 @@ public class DragonBreathHelperP extends DragonHelper
     soundEffectBreathWeapon.performTick(Minecraft.getMinecraft().player);
   }
 
-  public SoundController getSoundController(World world)
-  {
+  @Deprecated
+  private void onLivingUpdateClientLegacy() {
+    if (dragon.isUsingBreathWeapon()) {
+      Vec3d origin = dragon.getAnimator().getThroatPosition();
+      Vec3d lookDirection = dragon.getLook(1.0f);
+      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
+      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
+        BreathNode.Power power = dragon.getLifeStageHelper().getBreathPower();
+        dragon.getBreed().spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
+      }
+    }
+
+    if (soundEffectBreathWeaponLegacy == null) {
+      soundEffectBreathWeaponLegacy = new SoundEffectBreathWeapon(getSoundController(dragon.getEntityWorld()), weaponInfoLinkLegacy);
+    }
+    soundEffectBreathWeaponLegacy.performTick(Minecraft.getMinecraft().player, dragon);
+  }
+
+
+  public SoundController getSoundController(World world) {
     if (!world.isRemote) {
       throw new IllegalArgumentException("getSoundController() only valid for WorldClient");
     }
     if (soundController == null) {
-      soundController = new SoundController((WorldClient)world);
+      soundController = new SoundController((WorldClient) world);
     }
 
     return soundController;
@@ -427,7 +477,12 @@ public class DragonBreathHelperP extends DragonHelper
 
   private SoundController soundController;
   private SoundEffectBreathWeaponP soundEffectBreathWeapon;
+  @Deprecated
+  private SoundEffectBreathWeapon soundEffectBreathWeaponLegacy;
   private WeaponInfoLink weaponInfoLink = new WeaponInfoLink();
+
+  private WeaponInfoLinkLegacy weaponInfoLinkLegacy = new WeaponInfoLinkLegacy();
+
 
   // Callback link to provide the Sound generator with state information
   public class WeaponInfoLink implements SoundEffectBreathWeaponP.WeaponSoundUpdateLink {
@@ -449,8 +504,33 @@ public class DragonBreathHelperP extends DragonHelper
         }
       }
       infoToUpdate.breathingState = isBreathing ? SoundEffectBreathWeaponP.WeaponSoundInfo.State.BREATHING
-                                                : SoundEffectBreathWeaponP.WeaponSoundInfo.State.IDLE;
+              : SoundEffectBreathWeaponP.WeaponSoundInfo.State.IDLE;
 
+      return true;
+    }
+  }
+
+  // Callback link to provide the Sound generator with state information
+  @Deprecated
+  public class WeaponInfoLinkLegacy implements SoundEffectBreathWeapon.WeaponSoundUpdateLinkLegacy {
+
+    @Override
+    public boolean refreshWeaponSoundInfo(SoundEffectBreathWeapon.WeaponSoundInfo infoToUpdate) {
+      Vec3d origin = dragon.getAnimator().getThroatPosition();
+      infoToUpdate.dragonHeadLocation = origin;
+      infoToUpdate.relativeVolume = dragon.getScale();
+      infoToUpdate.lifeStage = dragon.getLifeStageHelper().getLifeStage();
+
+      boolean isUsingBreathweapon = false;
+      if (dragon.isUsingBreathWeapon()) {
+        Vec3d lookDirection = dragon.getLook(1.0f);
+        Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
+        if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
+          isUsingBreathweapon = true;
+        }
+      }
+
+      infoToUpdate.breathingState = isUsingBreathweapon ? SoundEffectBreathWeapon.WeaponSoundInfo.State.BREATHING : SoundEffectBreathWeapon.WeaponSoundInfo.State.IDLE;
       return true;
     }
   }
@@ -459,10 +539,10 @@ public class DragonBreathHelperP extends DragonHelper
    * Get the target currently being breathed at, for this dragon:
    * 1) On the client, from the datawatcher
    * 2) On the server- previously set by AI
+   *
    * @return the target, or null for none
    */
-  private BreathWeaponTarget getTarget()
-  {
+  private BreathWeaponTarget getTarget() {
     if (dragon.isClient()) {
       String targetString = dataWatcher.get(dataParamBreathWeaponTarget);
       BreathWeaponTarget target = BreathWeaponTarget.fromEncodedString(targetString);
@@ -486,22 +566,23 @@ public class DragonBreathHelperP extends DragonHelper
   private BreathWeaponTarget breathWeaponTarget;
   private boolean playerHasReleasedTargetSinceLastBreath = false;
 
-  private BreathAffectedArea breathAffectedArea;
+  private BreathAffectedArea breathAffectedAreaP;
   private DragonBreed currentBreed = null;
   private BreathProjectileFactory breathProjectileFactory = null;
   private BreathNodeFactory breathNodeFactory = null;
   private DragonBreathMode breathWeaponMode = DragonBreathMode.DEFAULT;
 
+  private BreathAffectedArea breathAffectedArea;
+  public BreathAffectedArea breathAffectedAreaEnder = null;
+  public BreathAffectedArea breathAffectedAreaNether = null;
+  public BreathAffectedArea breathAffectedAreaIce = null;
+  public BreathAffectedArea breathAffectedAreaHydro = null;
+  public BreathAffectedArea breathAffectedAreaWither = null;
+  public BreathAffectedArea breathAffectedAreaPoison = null;
+  public BreathAffectedArea breathAffectedAreaAether = null;
 
-
-    public BreathAffectedArea breathAffectedAreaEnder=null;
-    public BreathAffectedArea breathAffectedAreaNether=null;
-    public BreathAffectedArea breathAffectedAreaIce=null;
-    public BreathAffectedArea breathAffectedAreaHydro=null;
-    public BreathAffectedArea breathAffectedAreaWither=null;
-    public BreathAffectedArea breathAffectedAreaPoison=null;
-    public BreathAffectedArea breathAffectedAreaAether=null;
-      protected BreathWeaponEmitter breathWeaponEmitter=null;
+  @Deprecated
+  protected BreathWeaponEmitter breathWeaponEmitter = null;
 
   @Deprecated
   public BreathWeaponEmitter getEmitter() {
@@ -548,5 +629,19 @@ public class DragonBreathHelperP extends DragonHelper
     return breathAffectedAreaAether;
   }
 
+  /**
+   * Should we use the legacy breath for this dragon?
+   * @param newBreathWeaponTarget
+   * @return true for legacy
+   */
+  private boolean isLegacyBreath(BreathWeaponTarget newBreathWeaponTarget)
+  {
+    if (newBreathWeaponTarget != null) {
+      useLegacy = newBreathWeaponTarget.getWeaponUsed() == BreathWeaponTarget.WeaponUsed.PRIMARY;
+    }
+    return useLegacy;
+  }
+
+  private boolean useLegacy = true; //todo for debugging: was the last weapon used the primary (== legacy)
 
 }

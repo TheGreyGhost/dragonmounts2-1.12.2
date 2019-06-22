@@ -207,7 +207,7 @@
 //    private WeaponInfoLink weaponInfoLink=new WeaponInfoLink();
 //
 //    // Callback link to provide the Sound generator with state information
-//    public class WeaponInfoLink implements SoundEffectBreathWeapon.WeaponSoundUpdateLink {
+//    public class WeaponInfoLink implements SoundEffectBreathWeapon.WeaponSoundUpdateLinkLegacy {
 //
 //        @Override
 //        public boolean refreshWeaponSoundInfo(SoundEffectBreathWeapon.WeaponSoundInfo infoToUpdate) {

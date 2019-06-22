@@ -19,10 +19,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *    which seems to help.
  *
  * The SoundEffectBreathWeapon corresponds to the breath weapon of a single dragon.  Typical usage is:
- * 1) create an instance, and provide a callback function (WeaponSoundUpdateLink)
+ * 1) create an instance, and provide a callback function (WeaponSoundUpdateLinkLegacy)
  * 2) startPlaying(), startPlayingIfNotAlreadyPlaying(), stopPlaying() to start or stop the sounds completely
  * 3) once per tick, call performTick().
- *   3a) performTick() will call the WeaponSoundUpdateLink.refreshWeaponSoundInfo(), which should return the
+ *   3a) performTick() will call the WeaponSoundUpdateLinkLegacy.refreshWeaponSoundInfo(), which should return the
  *       current data relevant to the sound (eg whether the dragon is breathing, and the location of the beam)
  *
  * Is subclassed for the different breath weapons.

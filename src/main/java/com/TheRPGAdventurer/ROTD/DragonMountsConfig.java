@@ -9,6 +9,8 @@
  */
 package com.TheRPGAdventurer.ROTD;
 
+import com.TheRPGAdventurer.ROTD.inits.ModItems;
+import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.google.common.collect.Lists;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;

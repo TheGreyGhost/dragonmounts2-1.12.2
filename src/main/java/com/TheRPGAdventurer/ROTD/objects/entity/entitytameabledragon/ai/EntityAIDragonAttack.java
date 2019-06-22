@@ -215,7 +215,7 @@ public class EntityAIDragonAttack extends EntityAIDragonBase {
         } else  if(shouldUseRange) { 
         	  this.attackTick = 20;
             if (target.isEntityAlive()) {
-                BreathWeaponTarget breathWeaponTarget = BreathWeaponTarget.targetEntity(target);
+                BreathWeaponTarget breathWeaponTarget = BreathWeaponTarget.targetEntity(target, BreathWeaponTarget.WeaponUsed.PRIMARY);  // default to PRIMARY until I can figure this out better
                 dragon.getBreathHelperP().setBreathingTarget(breathWeaponTarget);
             }
        	    dragon.getLookHelper().setLookPositionWithEntity(target, dragon.getHeadYawSpeed(), dragon.getHeadPitchSpeed());

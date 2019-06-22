@@ -1,11 +1,16 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
 
-import java.util.Arrays;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -40,7 +45,7 @@ public enum EnumDragonBreed implements IStringSerializable {
 
     // create static bimap between enums and meta data for faster and easier
     // lookups
-    public static final BiMap<EnumDragonBreed, Integer> META_MAPPING = ImmutableBiMap.copyOf(Arrays.asList(values()).stream().collect(Collectors.toMap(Function.identity(), EnumDragonBreed::getMeta)));
+    private static final BiMap<EnumDragonBreed, Integer> META_MAPPING = ImmutableBiMap.copyOf(Arrays.asList(values()).stream().collect(Collectors.toMap(Function.identity(), EnumDragonBreed::getMeta)));
     public static final PropertyEnum<EnumDragonBreed> BREED = PropertyEnum.create("breed", EnumDragonBreed.class);
     private final DragonBreed breed;
 
@@ -54,16 +59,71 @@ public enum EnumDragonBreed implements IStringSerializable {
         this.meta = meta;
     }
 
-
     public DragonBreed getBreed() {
         return breed;
     }
 
-    public int getMeta() {
+    private int getMeta() {
         return meta;
     }
 
-    @Override
+  public static ImmutableBiMap<EnumDragonBreed, Integer> getAllBreedMetas()
+  {
+    return ImmutableBiMap.copyOf(META_MAPPING);
+  }
+
+    @Deprecated
+    // for debugging purposes...
+    public static Set<Integer> getAllMetas()
+    {
+      return META_MAPPING.values();
+    }
+
+  @Deprecated
+  // for debugging purposes...
+  public static EnumDragonBreed getBreedForMeta(int meta)
+  {
+    return META_MAPPING.inverse().get(meta);
+  }
+
+  // which Breed does this egg produce?
+  // default = FIRE
+  public static EnumDragonBreed getBreedFromItemStack(ItemStack dragonEgg)
+  {
+    int metaValue = dragonEgg.getMetadata();
+    if (META_MAPPING.containsValue(metaValue)) {
+      EnumDragonBreed breed = EnumDragonBreed.META_MAPPING.inverse().get(metaValue);
+      return breed;
+    } else {
+      return FIRE;
+    }
+  }
+
+  // generate an ItemStack egg for this breed
+  public ItemStack createEggItemStack()
+  {
+    final int AMOUNT = 1;
+    return new ItemStack(BlockDragonBreedEgg.DRAGON_BREED_EGG, AMOUNT, meta);
+  }
+
+  public static int getMetaFromBlockState(IBlockState state) {
+    EnumDragonBreed type = state.getValue(BREED);
+    return EnumDragonBreed.META_MAPPING.get(type);
+  }
+
+  public static IBlockState getBlockstateFromMeta(BlockDragonBreedEgg blockDragonBreedEgg, int metaValue)
+  {
+    EnumDragonBreed breed = FIRE;  // default if unknown breed
+    if (META_MAPPING.containsValue(metaValue)) {
+      breed = EnumDragonBreed.META_MAPPING.inverse().get(metaValue);
+    } else {
+      DragonMounts.loggerLimit.error_once("Invalid meta given to EnumDragonBreed::getBlockstateFromMeta=" + metaValue);
+    }
+
+    return blockDragonBreedEgg.getDefaultState().withProperty(BREED, breed);
+  }
+
+  @Override
     public String getName() {
         return name().toLowerCase();
     }

@@ -68,7 +68,7 @@ public class RegistryEventHandler {
         // Register item render for amulet item variants
         ModelLoader.setCustomMeshDefinition(ModItems.Amulet, new ItemDragonAmuletNEW());
         ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:dragon_amulet"));
-        EnumDragonBreed.META_MAPPING.forEach((breed, meta) -> {
+        EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
         	ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:" + breed.getName() + "_dragon_amulet"));
         });
 
@@ -101,20 +101,20 @@ public class RegistryEventHandler {
 			// register item renderer for dragon egg block variants
 			ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
 			Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
-			EnumDragonBreed.META_MAPPING.forEach((breed, meta) -> {
-				ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
-				ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
-			});
+			EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
+        ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
+        ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
+      });
 		}
 
 		for (Block blockegg: BlockDragonBreedEgg.BLOCK_EGG) {
 			// register item renderer for dragon egg block variants
 			ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
 			Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
-			EnumDragonBreed.META_MAPPING.forEach((breed, meta) -> {
-				ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
-				ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
-			});
+			EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
+        ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
+        ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
+      });
 		}
 
       DMUtils.getLogger().info("Models Sucessfully Registered");
@@ -124,7 +124,7 @@ public class RegistryEventHandler {
     @SubscribeEvent
     public static void registerTESRblockstates(ModelBakeEvent event) {
         // prevent model errors for the shulker block by registering it like a vanilla chest
-        event.getModelManager().getBlockModelShapes().registerBuiltInBlocks(ModBlocks.DRAGONSHULKER);  //todo I think this will work...
+//        event.getModelManager().getBlockModelShapes().registerBuiltInBlocks(ModBlocks.DRAGONSHULKER);  //todo I think this will work...  it didn't.  Find out why later on
     }
 
     public static void preInitRegistries() {

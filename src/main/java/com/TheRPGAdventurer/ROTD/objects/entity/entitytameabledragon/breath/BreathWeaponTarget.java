@@ -38,32 +38,34 @@ import java.util.Random;
 public class BreathWeaponTarget
 {
   public enum TypeOfTarget {LOCATION, ENTITY, DIRECTION}
+  public enum WeaponUsed {PRIMARY, SECONDARY, NONE}
 
-  public static BreathWeaponTarget targetLocation(Vec3d location) {
-    BreathWeaponTarget retval = new BreathWeaponTarget(TypeOfTarget.LOCATION);
+  public static BreathWeaponTarget targetLocation(Vec3d location, WeaponUsed i_weaponUsed) {
+    BreathWeaponTarget retval = new BreathWeaponTarget(TypeOfTarget.LOCATION, i_weaponUsed);
     retval.coordinates = location;
     return retval;
   }
 
-  public static BreathWeaponTarget targetEntity(Entity entity) {
-    BreathWeaponTarget retval = new BreathWeaponTarget(TypeOfTarget.ENTITY);
+  public static BreathWeaponTarget targetEntity(Entity entity, WeaponUsed i_weaponUsed) {
+    BreathWeaponTarget retval = new BreathWeaponTarget(TypeOfTarget.ENTITY, i_weaponUsed);
     retval.entityID = entity.getEntityId();
     return retval;
   }
 
-  public static BreathWeaponTarget targetEntityID(int i_entity) {
-    BreathWeaponTarget retval = new BreathWeaponTarget(TypeOfTarget.ENTITY);
+  public static BreathWeaponTarget targetEntityID(int i_entity, WeaponUsed i_weaponUsed) {
+    BreathWeaponTarget retval = new BreathWeaponTarget(TypeOfTarget.ENTITY, i_weaponUsed);
     retval.entityID = i_entity;
     return retval;
   }
 
-  public static BreathWeaponTarget targetDirection(Vec3d direction) {
-    BreathWeaponTarget retval = new BreathWeaponTarget(TypeOfTarget.DIRECTION);
+  public static BreathWeaponTarget targetDirection(Vec3d direction, WeaponUsed i_weaponUsed) {
+    BreathWeaponTarget retval = new BreathWeaponTarget(TypeOfTarget.DIRECTION, i_weaponUsed);
     retval.coordinates = direction.normalize();
     return retval;
   }
 
   public TypeOfTarget getTypeOfTarget() {return  typeOfTarget;}
+  public WeaponUsed getWeaponUsed() {return weaponUsed;}
 
   /**
    *  getChangeInValue the entity being targeted
@@ -92,25 +94,32 @@ public class BreathWeaponTarget
       throw new IllegalArgumentException("typeOfHitInt was " + typeOfHitInt);
     }
     TypeOfTarget typeOfHit = TypeOfTarget.values()[typeOfHitInt];
+
+    int weaponUsedInt = buf.readInt();
+    if (weaponUsedInt < 0 || weaponUsedInt >= WeaponUsed.values().length) {
+      throw new IllegalArgumentException("weaponUsed was " + weaponUsedInt);
+    }
+    WeaponUsed weaponUsed = WeaponUsed.values()[weaponUsedInt];
+
     BreathWeaponTarget breathWeaponTarget;
     switch (typeOfHit) {
       case DIRECTION: {
         double x = buf.readDouble();
         double y = buf.readDouble();
         double z = buf.readDouble();
-        breathWeaponTarget = BreathWeaponTarget.targetDirection(new Vec3d(x, y, z));
+        breathWeaponTarget = BreathWeaponTarget.targetDirection(new Vec3d(x, y, z), weaponUsed);
         break;
       }
       case LOCATION: {
         double x = buf.readDouble();
         double y = buf.readDouble();
         double z = buf.readDouble();
-        breathWeaponTarget = BreathWeaponTarget.targetLocation(new Vec3d(x, y, z));
+        breathWeaponTarget = BreathWeaponTarget.targetLocation(new Vec3d(x, y, z), weaponUsed);
         break;
       }
       case ENTITY: {
         int rawEntityID = buf.readInt();
-        breathWeaponTarget = BreathWeaponTarget.targetEntityID(rawEntityID);
+        breathWeaponTarget = BreathWeaponTarget.targetEntityID(rawEntityID, weaponUsed);
         break;
       }
       default: {
@@ -126,10 +135,11 @@ public class BreathWeaponTarget
    * @param entityPlayer can be null
    * @return null if not possible
    */
-  public static BreathWeaponTarget fromMovingObjectPosition(RayTraceResult movingObjectPosition, EntityPlayer entityPlayer)
+  public static BreathWeaponTarget fromMovingObjectPosition(RayTraceResult movingObjectPosition,
+                                                            EntityPlayer entityPlayer, WeaponUsed weaponUsed)
   {
     if (movingObjectPosition == null) {
-      return (entityPlayer == null) ? null : targetDirection(entityPlayer.getLook(1.0F));
+      return (entityPlayer == null) ? null : targetDirection(entityPlayer.getLook(1.0F), weaponUsed);
     }
     switch (movingObjectPosition.typeOfHit) {
       case BLOCK: {
@@ -138,20 +148,20 @@ public class BreathWeaponTarget
         final double NUDGE = 0.001;
         switch (movingObjectPosition.sideHit) {
           case EAST:
-            return targetLocation(movingObjectPosition.hitVec.subtract(NUDGE, 0, 0));
+            return targetLocation(movingObjectPosition.hitVec.subtract(NUDGE, 0, 0), weaponUsed);
           case UP:
-            return targetLocation(movingObjectPosition.hitVec.subtract(0, NUDGE, 0));
+            return targetLocation(movingObjectPosition.hitVec.subtract(0, NUDGE, 0), weaponUsed);
           case SOUTH:
-            return targetLocation(movingObjectPosition.hitVec.subtract(0, 0, NUDGE));
+            return targetLocation(movingObjectPosition.hitVec.subtract(0, 0, NUDGE), weaponUsed);
           default:
-            return targetLocation(movingObjectPosition.hitVec);
+            return targetLocation(movingObjectPosition.hitVec, weaponUsed);
         }
       }
       case ENTITY: {
-        return targetEntity(movingObjectPosition.entityHit);
+        return targetEntity(movingObjectPosition.entityHit, weaponUsed);
       }
       case MISS: {
-        return (entityPlayer == null) ? null : targetDirection(entityPlayer.getLook(1.0F));
+        return (entityPlayer == null) ? null : targetDirection(entityPlayer.getLook(1.0F), weaponUsed);
       }
       default: {
         DragonMounts.loggerLimit.error_once("Unknown typeOfHit:" + movingObjectPosition.typeOfHit);
@@ -325,7 +335,7 @@ public class BreathWeaponTarget
     }
   }
 
-  /** getChangeInValue the point being targeted in [x,y,z]
+  /** getTargetedPoint the point being targeted in [x,y,z]
    * @param world
    * @param origin the origin of the breath weapon (dragon's throat)
    * @return an [x,y,z] to fire the beam at; or null if none
@@ -365,6 +375,7 @@ public class BreathWeaponTarget
    */
   public void toBytes(ByteBuf buf) {
     buf.writeInt(typeOfTarget.ordinal());
+    buf.writeInt(weaponUsed.ordinal());
     switch (typeOfTarget) {
       case LOCATION:
       case DIRECTION: {
@@ -433,6 +444,7 @@ public class BreathWeaponTarget
   {
     if (other == null) return false;
     if (other.typeOfTarget != this.typeOfTarget) return false;
+    if (other.weaponUsed != this.weaponUsed) return false;
 
     switch (typeOfTarget) {
       case ENTITY: {
@@ -465,6 +477,7 @@ public class BreathWeaponTarget
   public boolean exactlyMatches(BreathWeaponTarget other)
   {
     if (other.typeOfTarget != this.typeOfTarget) return false;
+    if (other.weaponUsed != this.weaponUsed) return false;
     switch (typeOfTarget) {
       case ENTITY: {
         return (this.entityID == other.entityID);
@@ -501,7 +514,7 @@ public class BreathWeaponTarget
   @Override
   public String toString()
   {
-    String retval = "BreathWeaponTarget(" + typeOfTarget + ") ";
+    String retval = "BreathWeaponTarget(" + weaponUsed + ", " + typeOfTarget + ") ";
     if (typeOfTarget  == TypeOfTarget.ENTITY) {
       return retval + ":" + entityID;
     }
@@ -509,13 +522,15 @@ public class BreathWeaponTarget
             coordinates.x, coordinates.y, coordinates.z);
   }
 
-  private BreathWeaponTarget(TypeOfTarget i_typeOfTarget)
+  private BreathWeaponTarget(TypeOfTarget i_typeOfTarget, WeaponUsed i_weaponUsed)
   {
     typeOfTarget = i_typeOfTarget;
+    weaponUsed = i_weaponUsed;
   }
 
   private TypeOfTarget typeOfTarget;
   private Vec3d coordinates;
   private int entityID;
+  private WeaponUsed weaponUsed;
 
 }

@@ -1,7 +1,11 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.TestForestBreath;
 import net.minecraft.block.BlockLadder;
 import net.minecraft.command.CommandClone;
@@ -9,10 +13,18 @@ import net.minecraft.command.server.CommandTeleport;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import scala.tools.nsc.backend.icode.TypeKinds;
+
+import javax.swing.text.html.parser.Entity;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -26,13 +38,13 @@ public class TestRunner
   {
     boolean success = false;
     switch (testNumber) {
-      case 1: {
+      case 61: {
 //        success = test1(worldIn, playerIn);  // todo restore
         TestForestBreath testForestBreath = new TestForestBreath();
         testForestBreath.test1(worldIn, playerIn);
         break;
       }
-      case 2: {
+      case 62: {
         EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
         BreathNode.Power power = BreathNode.Power.SMALL;
         ++testCounter;
@@ -56,11 +68,18 @@ public class TestRunner
         //todo reinstate test for later if required
 //        EntityBreathProjectileGhost entity = new EntityBreathProjectileGhost(worldIn, dragon, origin, target, power);
 //        worldIn.spawnEntityInWorld(entity);
-        System.out.println("Lighting spawned: mouth at [x,y,z] = " + origin + "to destination [x,y,z,] = " + target);
+        System.out.println("Lightning spawned: mouth at [x,y,z] = " + origin + "to destination [x,y,z,] = " + target);
 
         break;
       }
       default: {
+
+        final int DRAGON_SPAWN_TESTS_BASE = 1;
+        int dragonMeta = testNumber - DRAGON_SPAWN_TESTS_BASE;
+        if (EnumDragonBreed.getAllMetas().contains(dragonMeta)) {
+          spawnTamedDragon(worldIn, playerIn, EnumDragonBreed.getBreedForMeta(dragonMeta));
+          return true;
+        }
         System.out.println("Test Number " + testNumber + " does not exist on server side.");
         return false;
       }
@@ -207,5 +226,38 @@ public class TestRunner
     }
     return true;
   }
+
+  public void spawnTamedDragon(World worldIn, EntityPlayer playerIn, EnumDragonBreed dragonBreedToSpawn)
+  {
+    DragonMounts.logger.info("spawnTamedDragon:" + dragonBreedToSpawn);
+
+    // destroy all dragons in this radius, pesky critters
+    final float SEARCH_RANGE = 64.0F;
+    AxisAlignedBB aabb = playerIn.getEntityBoundingBox()
+            .grow(SEARCH_RANGE);
+
+    // List all dragons in expanded player entity box
+    List<EntityTameableDragon> dragons = playerIn
+            .world
+            .getEntitiesWithinAABB(EntityTameableDragon.class, aabb);
+    for (EntityTameableDragon dragon : dragons) {
+      dragon.setDead();
+    }
+
+    EntityTameableDragon entityDragon = new EntityTameableDragon(worldIn);
+    entityDragon.setBreedType(dragonBreedToSpawn);
+    entityDragon.getLifeStageHelper().setLifeStage(EnumDragonLifeStage.ADULT);
+    entityDragon.getReproductionHelper().setBreeder(playerIn);
+    entityDragon.setPosition(playerIn.posX + 5, playerIn.posY + 0.2, playerIn.posZ + 5);
+    entityDragon.tamedFor(playerIn, true);
+    ItemStack saddle = new ItemStack(Items.SADDLE, 1);
+    final int SADDLE_SLOT = 0;
+    entityDragon.dragonInv.setInventorySlotContents(SADDLE_SLOT, saddle);
+    entityDragon.refreshInventory();
+
+    worldIn.spawnEntity(entityDragon);
+
+  }
+
 
 }

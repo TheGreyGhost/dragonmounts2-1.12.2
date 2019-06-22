@@ -52,7 +52,7 @@ public class ItemTestRunner extends Item implements IHasModel
   {
     tooltip.add("Right click: conduct test");
     tooltip.add("Stacksize: change test #");
-    tooltip.add("  (64 = test all)");
+    tooltip.add("(1,2, etc) = spawn dragon");
   }
 
   // what animation to use when the player holds the "use" button

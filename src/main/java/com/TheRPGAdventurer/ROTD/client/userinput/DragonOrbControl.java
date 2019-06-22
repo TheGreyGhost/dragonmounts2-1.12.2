@@ -6,6 +6,7 @@ import com.TheRPGAdventurer.ROTD.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonTarget;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathWeaponTarget;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeapon;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.RayTraceServer;
 import net.minecraft.client.Minecraft;
@@ -33,7 +34,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
  *        .register(DragonOrbControl.getInstance());
  *
  * MODIFYING
- * (1) Optionally: setKeyBreathState() to allow the rider of a dragon to breathe by pressing KEY_BREATH, without holding a
+ * (1) Optionally: setKeyBreathState() to allow the rider of a dragon to breathe by pressing KEY_BREATH_PRIMARY, without holding a
  *        dragon orb
  *
  * POLLING
@@ -82,7 +83,16 @@ public class DragonOrbControl {
     if (entityPlayerSP == null) return;
 
     boolean oldTriggerHeld = triggerHeld;
-    boolean orbTriggerHeld = false;
+
+    boolean leftTriggerHeld = attackButtonInterceptor.isUnderlyingKeyDown();
+    boolean rightTriggerHeld = useItemButtonInterceptor.isUnderlyingKeyDown();
+    boolean orbTriggerHeld = leftTriggerHeld || rightTriggerHeld;
+    BreathWeaponTarget.WeaponUsed weaponUsed = BreathWeaponTarget.WeaponUsed.NONE;
+    if (leftTriggerHeld) {
+      weaponUsed = BreathWeaponTarget.WeaponUsed.PRIMARY;
+    } else if (rightTriggerHeld) {
+      weaponUsed = BreathWeaponTarget.WeaponUsed.SECONDARY;
+    }
 
     if (!DMUtils.hasEquipped(entityPlayerSP, ModItems.dragon_orb)) {
       enableClickInterception(false);
@@ -92,17 +102,16 @@ public class DragonOrbControl {
       enableClickInterception(true);
       final float MAX_ORB_RANGE = 20.0F;
       RayTraceResult mop = RayTraceServer.getMouseOver(entityPlayerSP.getEntityWorld(), entityPlayerSP, MAX_ORB_RANGE);
-      targetBeingLookedAt = BreathWeaponTarget.fromMovingObjectPosition(mop, entityPlayerSP);
-      orbTriggerHeld = attackButtonInterceptor.isUnderlyingKeyDown();
+      targetBeingLookedAt = BreathWeaponTarget.fromMovingObjectPosition(mop, entityPlayerSP, weaponUsed);
       if (orbTriggerHeld) {
-        breathWeaponTarget = BreathWeaponTarget.fromMovingObjectPosition(mop, entityPlayerSP);
+        breathWeaponTarget = BreathWeaponTarget.fromMovingObjectPosition(mop, entityPlayerSP, weaponUsed);
       }
     }
-    triggerHeld = orbTriggerHeld || breathKeyHeld;
     if (!orbTriggerHeld && breathKeyHeld) {
-       breathWeaponTarget = BreathWeaponTarget.targetDirection(dragonLookDirection);
+       breathWeaponTarget = BreathWeaponTarget.targetDirection(dragonLookDirection, breathKeyWeaponUsed);
     }
 
+    triggerHeld = orbTriggerHeld || breathKeyHeld;
     boolean needToSendMessage = false;
     if (!triggerHeld) {
       needToSendMessage = oldTriggerHeld;
@@ -132,7 +141,7 @@ public class DragonOrbControl {
     }
 
     // if autolock is on, only change target when the player releases the button
-    // (used on client side only, for rendering)  Server side AI is used for the real autolock
+    // (used on client side only, for rendering of Target Highlighting)  Server side AI is used for the real autolock
     boolean orbTargetAutoLock = DragonMounts.instance.getConfig().isOrbTargetAutoLock();
     if (breathWeaponTarget != null && orbTriggerHeld) {
       if (!orbTargetAutoLock || targetLockedOn == null) {
@@ -159,14 +168,15 @@ public class DragonOrbControl {
   }
 
   /**
-   * Used for breathing when riding without a Dragon Orb, i.e. holding down the KEY_BREATH will cause the dragon to
+   * Used for breathing when riding without a Dragon Orb, i.e. holding down the KEY_BREATH_PRIMARY will cause the dragon to
    *   breathe straight ahead where the dragon is looking.
    * @param dragon  the dragon being ridden
    * @param newKeyState
    */
-  public void setKeyBreathState(EntityTameableDragon dragon, boolean newKeyState) {
+  public void setKeyBreathState(EntityTameableDragon dragon, boolean newKeyState, BreathWeaponTarget.WeaponUsed weaponUsed) {
     breathKeyHeld = newKeyState;
     dragonLookDirection = dragon.getLook(1.0F);
+    breathKeyWeaponUsed = weaponUsed;
   }
 
   /**
@@ -185,6 +195,7 @@ public class DragonOrbControl {
 
   private boolean triggerHeld = false;
   private boolean breathKeyHeld = false;
+  private BreathWeaponTarget.WeaponUsed breathKeyWeaponUsed = BreathWeaponTarget.WeaponUsed.NONE;
   private Vec3d dragonLookDirection;
   private BreathWeaponTarget breathWeaponTarget;
   private BreathWeaponTarget lastTargetSent;
@@ -207,14 +218,14 @@ public class DragonOrbControl {
     Minecraft.getMinecraft().gameSettings.keyBindAttack = attackButtonInterceptor;
     attackButtonInterceptor.setInterceptionActive(false);
 
-//    useItemButtonInterceptor = new KeyBindingInterceptor(Minecraft.getMinecraft().gameSettings.keyBindUseItem);
-//    Minecraft.getMinecraft().gameSettings.keyBindUseItem = useItemButtonInterceptor;
-//    useItemButtonInterceptor.setInterceptionActive(false);
+    useItemButtonInterceptor = new KeyBindingInterceptor(Minecraft.getMinecraft().gameSettings.keyBindUseItem);
+    Minecraft.getMinecraft().gameSettings.keyBindUseItem = useItemButtonInterceptor;
+    useItemButtonInterceptor.setInterceptionActive(false);
   }
 
   public static void enableClickInterception(boolean interception)
   {
-//    useItemButtonInterceptor.setInterceptionActive(interception);
+    useItemButtonInterceptor.setInterceptionActive(interception);
     attackButtonInterceptor.setInterceptionActive(interception);
   }
 

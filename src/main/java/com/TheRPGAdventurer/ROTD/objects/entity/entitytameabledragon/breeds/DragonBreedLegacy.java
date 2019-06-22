@@ -285,7 +285,7 @@
 //  //     *
 //  //     * @return
 //  //     */
-//  //    public SoundEffectBreathWeapon getSoundEffectBreathWeapon(SoundController i_soundController, SoundEffectBreathWeapon.WeaponSoundUpdateLink i_weaponSoundUpdateLink) {
+//  //    public SoundEffectBreathWeapon getSoundEffectBreathWeapon(SoundController i_soundController, SoundEffectBreathWeapon.WeaponSoundUpdateLinkLegacy i_weaponSoundUpdateLink) {
 //  //        return new SoundEffectBreathWeaponFire(i_soundController, i_weaponSoundUpdateLink);
 //  //    }
 //

@@ -45,14 +45,13 @@ public class BreathAffectedArea {
   private DragonBreathMode dragonBreathMode;
 
   @Deprecated
-
   public BreathAffectedArea(BreathWeapon i_breathWeapon) {
     breathWeapon = i_breathWeapon;
   }
 
   public BreathAffectedArea(BreathWeaponP i_breathWeapon) {  // dummy to enable compilation
     breathWeaponP = i_breathWeapon;
-    throw new UnsupportedOperationException();
+//    throw new UnsupportedOperationException();
   }
 
   /**

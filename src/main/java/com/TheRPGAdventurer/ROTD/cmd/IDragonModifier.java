@@ -38,12 +38,12 @@ public interface IDragonModifier {
             EntityPlayerMP player = getCommandSenderAsPlayer(sender);
             
             AxisAlignedBB aabb = player.getEntityBoundingBox()
-                .expand(MODIFIER_RANGE_XZ, MODIFIER_RANGE_Y, MODIFIER_RANGE_XZ);
-            
-            // List all dragons in expanded player entity box
-            List<EntityTameableDragon> dragons = player
-            		.world
-            		.getEntitiesWithinAABB(EntityTameableDragon.class, aabb);
+                        .grow(MODIFIER_RANGE_XZ, MODIFIER_RANGE_Y, MODIFIER_RANGE_XZ);
+
+          // List all dragons in expanded player entity box
+          List<EntityTameableDragon> dragons = player
+                  .world
+                  .getEntitiesWithinAABB(EntityTameableDragon.class, aabb);
 
             // get closest dragon
             Optional<EntityTameableDragon> closestDragon = dragons.stream()

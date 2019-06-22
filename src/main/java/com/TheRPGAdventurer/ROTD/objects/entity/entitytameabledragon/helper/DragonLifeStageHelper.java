@@ -190,8 +190,8 @@ public class DragonLifeStageHelper extends DragonHelper {
             dragon.dropItem(Items.SADDLE, 1);
         }
 
-        dragon.entityDropItem(new ItemStack(BlockDragonBreedEgg.DRAGON_BREED_EGG),
-                dragon.getBreedType().getMeta());
+        final float OFFSET_POSITION = 0.0F;
+        dragon.entityDropItem(dragon.getBreedType().createEggItemStack(), OFFSET_POSITION);
 
         dragon.setDead();
     }

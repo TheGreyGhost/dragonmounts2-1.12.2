@@ -8,7 +8,8 @@ public class ModKeys {
 	
     public static final String KEY_CATEGORY = "key.categories.dragon";
     public static KeyBinding FOLLOW_YAW;
-    public static  KeyBinding KEY_BREATH;
+    public static KeyBinding KEY_BREATH_PRIMARY;
+    public static KeyBinding KEY_BREATH_SECONDARY;
     public static KeyBinding KEY_HOVERCANCEL;
     public static KeyBinding KEY_LOCKEDY;
     public static KeyBinding BOOST;
@@ -17,7 +18,8 @@ public class ModKeys {
     public static KeyBinding dragon_change_view;
     
     public static void init() {
-    	KEY_BREATH = new KeyBinding("key.dragon.breath", Keyboard.KEY_R, KEY_CATEGORY);
+    	KEY_BREATH_PRIMARY = new KeyBinding("key.dragon.breath", Keyboard.KEY_R, KEY_CATEGORY);
+      KEY_BREATH_SECONDARY = new KeyBinding("key.dragon.breathsecondary", Keyboard.KEY_R, KEY_CATEGORY);
     	KEY_HOVERCANCEL = new KeyBinding("key.dragon.cancelhover", Keyboard.KEY_B, KEY_CATEGORY);
     	FOLLOW_YAW = new KeyBinding("key.dragon.followYaw", Keyboard.KEY_N, KEY_CATEGORY);
     	KEY_LOCKEDY = new KeyBinding("key.dragon.lockY", Keyboard.KEY_M, KEY_CATEGORY);
@@ -25,7 +27,8 @@ public class ModKeys {
     	BOOST=new KeyBinding("key.dragon.boost", Keyboard.KEY_LCONTROL, KEY_CATEGORY);
     	DISMOUNT = new KeyBinding("key.dragon.dismount",Keyboard.KEY_X, KEY_CATEGORY);
     	DOWN = new KeyBinding("key.dragon.down",Keyboard.KEY_LMENU, KEY_CATEGORY);
-        ClientRegistry.registerKeyBinding(KEY_BREATH);
+        ClientRegistry.registerKeyBinding(KEY_BREATH_PRIMARY);
+      ClientRegistry.registerKeyBinding(KEY_BREATH_SECONDARY);
         ClientRegistry.registerKeyBinding(KEY_HOVERCANCEL);
         ClientRegistry.registerKeyBinding(FOLLOW_YAW);
         ClientRegistry.registerKeyBinding(KEY_LOCKEDY);

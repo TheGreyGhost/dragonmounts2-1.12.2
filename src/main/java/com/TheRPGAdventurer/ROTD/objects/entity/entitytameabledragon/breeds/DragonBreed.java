@@ -2,15 +2,14 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitter;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitterFire;
 import com.TheRPGAdventurer.ROTD.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFactory;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFire;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathProjectileFactory;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundController;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponNull;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectBreathWeaponP;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectNames;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.*;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponFireP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeaponP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
@@ -253,11 +252,12 @@ public abstract class DragonBreed {
         dragon.getBreathHelperP().getBreathAffectedArea().continueBreathing(world, origin, endOfLook, power, dragon);
         dragon.getBreathHelperP().getBreathAffectedArea().updateTick(world);
     }
-//
-//    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//        dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
-//        dragon.getBreathHelperP().getEmitter().spawnBreathParticles(world, power, tickCounter);
-//    }
+
+    @Deprecated
+    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+        dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
+        dragon.getBreathHelperP().getEmitter().spawnBreathParticles(world, power, tickCounter);
+    }
 
   @Deprecated
     public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {
@@ -295,14 +295,16 @@ public abstract class DragonBreed {
 
     }
 
-    //    /**
-    //     * creates a SoundEffectBreathWeapon that creates the sound from the dragon's mouth when breathing
-    //     *
-    //     * @return
-    //     */
-    //    public SoundEffectBreathWeapon getSoundEffectBreathWeapon(SoundController i_soundController, SoundEffectBreathWeapon.WeaponSoundUpdateLink i_weaponSoundUpdateLink) {
-    //        return new SoundEffectBreathWeaponFire(i_soundController, i_weaponSoundUpdateLink);
-    //    }
+//    /**
+//     * creates a SoundEffectBreathWeapon that creates the sound from the dragon's mouth when breathing
+//     *
+//     * @return
+//     */
+//    @Deprecated
+//    public SoundEffectBreathWeapon getSoundEffectBreathWeapon(SoundController i_soundController, SoundEffectBreathWeapon.WeaponSoundUpdateLinkLegacy i_weaponSoundUpdateLink) {
+//
+//        return soun;
+//    }
 
     public boolean isInfertile() {
         return false;
@@ -331,7 +333,8 @@ public abstract class DragonBreed {
    */
   public BreathWeaponFXEmitter getBreathWeaponFXEmitter(EntityTameableDragon dragon)
   {
-    throw new UnsupportedOperationException();
+    return new BreathWeaponFXEmitterFire();   // todo just for now to support legacy
+//    throw new UnsupportedOperationException();
   }
 
   /** return a new BreathWeapon based on breed
@@ -345,7 +348,8 @@ public abstract class DragonBreed {
 
   public BreathNodeFactory getBreathNodeFactory(EntityTameableDragon dragon)
   {
-    throw new UnsupportedOperationException();
+    return new BreathNodeFire.BreathNodeFireFactory(); // todo just dummy for now to support legacy
+//    throw new UnsupportedOperationException();
   }
 
   public BreathProjectileFactory getBreathProjectileFactory(EntityTameableDragon dragon)

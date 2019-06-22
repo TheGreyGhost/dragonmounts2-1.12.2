@@ -748,14 +748,24 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     public void updateKeys() {
         Minecraft mc=Minecraft.getMinecraft();
         if ((hasControllingPlayer(mc.player) && getControllingPlayer()!=null) || (this.getRidingEntity() instanceof EntityPlayer && this.getRidingEntity()!=null && this.getRidingEntity().equals(mc.player)) || (getOwner()!=null && firesupport())) {
-            boolean breathKeyHeldDown=ModKeys.KEY_BREATH.isKeyDown();
+            boolean breathKeyHeldDownPrimary=ModKeys.KEY_BREATH_PRIMARY.isKeyDown();
+            boolean breathKeyHeldDownSecondary=ModKeys.KEY_BREATH_SECONDARY.isKeyDown();
+            BreathWeaponTarget.WeaponUsed breathWeaponUsed = BreathWeaponTarget.WeaponUsed.NONE;
+            boolean breathKeyHeldDownEither = breathKeyHeldDownPrimary || breathKeyHeldDownSecondary;
+            if (breathKeyHeldDownPrimary) {
+              breathWeaponUsed = BreathWeaponTarget.WeaponUsed.PRIMARY;
+            } else if (breathKeyHeldDownSecondary) {
+              breathWeaponUsed = BreathWeaponTarget.WeaponUsed.SECONDARY;
+            }
+            DragonOrbControl.getInstance().setKeyBreathState(this, breathKeyHeldDownEither, breathWeaponUsed);
+
             boolean isBoosting=ModKeys.BOOST.isKeyDown();
             boolean isDown=ModKeys.DOWN.isKeyDown();
             boolean unhover=ModKeys.KEY_HOVERCANCEL.isPressed();
             boolean followyaw=ModKeys.FOLLOW_YAW.isPressed();
             boolean locky=ModKeys.KEY_LOCKEDY.isPressed();
             //DragonMounts.NETWORK_WRAPPER.sendToServer(new MessageDragonBreath(getEntityId(), isBreathing));
-            DragonOrbControl.getInstance().setKeyBreathState(this, breathKeyHeldDown);
+
             DragonMounts.NETWORK_WRAPPER.sendToServer(new MessageDragonExtras(getEntityId(), unhover, followyaw, locky, isBoosting, isDown));
         }
     }

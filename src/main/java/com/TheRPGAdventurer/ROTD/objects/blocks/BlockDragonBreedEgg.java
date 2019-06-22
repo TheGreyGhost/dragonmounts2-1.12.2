@@ -37,6 +37,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 
+import javax.imageio.ImageTranscoder;
 import java.util.Random;
 
 /**
@@ -46,7 +47,7 @@ import java.util.Random;
  */
 public class BlockDragonBreedEgg extends BlockDragonEgg {
     
-    public static final PropertyEnum<EnumDragonBreed> BREED = PropertyEnum.create("breed", EnumDragonBreed.class);
+    public static final PropertyEnum<EnumDragonBreed> BREED = EnumDragonBreed.BREED;  // PropertyEnum.create("breed", EnumDragonBreed.class);
     public static BlockDragonBreedEgg DRAGON_BREED_EGG;
     public static int meta; 
     
@@ -68,18 +69,19 @@ public class BlockDragonBreedEgg extends BlockDragonEgg {
     @Override
     public IBlockState getStateFromMeta(int meta) {
     	this.meta = meta;
-        return getDefaultState().withProperty(BREED, EnumDragonBreed.META_MAPPING.inverse().get(meta));
+      return EnumDragonBreed.getBlockstateFromMeta(this, meta);
     }
 
     @Override
     public int getMetaFromState(IBlockState state) {
-        EnumDragonBreed type = state.getValue(BREED);
-        return EnumDragonBreed.META_MAPPING.get(type);
+      return EnumDragonBreed.getMetaFromBlockState(state);
     }
     
     @Override
     public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items) {
-        EnumDragonBreed.META_MAPPING.values().forEach(index -> items.add(new ItemStack(this, 1, index)));
+      for (EnumDragonBreed breed : EnumDragonBreed.values()) {
+        items.add(breed.createEggItemStack());
+      }
     }
 
     @Override

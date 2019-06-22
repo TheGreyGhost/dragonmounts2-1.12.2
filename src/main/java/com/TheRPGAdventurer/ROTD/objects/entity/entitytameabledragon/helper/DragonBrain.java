@@ -14,6 +14,8 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.*;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.air.EntityAIDragonFlight;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.air.EntityAIDragonFollowOwnerElytraFlying;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.ground.*;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.targeting.EntityAIRangedBreathAttack;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.util.EntityClassPredicate;
 
 import com.google.common.base.Predicate;
@@ -123,6 +125,13 @@ public class DragonBrain extends DragonHelper {
             targetTasks.addTask(2, new EntityAIOwnerHurtByTarget(dragon)); // mutex 1
             targetTasks.addTask(3, new EntityAIOwnerHurtTarget(dragon)); // mutex 1
             targetTasks.addTask(4, new EntityAIDragonHurtByTarget(dragon, false)); // mutex 1
+
+      Pair<Float, Float> ranges = dragon.getBreed().getBreathWeaponRange(dragon.getLifeStageHelper().getLifeStageP());
+      float minAttackRange = ranges.getFirst();
+      float maxAttackRange = ranges.getSecond();
+
+      EntityAIRangedBreathAttack breathAttack = new EntityAIRangedBreathAttack(dragon, minAttackRange, (minAttackRange + maxAttackRange) / 2, maxAttackRange);
+      targetTasks.addTask(1, breathAttack); // mutex 1
 
         if (dragon.isAdult()) {
             tasks.addTask(5, new EntityAIDragonMate(dragon, 0.6)); // mutex 2+1

@@ -17,6 +17,7 @@ import com.TheRPGAdventurer.ROTD.util.math.MathX;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
+@Deprecated
 public enum EnumDragonLifeStage {
 
     EGG(0.25f),
