@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.inits;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectName;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -98,6 +99,7 @@ public class ModSounds {
 					HATCHLING_DRAGON_ROAR,
 					DRAGON_SWITCH
 			);
+      SoundEffectName.registerAllSounds();
 		}
 	}
 	

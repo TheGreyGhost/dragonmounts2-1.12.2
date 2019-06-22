@@ -333,8 +333,8 @@ public class DragonBreathHelperP extends DragonHelper {
     refreshBreed(dragon);
     BreathWeaponTarget target = getTarget();
     updateBreathState(target);
-    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()           // todo: currently - primary is legacy, secondary is prototype
-            || target.getWeaponUsed() == BreathWeaponTarget.WeaponUsed.PRIMARY) {
+    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()
+        || isLegacyBreath(target)) {
       onLivingUpdateServerLegacy();
       return;
     }
@@ -399,7 +399,7 @@ public class DragonBreathHelperP extends DragonHelper {
     updateBreathState(target);
 
     if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()
-            && isLegacyBreath(target)) {
+        || isLegacyBreath(target)) {
       onLivingUpdateClientLegacy();
       return;
     }
