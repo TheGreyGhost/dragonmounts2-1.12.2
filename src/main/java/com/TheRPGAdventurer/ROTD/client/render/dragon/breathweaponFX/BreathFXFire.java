@@ -30,7 +30,7 @@ import java.util.Random;
  *
  */
 public class BreathFXFire extends BreathFX {
-  private final ResourceLocation fireballRL = new ResourceLocation("dragonmounts:textures/entities/breathweapon/breath_fire");
+  private final ResourceLocation fireballRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_fire");
 
   private final float SMOKE_CHANCE = 0.1f;
   private final float LARGE_SMOKE_CHANCE = 0.3f;
