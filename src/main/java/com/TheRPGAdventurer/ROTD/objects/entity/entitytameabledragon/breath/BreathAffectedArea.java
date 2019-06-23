@@ -35,12 +35,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class BreathAffectedArea {
 
-  private ArrayList<EntityBreathNode> entityBreathNodes = new ArrayList<>();
+//  private ArrayList<EntityBreathNodeP> entityBreathNodes = new ArrayList<>();
   private HashMap<Vec3i, BreathAffectedBlock> blocksAffectedByBeam = new HashMap<Vec3i, BreathAffectedBlock>();
   private HashMap<Integer, BreathAffectedEntity> entitiesAffectedByBeam = new HashMap<Integer, BreathAffectedEntity>();
   public BreathWeapon breathWeapon;
 
-  private ArrayList<EntityBreathNodeP> entityBreathNodesP = new ArrayList<>();
+  private ArrayList<EntityBreathNodeP> entityBreathNodes = new ArrayList<>();
   private BreathWeaponP breathWeaponP;
   private DragonBreathMode dragonBreathMode;
 
@@ -61,10 +61,11 @@ public class BreathAffectedArea {
    * @param power
    */
   @Deprecated
-  public void continueBreathingLegacy(World world, Vec3d origin, Vec3d destination, BreathNode.Power power, EntityTameableDragon dragon) {
+  public void continueBreathingLegacy(World world, Vec3d origin, Vec3d destination, BreathNodeP.Power power, EntityTameableDragon dragon) {
     Vec3d direction = destination.subtract(origin).normalize();
 
-    EntityBreathNode newNode = EntityBreathNode.createEntityBreathNodeServer(world, origin.x, origin.y, origin.z, direction.x, direction.y, direction.z, power);
+    EntityBreathNodeP newNode = EntityBreathNodeP.createEntityBreathNodeServerLegacy(world, origin.x, origin.y, origin.z,
+            direction.x, direction.y, direction.z, power);
 
     entityBreathNodes.add(newNode);
   }
@@ -85,20 +86,19 @@ public class BreathAffectedArea {
             world, origin.x, origin.y, origin.z, direction.x, direction.y, direction.z,
             breathNodeFactory, power, breathMode);
 
-    entityBreathNodesP.add(newNode);
-//    throw new UnsupportedOperationException();
+    entityBreathNodes.add(newNode);
   }
 
   /** updates the BreathAffectedArea, called once per tick
    */
   @Deprecated
-  public void updateTick(World world) {
+  public void updateTickLegacy(World world) {
     ArrayList<NodeLineSegment> segments = new ArrayList<>();
 
     // create a list of NodeLineSegments from the motion path of the BreathNodes
-    Iterator<EntityBreathNode> it = entityBreathNodes.iterator();
+    Iterator<EntityBreathNodeP> it = entityBreathNodes.iterator();
     while (it.hasNext()) {
-      EntityBreathNode entity = it.next();
+      EntityBreathNodeP entity = it.next();
       if (entity.isDead) {
         it.remove();
       } else {
@@ -112,8 +112,8 @@ public class BreathAffectedArea {
     }
 
     updateBlockAndEntityHitDensities(world, segments, entityBreathNodes, blocksAffectedByBeam, entitiesAffectedByBeam);
-    implementEffectsOnBlocksTick(world, blocksAffectedByBeam);
-    implementEffectsOnEntitiesTick(world, entitiesAffectedByBeam);
+    implementEffectsOnBlocksTickLegacy(world, blocksAffectedByBeam);
+    implementEffectsOnEntitiesTickLegacy(world, entitiesAffectedByBeam);
     decayBlockAndEntityHitDensities(blocksAffectedByBeam, entitiesAffectedByBeam);
   }
 
@@ -132,7 +132,7 @@ public class BreathAffectedArea {
     ArrayList<NodeLineSegment> segments = new ArrayList<>();
 
     // create a list of NodeLineSegments from the motion path of the BreathNodes
-    Iterator<EntityBreathNodeP> it = entityBreathNodesP.iterator();
+    Iterator<EntityBreathNodeP> it = entityBreathNodes.iterator();
     while (it.hasNext()) {
       EntityBreathNodeP entity = it.next();
       if (entity.isDead) {
@@ -161,12 +161,35 @@ public class BreathAffectedArea {
       return;
     }
     for (Map.Entry<Vec3i, BreathAffectedBlock> blockInfo : affectedBlocks.entrySet()) {
-      BreathAffectedBlock newHitDensity = breathWeapon.affectBlock(world, blockInfo.getKey(), blockInfo.getValue());
+      BreathAffectedBlock newHitDensity = breathWeaponP.affectBlock(world, blockInfo.getKey(), blockInfo.getValue());
       blockInfo.setValue(newHitDensity);
     }
   }
 
   private void implementEffectsOnEntitiesTick(World world, HashMap<Integer, BreathAffectedEntity> affectedEntities ) {
+    Iterator<Map.Entry<Integer, BreathAffectedEntity>> itAffectedEntities = affectedEntities.entrySet().iterator();
+    while (itAffectedEntities.hasNext()) {
+      Map.Entry<Integer, BreathAffectedEntity> affectedEntity = itAffectedEntities.next();
+      BreathAffectedEntity newHitDensity = breathWeaponP.affectEntity(world, affectedEntity.getKey(), affectedEntity.getValue());
+      if (newHitDensity == null) {
+        itAffectedEntities.remove();
+      } else {
+        affectedEntity.setValue(newHitDensity);
+      }
+    }
+  }
+
+  private void implementEffectsOnBlocksTickLegacy(World world, HashMap<Vec3i, BreathAffectedBlock> affectedBlocks ) {
+    if (!DragonMounts.instance.getConfig().doBreathweaponsAffectBlocks()) {
+      return;
+    }
+    for (Map.Entry<Vec3i, BreathAffectedBlock> blockInfo : affectedBlocks.entrySet()) {
+      BreathAffectedBlock newHitDensity = breathWeapon.affectBlock(world, blockInfo.getKey(), blockInfo.getValue());
+      blockInfo.setValue(newHitDensity);
+    }
+  }
+
+  private void implementEffectsOnEntitiesTickLegacy(World world, HashMap<Integer, BreathAffectedEntity> affectedEntities ) {
     Iterator<Map.Entry<Integer, BreathAffectedEntity>> itAffectedEntities = affectedEntities.entrySet().iterator();
     while (itAffectedEntities.hasNext()) {
       Map.Entry<Integer, BreathAffectedEntity> affectedEntity = itAffectedEntities.next();
@@ -221,13 +244,16 @@ public class BreathAffectedArea {
    */
   private void updateBlockAndEntityHitDensities(World world,
                                                 ArrayList<NodeLineSegment> nodeLineSegments,
-                                                ArrayList<EntityBreathNode> entityBreathNodes,
+                                                ArrayList<EntityBreathNodeP> entityBreathNodes,
                                                 HashMap<Vec3i, BreathAffectedBlock> affectedBlocks,
                                                 HashMap<Integer, BreathAffectedEntity> affectedEntities) {
     checkNotNull(nodeLineSegments);
     checkNotNull(entityBreathNodes);
     checkNotNull(affectedBlocks);
     checkNotNull(affectedEntities);
+    if (nodeLineSegments.size() != entityBreathNodes.size()) { //todo debug
+      int i = 1;
+    }
     checkArgument(nodeLineSegments.size() == entityBreathNodes.size());
 
     if (entityBreathNodes.isEmpty()) return;

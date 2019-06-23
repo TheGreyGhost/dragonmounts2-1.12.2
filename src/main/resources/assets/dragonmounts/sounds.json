@@ -1,4 +1,11 @@
 {
+  "mob.dragon.silence": {
+    "category": "neutral",
+    "sounds": [
+      "dragonmounts:mob/dragon/silence"
+    ]
+  },
+
   "mob.dragon.growl": {
   "category": "dragon_growl",
     "sounds": [

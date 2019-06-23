@@ -3,7 +3,7 @@ package com.TheRPGAdventurer.ROTD.util.debugging;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.TestForestBreath;
@@ -46,7 +46,7 @@ public class TestRunner
       }
       case 62: {
         EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
-        BreathNode.Power power = BreathNode.Power.SMALL;
+        BreathNodeP.Power power = BreathNodeP.Power.SMALL;
         ++testCounter;
         Vec3d origin = new Vec3d(0, 24, 0);
         Vec3d target = new Vec3d(0, 4, 0);
@@ -57,12 +57,12 @@ public class TestRunner
         if (testCounter == 2) {
           origin = new Vec3d(0, 24, 0);
           target = new Vec3d(0, 4, 0);
-          power = BreathNode.Power.MEDIUM;
+          power = BreathNodeP.Power.MEDIUM;
         }
         if (testCounter == 3) {
           origin = new Vec3d(0, 24, 0);
           target = new Vec3d(0, 4, 0);
-          power = BreathNode.Power.LARGE;
+          power = BreathNodeP.Power.LARGE;
           testCounter = 0;
         }
         //todo reinstate test for later if required

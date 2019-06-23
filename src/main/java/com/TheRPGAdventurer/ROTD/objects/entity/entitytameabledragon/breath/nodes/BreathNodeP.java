@@ -210,14 +210,19 @@ public abstract class BreathNodeP
   private final float YOUNG_AGE = 0.25F;
   private final float OLD_AGE = 0.75F;
 
-  private Power power;
+  protected Power power;
   protected DragonBreathMode dragonBreathMode;
-  private float speedPowerFactor = 1.0F;
-  private float lifetimePowerFactor = 1.0F;
-  private float sizePowerFactor = 1.0F;
-  private float intensityPowerFactor = 1.0F;
+  protected float speedPowerFactor = 1.0F;
+  protected float lifetimePowerFactor = 1.0F;
+  protected float sizePowerFactor = 1.0F;
+  protected float intensityPowerFactor = 1.0F;
 
-  private void setPower(Power newPower) {
+  /**
+   * set different effects based on the power
+   * can be overriden in subclasses if desired
+   * @param newPower
+   */
+  protected void setPower(Power newPower) {
     power = newPower;
     switch (newPower) {
       case SMALL: {

@@ -13,39 +13,39 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
  */
 public enum SoundEffectName
 {
-  SILENCE("mob.enderdragon.silence", 0),
+  SILENCE("mob.dragon.silence", 0),
 
-  ADULT_BREATHE_FIRE_START("mob.enderdragon.breathweapon_p.fire.adultbreathefirestart", 2.0),
-  ADULT_BREATHE_FIRE_LOOP("mob.enderdragon.breathweapon_p.fire.adultbreathefireloop", 5.336),
-  ADULT_BREATHE_FIRE_STOP("mob.enderdragon.breathweapon_p.fire.adultbreathefirestop", 1.0),
-  JUVENILE_BREATHE_FIRE_START("mob.enderdragon.breathweapon_p.fire.juvenilebreathefirestart", 2.0),
-  JUVENILE_BREATHE_FIRE_LOOP("mob.enderdragon.breathweapon_p.fire.juvenilebreathefireloop", 5.336),
-  JUVENILE_BREATHE_FIRE_STOP("mob.enderdragon.breathweapon_p.fire.juvenilebreathefirestop", 1.0),
-  HATCHLING_BREATHE_FIRE_START("mob.enderdragon.breathweapon_p.fire.hatchlingbreathefirestart", 2.0),
-  HATCHLING_BREATHE_FIRE_LOOP("mob.enderdragon.breathweapon_p.fire.hatchlingbreathefireloop", 5.336),
-  HATCHLING_BREATHE_FIRE_STOP("mob.enderdragon.breathweapon_p.fire.hatchlingbreathefirestop", 1.0),
+  ADULT_BREATHE_FIRE_START("mob.dragon.breathweaponp.fire.adultbreathefirestart", 2.0),
+  ADULT_BREATHE_FIRE_LOOP("mob.dragon.breathweaponp.fire.adultbreathefireloop", 5.336),
+  ADULT_BREATHE_FIRE_STOP("mob.dragon.breathweaponp.fire.adultbreathefirestop", 1.0),
+  JUVENILE_BREATHE_FIRE_START("mob.dragon.breathweaponp.fire.juvenilebreathefirestart", 2.0),
+  JUVENILE_BREATHE_FIRE_LOOP("mob.dragon.breathweaponp.fire.juvenilebreathefireloop", 5.336),
+  JUVENILE_BREATHE_FIRE_STOP("mob.dragon.breathweaponp.fire.juvenilebreathefirestop", 1.0),
+  HATCHLING_BREATHE_FIRE_START("mob.dragon.breathweaponp.fire.hatchlingbreathefirestart", 2.0),
+  HATCHLING_BREATHE_FIRE_LOOP("mob.dragon.breathweaponp.fire.hatchlingbreathefireloop", 5.336),
+  HATCHLING_BREATHE_FIRE_STOP("mob.dragon.breathweaponp.fire.hatchlingbreathefirestop", 1.0),
 
-  BREATHE_ICE_START("mob.enderdragon.breathweapon_p.ice.breatheicestart", 1.7),
-  BREATHE_ICE_LOOP("mob.enderdragon.breathweapon_p.ice.breatheiceloop", 7.663),
-  BREATHE_ICE_STOP("mob.enderdragon.breathweapon_p.ice.breatheicestop", 1.2),
+  BREATHE_ICE_START("mob.dragon.breathweaponp.ice.breatheicestart", 1.7),
+  BREATHE_ICE_LOOP("mob.dragon.breathweaponp.ice.breatheiceloop", 7.663),
+  BREATHE_ICE_STOP("mob.dragon.breathweaponp.ice.breatheicestop", 1.2),
 
-  BREATHE_FOREST_START("mob.enderdragon.breathweapon_p.forest.breatheforeststart", 0.929),
-  BREATHE_FOREST_LOOP("mob.enderdragon.breathweapon_p.forest.breatheforestloop", 1.936),
-  BREATHE_FOREST_STOP("mob.enderdragon.breathweapon_p.forest.breatheforeststop", 0.708),
+  BREATHE_FOREST_START("mob.dragon.breathweaponp.forest.breatheforeststart", 0.929),
+  BREATHE_FOREST_LOOP("mob.dragon.breathweaponp.forest.breatheforestloop", 1.936),
+  BREATHE_FOREST_STOP("mob.dragon.breathweaponp.forest.breatheforeststop", 0.708),
 
-  BREATHE_AIR_START("mob.enderdragon.breathweapon_p.air.breatheairstart", 1.5),
-  BREATHE_AIR_LOOP("mob.enderdragon.breathweapon_p.air.breatheairloop", 7.407),
-  BREATHE_AIR_STOP("mob.enderdragon.breathweapon_p.air.breatheairstop", 1.317),
+  BREATHE_AIR_START("mob.dragon.breathweaponp.air.breatheairstart", 1.5),
+  BREATHE_AIR_LOOP("mob.dragon.breathweaponp.air.breatheairloop", 7.407),
+  BREATHE_AIR_STOP("mob.dragon.breathweaponp.air.breatheairstop", 1.317),
 
-  BREATHE_WATER_START("mob.enderdragon.breathweapon_p.water.breathewaterstart", 0.733),
-  BREATHE_WATER_LOOP("mob.enderdragon.breathweapon_p.water.breathewaterloop", 4.949),
-  BREATHE_WATER_STOP("mob.enderdragon.breathweapon_p.water.breathewaterstop", 3.536),
+  BREATHE_WATER_START("mob.dragon.breathweaponp.water.breathewaterstart", 0.733),
+  BREATHE_WATER_LOOP("mob.dragon.breathweaponp.water.breathewaterloop", 4.949),
+  BREATHE_WATER_STOP("mob.dragon.breathweaponp.water.breathewaterstop", 3.536),
 
-  BREATHE_NETHER_SPAWN("mob.enderdragon.breathweapon_p.nether.breathenetherspawn", 2.0),
-  NETHER_PROJECTILE_LOOP("mob.enderdragon.breathweapon_p.nether.projectilenetherloop", 3.4),
+  BREATHE_NETHER_SPAWN("mob.dragon.breathweaponp.nether.breathenetherspawn", 2.0),
+  NETHER_PROJECTILE_LOOP("mob.dragon.breathweaponp.nether.projectilenetherloop", 3.4),
 
-  BREATHE_ENDER_SPAWN("mob.enderdragon.breathweapon_p.ender.breatheenderspawn", 2.0),
-  ENDER_PROJECTILE_LOOP("mob.enderdragon.breathweapon_p.ender.projectileenderloop", 9.056);
+  BREATHE_ENDER_SPAWN("mob.dragon.breathweaponp.ender.breatheenderspawn", 2.0),
+  ENDER_PROJECTILE_LOOP("mob.dragon.breathweaponp.ender.projectileenderloop", 9.056);
 
 
   public final String getJsonName() {return DragonMounts.MODID + ":" + jsonName;}

@@ -10,7 +10,7 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
@@ -97,13 +97,13 @@ public class DragonBreedIce extends DragonBreed {
     }
 
     @Override
-    public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
+    public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNodeP.Power power, EntityTameableDragon dragon) {
         dragon.getBreathHelperP().getBreathAffectedAreaIce().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
-        dragon.getBreathHelperP().getBreathAffectedAreaIce().updateTick(world);
+        dragon.getBreathHelperP().getBreathAffectedAreaIce().updateTickLegacy(world);
     }
 
     @Override
-    public void spawnBreathParticles(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+    public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
         dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
         dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforIceDragon(world, power, tickCounter);
     }

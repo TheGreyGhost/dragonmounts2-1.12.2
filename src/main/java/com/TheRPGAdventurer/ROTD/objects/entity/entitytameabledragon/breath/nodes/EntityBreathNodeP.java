@@ -44,6 +44,14 @@ public class EntityBreathNodeP extends Entity implements IEntityParticle
     return newEntity;
   }
 
+  @Deprecated
+  public static EntityBreathNodeP createEntityBreathNodeServerLegacy(World world, double x, double y, double z,
+                                                                     double directionX, double directionY, double directionZ,
+                                                                     BreathNodeP.Power power) {
+    return createEntityBreathNodeServer(world, x, y, z, directionX, directionY, directionZ,
+            new BreathNodeLegacy.BreathNodeLegacyFactory(),power, DragonBreathMode.DEFAULT);
+  }
+
   private EntityBreathNodeP(World world, double x, double y, double z, Vec3d motion, BreathNodeP i_breathNode)
   {
     super(world);

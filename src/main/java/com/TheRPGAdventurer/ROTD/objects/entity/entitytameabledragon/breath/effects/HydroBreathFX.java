@@ -1,5 +1,9 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.effects;
 
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathMode;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.IEntityParticle;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeLegacy;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.nbt.NBTTagCompound;
@@ -10,7 +14,6 @@ import net.minecraft.world.World;
 import java.util.Random;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.EntityMoveAndResizeHelper;
 
 /**
@@ -22,18 +25,19 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util
  * (2) spawn it as per normal
  *
  */
-public class HydroBreathFX extends Entity {
+@Deprecated
+public class HydroBreathFX extends Entity implements IEntityParticle {
 
   private final float PARTICLE_CHANCE = 0.1f;
   private final float LARGE_PARTICLE_CHANCE = 0.3f;
   private static final float MAX_ALPHA = 0.99F;
   public float scale;
-  private BreathNode breathNode;
+  private BreathNodeP breathNode;
   private EntityTameableDragon dragon;
   private EntityMoveAndResizeHelper entityMoveAndResizeHelper;
 
   private HydroBreathFX(World world, double x, double y, double z, Vec3d motion,
-                        BreathNode i_breathNode) {
+                        BreathNodeP i_breathNode) {
     super(world);
 
     breathNode = i_breathNode;
@@ -101,12 +105,12 @@ public class HydroBreathFX extends Entity {
    */
   public static HydroBreathFX createHydroBreathFX(World world, double x, double y, double z,
                                                   double directionX, double directionY, double directionZ,
-                                                  BreathNode.Power power,
+                                                  BreathNodeP.Power power,
                                                   float partialTicksHeadStart, EntityTameableDragon dragon) {
     Vec3d direction = new Vec3d(directionX, directionY, directionZ).normalize();
 
     Random rand = new Random();
-    BreathNode breathNode = new BreathNode(power);
+    BreathNodeP breathNode = new BreathNodeLegacy(power, DragonBreathMode.DEFAULT);
     breathNode.randomiseProperties(rand);
     Vec3d actualMotion = breathNode.getRandomisedStartingMotion(direction, rand);
 
@@ -144,5 +148,24 @@ protected void readEntityFromNBT(NBTTagCompound compound) {}
 
 @Override
 protected void writeEntityToNBT(NBTTagCompound compound) {}
-
+  @Override
+  public double getMotionX() {return motionX;}
+  @Override
+  public double getMotionY() {return motionY;}
+  @Override
+  public double getMotionZ() {return motionZ;}
+  @Override
+  public double getSpeedSQ() {return motionX*motionX + motionY*motionY + motionZ*motionZ;}
+  //  public boolean isInWater() {return isInWater();}
+  @Override
+  public boolean isCollided() {return collided;}
+  @Override
+  public boolean isOnGround() {return onGround;}
+  @Override
+  public void setMotion(Vec3d newMotion)
+  {
+    motionX = newMotion.x;
+    motionY = newMotion.y;
+    motionZ = newMotion.z;
+  }
 }

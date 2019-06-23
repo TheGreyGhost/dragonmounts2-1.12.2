@@ -11,9 +11,7 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.inits.ModSounds;
-import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
@@ -25,7 +23,6 @@ import static com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.help
 import static net.minecraft.entity.SharedMonsterAttributes.*;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -370,23 +367,23 @@ public class DragonLifeStageHelper extends DragonHelper {
 //        return getLifeStage() == ADJUDICATOR;
 //    }
 
-    public BreathNode.Power getBreathPower() {
+    public BreathNodeP.Power getBreathPower() {
         switch (getLifeStage()) {
             case EGG: {
-                return BreathNode.Power.SMALL; //  dummy
+                return BreathNodeP.Power.SMALL; //  dummy
             }
             case HATCHLING: {
-                return BreathNode.Power.SMALL;
+                return BreathNodeP.Power.SMALL;
             }
             case JUVENILE: {
-                return BreathNode.Power.MEDIUM;
+                return BreathNodeP.Power.MEDIUM;
             }
             case ADULT: {
-                return BreathNode.Power.LARGE;
+                return BreathNodeP.Power.LARGE;
             }
             default: {
                 DragonMounts.loggerLimit.error_once("Illegal lifestage in getScale():" + getLifeStage());
-                return BreathNode.Power.SMALL;
+                return BreathNodeP.Power.SMALL;
             }
         }
     }

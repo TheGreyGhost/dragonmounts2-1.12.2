@@ -1,9 +1,9 @@
 package com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.effects.*;
 
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -16,6 +16,7 @@ import net.minecraft.world.World;
  * (1) setBeamEndpoints() to set the current beam origin and destination
  * (2) spawnBreathParticlesForFireDragon() to spawn the particles()
  */
+@Deprecated
 public class BreathWeaponEmitter {
 
   protected Vec3d origin;
@@ -42,7 +43,8 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticlesForFireDragon(World world, BreathNode.Power power, int tickCount) {
+  @Deprecated
+  public void spawnBreathParticlesForFireDragon(World world, BreathNodeP.Power power, int tickCount) {
 	  EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCount != previousTickCount + 1) {
       previousDirection = direction;
@@ -73,7 +75,8 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticlesforEnderDragon(World world, BreathNode.Power power, int tickCounter) {
+  @Deprecated
+  public void spawnBreathParticlesforEnderDragon(World world, BreathNodeP.Power power, int tickCounter) {
 	  EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCounter != previousTickCount + 1) {
       previousDirection = direction;
@@ -104,7 +107,8 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticlesforNetherDragon(World world, BreathNode.Power power, int tickCounter) {
+  @Deprecated
+  public void spawnBreathParticlesforNetherDragon(World world, BreathNodeP.Power power, int tickCounter) {
 	  EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCounter != previousTickCount + 1) {
       previousDirection = direction;
@@ -135,7 +139,8 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticlesforWaterDragon(World world, BreathNode.Power power, int tickCounter) {
+  @Deprecated
+  public void spawnBreathParticlesforWaterDragon(World world, BreathNodeP.Power power, int tickCounter) {
 	  EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCounter != previousTickCount + 1) {
       previousDirection = direction;
@@ -166,7 +171,8 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticlesforWitherDragon(World world, BreathNode.Power power, int tickCounter) {
+  @Deprecated
+  public void spawnBreathParticlesforWitherDragon(World world, BreathNodeP.Power power, int tickCounter) {
 	  EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCounter != previousTickCount + 1) {
       previousDirection = direction;
@@ -197,7 +203,8 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticlesforIceDragon(World world, BreathNode.Power power, int tickCounter) {
+  @Deprecated
+  public void spawnBreathParticlesforIceDragon(World world, BreathNodeP.Power power, int tickCounter) {
 	  EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCounter != previousTickCount + 1) {
       previousDirection = direction;
@@ -228,7 +235,8 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticlesforAetherDragon(World world, BreathNode.Power power, int tickCounter) {
+  @Deprecated
+  public void spawnBreathParticlesforAetherDragon(World world, BreathNodeP.Power power, int tickCounter) {
 	  EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCounter != previousTickCount + 1) {
       previousDirection = direction;
@@ -258,7 +266,8 @@ public class BreathWeaponEmitter {
    * @param world
    * @param power the strength of the beam
    */
-  public void spawnBreathParticlesforPoisonDragon(World world, BreathNode.Power power, int tickCounter) {
+  @Deprecated
+  public void spawnBreathParticlesforPoisonDragon(World world, BreathNodeP.Power power, int tickCounter) {
     EntityTameableDragon dragon = new EntityTameableDragon(world);
     if (tickCounter != previousTickCount + 1) {
       previousDirection = direction;
