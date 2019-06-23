@@ -14,6 +14,7 @@ import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.RenderCarriage;
 import com.TheRPGAdventurer.ROTD.client.render.RenderDM2Cape;
+import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
 import com.TheRPGAdventurer.ROTD.client.render.TileEntityDragonShulkerRenderer;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.*;
@@ -77,6 +78,8 @@ public class ClientProxy extends ServerProxy {
         RenderingRegistry.registerEntityRenderingHandler(AetherBreathFX.class, RenderAetherBreathFX::new);
         RenderingRegistry.registerEntityRenderingHandler(EntityCarriage.class, RenderCarriage::new);
 
+        MinecraftForge.EVENT_BUS.register(new TextureStitcherBreathFX());
+
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityDragonShulker.class, new TileEntityDragonShulkerRenderer());
 
         //Override mcmod.info - This looks cooler :)
@@ -127,13 +130,10 @@ public class ClientProxy extends ServerProxy {
         }
       StartupDebugClientOnly.postInitClientOnly();
 
-//      if (DragonMountsConfig.isPrototypeBreathweapons()) {
         DragonOrbControl.createSingleton(getNetwork());
         DragonOrbControl.initialiseInterceptors();
         MinecraftForge.EVENT_BUS.register(DragonOrbControl.getInstance());
         MinecraftForge.EVENT_BUS.register(new TargetHighlighter());
- //       FMLCommonHandler.instance().bus().register(new DragonEntityWatcher());  todo not required?
-//      }
 
       MinecraftForge.EVENT_BUS.register(new ModKeys());
         MinecraftForge.EVENT_BUS.register(new DragonViewEvent());
