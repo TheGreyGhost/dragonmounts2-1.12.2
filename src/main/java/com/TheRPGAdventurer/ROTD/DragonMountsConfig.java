@@ -93,7 +93,6 @@ public class DragonMountsConfig {
 
   private static boolean configHasLoaded = false; // used to detect code which tries to access a property before the config has been loaded
       // can be caused by static instantiation of classes especially Items Blocks and similar
-  private static int configHasLoadedErrorCount = 0; // used to detect code which tries to access a property before the config has been loaded
 
 	public static void PreInit() {
 		File configFile = new File(Loader.instance().getConfigDir(), DragonMounts.MODID + ".cfg");
