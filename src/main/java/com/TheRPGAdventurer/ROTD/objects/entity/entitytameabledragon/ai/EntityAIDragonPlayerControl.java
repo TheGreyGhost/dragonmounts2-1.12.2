@@ -10,6 +10,7 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import com.TheRPGAdventurer.ROTD.util.reflection.PrivateAccessor;
@@ -86,5 +87,14 @@ public class EntityAIDragonPlayerControl extends EntityAIDragonBase implements P
         }
 
         dragon.getMoveHelper().setMoveTo(x, y, z, 1.2);
+
+      // if we're breathing at a target, look at it
+      BreathWeaponTarget breathWeaponTarget = dragon.getBreathHelperP().getPlayerSelectedTarget();
+      if (breathWeaponTarget != null) {
+        Vec3d dragonEyePos = dragon.getPositionVector().addVector(0, dragon.getEyeHeight(), 0);
+        breathWeaponTarget.setEntityLook(dragon.world, dragon.getLookHelper(), dragonEyePos,
+                dragon.getHeadYawSpeed(), dragon.getHeadPitchSpeed());
+      }
+
     }
 }

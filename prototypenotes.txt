@@ -103,3 +103,16 @@ ModelRegistryEvent?
 known bugs:
 DragonOrb itemtransforms broken
 
+-------------
+Notes on introducing:
+primary uses legacy, secondary uses prototype
+
+
+bugs:
+fire emits from too low down
+fire breath looks very slow and small?  (is the same as prototype..)
+head turn to face target is very slow
+target highlight doesn't render
+
+
+
