@@ -5,6 +5,9 @@ import com.TheRPGAdventurer.ROTD.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
@@ -89,6 +92,23 @@ public class TargetHighlighter
 
     int timeMS = (int)System.currentTimeMillis();
     drawAABB(blockAABB, entityPlayer, partialTick, timeMS, Color.RED);
+
+//    GlStateManager.enableBlend();
+//    GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//    GlStateManager.glLineWidth(2.0F);
+//    GlStateManager.disableTexture2D();
+//    GlStateManager.depthMask(false);
+//
+//    double d3 = entityPlayer.lastTickPosX + (entityPlayer.posX - entityPlayer.lastTickPosX) * (double)partialTick;
+//    double d4 = entityPlayer.lastTickPosY + (entityPlayer.posY - entityPlayer.lastTickPosY) * (double)partialTick;
+//    double d5 = entityPlayer.lastTickPosZ + (entityPlayer.posZ - entityPlayer.lastTickPosZ) * (double)partialTick;
+//    RenderGlobal.drawSelectionBoundingBox(blockAABB.grow(0.0020000000949949026D).offset(-d3, -d4, -d5), 0.0F, 0.0F, 0.0F, 0.4F);
+//
+//    GlStateManager.depthMask(true);
+//    GlStateManager.enableTexture2D();
+//    GlStateManager.disableBlend();
+
+
   }
 
   /** draw an oscillating outlined bounding box around the indicated aabb
@@ -116,27 +136,54 @@ public class TargetHighlighter
     }
     AxisAlignedBB expandedBox = aabb.grow(expansionamount);
 
-    try {
-      GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
-      GL11.glEnable(GL11.GL_BLEND);
-      OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-      final float ALPHA = 0.4F;
-      GL11.glColor4ub((byte) colour.getRed(), (byte) colour.getGreen(), (byte) colour.getBlue(), (byte) (255 * ALPHA));
-      GL11.glLineWidth(2.0F);
-      GL11.glDisable(GL11.GL_TEXTURE_2D);
-      GL11.glDepthMask(false);
+//    try {
+//      GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
+//      GL11.glEnable(GL11.GL_BLEND);
+//      OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+//      final float ALPHA = 0.4F;
+//      GL11.glColor4ub((byte) colour.getRed(), (byte) colour.getGreen(), (byte) colour.getBlue(), (byte) (255 * ALPHA));
+//      GL11.glLineWidth(2.0F);
+//      GL11.glDisable(GL11.GL_TEXTURE_2D);
+//      GL11.glDepthMask(false);
+//
+//      double px = entityPlayer.lastTickPosX + (entityPlayer.posX - entityPlayer.lastTickPosX) * partialTick;
+//      double py = entityPlayer.lastTickPosY + (entityPlayer.posY - entityPlayer.lastTickPosY) * partialTick;
+//      double pz = entityPlayer.lastTickPosZ + (entityPlayer.posZ - entityPlayer.lastTickPosZ) * partialTick;
+//
+//      Color dummyDrawColour = Color.WHITE;
+//      RenderGlobal.drawSelectionBoundingBox(expandedBox.offset(-px, -py, -pz),
+//                                            dummyDrawColour.getRed(), dummyDrawColour.getGreen(),
+//                                            dummyDrawColour.getBlue(), dummyDrawColour.getAlpha());
+//    } finally {
+//      GL11.glPopAttrib();
+//    }
 
-      double px = entityPlayer.lastTickPosX + (entityPlayer.posX - entityPlayer.lastTickPosX) * partialTick;
-      double py = entityPlayer.lastTickPosY + (entityPlayer.posY - entityPlayer.lastTickPosY) * partialTick;
-      double pz = entityPlayer.lastTickPosZ + (entityPlayer.posZ - entityPlayer.lastTickPosZ) * partialTick;
+    // copied from DebugRendererCollisionBox
 
-      Color dummyDrawColour = Color.WHITE;
-      RenderGlobal.drawSelectionBoundingBox(expandedBox.offset(-px, -py, -pz),
-                                            dummyDrawColour.getRed(), dummyDrawColour.getGreen(),
-                                            dummyDrawColour.getBlue(), dummyDrawColour.getAlpha());
-    } finally {
-      GL11.glPopAttrib();
-    }
+    GlStateManager.enableBlend();
+    GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                        GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+    GlStateManager.glLineWidth(2.0F);
+    GlStateManager.disableTexture2D();
+    GlStateManager.depthMask(false);
+    final float MAX_BYTE = 255;
+    GlStateManager.color(colour.getRed()/MAX_BYTE, colour.getGreen()/MAX_BYTE, colour.getBlue()/MAX_BYTE, colour.getAlpha()/MAX_BYTE);
+
+    double px = entityPlayer.lastTickPosX + (entityPlayer.posX - entityPlayer.lastTickPosX) * partialTick;
+    double py = entityPlayer.lastTickPosY + (entityPlayer.posY - entityPlayer.lastTickPosY) * partialTick;
+    double pz = entityPlayer.lastTickPosZ + (entityPlayer.posZ - entityPlayer.lastTickPosZ) * partialTick;
+
+    Color dummyDrawColour = Color.WHITE;
+    RenderGlobal.drawSelectionBoundingBox(expandedBox.offset(-px, -py, -pz),
+            dummyDrawColour.getRed()/MAX_BYTE, dummyDrawColour.getGreen()/MAX_BYTE,
+            dummyDrawColour.getBlue()/MAX_BYTE, dummyDrawColour.getAlpha()/MAX_BYTE);
+
+    GlStateManager.depthMask(true);
+    GlStateManager.enableTexture2D();
+    GlStateManager.disableBlend();
+
+
+
 
   }
 }

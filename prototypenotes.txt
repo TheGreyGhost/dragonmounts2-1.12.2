@@ -114,5 +114,17 @@ fire breath looks very slow and small?  (is the same as prototype..)
 head turn to face target is very slow
 target highlight doesn't render
 
+look speed
+EntityLiving:
+    public int getVerticalFaceSpeed()
+    {
+        return 40;
+    }
 
+    public int getHorizontalFaceSpeed()
+    {
+        return 10;
+    }
 
+deltaLookYaw
+deltaLookPitch

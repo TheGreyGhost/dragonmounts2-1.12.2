@@ -16,6 +16,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.Drag
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonReproductionHelper;
 
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -52,7 +53,7 @@ public class GuiDragonDebug extends Gui {
     private static final int RED = 0xFF8888;
     
     public static Object probe;
-    public static boolean enabled = true;
+//    public static boolean enabled = true;
     
     private final Minecraft mc = Minecraft.getMinecraft();
     private final FontRenderer fr;
@@ -70,7 +71,7 @@ public class GuiDragonDebug extends Gui {
     
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent event) {
-        if (!enabled || event.isCancelable() || event.getType() != ElementType.TEXT) {
+        if (!DebugSettings.isDebugGuiEnabled() || event.isCancelable() || event.getType() != ElementType.TEXT) {
             return;
         }
 

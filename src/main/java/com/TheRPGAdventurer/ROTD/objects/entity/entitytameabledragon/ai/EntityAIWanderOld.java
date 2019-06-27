@@ -22,6 +22,7 @@ public class EntityAIWanderOld extends EntityAIDragonBase {
     /**
      * Returns whether the EntityAIBase should begin execution.
      */
+    @Override
     public boolean shouldExecute() {
         if (this.dragon.isEgg()) return false;
         else if (this.dragon.getRNG().nextInt(120) != 0) return false;
@@ -41,13 +42,15 @@ public class EntityAIWanderOld extends EntityAIDragonBase {
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting() {
+    @Override
+    public boolean shouldContinueExecuting() {
         return !this.dragon.getNavigator().noPath();
     }
 
     /**
      * Execute a one shot task or start executing a continuous task
      */
+    @Override
     public void startExecuting() {
         this.dragon.getNavigator().tryMoveToXYZ(this.xPosition, this.yPosition, this.zPosition, this.speed);
     }

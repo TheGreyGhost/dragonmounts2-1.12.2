@@ -51,6 +51,7 @@ public class EntityAIMoveToOptimalDistance extends EntityAIBase {
   /**
    * Returns whether the EntityAIBase should begin execution.
    */
+  @Override
   public boolean shouldExecute()
   {
     return dragon.getBreathHelperP().hasBreathTargetForMoving() && !dragon.isRiding();
@@ -59,7 +60,8 @@ public class EntityAIMoveToOptimalDistance extends EntityAIBase {
   /**
    * Returns whether an in-progress EntityAIBase should continue executing
    */
-  public boolean continueExecuting()
+  @Override
+  public boolean shouldContinueExecuting()
   {
     return this.shouldExecute();
   }
@@ -67,6 +69,7 @@ public class EntityAIMoveToOptimalDistance extends EntityAIBase {
   /**
    * Resets the task
    */
+  @Override
   public void resetTask()
   {
     dragon.getNavigator().clearPath();  // stop moving
@@ -79,6 +82,7 @@ public class EntityAIMoveToOptimalDistance extends EntityAIBase {
    * moves towards (or away from) the breath target
    * looks at the target.
    */
+  @Override
   public void updateTask()
   {
     BreathWeaponTarget currentTarget = dragon.getBreathHelperP().getBreathTargetForMoving();

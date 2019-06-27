@@ -31,7 +31,7 @@ import com.TheRPGAdventurer.ROTD.objects.items.ItemDragonAmulet;
 import com.TheRPGAdventurer.ROTD.objects.items.ItemDragonEssence;
 import com.TheRPGAdventurer.ROTD.objects.tileentities.TileEntityDragonShulker;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
-import com.TheRPGAdventurer.ROTD.util.debugging.DebugFreezeAnimator;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import com.google.common.base.Optional;
 import net.minecraft.block.Block;
@@ -809,7 +809,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
     @Override
     public void onLivingUpdate() {
-        if (!DebugFreezeAnimator.isFrozen()) {
+        if (!DebugSettings.isAnimationFrozen()) {
             helpers.values().forEach(DragonHelper::onLivingUpdate);
             getBreed().onLivingUpdate(this);
         }

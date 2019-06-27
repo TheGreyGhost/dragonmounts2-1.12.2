@@ -55,6 +55,7 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
   /**
    * Returns whether the EntityAIBase should begin execution.
    */
+  @Override
   public boolean shouldExecute()
   {
     BreathWeaponTarget playerSelectedTarget = this.dragon.getBreathHelperP().getPlayerSelectedTarget();
@@ -64,7 +65,8 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
   /**
    * Returns whether an in-progress EntityAIBase should continue executing
    */
-  public boolean continueExecuting()
+  @Override
+  public boolean shouldContinueExecuting()
   {
     return this.shouldExecute() || !this.dragon.getNavigator().noPath();
   }
@@ -72,6 +74,7 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
   /**
    * Resets the task
    */
+  @Override
   public void resetTask()
   {
     currentTarget = null;
@@ -83,6 +86,7 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
   /**
    * Updates the task
    */
+  @Override
   public void updateTask()
   {
     // check which target the player has selected; if deselected, wait a short while before losing interest

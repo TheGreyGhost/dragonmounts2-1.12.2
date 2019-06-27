@@ -1,7 +1,9 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMountsConfig;
+import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.items.ItemTestRunner;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 /**
@@ -32,5 +34,6 @@ public class StartupDebugCommon
   public static void postInitCommon()
   {
     if (!DragonMountsConfig.isDebug()) return;
+    MinecraftForge.EVENT_BUS.register(new DebugSpawnInhibitor());
   }
 }

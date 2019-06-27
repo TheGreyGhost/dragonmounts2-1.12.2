@@ -22,6 +22,7 @@ public class EntityAIDragonSwimming extends EntityAIDragonBase {
     /**
      * Returns whether the EntityAIBase should begin execution.
      */
+    @Override
     public boolean shouldExecute() {
         return this.dragon.isInWater() || this.dragon.isInLava() && !dragon.onGround;
     }
@@ -29,6 +30,7 @@ public class EntityAIDragonSwimming extends EntityAIDragonBase {
     /**
      * Keep ticking a continuous task that has already been started
      */
+    @Override
     public void updateTask() {
         if (this.dragon.getRNG().nextFloat() < 1.3F && !dragon.onGround && !dragon.isInWater()) {
             this.dragon.getJumpHelper().setJumping();

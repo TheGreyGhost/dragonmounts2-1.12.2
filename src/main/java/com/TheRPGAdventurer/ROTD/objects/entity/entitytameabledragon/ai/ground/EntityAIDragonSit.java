@@ -20,6 +20,7 @@ public class EntityAIDragonSit extends EntityAISit {
     /**
      * Returns whether the EntityAIBase should begin execution.
      */
+    @Override
     public boolean shouldExecute() {
         if (!this.dragon.isTamed() || this.dragon.isInWater() || !this.dragon.onGround)
         {

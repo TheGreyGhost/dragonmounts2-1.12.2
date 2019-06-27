@@ -16,6 +16,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.Drag
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.SegmentSizePositionRotation;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.Spline;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.Interpolation;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.util.math.Vec3d;
@@ -231,7 +232,11 @@ public class DragonAnimator {
             setOnGround(!dragon.isFlying());
         }
 
-        // init trails
+        if (DebugSettings.isAnimationFrozen()) {
+          return;
+        }
+
+      // init trails
         if (initTrails) {
             yTrail.fill((float) dragon.posY);
             yawTrail.fill(dragon.renderYawOffset);
