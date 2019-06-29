@@ -92,23 +92,6 @@ public class TargetHighlighter
 
     int timeMS = (int)System.currentTimeMillis();
     drawAABB(blockAABB, entityPlayer, partialTick, timeMS, Color.RED);
-
-//    GlStateManager.enableBlend();
-//    GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-//    GlStateManager.glLineWidth(2.0F);
-//    GlStateManager.disableTexture2D();
-//    GlStateManager.depthMask(false);
-//
-//    double d3 = entityPlayer.lastTickPosX + (entityPlayer.posX - entityPlayer.lastTickPosX) * (double)partialTick;
-//    double d4 = entityPlayer.lastTickPosY + (entityPlayer.posY - entityPlayer.lastTickPosY) * (double)partialTick;
-//    double d5 = entityPlayer.lastTickPosZ + (entityPlayer.posZ - entityPlayer.lastTickPosZ) * (double)partialTick;
-//    RenderGlobal.drawSelectionBoundingBox(blockAABB.grow(0.0020000000949949026D).offset(-d3, -d4, -d5), 0.0F, 0.0F, 0.0F, 0.4F);
-//
-//    GlStateManager.depthMask(true);
-//    GlStateManager.enableTexture2D();
-//    GlStateManager.disableBlend();
-
-
   }
 
   /** draw an oscillating outlined bounding box around the indicated aabb
@@ -136,28 +119,6 @@ public class TargetHighlighter
     }
     AxisAlignedBB expandedBox = aabb.grow(expansionamount);
 
-//    try {
-//      GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
-//      GL11.glEnable(GL11.GL_BLEND);
-//      OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-//      final float ALPHA = 0.4F;
-//      GL11.glColor4ub((byte) colour.getRed(), (byte) colour.getGreen(), (byte) colour.getBlue(), (byte) (255 * ALPHA));
-//      GL11.glLineWidth(2.0F);
-//      GL11.glDisable(GL11.GL_TEXTURE_2D);
-//      GL11.glDepthMask(false);
-//
-//      double px = entityPlayer.lastTickPosX + (entityPlayer.posX - entityPlayer.lastTickPosX) * partialTick;
-//      double py = entityPlayer.lastTickPosY + (entityPlayer.posY - entityPlayer.lastTickPosY) * partialTick;
-//      double pz = entityPlayer.lastTickPosZ + (entityPlayer.posZ - entityPlayer.lastTickPosZ) * partialTick;
-//
-//      Color dummyDrawColour = Color.WHITE;
-//      RenderGlobal.drawSelectionBoundingBox(expandedBox.offset(-px, -py, -pz),
-//                                            dummyDrawColour.getRed(), dummyDrawColour.getGreen(),
-//                                            dummyDrawColour.getBlue(), dummyDrawColour.getAlpha());
-//    } finally {
-//      GL11.glPopAttrib();
-//    }
-
     // copied from DebugRendererCollisionBox
 
     GlStateManager.enableBlend();
@@ -181,9 +142,5 @@ public class TargetHighlighter
     GlStateManager.depthMask(true);
     GlStateManager.enableTexture2D();
     GlStateManager.disableBlend();
-
-
-
-
   }
 }

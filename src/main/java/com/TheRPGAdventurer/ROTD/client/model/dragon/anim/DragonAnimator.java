@@ -171,6 +171,9 @@ public class DragonAnimator {
     }
 
     public void setPartialTicks(float partialTicks) {
+        if (DebugSettings.isAnimationFrozen()) {
+          partialTicks = DebugSettings.animationFrozenPartialTicks();
+        }
         this.partialTicks = partialTicks;
     }
 
@@ -190,6 +193,7 @@ public class DragonAnimator {
      * every frame.
      */
     public void animate() {
+        if (DebugSettings.isAnimationFrozen()) return;
         haveCalculatedAnimations = true;
         anim = animTimer.get(partialTicks);
         ground = groundTimer.get(partialTicks);

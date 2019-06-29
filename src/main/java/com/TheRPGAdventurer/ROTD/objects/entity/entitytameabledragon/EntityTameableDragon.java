@@ -801,6 +801,9 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
     @Override
     public void onEntityUpdate() {
+      if (DebugSettings.isAnimationFrozen()) {
+        return;
+      }
         if (getRNG().nextInt(800)==1 && !isEgg()) {
             roar();
         }
@@ -809,10 +812,10 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
     @Override
     public void onLivingUpdate() {
-        if (!DebugSettings.isAnimationFrozen()) {
-            helpers.values().forEach(DragonHelper::onLivingUpdate);
-            getBreed().onLivingUpdate(this);
-        }
+        if (DebugSettings.isAnimationFrozen()) return;
+
+          helpers.values().forEach(DragonHelper::onLivingUpdate);
+          getBreed().onLivingUpdate(this);
 
         if (isServer()) {
             final float DUMMY_MOVETIME=0;

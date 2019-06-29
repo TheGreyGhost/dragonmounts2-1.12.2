@@ -4,10 +4,14 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.Drag
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.IEntityParticle;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.Pair;
+import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -36,6 +40,15 @@ public class BreathFX extends Particle implements IEntityParticle {
 
   protected BreathNodeP breathNode;
   protected Optional<DebugBreathFXSettings> debugBreathFXSettings; // if present, used for debugging purposes
+
+  /**
+   * For debugging purposes: render the centrepoint of the entity as a 3D crosshair
+   */
+  protected void renderEntityCentrepoint()
+  {
+    if (!DebugSettings.isRenderCentrePoints()) return;
+    CentrepointCrosshairRenderer.addCentrepointToRender(this.posX, this.posY, this.posZ);
+  }
 
   /** This used to be in EntityMoveAndResizeHelper, had to move it out because Particles aren't Entities any more, and
    *   because all the particle sizes etc are now protected fields

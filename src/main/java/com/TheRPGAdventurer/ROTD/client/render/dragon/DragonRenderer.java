@@ -17,6 +17,8 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTamea
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStageHelper;
 
+import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -31,6 +33,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -67,7 +70,16 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 
     @Override
     public void doRender(EntityTameableDragon dragon, double x, double y, double z, float yaw, float partialTicks) {
-        DragonModel breedModel=getBreedRenderer(dragon).getModel();
+      if (DebugSettings.isAnimationFrozen()) {
+        partialTicks = DebugSettings.animationFrozenPartialTicks();
+      }
+
+      if (DebugSettings.isRenderCentrePoints()) {
+        Vec3d throat = dragon.getAnimator().getThroatPosition();
+        CentrepointCrosshairRenderer.addCentrepointToRender(throat.x, throat.y, throat.z);
+      }
+
+      DragonModel breedModel=getBreedRenderer(dragon).getModel();
         breedModel.setMode(DragonModelMode.FULL);
         mainModel=breedModel;
         renderName(dragon, x, y, z);

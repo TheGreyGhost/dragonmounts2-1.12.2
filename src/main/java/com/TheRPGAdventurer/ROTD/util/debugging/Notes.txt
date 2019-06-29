@@ -1,27 +1,25 @@
-MBE75_TESTING_FRAMEWORK
+Debugging tools:
 
-This example is a useful tool that can help you automate testing of your classes in-game.
-Unit testing using JUnit or similar is easy enough for standalone classes you write, but it's not much good for
-  classes which rely on vanilla classes such as World, EntityPlayer, or similar.  It's almost impossible to mock or
-  stub these without all sorts of brittle tricks.
-
-An alternative I've found useful is to start up Minecraft and run your automated test-cases in-game.
-For example - if you want to test what happens when your block catches on fire, your test case can put the block in
-  the world, set fire to it, then inspect the result and report success or failure.
-
-One of the easiest ways to trigger a test case is using an item.  In this example, using the ItemTestRunner item
-will trigger a test case.  Changing the stacksize will change the test case that is executed.
+ItemTestRunner
+will trigger a test case when held and clicked.  Changing the stacksize will change the test case that is executed.
 For example - stacksize of 2 will run test case 2; stacksize of 20 will run test case 20.
 
-A couple of useful functions are also demonstrated -
-1) teleporting the player to the test location
-2) copying a region of the world to a test location.  This can be useful if you have a complicated test pattern for your
-   blocks: eg
-  a) generate a save game with a test pattern of blocks at the source region
-  b) before each test, copy the source region to the test region and run your tests.
+Current test cases:
+1..16(?) = spawn a tame adult dragon wearing a saddle, the test number corresponds to the breed of dragon
 
-The pieces you need to understand are located in:
-ItemTestRunner
-TestRunner
+61 = forest breath test
+62 = lightning breath test
 
-See MBE10 for more information on simple items.
+Debug commands
+/dragon debug overlay = toggle debug GUI on/off
+/dragon debug spawnInhibitor = toggle spawn inhibition (stops entities from spawning, useful if you want to study the dragon entity without any others nearby)
+  also useful: /kill @e[type=!Player]
+/dragon debug animationFrozen = enable animation freezing.  When animation freezing is enabled:
+   1) hold the dragon orb
+   2) hold either left or right mouse button to start the desired breath
+   3) while holding the first button, click the other mouse button as well.
+   This will cause the dragon to stop updating on the client and the server, as well as any breathnodes
+   To cancel the freezing, use /dragon debug animationFrozen to toggle it off
+/dragon debug renderCentrepoints = toggle rendering of centrepoints on/off (breath nodes, dragon throat location)
+
+

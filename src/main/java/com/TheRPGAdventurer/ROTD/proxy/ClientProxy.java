@@ -28,6 +28,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTamea
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.effects.*;
 import com.TheRPGAdventurer.ROTD.objects.items.entity.ImmuneEntityItem;
 import com.TheRPGAdventurer.ROTD.objects.tileentities.TileEntityDragonShulker;
+import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.StartupDebugClientOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -134,6 +135,7 @@ public class ClientProxy extends ServerProxy {
         DragonOrbControl.initialiseInterceptors();
         MinecraftForge.EVENT_BUS.register(DragonOrbControl.getInstance());
         MinecraftForge.EVENT_BUS.register(new TargetHighlighter());
+      MinecraftForge.EVENT_BUS.register(new CentrepointCrosshairRenderer());
 
       MinecraftForge.EVENT_BUS.register(new ModKeys());
         MinecraftForge.EVENT_BUS.register(new DragonViewEvent());

@@ -254,10 +254,9 @@ public class TestRunner
     final int SADDLE_SLOT = 0;
     entityDragon.dragonInv.setInventorySlotContents(SADDLE_SLOT, saddle);
     entityDragon.refreshInventory();
-
     worldIn.spawnEntity(entityDragon);
 
+    entityDragon.getAISit().setSitting(true);
+    entityDragon.getNavigator().clearPath();
   }
-
-
 }

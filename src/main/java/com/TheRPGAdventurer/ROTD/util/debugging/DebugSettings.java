@@ -25,10 +25,34 @@ public class DebugSettings
   public static void setSpawningInhibited(boolean newstate) {spawningInhibited = newstate;}
   private static boolean spawningInhibited;
 
+  /** are the draqon and breath animations be frozen in place?
+   * Usage:
+   * 1) setAnimationFreezeEnabled to enable freezing
+   * 2) whenever you want the animation to be frozen, call setAnimationFreezeActive
+   *    (this does nothing unless freezing has been enabled)
+   * Disabling the freezing will also deactivate freezing
+   * @return
+   */
   public static boolean isAnimationFrozen()
   {
-    return DragonMounts.instance.getConfig().isDebug() && frozen;
+    return DragonMounts.instance.getConfig().isDebug() && frozenEnabled && frozenActive;
   }
-  public static void setAnimationFrozen(boolean newstate) {frozen = newstate;}
-  private static boolean frozen;
+  public static void setAnimationFreezeEnabled(boolean newstate) {
+    frozenEnabled = newstate;
+    if (!frozenEnabled) frozenActive = false;
+  }
+  public static float animationFrozenPartialTicks() {return partialTicks;}
+  public static boolean isAnimationFreezeEnabled() {return frozenEnabled;}
+  public static void setAnimationFreezeActive(boolean newstate) {frozenActive = newstate;}
+  private static boolean frozenEnabled;
+  private static boolean frozenActive;
+  private static final float partialTicks = 0.25F;
+
+  public static boolean isRenderCentrePoints() {
+    return renderCentrePoints;
+  }
+  public static void setRenderCentrePoints(boolean renderCentrePoints) {
+    DebugSettings.renderCentrePoints = renderCentrePoints;
+  }
+  private static boolean renderCentrePoints;
 }

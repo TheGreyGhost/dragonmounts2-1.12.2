@@ -9,7 +9,6 @@
  */
 package com.TheRPGAdventurer.ROTD.cmd;
 
-import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
 
@@ -55,7 +54,11 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
       }));
 
       addCommand(new CommandDragonLambda("animationFrozen", (server, sender, args) -> {
-        DebugSettings.setAnimationFrozen(!DebugSettings.isAnimationFrozen());
+        DebugSettings.setAnimationFreezeEnabled(!DebugSettings.isAnimationFreezeEnabled());
+      }));
+
+      addCommand(new CommandDragonLambda("renderCentrepoints", (server, sender, args) -> {
+        DebugSettings.setRenderCentrePoints(!DebugSettings.isRenderCentrePoints());
       }));
 
       addCommand(new CommandDragonLambda("testBreeds", dragon -> {

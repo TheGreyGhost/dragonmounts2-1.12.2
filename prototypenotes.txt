@@ -110,9 +110,14 @@ primary uses legacy, secondary uses prototype
 
 bugs:
 fire emits from too low down
-fire breath looks very slow and small?  (is the same as prototype..)
+OK fire breath looks very slow and small?  (is the same as prototype..)
 head turn to face target is very slow
-target highlight doesn't render
+OK target highlight doesn't render
+Dragon doesn't render when hitbox out of view
+
+
+to do - storm should use water
+
 
 look speed
 EntityLiving:

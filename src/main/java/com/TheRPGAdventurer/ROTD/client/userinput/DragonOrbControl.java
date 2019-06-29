@@ -6,9 +6,9 @@ import com.TheRPGAdventurer.ROTD.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonTarget;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathWeaponTarget;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.BreathWeapon;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.RayTraceServer;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.RayTraceResult;
@@ -74,6 +74,16 @@ public class DragonOrbControl {
    * Every tick, check if the player is holding the Dragon Orb, and if so, whether the player is targeting something with it
    * Additionally, check whether the player is riding the dragon and using the breath key to make the dragon breathe straight ahead
    * Send the target to the server at periodic intervals (if the target has changed significantly, or at least every x ticks)
+   *
+   * Debug settings for freezing animation:
+   * 1) hold the dragon orb
+   * 2) hold either left or right mouse button to start the desired breath
+   * 3) while holding the first button, click the other mouse button as well.
+   * This will cause the dragon to stop updating on the client and the server, as well as any breathnodes
+   * It will also stop any further target messages being sent
+   * Once the animation has been frozen, it will stay frozen even after you release the mouse buttons
+   * To cancel the freezing, use /dragon debug animationFrozen to toggle it off
+
    * @param evt
    */
   @SubscribeEvent
@@ -87,6 +97,14 @@ public class DragonOrbControl {
     boolean leftTriggerHeld = attackButtonInterceptor.isUnderlyingKeyDown();
     boolean rightTriggerHeld = useItemButtonInterceptor.isUnderlyingKeyDown();
     boolean orbTriggerHeld = leftTriggerHeld || rightTriggerHeld;
+
+    if (DebugSettings.isAnimationFreezeEnabled()) {
+      if (leftTriggerHeld && rightTriggerHeld) {
+        DebugSettings.setAnimationFreezeActive(true);
+      }
+      if (DebugSettings.isAnimationFrozen()) return;
+    }
+
     BreathWeaponTarget.WeaponUsed weaponUsed = BreathWeaponTarget.WeaponUsed.NONE;
     if (leftTriggerHeld) {
       weaponUsed = BreathWeaponTarget.WeaponUsed.PRIMARY;

@@ -4,6 +4,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.Drag
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFire;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.RotatingQuad;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -146,12 +147,21 @@ public class BreathFXFire extends BreathFX {
                              float edgeLRdirectionX, float edgeUDdirectionY, float edgeLRdirectionZ,
                              float edgeUDdirectionX, float edgeUDdirectionZ)
   {
+    renderEntityCentrepoint();
     double minU = this.particleTexture.getMinU();
     double maxU = this.particleTexture.getMaxU();
     double minV = this.particleTexture.getMinV();
     double maxV = this.particleTexture.getMaxV();
     RotatingQuad tex = new RotatingQuad(minU, minV, maxU, maxV);
+
     Random random = new Random();
+
+    if (DebugSettings.isAnimationFrozen()) {  // stop jitter
+      partialTick = DebugSettings.animationFrozenPartialTicks();
+      final long FIXED_SEED = (long)((10000*(this.posX + this.posZ))%10000);
+      random.setSeed(FIXED_SEED);
+    }
+
     if (random.nextBoolean()) {
       tex.mirrorLR();
     }
@@ -205,6 +215,7 @@ public class BreathFXFire extends BreathFX {
    */
   @Override
   public void onUpdate() {
+    if (DebugSettings.isAnimationFrozen()) return;
     final float YOUNG_AGE = 0.25F;
     final float OLD_AGE = 0.75F;
 
