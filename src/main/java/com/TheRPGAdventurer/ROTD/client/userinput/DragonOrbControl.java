@@ -9,6 +9,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.Brea
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.RayTraceServer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
+import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.RayTraceResult;
@@ -97,6 +98,8 @@ public class DragonOrbControl {
     boolean leftTriggerHeld = attackButtonInterceptor.isUnderlyingKeyDown();
     boolean rightTriggerHeld = useItemButtonInterceptor.isUnderlyingKeyDown();
     boolean orbTriggerHeld = leftTriggerHeld || rightTriggerHeld;
+
+    if (!oldTriggerHeld) DebugBreathFXSettings.resetSpawnSuppressor();
 
     if (DebugSettings.isAnimationFreezeEnabled()) {
       if (leftTriggerHeld && rightTriggerHeld) {

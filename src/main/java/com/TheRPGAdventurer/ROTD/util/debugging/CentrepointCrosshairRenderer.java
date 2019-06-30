@@ -17,6 +17,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.awt.*;
@@ -34,9 +35,10 @@ import java.util.List;
 public class CentrepointCrosshairRenderer
 {
   /**
+   * render this first (before any other DrawBlockHighlightEvents which might cancel it)
    * @param event the event
    */
-  @SubscribeEvent
+  @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void centrepointCrosshairRenderer(DrawBlockHighlightEvent event)
   {
     for (Vec3d cp : pointsToRenderNextFrame) {
@@ -105,7 +107,7 @@ public class CentrepointCrosshairRenderer
     }
   }
 
-  private static  final int MAX_POINTS = 100;
+  private static  final int MAX_POINTS = 500;
   private static List<Vec3d> pointsToRenderNextFrame = new ArrayList<>(MAX_POINTS);
 
 }

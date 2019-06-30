@@ -16,6 +16,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 
 import java.nio.Buffer;
 import java.util.Optional;
@@ -55,8 +56,7 @@ public class BreathFXFire extends BreathFX {
   public static BreathFXFire createBreathFXFire(World world, double x, double y, double z,
                                                   double directionX, double directionY, double directionZ,
                                                   BreathNodeP.Power power,
-                                                  float partialTicksHeadStart,
-                                                  Optional<DebugBreathFXSettings> debugBreathFXSettings)
+                                                  float partialTicksHeadStart)
   {
     Vec3d direction = new Vec3d(directionX, directionY, directionZ).normalize();
 
@@ -68,26 +68,18 @@ public class BreathFXFire extends BreathFX {
     x += actualMotion.x * partialTicksHeadStart;
     y += actualMotion.y * partialTicksHeadStart;
     z += actualMotion.z * partialTicksHeadStart;
-    BreathFXFire newBreathFXFire = new BreathFXFire(world, x, y, z, actualMotion, breathNode, debugBreathFXSettings);
+    BreathFXFire newBreathFXFire = new BreathFXFire(world, x, y, z, actualMotion, breathNode);
     return newBreathFXFire;
   }
 
   private BreathFXFire(World world, double x, double y, double z, Vec3d motion,
-                       BreathNodeP i_breathNode, Optional<DebugBreathFXSettings> debugBreathFXSettings) {
-    super(world, x, y, z, motion.x, motion.y, motion.z, debugBreathFXSettings);
+                       BreathNodeP i_breathNode) {
+    super(world, x, y, z, motion.x, motion.y, motion.z);
 
     breathNode = i_breathNode;
     particleGravity = Blocks.FIRE.blockParticleGravity;  /// arbitrary block!  maybe not even required.
     particleMaxAge = (int)breathNode.getMaxLifeTime(); // not used, but good for debugging
     this.particleAlpha = MAX_ALPHA;  // a value less than 1 turns on alpha blending
-
-    //undo random velocity variation of vanilla EntityFX constructor
-    motionX = motion.x;
-    motionY = motion.y;
-    motionZ = motion.z;
-    if (debugBreathFXSettings.isPresent() && debugBreathFXSettings.get().freezeMotion) {
-      motionX = 0; motionY = 0; motionZ = 0;
-    }
 
     // set the texture to the flame texture, which we have previously added using TextureStitchEvent
     TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(fireballRL.toString());
@@ -141,13 +133,15 @@ public class BreathFXFire extends BreathFX {
    * @param edgeLRdirectionZ edgeLRdirection[XYZ] is the vector direction pointing left-right on the player's screen
    * @param edgeUDdirectionX edgeUDdirection[XYZ] is the vector direction pointing up-down on the player's screen
    * @param edgeUDdirectionZ edgeUDdirection[XYZ] is the vector direction pointing up-down on the player's screen
+   *
+   * NOTE - in accordance with the vanilla convention, this.posX and this.posZ are the centre of the particle but
+   *          this.posY is the bottom (minY)
    */
   @Override
   public void renderParticle(BufferBuilder bufferBuilder, Entity entity, float partialTick,
                              float edgeLRdirectionX, float edgeUDdirectionY, float edgeLRdirectionZ,
                              float edgeUDdirectionX, float edgeUDdirectionZ)
   {
-    renderEntityCentrepoint();
     double minU = this.particleTexture.getMinU();
     double maxU = this.particleTexture.getMaxU();
     double minV = this.particleTexture.getMinV();
@@ -178,8 +172,10 @@ public class BreathFXFire extends BreathFX {
     final double scaleUD = scale;
     double x = this.prevPosX + (this.posX - this.prevPosX) * partialTick - interpPosX;
     double y = this.prevPosY + (this.posY - this.prevPosY) * partialTick - interpPosY + this.height / 2.0F;
-    // centre of rendering is now y midpt not ymin
+    // centre of rendering is now y midpt not ymin; need to compensate
     double z = this.prevPosZ + (this.posZ - this.prevPosZ) * partialTick - interpPosZ;
+
+    renderEntityCentrepoint(x + interpPosX, y + interpPosY, z + interpPosZ);
 
     bufferBuilder.pos(x - edgeLRdirectionX * scaleLR - edgeUDdirectionX * scaleUD,
             y - edgeUDdirectionY * scaleUD,
@@ -248,6 +244,14 @@ public class BreathFXFire extends BreathFX {
     prevPosY = posY;
     prevPosZ = posZ;
     moveAndResizeParticle(motionX, motionY, motionZ, newAABBDiameter, newAABBDiameter);
+
+    if (DebugBreathFXSettings.isLogBreathFXinfo()) {
+      System.out.println("prevPos; pos; motion; w,h:" +
+                         new Vec3d(prevPosX, prevPosY, prevPosZ) + "," +
+                         new Vec3d(posX, posY, posZ) + "," +
+                         new Vec3d(motionX, motionY, motionZ) + "," +
+                         "[" + width + "," + height +"]");
+    }
 
     if (isCollided && onGround) {
         motionY -= 0.01F;         // ensure that we hit the ground next time too

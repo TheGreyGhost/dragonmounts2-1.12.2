@@ -26,11 +26,34 @@ import java.util.Optional;
  * Created by TGG on 6/03/2016.
  */
 public class BreathFX extends Particle implements IEntityParticle {
+
+  /**
+   * Create a new BreathFX particle
+   * @param worldIn
+   * @param xCoordIn  [x,y,z] is the location of the centre of the particle (unlike vanilla where y is the MINIMUM) of the particle
+   * @param yCoordIn
+   * @param zCoordIn
+   * @param xSpeedIn  speed as per vanilla
+   * @param ySpeedIn
+   * @param zSpeedIn
+   */
   public BreathFX(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn,
                   double ySpeedIn,
-                  double zSpeedIn, Optional<DebugBreathFXSettings> i_debugBreathFXSettings) {
+                  double zSpeedIn) {
     super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
-    debugBreathFXSettings = i_debugBreathFXSettings;
+    //undo random velocity variation of vanilla EntityFX constructor
+    motionX = xSpeedIn;
+    motionY = ySpeedIn;
+    motionZ = zSpeedIn;
+    if (DebugBreathFXSettings.isMotionFrozen()) {
+      motionX = 0; motionY = 0; motionZ = 0;
+    }
+
+    // correct posY so that the centre of the Particle is at the initial [x,y,z]
+    posY -= height/2.0;
+    prevPosY = posY;
+    setPosition(posX, posY, posZ);
+    prevPosY = posY;
   }
 
   public void updateBreathMode(DragonBreathMode dragonBreathMode)
@@ -39,15 +62,14 @@ public class BreathFX extends Particle implements IEntityParticle {
   }
 
   protected BreathNodeP breathNode;
-  protected Optional<DebugBreathFXSettings> debugBreathFXSettings; // if present, used for debugging purposes
 
   /**
    * For debugging purposes: render the centrepoint of the entity as a 3D crosshair
    */
-  protected void renderEntityCentrepoint()
+  protected void renderEntityCentrepoint(double x, double y, double z)
   {
     if (!DebugSettings.isRenderCentrePoints()) return;
-    CentrepointCrosshairRenderer.addCentrepointToRender(this.posX, this.posY, this.posZ);
+    CentrepointCrosshairRenderer.addCentrepointToRender(x, y, z);
   }
 
   /** This used to be in EntityMoveAndResizeHelper, had to move it out because Particles aren't Entities any more, and
@@ -64,6 +86,10 @@ public class BreathFX extends Particle implements IEntityParticle {
    *@return returns a collection showing which parts of the entity collided with an object- eg
    *        (WEST, [3,2,6]-->[3.5, 2, 6] means the west face of the entity collided; the entity tried to move to
    *          x = 3, but got pushed back to x=3.5
+   *
+   * Note: posX, posY, posZ uses the vanilla representation, where posX and posZ are the middle of the object (the AABB) but
+   *       posY is the bottom (minY) of the AABB.
+   *
    */
   public Collection<Pair<EnumFacing, AxisAlignedBB>> moveAndResizeParticle(double dx, double dy, double dz, float newWidth, float newHeight) {
     world.profiler.startSection("moveAndResizeEntity");
@@ -136,7 +162,7 @@ public class BreathFX extends Particle implements IEntityParticle {
     setBoundingBox(entityAABB);
 
     posX = (entityAABB.minX + entityAABB.maxX) / 2.0;
-    posY = entityAABB.minY;
+    posY = entityAABB.minY;                             // vanilla uses posY = minimum of the AABB, unlike posX and posZ
     posZ = (entityAABB.minZ + entityAABB.maxZ) / 2.0;
 
     boolean isCollidedHorizontally = desiredDX != dx || desiredDZ != dz;

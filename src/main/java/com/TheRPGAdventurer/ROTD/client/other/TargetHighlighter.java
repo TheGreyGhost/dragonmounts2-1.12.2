@@ -16,6 +16,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
@@ -32,9 +33,10 @@ public class TargetHighlighter
   /**
    * If the player is holding the dragon orb but not currently holding the attack button down, override the normal
    *   highlighting with a custom highlighting. Otherwise, revert to the default.
+   *   This event should be called last because it cancels any further rendering (to prevent vanilla highlighting)
    * @param event the event
    */
-  @SubscribeEvent
+  @SubscribeEvent(priority = EventPriority.LOWEST)
   public void blockHighlightDecider(DrawBlockHighlightEvent event)
   {
     BreathWeaponTarget targetBeingLookedAt = DragonOrbControl.getInstance().getTargetBeingLookedAt();

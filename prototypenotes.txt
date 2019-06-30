@@ -117,7 +117,8 @@ Dragon doesn't render when hitbox out of view
 
 
 to do - storm should use water
-
+inspiration for a breath type:
+https://www.youtube.com/watch?v=sdJITgE-2Ik
 
 look speed
 EntityLiving:

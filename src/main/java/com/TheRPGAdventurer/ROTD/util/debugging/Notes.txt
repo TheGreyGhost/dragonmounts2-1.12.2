@@ -22,4 +22,8 @@ Debug commands
    To cancel the freezing, use /dragon debug animationFrozen to toggle it off
 /dragon debug renderCentrepoints = toggle rendering of centrepoints on/off (breath nodes, dragon throat location)
 
+Other tools:
+In DebugBreathFXSettings:
+
+
 
