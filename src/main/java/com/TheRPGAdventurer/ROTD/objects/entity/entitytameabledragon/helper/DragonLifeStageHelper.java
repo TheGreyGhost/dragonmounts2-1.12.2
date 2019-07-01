@@ -15,11 +15,11 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTamea
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 
-import static com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage.*;
 import static net.minecraft.entity.SharedMonsterAttributes.*;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
@@ -31,6 +31,8 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
 
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
@@ -45,7 +47,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     private static final float EGG_WIGGLE_THRESHOLD = 0.75f;
     private static final float EGG_WIGGLE_BASE_CHANCE = 20;
 
-    private EnumDragonLifeStage lifeStagePrev;
+    private DragonLifeStage lifeStagePrev;
     private int eggWiggleX;
     private int eggWiggleZ;
 
@@ -120,15 +122,15 @@ public class DragonLifeStageHelper extends DragonHelper {
      *
      * @return current life stage
      */
-    public EnumDragonLifeStage getLifeStage() {
-        int age = getTicksSinceCreation();
-        return EnumDragonLifeStage.fromTickCount(age);
-    }
-
-    public DragonLifeStage getLifeStageP() {
+    public DragonLifeStage getLifeStage() {
         int age = getTicksSinceCreation();
         return DragonLifeStage.getLifeStageFromTickCount(age);
     }
+
+//    public DragonLifeStage getLifeStageP() {
+//        int age = getTicksSinceCreation();
+//        return DragonLifeStage.getLifeStageFromTickCount(age);
+//    }
 
     public int getTicksSinceCreation() {
         if (dragon.isServer()) {
@@ -154,7 +156,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     @Override
     public void readFromNBT(NBTTagCompound nbt) {
         int ticksRead = nbt.getInteger(NBT_TICKS_SINCE_CREATION);
-        ticksRead = EnumDragonLifeStage.clampTickCount(ticksRead);
+        ticksRead = DragonLifeStage.clipTickCountToValid(ticksRead);
         ticksSinceCreationServer = ticksRead;
         dataWatcher.set(dataParam, ticksSinceCreationServer);
     }
@@ -165,7 +167,7 @@ public class DragonLifeStageHelper extends DragonHelper {
      * @return size
      */
     public float getScale() {
-        return EnumDragonLifeStage.scaleFromTickCount(getTicksSinceCreation());
+        return DragonLifeStage.getScaleFromTickCount(getTicksSinceCreation());
     }
 
     /**
@@ -198,10 +200,10 @@ public class DragonLifeStageHelper extends DragonHelper {
      *
      * @param lifeStage
      */
-    public final void setLifeStage(EnumDragonLifeStage lifeStage) {
+    public final void setLifeStage(DragonLifeStage lifeStage) {
         L.trace("setLifeStage({})", lifeStage);
         if (dragon.isServer()) {
-            ticksSinceCreationServer = lifeStage.startTicks();
+            ticksSinceCreationServer = lifeStage.getStartTickCount();
             dataWatcher.set(dataParam, ticksSinceCreationServer);
         } else {
             L.error("setLifeStage called on Client");
@@ -212,12 +214,12 @@ public class DragonLifeStageHelper extends DragonHelper {
     /**
      * Called when the dragon enters a new life stage.
      */
-    private void onNewLifeStage(EnumDragonLifeStage lifeStage, EnumDragonLifeStage prevLifeStage) {
+    private void onNewLifeStage(DragonLifeStage lifeStage, DragonLifeStage prevLifeStage) {
         L.trace("onNewLifeStage({},{})", prevLifeStage, lifeStage);
 
         if (dragon.isClient()) {
             // play particle and sound effects when the dragon hatches
-            if (prevLifeStage != null && prevLifeStage == EGG && lifeStage == HATCHLING) {
+            if (prevLifeStage != null && prevLifeStage.isEgg() && !lifeStage.isBaby()) {
                 playEggCrackEffect();
                 dragon.world.playSound(dragon.posX, dragon.posY, dragon.posZ, ModSounds.DRAGON_HATCHED, SoundCategory.BLOCKS, 4, 1, false);
             }
@@ -236,21 +238,15 @@ public class DragonLifeStageHelper extends DragonHelper {
     @Override
     public void onLivingUpdate() {
         // if the dragon is not an adult pr paused, update its growth ticks
-        if (!dragon.isGrowthPaused()) {
-            if (dragon.isServer()) {
-                if (!isAdult()) {
-                    ticksSinceCreationServer++;
-                    if (ticksSinceCreationServer % TICKS_SINCE_CREATION_UPDATE_INTERVAL == 0) {
-                        dataWatcher.set(dataParam, ticksSinceCreationServer);
-                    }
-                }
-            } else {
-                ticksSinceCreationClient.updateFromServer(dataWatcher.get(dataParam));
-                if (!isAdult()) {
-                    ticksSinceCreationClient.tick();
-                }
-            }
-        }
+    	if (dragon.isServer()) {
+    		if (!isFullyGrown() && !dragon.isGrowthPaused()) {
+    			ticksSinceCreationServer++;
+    			if (ticksSinceCreationServer % TICKS_SINCE_CREATION_UPDATE_INTERVAL == 0) dataWatcher.set(dataParam, ticksSinceCreationServer);
+    		}
+    	} else {
+    		ticksSinceCreationClient.updateFromServer(dataWatcher.get(dataParam));
+    		if (!isFullyGrown()) ticksSinceCreationClient.tick();
+    	}
 
         updateLifeStage();
         updateEgg();
@@ -263,7 +259,7 @@ public class DragonLifeStageHelper extends DragonHelper {
 
     private void updateLifeStage() {
         // trigger event when a new life stage was reached
-        EnumDragonLifeStage lifeStage = getLifeStage();
+        DragonLifeStage lifeStage = getLifeStage();
         if (lifeStagePrev != lifeStage) {
             onNewLifeStage(lifeStage, lifeStagePrev);
             lifeStagePrev = lifeStage;
@@ -276,7 +272,7 @@ public class DragonLifeStageHelper extends DragonHelper {
         }
 
         // animate egg wiggle based on the time the eggs take to hatch
-        float progress = EnumDragonLifeStage.progressFromTickCount(getTicksSinceCreation());
+        float progress = DragonLifeStage.getStageProgressFromTickCount(getTicksSinceCreation());
 
         // wait until the egg is nearly hatched
         if (progress > EGG_WIGGLE_THRESHOLD) {
@@ -335,29 +331,36 @@ public class DragonLifeStageHelper extends DragonHelper {
         }
     }
 
-    public boolean isEgg() {
-        return getLifeStage() == EGG;
-    }
+    public boolean isEgg() { return getLifeStage().isEgg(); }
 
-    public boolean isHatchling() {
-        return getLifeStage() == HATCHLING;
-    }
+  public boolean isFullyGrown() { return getLifeStage().isFullyGrown();  }
+  /**
+   * Does this life stage act like a minecraft baby?
+   * @return
+   */
+    public boolean isBaby() {return getLifeStage().isBaby();}
 
-    public boolean isInfant() {
-        return getLifeStage() == INFANT;
-    }
+  public boolean isOldEnoughToBreathe() { return getLifeStage().isOldEnoughToBreathe(); }
 
-    public boolean isPreJuvenile() {
-        return getLifeStage() == PREJUVENILE;
-    }
-
-    public boolean isJuvenile() {
-        return getLifeStage() == JUVENILE;
-    }
-
-    public boolean isAdult() {
-        return getLifeStage() == ADULT;
-    }
+//    public boolean isHatchling() {
+//        return getLifeStage() == HATCHLING;
+//    }
+//
+//    public boolean isInfant() {
+//        return getLifeStage() == INFANT;
+//    }
+//
+//    public boolean isPreJuvenile() {
+//        return getLifeStage() == PREJUVENILE;
+//    }
+//
+//    public boolean isJuvenile() {
+//        return getLifeStage() == JUVENILE;
+//    }
+//
+//    public boolean isAdult() {
+//        return getLifeStage() == ADULT;
+//    }
 
 //    public boolean isGiga() {
 //        return getLifeStage() == GIGA;
@@ -367,45 +370,41 @@ public class DragonLifeStageHelper extends DragonHelper {
 //        return getLifeStage() == ADJUDICATOR;
 //    }
 
-    public BreathNodeP.Power getBreathPower() {
-        switch (getLifeStage()) {
-            case EGG: {
-                return BreathNodeP.Power.SMALL; //  dummy
-            }
-            case HATCHLING: {
-                return BreathNodeP.Power.SMALL;
-            }
-            case JUVENILE: {
-                return BreathNodeP.Power.MEDIUM;
-            }
-            case ADULT: {
-                return BreathNodeP.Power.LARGE;
-            }
-            default: {
-                DragonMounts.loggerLimit.error_once("Illegal lifestage in getScale():" + getLifeStage());
-                return BreathNodeP.Power.SMALL;
-            }
-        }
-    }
-    public BreathNodeP.Power getBreathPowerP() {
-        switch (getLifeStage()) {
-            case EGG: {
-                return BreathNodeP.Power.SMALL; //  dummy
-            }
-            case HATCHLING: {
-                return BreathNodeP.Power.SMALL;
-            }
-            case JUVENILE: {
-                return BreathNodeP.Power.MEDIUM;
-            }
-            case ADULT: {
-                return BreathNodeP.Power.LARGE;
-            }
-            default: {
-                DragonMounts.loggerLimit.error_once("Illegal lifestage in getScale():" + getLifeStage());
-                return BreathNodeP.Power.SMALL;
-            }
-        }
+  public static final Map<DragonLifeStage, BreathNode.Power> BREATHNODE_POWER_BY_STAGE =
+          ImmutableMap.<DragonLifeStage, BreathNode.Power> builder()
+                  .put(DragonLifeStage.EGG, BreathNode.Power.SMALL)           // dummy
+                  .put(DragonLifeStage.HATCHLING, BreathNode.Power.SMALL)     // dummy
+                  .put(DragonLifeStage.INFANT, BreathNode.Power.SMALL)        // dummy
+                  .put(DragonLifeStage.PREJUVENILE, BreathNode.Power.SMALL)
+                  .put(DragonLifeStage.JUVENILE, BreathNode.Power.MEDIUM)
+                  .put(DragonLifeStage.ADULT, BreathNode.Power.LARGE)
+                  .build();
+
+  public static final Map<DragonLifeStage, BreathNodeP.Power> BREATHNODEP_POWER_BY_STAGE =
+          ImmutableMap.<DragonLifeStage, BreathNodeP.Power> builder()
+                  .put(DragonLifeStage.EGG, BreathNodeP.Power.SMALL)           // dummy
+                  .put(DragonLifeStage.HATCHLING, BreathNodeP.Power.SMALL)     // dummy
+                  .put(DragonLifeStage.INFANT, BreathNodeP.Power.SMALL)        // dummy
+                  .put(DragonLifeStage.PREJUVENILE, BreathNodeP.Power.SMALL)
+                  .put(DragonLifeStage.JUVENILE, BreathNodeP.Power.MEDIUM)
+                  .put(DragonLifeStage.ADULT, BreathNodeP.Power.LARGE)
+                  .build();
+
+    public BreathNode.Power getBreathPower() {
+      BreathNode.Power power = BREATHNODE_POWER_BY_STAGE.get(getLifeStage());
+      if (power == null) {
+        DragonMounts.loggerLimit.error_once("Illegal lifestage in getBreathPower():" + getLifeStage());
+        power = BreathNode.Power.SMALL;
+      }
+      return power;
     }
 
+  public BreathNodeP.Power getBreathPowerP() {
+    BreathNodeP.Power power = BREATHNODEP_POWER_BY_STAGE.get(getLifeStage());
+    if (power == null) {
+      DragonMounts.loggerLimit.error_once("Illegal lifestage in getBreathPowerP():" + getLifeStage());
+      power = BreathNodeP.Power.SMALL;
+    }
+    return power;
+  }
 }

@@ -12,6 +12,8 @@ package com.TheRPGAdventurer.ROTD;
 import com.TheRPGAdventurer.ROTD.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.google.common.collect.Lists;
+
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -37,6 +39,7 @@ public class DragonMountsConfig {
   private static boolean prototypeBreathWeapons = false;
 	public static boolean shouldChangeBreedViaHabitatOrBlock = true;
 	public static boolean canDragonDespawn = true;
+	public static boolean canMilk = true;
 
 	public static boolean canIceBreathBePermanent = false;
 	public static boolean canFireBreathAffectBlocks = true;
@@ -54,6 +57,7 @@ public class DragonMountsConfig {
 
 	public static double ARMOR  = 8F;
 	public static double BASE_DAMAGE  = 5.0F;
+	public static double BASE_HEALTH = 90.0d;
 	public static int REG_FACTOR  = 75;
 	public static int hungerDecrement  = 3000;
 
@@ -69,9 +73,9 @@ public class DragonMountsConfig {
 	public static int WaterNestRarity  = 150;
 	public static int IceNestRarity  = 200;
 
-	public static int netherNestRarity = 300;
-	public static int netherNestRarerityInX = 32;
-	public static int netherNestRarerityInZ = 32;
+	public static int netherNestRarity = 200;
+	public static int netherNestRarerityInX = 16;
+	public static int netherNestRarerityInZ = 16;
 
 	public static int zombieNestRarity = 500;
 	public static int zombieNestRarerityInX = 28;
@@ -82,7 +86,7 @@ public class DragonMountsConfig {
 	public static int dragonFollowOwnerFlyingHeight = 50;
 	public static int dragonanderFromHomeDist = 50;
 
-	public static double maxFLightHeight = 40;
+	public static double maxFLightHeight = 20;
 
 	public static int[] dragonBlacklistedDimensions = new int[]{1, -1};
 	public static int[] dragonWhitelistedDimensions = new int[]{0};
@@ -174,6 +178,11 @@ public class DragonMountsConfig {
 		prop.setComment("Damage for dragon attack");
 		BASE_DAMAGE = prop.getDouble();
 		propOrder.add(prop.getName());
+		
+		prop = config.get(CATEGORY_MAIN, "Dragon Base Health", BASE_HEALTH);
+		prop.setComment("Dragon Base Health" + TextFormatting.ITALIC + " Note: Some Dragons have unique health values and are still affected by this");
+		BASE_HEALTH = prop.getDouble();
+		propOrder.add(prop.getName());
 
 		prop = config.get(CATEGORY_MAIN, "Health Regen Speed", REG_FACTOR);
 		prop.setComment("Higher numbers slower regen for dragons");
@@ -181,13 +190,18 @@ public class DragonMountsConfig {
 		propOrder.add(prop.getName());
 
 		prop = config.get(CATEGORY_MAIN, "Hunger Speed", hungerDecrement);
-		prop.setComment("Lower numbers slower hunger speed for dragons");
+		prop.setComment("More numbers slower, i.e. gets a number from the factor of (3000 * 5) to 1 per millisecond if it equals to 1 reduce hunger, set to zero for no hunger");
 		hungerDecrement = prop.getInt();
 		propOrder.add(prop.getName());
 
 		prop = config.get(CATEGORY_MAIN, "can dragons despawn", canDragonDespawn);
 		prop.setComment("Enables or Disables dragons ability to despawn, works only for adult non tamed dragons");
 		canDragonDespawn = prop.getBoolean();
+		propOrder.add(prop.getName());
+
+		prop = config.get(CATEGORY_MAIN, "Milk Dregons", canMilk);
+		prop.setComment("Joke Feature: makes dragons milkable like cows");
+		canMilk = prop.getBoolean();
 		propOrder.add(prop.getName());
 
 		prop = config.get(CATEGORY_MAIN, "can ice breath be permanent", canIceBreathBePermanent);
@@ -234,6 +248,7 @@ public class DragonMountsConfig {
 		 *  WORLDGEN
 		 */
 
+		// thanks i/f
 		dragonBlacklistedDimensions = config.get("all", "Blacklisted Dragon Dimensions", new int[]{-1, 1}, "Dragons cannot spawn in these dimensions' IDs").getIntList();
 		dragonWhitelistedDimensions = config.get("all", "Whitelisted Dragon Dimensions", new int[]{0}, "Dragons can only spawn in these dimensions' IDs").getIntList();
 		useDimensionBlackList = config.getBoolean("use Dimension Blacklist", "all", true, "true to use dimensional blacklist, false to use the whitelist.");

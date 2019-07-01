@@ -53,7 +53,7 @@ public class DragonBreedSkeleton extends DragonBreed {
     public void onDeath(EntityTameableDragon dragon) {}
 
     public SoundEvent getLivingSound(EntityTameableDragon dragon) {
-        if (dragon.isHatchling()) {
+        if (dragon.isBaby()) {
             return ModSounds.ENTITY_DRAGON_HATCHLING_GROWL;
         } else {
             return ModSounds.ENTITY_SKELETON_DRAGON_GROWL;

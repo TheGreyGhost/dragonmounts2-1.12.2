@@ -69,9 +69,9 @@ public class TargetHighlighter
         return;
       }
       default: {
-          DragonMounts.loggerLimit.error_once(
-                  "Unknown target type in blockHighlightDecider : " + targetToHighlight.getTypeOfTarget());
-          return;
+        DragonMounts.loggerLimit.error_once(
+                "Unknown target type in blockHighlightDecider : " + targetToHighlight.getTypeOfTarget());
+        return;
       }
     }
   }

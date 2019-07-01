@@ -1,17 +1,17 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper;
 
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.util.reflection.PrivateAccessor;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.util.math.Vec3d;
 
 import static net.minecraft.entity.SharedMonsterAttributes.MOVEMENT_SPEED;
 
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-
-public class DragonMoveHelper extends EntityMoveHelper {
+public class DragonMoveHelper extends EntityMoveHelper implements PrivateAccessor {
 
     private final EntityTameableDragon dragon;
-    private final float YAW_SPEED = 50;
+    private final float YAW_SPEED = 40;
 
     public DragonMoveHelper(EntityTameableDragon dragon) {
         super(dragon);
@@ -44,7 +44,7 @@ public class DragonMoveHelper extends EntityMoveHelper {
                 dragon.motionY = dir.y * flySpeed;
                 dragon.motionZ = dir.z * flySpeed;
 
-            } else {
+            } else if (dragon.getControllingPlayer() != null) {
                 // just slow down and hover at current location
                 dragon.motionX *= 0.8;
                 dragon.motionY *= 0.8;
@@ -57,14 +57,12 @@ public class DragonMoveHelper extends EntityMoveHelper {
             if (dist > 2.5E-7) {
                 float newYaw = (float) Math.toDegrees(Math.PI * 2 - Math.atan2(dir.x, dir.z));
                 dragon.rotationYaw = limitAngle(dragon.rotationYaw, newYaw, YAW_SPEED);
-                entity.setAIMoveSpeed((float)(speed * entity.getEntityAttribute(MOVEMENT_SPEED).getAttributeValue()));
+                entity.setAIMoveSpeed((float) (speed * entity.getEntityAttribute(MOVEMENT_SPEED).getAttributeValue()));
             }
 
             // apply movement
             dragon.move(MoverType.SELF, dragon.motionX, dragon.motionY, dragon.motionZ);
 
-        } else {
-            super.onUpdateMoveHelper();
-        }
+        } else super.onUpdateMoveHelper();
     }
 }

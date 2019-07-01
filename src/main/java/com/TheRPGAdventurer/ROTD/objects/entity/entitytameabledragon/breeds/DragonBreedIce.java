@@ -11,6 +11,10 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectNames;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
@@ -27,8 +31,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
@@ -108,9 +110,8 @@ public class DragonBreedIce extends DragonBreed {
         dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforIceDragon(world, power, tickCounter);
     }
 
-    @SideOnly(Side.CLIENT)
     private void doParticles(EntityTameableDragon dragon) {
-        if (!dragon.isEgg() && !dragon.isHatchling()) {
+        if (!dragon.isEgg() && !dragon.isBaby()) {
             float s=dragon.getScale() * 1.2f;
             double x=dragon.posX + (rand.nextDouble() - 0.5) * (dragon.width - 0.65) * s;
             double y=dragon.posY + (rand.nextDouble() - 0.5) * dragon.height * s;
@@ -168,6 +169,5 @@ public class DragonBreedIce extends DragonBreed {
 //        return soundEffectNames;
 //
 //    }
-
 
 }

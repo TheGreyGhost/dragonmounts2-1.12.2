@@ -15,7 +15,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTamea
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemFood;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -26,32 +26,33 @@ public abstract class DragonInteractBase {
 
     protected final EntityTameableDragon dragon;
 
-    public DragonInteractBase(EntityTameableDragon dragon) {
-        this.dragon = dragon;
+	public DragonInteractBase(EntityTameableDragon dragon) {
+    	this.dragon = dragon;
     }
 
     public abstract boolean interact(EntityPlayer player, ItemStack item);
     
     protected boolean isAllowed(EntityPlayer player) {
-		ItemFood food = (ItemFood) DMUtils.consumeEquipped(player, DragonBreed.getFoodItems());
-        if (!dragon.isTamed() && (food == null || !DMUtils.consumeFish(player))) {
+		boolean hasFood = DMUtils.consumeEquippedArray(player, DragonBreed.getFoodItems()) || DMUtils.consumeFish(player);
+		
+        if (!dragon.isTamed() && !hasFood) {
             player.sendStatusMessage(new TextComponentTranslation("dragon.notTamed"), true);
             return dragon.isTamedFor(player);
-        } else if (!dragon.allowedOtherPlayers() && !dragon.isTamedFor(player) && (food == null || !DMUtils.consumeFish(player)) && !DMUtils.hasEquippedAmulet(player)) {
+        } else if (!dragon.allowedOtherPlayers() && !dragon.isTamedFor(player) && dragon.isTamed() && !(dragon.getHealthRelative() < 1 && hasFood)) {
             player.sendStatusMessage(new TextComponentTranslation("dragon.locked"), true);
             return dragon.isTamedFor(player);
-        } else {
-            return true;
-        }
+        } else return true;
     }
     
-    public boolean hasInteractItemsEquipped(EntityPlayer player) {
-    	return	DMUtils.hasEquippedUsable(player)
+    public static boolean hasInteractItemsEquipped(EntityPlayer player) {
+    	return DMUtils.hasEquippedUsable(player)
     			|| DMUtils.hasEquipped(player, ModTools.diamond_shears)
     			|| DMUtils.hasEquipped(player, ModItems.dragon_wand)
     			|| DMUtils.hasEquipped(player, ModItems.dragon_whistle)
     			|| DMUtils.hasEquipped(player, ModItems.Amulet)
-    			|| DMUtils.hasEquipped(player, dragon.dragonEssence())
+    			|| DMUtils.hasEquipped(player, Items.BONE)
+    			|| DMUtils.hasEquipped(player, Items.STICK)
     			|| DMUtils.hasEquippedFood(player);
     }
+    
 }

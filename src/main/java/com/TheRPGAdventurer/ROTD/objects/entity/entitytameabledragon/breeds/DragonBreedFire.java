@@ -74,9 +74,8 @@ public class DragonBreedFire extends DragonBreed {
 		if(dragon.isInLava() || dragon.world.isMaterialInBB(dragon.getEntityBoundingBox().grow(-0.1, -0.4, -0.1), Material.FIRE)) doParticles(dragon);
 	}
 	
-    @SideOnly(Side.CLIENT)
     private void doParticles(EntityTameableDragon dragon) {
-        if (!dragon.isEgg() && !dragon.isHatchling()) {
+        if (!dragon.isEgg() && !dragon.isBaby()) {
 	        float s = dragon.getScale() * 1.2f;
 	        for (double x1 = 0; x1 < s + 1; ++x1) {
 		        double x = dragon.posX + (rand.nextDouble() - 0.5) * (dragon.width - 0.65) * s;

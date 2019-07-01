@@ -4,7 +4,7 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.IHasModel;
 import net.minecraft.block.BlockFence;
@@ -47,9 +47,9 @@ public class ItemDragonSpawner extends Item implements IHasModel {
         EntityTameableDragon dragon=new EntityTameableDragon(world);
         try {
             if (player.isSneaking()) {
-                dragon.getLifeStageHelper().setLifeStage(EnumDragonLifeStage.HATCHLING);
+                dragon.getLifeStageHelper().setLifeStage(DragonLifeStage.HATCHLING);
             } else {
-                dragon.getLifeStageHelper().setLifeStage(EnumDragonLifeStage.ADULT);
+                dragon.getLifeStageHelper().setLifeStage(DragonLifeStage.ADULT);
             }
 
             dragon.setPosition(x + 0.5, y + 0.5, z + 0.5);
@@ -57,7 +57,7 @@ public class ItemDragonSpawner extends Item implements IHasModel {
             dragon.rotationYawHead=dragon.rotationYaw;
             dragon.renderYawOffset=dragon.rotationYaw;
             dragon.setBreedType(breed);
-            dragon.setHealth(dragon.getMaxHealth());
+            dragon.heal(200);
             return dragon;
         } catch (Exception e) {
             e.printStackTrace();

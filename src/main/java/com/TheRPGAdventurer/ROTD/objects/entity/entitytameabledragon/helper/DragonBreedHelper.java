@@ -13,9 +13,9 @@ import com.TheRPGAdventurer.ROTD.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.DamageSource;
@@ -34,11 +34,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Helper class for breed properties.
- * 
+ *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public class DragonBreedHelper extends DragonHelper {
-    
+
     private static final Logger L = LogManager.getLogger();
     private static final int BLOCK_RANGE = 2;
     private static final int POINTS_BLOCK = 1;
@@ -53,10 +53,10 @@ public class DragonBreedHelper extends DragonHelper {
 
     private final DataParameter<String> dataParam;
     private final Map<EnumDragonBreed, AtomicInteger> breedPoints = new EnumMap<>(EnumDragonBreed.class);
-    
+
     public DragonBreedHelper(EntityTameableDragon dragon, DataParameter<String> dataParam) {
         super(dragon);
-        
+
         this.dataParam = dataParam;
 
         if (dragon.isServer()) {
@@ -64,18 +64,18 @@ public class DragonBreedHelper extends DragonHelper {
             for (EnumDragonBreed type : EnumDragonBreed.values()) {
                 breedPoints.put(type, new AtomicInteger());
             }
-            
+
             // default breed has initial points
             breedPoints.get(EnumDragonBreed.FIRE).set(POINTS_INITIAL);
         }
-        
+
         dataWatcher.register(dataParam, EnumDragonBreed.END.getName());
     }
 
     @Override
     public void writeToNBT(NBTTagCompound nbt) {
         nbt.setString(NBT_BREED, getBreedType().getName());
-        
+
         NBTTagCompound breedPointTag = new NBTTagCompound();
         breedPoints.forEach((type, points) -> {
             breedPointTag.setInteger(type.getName(), points.get());
@@ -94,63 +94,91 @@ public class DragonBreedHelper extends DragonHelper {
                     dragon.getEntityId(), breedName, breed);
         }
         setBreedType(breed);
-        
+
         // read breed points
         NBTTagCompound breedPointTag = nbt.getCompoundTag(NBT_BREED_POINTS);
         breedPoints.forEach((type, points) -> {
             points.set(breedPointTag.getInteger(type.getName()));
         });
     }
-    
+
     public Map<EnumDragonBreed, AtomicInteger> getBreedPoints() {
         return Collections.unmodifiableMap(breedPoints);
     }
-    
+
     public EnumDragonBreed getBreedType() {
         String breedName = dataWatcher.get(dataParam);
         return EnumUtils.getEnum(EnumDragonBreed.class, breedName.toUpperCase());
     }
-    
+
     public void setBreedType(EnumDragonBreed newType) {
         L.trace("setBreed({})", newType);
-        
+
         // ignore breed changes on client side, it's controlled by the server
         if (dragon.isClient()) {
             return;
         }
-        
+
         Objects.requireNonNull(newType);
-        
+
         // check if the breed actually changed
         EnumDragonBreed oldType = getBreedType();
         if (oldType == newType) {
             return;
         }
-        
+
         DragonBreed oldBreed = oldType.getBreed();
         DragonBreed newBreed = newType.getBreed();
-        
+
         // switch breed stats
         oldBreed.onDisable(dragon);
         newBreed.onEnable(dragon);
-        
+
         // check for fire immunity and disable fire particles
         dragon.setImmuneToFire(newBreed.isImmuneToDamage(DamageSource.IN_FIRE) || newBreed.isImmuneToDamage(DamageSource.ON_FIRE) || newBreed.isImmuneToDamage(DamageSource.LAVA));
-        
+
         // update breed name
         dataWatcher.set(dataParam, newType.getName());
-        
+
         // reset breed points
         if (dragon.isEgg()) {
             breedPoints.values().forEach(points -> points.set(0));
             breedPoints.get(newType).set(POINTS_INITIAL);
         }
     }
-    
+
+    /**
+     * Get's the health of the dragon per breed, doubles
+     * when it turns into an adult
+     */
+    public void getBreedHealth() {
+    	
+    	IAttributeInstance health = dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
+    	double base = DragonMountsConfig.BASE_HEALTH; //90d
+
+        switch (getBreedType()) {
+        	case NETHER:
+        		health.setBaseValue(base + 5d);
+        		break;
+        	case END:
+        		health.setBaseValue(base + 10d);
+        		break;
+        	case SKELETON:
+        		health.setBaseValue(base - (base < 16d ? 0d : 15d)); // Cant have 0 health!
+        		break;
+        	case WITHER:
+        		health.setBaseValue(base - (base < 6d ? 0d : 10d)); // Cant have 0 health!
+        		break;
+        	default: //All Dragons without special health parameters
+        		health.setBaseValue(base);
+        		break;
+        }
+    }
+
     @Override
     public void onLivingUpdate() {
         EnumDragonBreed currentType = getBreedType();
-        
+
         if (dragon.isEgg()) {
             // spawn breed-specific particles every other tick
             if (dragon.isClient() && dragon.ticksExisted % TICK_RATE_PARTICLES == 0) {
@@ -164,19 +192,19 @@ public class DragonBreedHelper extends DragonHelper {
                 }
             }
 
-         // update egg breed every second on the server
-            if (dragon.getBreed().canChangeBreed() && dragon.isServer() && dragon.ticksExisted % TICK_RATE_BLOCK == 0 && DragonMountsConfig.shouldChangeBreedViaHabitatOrBlock) {
+            // update egg breed every second on the server
+            if (dragon.getBreed().canChangeBreed() && dragon.isServer() && dragon.ticksExisted % TICK_RATE_BLOCK == 0) {
                 BlockPos eggPos = dragon.getPosition();
-                
+
                 // scan surrounding for breed-loving blocks
                 BlockPos eggPosFrom = eggPos.add(BLOCK_RANGE, BLOCK_RANGE, BLOCK_RANGE);
                 BlockPos eggPosTo = eggPos.add(-BLOCK_RANGE, -BLOCK_RANGE, -BLOCK_RANGE);
-                
+
                 BlockPos.getAllInBoxMutable(eggPosFrom, eggPosTo).forEach(blockPos -> {
                     Block block = dragon.world.getBlockState(blockPos).getBlock();
                     breedPoints.entrySet().stream()
-                        .filter(breed -> (breed.getKey().getBreed().isHabitatBlock(block)))
-                        .forEach(breed -> breed.getValue().addAndGet(POINTS_BLOCK));
+                            .filter(breed -> (breed.getKey().getBreed().isHabitatBlock(block)))
+                            .forEach(breed -> breed.getValue().addAndGet(POINTS_BLOCK));
                 });
 
                 // check biome
@@ -196,50 +224,32 @@ public class DragonBreedHelper extends DragonHelper {
 
                 // update most dominant breed
                 EnumDragonBreed newType = breedPoints.entrySet().stream()
-                    .max((breed1, breed2) -> Integer.compare(
-                            breed1.getValue().get(),
-                            breed2.getValue().get()))
-                    .get().getKey();
-                
+                        .max((breed1, breed2) -> Integer.compare(
+                                breed1.getValue().get(),
+                                breed2.getValue().get()))
+                        .get().getKey();
+
                 if (newType != currentType) {
                     setBreedType(newType);
 
                 }
             }
         }
-        
+
         currentType.getBreed().onUpdate(dragon);
         getBreedHealth();
     }
+
+
 
     @Override
     public void onDeath() {
         getBreedType().getBreed().onDeath(dragon);
     }
-    
+
     public void inheritBreed(EntityTameableDragon parent1, EntityTameableDragon parent2) {
         breedPoints.get(parent1.getBreedType()).addAndGet(POINTS_INHERIT + rand.nextInt(POINTS_INHERIT));
         breedPoints.get(parent2.getBreedType()).addAndGet(POINTS_INHERIT + rand.nextInt(POINTS_INHERIT));
     }
 
-    public void getBreedHealth() {
-    	
-        switch (getBreedType()) {
-        	case NETHER:
-        		dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(95.0D);
-        		break;
-        	case END:
-        		dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0D);
-        		break;
-        	case SKELETON:
-        		dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(85.0D);
-        		break;
-        	case WITHER:
-        		dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(85.0D);
-        		break;
-        	default: //All Dragons without special health parameters
-        		dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(90.0D);
-        		break;
-        }
-    }
 }

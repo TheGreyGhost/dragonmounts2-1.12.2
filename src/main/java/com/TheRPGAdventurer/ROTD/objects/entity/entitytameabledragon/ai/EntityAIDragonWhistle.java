@@ -42,7 +42,7 @@ public class EntityAIDragonWhistle extends EntityAIDragonBase {
     @Override
     public void startExecuting() {
         //Commands Requiring Flight - if any is true, start flying
-        if (!dragon.isFlying() && (dragon.circle() || dragon.follow() || dragon.come()) || dragon.firesupport()) {
+        if (!dragon.isFlying() && (dragon.circle() || dragon.follow()) || dragon.firesupport()) {
             dragon.liftOff();
         }
 
@@ -53,9 +53,6 @@ public class EntityAIDragonWhistle extends EntityAIDragonBase {
             } else if (dragon.follow() && !dragon.followPlayerFlying(dragon.getOwner()) && dragon.getOwner()!=null) {
                 dragon.followPlayerFlying(dragon.getOwner());
                 dragon.getAISit().setSitting(false);
-            } else if (dragon.come() && !dragon.comeToPlayerFlying(dragon.getOwner().getPosition(), dragon.getOwner()) && dragon.getOwner()!=null) {
-                dragon.comeToPlayerFlying(dragon.getOwner().getPosition(), dragon.getOwner());
-                dragon.getAISit().setSitting(false);
             } else if (dragon.homepos()) {
                 BlockPos pos=new BlockPos(dragon);
                 dragon.homePos=pos;
@@ -64,7 +61,6 @@ public class EntityAIDragonWhistle extends EntityAIDragonBase {
             } else if (dragon.nothing()) {
                 return;
             } else if(dragon.firesupport()) {
-                dragon.fireSupport(dragon, dragon.getOwner());
                 dragon.getAISit().setSitting(false);
             }
 

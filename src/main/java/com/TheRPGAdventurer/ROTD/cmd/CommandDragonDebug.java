@@ -10,7 +10,7 @@
 package com.TheRPGAdventurer.ROTD.cmd;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.EnumDragonLifeStage;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
 
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.client.Minecraft;
@@ -59,6 +59,11 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
 
       addCommand(new CommandDragonLambda("renderCentrepoints", (server, sender, args) -> {
         DebugSettings.setRenderCentrePoints(!DebugSettings.isRenderCentrePoints());
+
+      addCommand(new CommandDragonLambda("parameter", (server, sender, args) -> {
+        String paramName = args[0];
+        double value = parseDouble(args[1], 0);
+        DebugSettings.setDebugParameter(paramName,value);
       }));
 
       addCommand(new CommandDragonLambda("testBreeds", dragon -> {
@@ -76,7 +81,7 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
         addCommand(new CommandDragonLambda("testStages", dragon -> {
             new Thread(() -> {
                 try {
-                    for (EnumDragonLifeStage stage : EnumDragonLifeStage.values()) {
+                    for (DragonLifeStage stage : DragonLifeStage.values()) {
                         dragon.getLifeStageHelper().setLifeStage(stage);
                         Thread.sleep(1000);
                     }

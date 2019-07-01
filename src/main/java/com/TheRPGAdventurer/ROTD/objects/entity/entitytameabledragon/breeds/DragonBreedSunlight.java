@@ -33,9 +33,8 @@ public class DragonBreedSunlight extends DragonBreed {
 		if(dragon.posY > dragon.world.getHeight() + 8 && dragon.world.isDaytime()) doParticles(dragon);
 	}
 	
-    @SideOnly(Side.CLIENT)
     private void doParticles(EntityTameableDragon dragon) {
-        if (!dragon.isEgg() && !dragon.isHatchling()) {
+        if (!dragon.isEgg() && !dragon.isBaby()) {
 	        float s = dragon.getScale() * 1.2f;
 	        for (double x1 = 0; x1 < s + 2; ++x1) {
 		        double x = dragon.posX + (rand.nextDouble() - 0.5) * (dragon.width - 0.65) * s;

@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import org.lwjgl.input.Keyboard;
+import java.util.HashMap;
 
 /**
  * Created by TGG on 29/06/2015.
@@ -55,4 +56,26 @@ public class DebugSettings
     DebugSettings.renderCentrePoints = renderCentrePoints;
   }
   private static boolean renderCentrePoints;
+
+  /**
+   * Debug parameters can be set using the command console
+   * /dragon debug parameter {name} {value}
+   * eg
+   * /dragon debug parameter x 0.3
+   * Useful for interactively adjusting rendering offsets in-game
+   * @param parameterName
+   * @param value
+   */
+  public static void setDebugParameter(String parameterName, double value)
+  {
+    debugParameters.put(parameterName, value);
+  }
+
+  public static double getDebugParameter(String parameterName)
+  {
+    Double value = debugParameters.get(parameterName);
+    return (value == null) ? 0.0 : value;
+  }
+
+  private static HashMap<String, Double> debugParameters = new HashMap<>();
 }

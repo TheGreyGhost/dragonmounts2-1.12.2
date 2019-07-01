@@ -28,8 +28,8 @@ public class ItemDragonBreedEgg extends ItemBlock {
 
     @Override
     public String getItemStackDisplayName(ItemStack stack) {
-        EnumDragonBreed breed = EnumDragonBreed.getBreedFromItemStack(stack);
-        String breedName = net.minecraft.util.text.translation.I18n.translateToLocal("entity.DragonMounts.dragon." + breed.getName() + ".name");
+        EnumDragonBreed breed = EnumDragonBreed.META_MAPPING.inverse().get(stack.getMetadata());
+        String breedName = net.minecraft.util.text.translation.I18n.translateToLocal("entity.DragonMount." + breed.getName() + ".name");
         return net.minecraft.util.text.translation.I18n.translateToLocalFormatted("item.dragonEgg.name", breedName);
     }
     

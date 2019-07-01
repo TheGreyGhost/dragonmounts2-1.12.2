@@ -15,7 +15,6 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.Enum
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonBreedHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonReproductionHelper;
-
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;

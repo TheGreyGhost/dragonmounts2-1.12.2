@@ -11,6 +11,7 @@ package com.TheRPGAdventurer.ROTD.proxy;
 
 import com.TheRPGAdventurer.ROTD.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
+import com.TheRPGAdventurer.ROTD.client.model.ModelAmuletMesh;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.RenderCarriage;
 import com.TheRPGAdventurer.ROTD.client.render.RenderDM2Cape;
@@ -26,11 +27,14 @@ import com.TheRPGAdventurer.ROTD.inits.ModKeys;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitycarriage.EntityCarriage;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.effects.*;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.items.entity.ImmuneEntityItem;
+import com.TheRPGAdventurer.ROTD.objects.items.gemset.armorset.DragonArmourEnchant;
 import com.TheRPGAdventurer.ROTD.objects.tileentities.TileEntityDragonShulker;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.StartupDebugClientOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.text.TextFormatting;
@@ -38,7 +42,6 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -46,6 +49,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.util.Arrays;
 
@@ -89,10 +93,10 @@ public class ClientProxy extends ServerProxy {
         metadata.name = t.DARK_AQUA +""+ t.BOLD + "Dragon Mounts";
         metadata.credits = "\n" +
                 t.GREEN + "BarracudaATA4" + r + "-" + t.AQUA + "The Original Owner\n\n" +
-                t.GREEN + "Merpou/Kingdomall/Masked_Ares" + r + "-" + t.AQUA + "more textures much help, First Dev for Dragon Mounts, Overall Second Dev :D Thanks Man... (just found out she's a girl BTW O_O)\n\n" +
+                t.GREEN + "Merpou/Kingdomall/Masked_Ares" + r + "-" + t.AQUA + "First Dev for DM2. Has Made 500+ Textures and has put forth so much effort.\n\n" +
                 t.GREEN + "Shannieanne" + r + "-" + t.AQUA + "Zombie Textures, Terra textures, Texture Fixes, Overall Second Dev\n\n" +
-                t.GREEN + "GundunUkan/Lord Ukan" + r + "-" + t.AQUA + "for new fire texures, sunlight textures, and more.... I Hope he finishes his university he's a hardworking working student\n\n" +
-                t.GREEN + "Wolf" + r + "-" + t.AQUA + "Second Coder, started making small fixes then started doing big ones, I hope his dreams of becoming a computer engineer succeeds\n\n" +
+                t.GREEN + "GundunUkan/Lord Ukan" + r + "-" + t.AQUA + "for new fire texures, sunlight textures, and more.... I Hope he finishes his university hes hardworking working student\n\n" +
+                t.GREEN + "Wolf" + r + "-" + t.AQUA + "Second Coder, started making small fixes then started doing big ones, I hope his dreams of becoming computer engineer succeeds\n\n" +
                 t.GREEN + "FlaemWing" + r + "-" + t.AQUA + "for new nest block textures and dragonarmor item textures, new tool textures\n\n" +
                 t.GREEN + "AlexThe666" + r + "-" + t.AQUA + "for open source code, Ice and Fire owner, Older Matured and more experience than me\n\n" +
                 t.GREEN + "Majty/Guinea Owl" + r + "-" + t.AQUA + "for amulet textures\n" +
@@ -109,17 +113,25 @@ public class ClientProxy extends ServerProxy {
 
     @Override
     public void Initialization(FMLInitializationEvent evt) {
-        super.Initialization(evt);
-      if (DragonMountsConfig.isDebug()) {
-        MinecraftForge.EVENT_BUS.register(new GuiDragonDebug());
-      }
-      StartupDebugClientOnly.initClientOnly();
+    	super.Initialization(evt);
+    	if (DragonMountsConfig.isDebug()) {
+    		MinecraftForge.EVENT_BUS.register(new GuiDragonDebug());
+    	}
+    	StartupDebugClientOnly.initClientOnly();
 
         // Dragon Whistle String Color
         Minecraft.getMinecraft().getItemColors().registerItemColorHandler((stack, tintIndex) -> {
             if (stack.hasTagCompound() && stack.getTagCompound().hasKey("Color") && tintIndex == 1) return stack.getTagCompound().getInteger("Color");
             return 0xFFFFFF;
         }, ModItems.dragon_whistle);
+        
+    	System.out.println("Registered Amulets");
+        ModelLoader.setCustomMeshDefinition(ModItems.Amulet, new ModelAmuletMesh());
+        ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:dragon_amulet"));
+        EnumDragonBreed.META_MAPPING.forEach((breed, meta) -> {
+        	ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:" + breed.getName() + "_dragon_amulet"));
+        });
+        
     }
 
     @Override
@@ -136,9 +148,11 @@ public class ClientProxy extends ServerProxy {
         MinecraftForge.EVENT_BUS.register(DragonOrbControl.getInstance());
         MinecraftForge.EVENT_BUS.register(new TargetHighlighter());
         MinecraftForge.EVENT_BUS.register(new CentrepointCrosshairRenderer());
+ //       FMLCommonHandler.instance().bus().register(new DragonEntityWatcher());  todo not required? if i remember correctly this is used to make a zoom in, thridpersonview i unused now now uing DragonViewEvent rpg
 
       MinecraftForge.EVENT_BUS.register(new ModKeys());
         MinecraftForge.EVENT_BUS.register(new DragonViewEvent());
+        MinecraftForge.EVENT_BUS.register(new DragonArmourEnchant.ArmourXPBonus());
         MinecraftForge.EVENT_BUS.register(new RenderDM2Cape());
         MinecraftForge.EVENT_BUS.register(ImmuneEntityItem.EventHandler.instance);
 
@@ -149,7 +163,7 @@ public class ClientProxy extends ServerProxy {
     public void render() {
         ModKeys.init();
     }
-
+    
     public int getDragon3rdPersonView() {
         return thirdPersonViewDragon;
     }
@@ -181,6 +195,16 @@ public class ClientProxy extends ServerProxy {
 
     public void registerItemRenderer(Item item, int meta, String id) {
     	ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(item.getRegistryName(), id));
+    }
+    
+    @Override
+    /**Handles Amulet Model Variations*/
+    public void registerAmuletRenderer() {
+        ModelLoader.setCustomMeshDefinition(ModItems.Amulet, new ModelAmuletMesh());
+        ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:dragon_amulet"));
+        EnumDragonBreed.META_MAPPING.forEach((breed, meta) -> {
+        	ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:" + breed.getName() + "_dragon_amulet"));
+        });
     }
 
   @Override
