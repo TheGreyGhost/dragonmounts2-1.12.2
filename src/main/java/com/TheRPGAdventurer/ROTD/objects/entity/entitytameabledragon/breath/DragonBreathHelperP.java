@@ -386,7 +386,7 @@ public class DragonBreathHelperP extends DragonHelper {
       Vec3d origin = dragon.getAnimator().getThroatPosition();
       Vec3d lookDirection = dragon.getLook(1.0f);
       Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
-      BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPower();
+      BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
       if (endOfLook != null && currentBreathState == BreathState.SUSTAIN) {
         dragon.getBreed().continueAndUpdateBreathingLegacy(dragon.getEntityWorld(), origin, endOfLook, power, dragon);
       }
@@ -447,7 +447,7 @@ public class DragonBreathHelperP extends DragonHelper {
       Vec3d lookDirection = dragon.getLook(1.0f);
       Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
       if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
-        BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPower();
+        BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
         dragon.getBreed().spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
       }
     }

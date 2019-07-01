@@ -16,7 +16,6 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.air.Enti
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.ground.*;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.targeting.EntityAIRangedBreathAttack;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.Pair;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.whistlestates.AIWhistle_ComeToPlayer;
 import com.TheRPGAdventurer.ROTD.util.EntityClassPredicate;
 
 import com.google.common.base.Predicate;
@@ -79,7 +78,7 @@ public class DragonBrain extends DragonHelper {
     // guessed, based on EntityAIRestrictOpenDoor - break the door down, don't open it
     if (dragon.getNavigator() instanceof PathNavigateGround) {
       PathNavigateGround pathNavigateGround = (PathNavigateGround) dragon.getNavigator();
-      pathNavigateGround.setEnterDoors(dragon.isHatchling());
+      pathNavigateGround.setEnterDoors(dragon.isBaby());
     }
 
     // clear current navigation target
@@ -97,7 +96,7 @@ public class DragonBrain extends DragonHelper {
     // mutex 2: looking
     // mutex 4: special state
 
-    Pair<Float, Float> ranges = dragon.getBreed().getBreathWeaponRange(dragon.getLifeStageHelper().getLifeStageP());
+    Pair<Float, Float> ranges = dragon.getBreed().getBreathWeaponRange(dragon.getLifeStageHelper().getLifeStage());
     float minAttackRange = ranges.getFirst();
     float maxAttackRange = ranges.getSecond();
     EntityAIMoveToOptimalDistance moveToOptimalAttackDistance =
@@ -118,7 +117,7 @@ public class DragonBrain extends DragonHelper {
     } else {
       tasks.addTask(20, new EntityAISwimming(dragon)); // mutex 4
 
-      if (dragon.isHatchling() && dragon.onGround) {
+      if (dragon.isBaby() && dragon.onGround) {
         tasks.addTask(70, new EntityAILeapAtTarget(dragon, 0.7F)); // mutex 1
         tasks.addTask(80, new EntityAIFollowParent(dragon, 1.4f));
         tasks.addTask(90, new EntityAITempt(dragon, 0.75, false, OreDictionary.getOres("listAllfishraw").stream().map(ItemStack::getItem).collect(Collectors.toSet()))); // mutex 2+1

@@ -47,7 +47,7 @@ public class DragonInteract extends DragonInteractBase {
                  */
                 if (dragon.isEgg() && player.isSneaking()) {
                     dragon.world.playSound(player, dragon.getPosition(), SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, SoundCategory.PLAYERS, 1, 1);
-                    dragon.world.setBlockState(dragon.getPosition(), BlockDragonBreedEgg.DRAGON_BREED_EGG.getStateFromMeta(dragon.getBreedType().getMeta()));
+                    dragon.world.setBlockState(dragon.getPosition(), dragon.getBreedType().getBlockState());
                     dragon.setDead();
                 }
 
@@ -93,7 +93,7 @@ public class DragonInteract extends DragonInteractBase {
                     // heal
                     if (DragonMountsConfig.hungerDecrement == 0) {
                         eatEvent(player);
-                        dragon.heal(50);
+                      dragon.heal(50);
                         return true;
                     //  hunger
                     } else if (dragon.getHunger() < 100) {

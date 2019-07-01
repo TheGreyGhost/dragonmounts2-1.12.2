@@ -3,8 +3,9 @@ package com.TheRPGAdventurer.ROTD.util.debugging;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.TestForestBreath;
 import net.minecraft.block.BlockLadder;
@@ -38,6 +39,14 @@ public class TestRunner
   {
     boolean success = false;
     switch (testNumber) {
+      case 59: {
+        testGetRelativeHeadSize(worldIn);
+        break;
+      }
+      case 60: {
+        testDragonLifeStage();
+        break;
+      }
       case 61: {
 //        success = test1(worldIn, playerIn);  // todo restore
         TestForestBreath testForestBreath = new TestForestBreath();
@@ -70,14 +79,6 @@ public class TestRunner
 //        worldIn.spawnEntityInWorld(entity);
         System.out.println("Lightning spawned: mouth at [x,y,z] = " + origin + "to destination [x,y,z,] = " + target);
 
-        break;
-      }
-      case 60: {
-        testGetRelativeHeadSize(worldIn);
-      }
-
-      case 61: {
-        testDragonLifeStage();
         break;
       }
       default: {
@@ -254,7 +255,7 @@ public class TestRunner
 
     EntityTameableDragon entityDragon = new EntityTameableDragon(worldIn);
     entityDragon.setBreedType(dragonBreedToSpawn);
-    entityDragon.getLifeStageHelper().setLifeStage(EnumDragonLifeStage.ADULT);
+    entityDragon.getLifeStageHelper().setLifeStage(DragonLifeStage.ADULT);
     entityDragon.getReproductionHelper().setBreeder(playerIn);
     entityDragon.setPosition(playerIn.posX + 5, playerIn.posY + 0.2, playerIn.posZ + 5);
     entityDragon.tamedFor(playerIn, true);

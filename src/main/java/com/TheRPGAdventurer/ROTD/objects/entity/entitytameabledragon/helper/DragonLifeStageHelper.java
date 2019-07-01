@@ -370,15 +370,15 @@ public class DragonLifeStageHelper extends DragonHelper {
 //        return getLifeStage() == ADJUDICATOR;
 //    }
 
-  public static final Map<DragonLifeStage, BreathNode.Power> BREATHNODE_POWER_BY_STAGE =
-          ImmutableMap.<DragonLifeStage, BreathNode.Power> builder()
-                  .put(DragonLifeStage.EGG, BreathNode.Power.SMALL)           // dummy
-                  .put(DragonLifeStage.HATCHLING, BreathNode.Power.SMALL)     // dummy
-                  .put(DragonLifeStage.INFANT, BreathNode.Power.SMALL)        // dummy
-                  .put(DragonLifeStage.PREJUVENILE, BreathNode.Power.SMALL)
-                  .put(DragonLifeStage.JUVENILE, BreathNode.Power.MEDIUM)
-                  .put(DragonLifeStage.ADULT, BreathNode.Power.LARGE)
-                  .build();
+//  public static final Map<DragonLifeStage, BreathNode.Power> BREATHNODE_POWER_BY_STAGE =
+//          ImmutableMap.<DragonLifeStage, BreathNode.Power> builder()
+//                  .put(DragonLifeStage.EGG, BreathNode.Power.SMALL)           // dummy
+//                  .put(DragonLifeStage.HATCHLING, BreathNode.Power.SMALL)     // dummy
+//                  .put(DragonLifeStage.INFANT, BreathNode.Power.SMALL)        // dummy
+//                  .put(DragonLifeStage.PREJUVENILE, BreathNode.Power.SMALL)
+//                  .put(DragonLifeStage.JUVENILE, BreathNode.Power.MEDIUM)
+//                  .put(DragonLifeStage.ADULT, BreathNode.Power.LARGE)
+//                  .build();
 
   public static final Map<DragonLifeStage, BreathNodeP.Power> BREATHNODEP_POWER_BY_STAGE =
           ImmutableMap.<DragonLifeStage, BreathNodeP.Power> builder()
@@ -390,14 +390,14 @@ public class DragonLifeStageHelper extends DragonHelper {
                   .put(DragonLifeStage.ADULT, BreathNodeP.Power.LARGE)
                   .build();
 
-    public BreathNode.Power getBreathPower() {
-      BreathNode.Power power = BREATHNODE_POWER_BY_STAGE.get(getLifeStage());
-      if (power == null) {
-        DragonMounts.loggerLimit.error_once("Illegal lifestage in getBreathPower():" + getLifeStage());
-        power = BreathNode.Power.SMALL;
-      }
-      return power;
-    }
+//    public BreathNode.Power getBreathPower() {
+//      BreathNode.Power power = BREATHNODE_POWER_BY_STAGE.get(getLifeStage());
+//      if (power == null) {
+//        DragonMounts.loggerLimit.error_once("Illegal lifestage in getBreathPower():" + getLifeStage());
+//        power = BreathNode.Power.SMALL;
+//      }
+//      return power;
+//    }
 
   public BreathNodeP.Power getBreathPowerP() {
     BreathNodeP.Power power = BREATHNODEP_POWER_BY_STAGE.get(getLifeStage());

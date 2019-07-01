@@ -13,16 +13,16 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.DragonMountsLootTables;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
+import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.inits.*;
 import com.TheRPGAdventurer.ROTD.inventory.ContainerDragon;
-import com.TheRPGAdventurer.ROTD.network.MessageDragonBreath;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonExtras;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonInventory;
 import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitycarriage.EntityCarriage;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.ground.EntityAIDragonSit;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.path.PathNavigateFlying;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathHelper;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathHelperP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
@@ -116,8 +116,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
   public static final int HOME_RADIUS = 64;
   public static final double IN_AIR_THRESH = 10;
-  private static final Logger L = LogManager.getLogger();
-  private static final SimpleNetworkWrapper n = DragonMounts.NETWORK_WRAPPER;
+
   // data value IDs
   private static final DataParameter<Boolean> DATA_FLYING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> GROWTH_PAUSED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
@@ -199,7 +198,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     addHelper(new DragonBreedHelper(this, DATA_BREED));
     addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION));
     addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
-    addHelper(new DragonBreathHelper(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
+    addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
     addHelper(new DragonInteractHelper(this));
     if (isServer()) addHelper(new DragonBrain(this));
 
@@ -1438,7 +1437,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
          */
     if (isEgg() && player.isSneaking()) {
       world.playSound(player, getPosition(), SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, SoundCategory.PLAYERS, 1, 1);
-      world.setBlockState(getPosition(), BlockDragonBreedEgg.DRAGON_BREED_EGG.getStateFromMeta(getBreedType().getMeta()));
+      world.setBlockState(getPosition(), getBreedType().getBlockState());
       setDead();
     }
 
@@ -1459,7 +1458,8 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
     if (getHealth() <= 0) return false;
 
-    if (this.isTamedFor(player) && !this.isBaby() && !player.isSneaking() && !DragonInteractBase.hasInteractItemsEquipped(player)) {
+    // if the dragon is small enough, put it on the player's shoulder
+    if (this.isTamedFor(player) && this.isBaby() && !player.isSneaking() && !DragonInteractBase.hasInteractItemsEquipped(player)) {
       this.setSitting(false);
       this.startRiding(player, true);
       return true;
@@ -1503,17 +1503,13 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
    * Returns the height of the eyes. Used for looking at other entities.
    */
   @Override
-  public float getEyeHeight() { SDGSDGSDG
-    float eyeHeight = height * 0.85F;
-
-    if (isSitting()) {
-      eyeHeight *= 0.8f;
-    }
-
+  public float getEyeHeight() {
+    float eyeHeight;
     if (isEgg()) {
       eyeHeight = 1.3f;
+    } else {
+      eyeHeight = height * getBreed().getRelativeEyeHeight(isSitting());
     }
-
     return eyeHeight;
   }
 
@@ -1973,6 +1969,17 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     return altitude > 2.0;
   }
 
+    public void equalizeYaw(EntityLivingBase rider) {
+    if (isFlying() && this.moveStrafing==0) {
+      this.rotationYaw=((EntityPlayer) rider).rotationYaw;
+      this.prevRotationYaw=((EntityPlayer) rider).prevRotationYaw;
+    }
+    this.rotationYawHead=((EntityPlayer) rider).rotationYawHead;
+    this.prevRotationYawHead=((EntityPlayer) rider).prevRotationYawHead;
+    this.rotationPitch=((EntityPlayer) rider).rotationPitch;
+    this.prevRotationPitch=((EntityPlayer) rider).prevRotationPitch;
+  }
+
   /**
    * method used to fix the head rotation, call it on onlivingbase or riding ai to trigger
    */
@@ -2288,10 +2295,27 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     this.dataManager.set(HUNGER, Math.min(100, hunger));
   }
 
+    /**
+   * when the dragon rotates its head left-right (yaw), how fast does it move?
+   *
+   * @return max yaw speed in degrees per tick
+   */
+  public float getHeadYawSpeed() {
+    return 120; //this.getControllingPlayer()!=null ? 400 : 1;
+  }
+
+  /**
+   * when the dragon rotates its head up-down (pitch), how fast does it move?
+   *
+   * @return max pitch speed in degrees per tick
+   */
+  public float getHeadPitchSpeed() {
+    return 90; //this.getControllingPlayer()!=null ? 400 : 1;
+  }
+
   @Override
   public boolean isShearable(ItemStack item, IBlockAccess world, BlockPos pos) {
     return item != null && item.getItem() == ModTools.diamond_shears && this.isChild() && !this.isSheared() && ticksShear <= 0;
-
   }
 
   @Override

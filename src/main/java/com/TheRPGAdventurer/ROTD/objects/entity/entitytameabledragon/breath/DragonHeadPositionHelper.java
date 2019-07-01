@@ -203,21 +203,22 @@ public class DragonHeadPositionHelper {
   }
 
   public float getRelativeHeadSize(float scale) {
-    final float SIZE_OF_ADULT_HEAD = 1.0F;
-    final float SIZE_OF_BABY_HEAD = 2.0F;
+    final float RELATIVE_SIZE_OF_ADULT_HEAD = 1.0F;
+    final float RELATIVE_SIZE_OF_BABY_HEAD = 2.0F;
     final float SCALE_OF_BABY = 0.2F;
     final float SCALE_OF_ADULT = 1.0F;
 
     // used to be 1.4F / (scale + 0.4F) i.e. a rational function of the form head_size = A / (scale + B)
-    // We want the headsize of the adult to be SIZE_OF_ADULT_HEAD at SCALE_OF_ADULT, and
-    //    headsize of the baby to be SIZE_OF_BABY_HEAD at SCALE_OF_BABY
+    // We want the headsize of the adult to be RELATIVE_SIZE_OF_ADULT_HEAD at SCALE_OF_ADULT, and
+    //    headsize of the baby to be RELATIVE_SIZE_OF_BABY_HEAD at SCALE_OF_BABY
     //  we can rearrange to solve for A and B
-    final float B = (SIZE_OF_ADULT_HEAD * SCALE_OF_ADULT - SIZE_OF_BABY_HEAD * SCALE_OF_BABY) /
-                    (SIZE_OF_BABY_HEAD - SIZE_OF_ADULT_HEAD);
-    final float A = SIZE_OF_ADULT_HEAD * (SCALE_OF_ADULT + B);
+    final float B = (RELATIVE_SIZE_OF_ADULT_HEAD * SCALE_OF_ADULT - RELATIVE_SIZE_OF_BABY_HEAD * SCALE_OF_BABY) /
+                    (RELATIVE_SIZE_OF_BABY_HEAD - RELATIVE_SIZE_OF_ADULT_HEAD);
+    final float A = RELATIVE_SIZE_OF_ADULT_HEAD * (SCALE_OF_ADULT + B);
 
     scale = MathX.clamp(scale, SCALE_OF_BABY, SCALE_OF_ADULT);
-    return A * (scale + B);
+    float relativeHeadSize = A / (scale + B);
+    return relativeHeadSize;
   }
 
   /**

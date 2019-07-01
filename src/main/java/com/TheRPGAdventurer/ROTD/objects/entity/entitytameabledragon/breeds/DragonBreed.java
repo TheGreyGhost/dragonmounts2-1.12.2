@@ -466,5 +466,11 @@ public abstract class DragonBreed {
     return 3;
   }
 
+  // what is the relative eye height of this dragon?
+  // todo: move to headpositionhelper
+  public float getRelativeEyeHeight(boolean isSitting)
+  {
+    return isSitting ? 0.8F : 0.85F;
+  }
 }
 

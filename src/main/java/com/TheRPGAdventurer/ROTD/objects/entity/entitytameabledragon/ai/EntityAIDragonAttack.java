@@ -224,7 +224,7 @@ public class EntityAIDragonAttack extends EntityAIDragonBase {
                 BreathWeaponTarget breathWeaponTarget = BreathWeaponTarget.targetEntity(target, BreathWeaponTarget.WeaponUsed.PRIMARY);  // default to PRIMARY until I can figure this out better
                 dragon.getBreathHelperP().setBreathingTarget(breathWeaponTarget);
             }
-       	    dragon.getLookHelper().setLookPositionWithEntity(target, dragon.getHeadYawSpeed(), dragon.getHeadPitchSpeed());
+       	    dragon.getLookHelper().setLookPositionWithEntity(target, 120, 90);
         }
     }
 

@@ -14,8 +14,6 @@ import net.minecraft.world.World;
 import java.util.Random;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathNode;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.sound.SoundEffectNames;
 
 public class DragonBreedStorm extends DragonBreed {
 

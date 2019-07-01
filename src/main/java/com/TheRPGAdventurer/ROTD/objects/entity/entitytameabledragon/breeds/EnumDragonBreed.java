@@ -109,6 +109,13 @@ public enum EnumDragonBreed implements IStringSerializable {
     return new ItemStack(BlockDragonBreedEgg.DRAGON_BREED_EGG, AMOUNT, meta);
   }
 
+  // generate an IBlockState for this breed
+  public IBlockState getBlockState()
+  {
+    return getBlockstateFromMeta(BlockDragonBreedEgg.DRAGON_BREED_EGG, meta);
+  }
+
+
   public static int getMetaFromBlockState(IBlockState state) {
     EnumDragonBreed type = state.getValue(BREED);
     return EnumDragonBreed.META_MAPPING.get(type);

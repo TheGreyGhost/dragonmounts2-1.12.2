@@ -59,57 +59,57 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
 
       addCommand(new CommandDragonLambda("renderCentrepoints", (server, sender, args) -> {
         DebugSettings.setRenderCentrePoints(!DebugSettings.isRenderCentrePoints());
-
-      addCommand(new CommandDragonLambda("parameter", (server, sender, args) -> {
-        String paramName = args[0];
-        double value = parseDouble(args[1], 0);
-        DebugSettings.setDebugParameter(paramName,value);
       }));
-
-      addCommand(new CommandDragonLambda("testBreeds", dragon -> {
-            new Thread(() -> {
-                try {
-                    for (EnumDragonBreed breed : EnumDragonBreed.values()) {
-                        dragon.setBreedType(breed);
-                        Thread.sleep(1000);
-                    }
-                } catch (InterruptedException ex) {
-                }
-            }).start();
+        addCommand(new CommandDragonLambda("parameter", (server, sender, args) -> {
+          String paramName = args[0];
+          double value = parseDouble(args[1], 0);
+          DebugSettings.setDebugParameter(paramName, value);
         }));
-        
+
+        addCommand(new CommandDragonLambda("testBreeds", dragon -> {
+          new Thread(() -> {
+            try {
+              for (EnumDragonBreed breed : EnumDragonBreed.values()) {
+                dragon.setBreedType(breed);
+                Thread.sleep(1000);
+              }
+            } catch (InterruptedException ex) {
+            }
+          }).start();
+        }));
+
         addCommand(new CommandDragonLambda("testStages", dragon -> {
-            new Thread(() -> {
-                try {
-                    for (DragonLifeStage stage : DragonLifeStage.values()) {
-                        dragon.getLifeStageHelper().setLifeStage(stage);
-                        Thread.sleep(1000);
-                    }
-                } catch (InterruptedException ex) {
-                }
-            }).start();
+          new Thread(() -> {
+            try {
+              for (DragonLifeStage stage : DragonLifeStage.values()) {
+                dragon.getLifeStageHelper().setLifeStage(stage);
+                Thread.sleep(1000);
+              }
+            } catch (InterruptedException ex) {
+            }
+          }).start();
         }));
-        
-        addCommand(new CommandDragonLambda("testAge", dragon -> {
-            dragon.getLifeStageHelper().setTicksSinceCreation(18000);
-        }));
-        
-        addCommand(new CommandDragonLambda("testMount", (server, sender, args) -> {
-            applyModifier(server, sender, dragon -> {
-                if (!(sender instanceof EntityPlayerMP)) {
-                    return;
-                }
 
-                EntityPlayerMP player = (EntityPlayerMP) sender;
-                dragon.tamedFor(player, true);
-                dragon.setSaddled(true);
-                dragon.setCustomNameTag("Puff");
-                player.startRiding(dragon);
-            });
+        addCommand(new CommandDragonLambda("testAge", dragon -> {
+          dragon.getLifeStageHelper().setTicksSinceCreation(18000);
         }));
-        
+
+        addCommand(new CommandDragonLambda("testMount", (server, sender, args) -> {
+          applyModifier(server, sender, dragon -> {
+            if (!(sender instanceof EntityPlayerMP)) {
+              return;
+            }
+
+            EntityPlayerMP player = (EntityPlayerMP) sender;
+            dragon.tamedFor(player, true);
+            dragon.setSaddled(true);
+            dragon.setCustomNameTag("Puff");
+            player.startRiding(dragon);
+          });
+        }));
+
         addCommand(new CommandDragonLambda("kill", dragon -> {
-            dragon.setHealth(0);
+          dragon.setHealth(0);
         }));
     }
 

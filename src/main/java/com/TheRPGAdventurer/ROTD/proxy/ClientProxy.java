@@ -128,7 +128,7 @@ public class ClientProxy extends ServerProxy {
     	System.out.println("Registered Amulets");
         ModelLoader.setCustomMeshDefinition(ModItems.Amulet, new ModelAmuletMesh());
         ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:dragon_amulet"));
-        EnumDragonBreed.META_MAPPING.forEach((breed, meta) -> {
+        EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
         	ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:" + breed.getName() + "_dragon_amulet"));
         });
         
@@ -202,7 +202,7 @@ public class ClientProxy extends ServerProxy {
     public void registerAmuletRenderer() {
         ModelLoader.setCustomMeshDefinition(ModItems.Amulet, new ModelAmuletMesh());
         ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:dragon_amulet"));
-        EnumDragonBreed.META_MAPPING.forEach((breed, meta) -> {
+        EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
         	ModelBakery.registerItemVariants(ModItems.Amulet, new ModelResourceLocation("dragonmounts:" + breed.getName() + "_dragon_amulet"));
         });
     }
