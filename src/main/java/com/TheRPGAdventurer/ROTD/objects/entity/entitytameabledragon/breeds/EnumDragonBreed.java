@@ -32,6 +32,9 @@ public enum EnumDragonBreed implements IStringSerializable {
     ZOMBIE(12, DragonBreedZombie::new),
     TERRA(13, DragonBreedTerra::new),
     MOONLIGHT(14, DragonBreedMoonlight::new);
+//	LIGHT(15, DragonBreedLight::new);
+//	DARK(16, DragonBreedDark::new);
+//	SPECTER(17, DragonBreedSpecter::new);
 
     // from prototypes
 //    AIR(0, DragonBreedAir::new),
@@ -134,7 +137,7 @@ public enum EnumDragonBreed implements IStringSerializable {
 
     public int getNumberOfTailSegments() {
         return 12;
-    } // 12
+    }
 
     public int getNumberOfWingFingers() {
         return 4;

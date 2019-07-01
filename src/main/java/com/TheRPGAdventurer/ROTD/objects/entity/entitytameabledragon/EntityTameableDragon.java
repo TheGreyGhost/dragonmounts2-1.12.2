@@ -33,6 +33,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.interact.Dr
 import com.TheRPGAdventurer.ROTD.objects.items.ItemDragonAmulet;
 import com.TheRPGAdventurer.ROTD.objects.items.ItemDragonEssence;
 import com.TheRPGAdventurer.ROTD.objects.tileentities.TileEntityDragonShulker;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import com.google.common.base.Optional;
 import net.minecraft.block.Block;
@@ -115,6 +116,8 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
   public static final int HOME_RADIUS = 64;
   public static final double IN_AIR_THRESH = 10;
+  private static final Logger L = LogManager.getLogger();
+  private static final SimpleNetworkWrapper n = DragonMounts.NETWORK_WRAPPER;
   // data value IDs
   private static final DataParameter<Boolean> DATA_FLYING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> GROWTH_PAUSED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
@@ -137,7 +140,6 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   private static final DataParameter<Integer> HUNGER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
   private static final DataParameter<Integer> DATA_TICKS_SINCE_CREATION = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
   private static final DataParameter<Byte> DRAGON_SCALES = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BYTE);
-  private static final DataParameter<String> DATA_BREATH_WEAPON=EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.STRING);
   private static final DataParameter<ItemStack> BANNER1 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);
   private static final DataParameter<ItemStack> BANNER2 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);
   private static final DataParameter<ItemStack> BANNER3 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);
@@ -1019,12 +1021,12 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().grow(0.2, -0.01, 0.2), EntitySelectors.getTeamCollisionPredicate(this));
 
     if (!list.isEmpty() && isSaddled() && isAdult()) {
-      boolean flag = !this.world.isRemote;
+      boolean onClient = !this.world.isRemote;
 
       for (int j = 0; j < list.size(); ++j) {
         Entity entity = list.get(j);
         if (!entity.isPassenger(this) && !entity.isRiding() && entity instanceof EntityCarriage) {
-          if (flag && this.getPassengers().size() < ASSASGASGAS && !entity.isRiding() && !isBaby()) {
+          if (onClient && canFitPassenger(entity) && !entity.isRiding() && !isBaby()) {
             entity.startRiding(this);
           } else {
             this.applyEntityCollision(entity);
@@ -1518,18 +1520,32 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   /**
    * Returns the Y offset from the entity's position for any entity riding this
    * one.
+   * May not be necessary since we also override updatePassenger()
    */
   @Override
   public double getMountedYOffset() {
-    return (isSitting() ? 1.7f : 2.0f) * getScale();
+    final int DEFAULT_PASSENGER_NUMBER = 0;
+    return getBreed().getAdultMountedPositionOffset(isSitting(), DEFAULT_PASSENGER_NUMBER).y * getScale();
   }
 
   /**
-   * Returns render size modifier
+   * Returns render size modifier for the shadow
    */
   @Override
   public float getRenderSizeModifier() {
-    return getScale();
+    return getScale() / (isChild() ? 0.5F : 1.0F);
+//  0.5 isChild() correction is required due to the code in Render::renderShadow which shrinks the shadow for a child
+//    if (entityIn instanceof EntityLiving)
+//    {
+//      EntityLiving entityliving = (EntityLiving)entityIn;
+//      f *= entityliving.getRenderSizeModifier();
+//
+//      if (entityliving.isChild())
+//      {
+//        f *= 0.5F;
+//      }
+//    }
+
   }
 
   /**
@@ -1879,6 +1895,22 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     return false;
   }
 
+  public double getFlySpeed() {
+    return this.boosting() ? 4 : 1;
+  }
+
+  public void updateIntendedRideRotation(EntityPlayer rider) {
+    boolean hasRider = this.hasControllingPlayer(rider);
+    if (this.isUsingBreathWeapon() && hasRider && rider.moveStrafing == 0) {
+      this.rotationYaw = rider.rotationYaw;
+      this.prevRotationYaw = this.rotationYaw;
+      this.rotationPitch = rider.rotationPitch;
+      this.setRotation(this.rotationYaw, this.rotationPitch);
+      this.renderYawOffset = this.rotationYaw;
+      this.rotationYawHead = this.renderYawOffset;
+    }
+  }
+  
   @Override
   public void travel(float strafe, float forward, float vertical) {
     // disable method while flying, the movement is done entirely by
@@ -1935,9 +1967,9 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     if (this.isRiding()) this.updateRiding((EntityLivingBase) entity);
   }
 
-  public boolean isRidingAboveGround(Entity entity) {
+  public boolean isRidingAboveGround(Entity entityBeingRidden) {
     int groundPos = world.getHeight(getPosition()).getY();
-    double altitude = entity.posY - groundPos;
+    double altitude = entityBeingRidden.posY - groundPos;
     return altitude > 2.0;
   }
 
@@ -1955,58 +1987,68 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     this.getLookHelper().setLookPosition(endOfLook.x, endOfLook.y, endOfLook.z, 120, 90);
   }
 
-  public void updateRiding(EntityLivingBase riding) {
-    if (riding != null && riding.isPassenger(this) && riding instanceof EntityPlayer) {
-      int i = riding.getPassengers().indexOf(this);
-      float radius = (i == 2 ? 0F : 0.4F) + (((EntityPlayer) riding).isElytraFlying() ? 2 : 0);
-      float angle = (0.01745329251F * ((EntityPlayer) riding).renderYawOffset) + (i == 1 ? -90 : i == 0 ? 90 : 0);
+  /**
+   * This code is called when the dragon is riding on the shoulder of the player
+   * @param entityBeingRidden
+   */
+  public void updateRiding(EntityLivingBase entityBeingRidden) {
+    if (entityBeingRidden == null || !(entityBeingRidden instanceof EntityPlayer)) return;
+    EntityPlayer playerBeingRidden = (EntityPlayer)entityBeingRidden;
+
+    if (playerBeingRidden.isPassenger(this)) { // this dragon is a passenger of the player being ridden
+      int i = playerBeingRidden.getPassengers().indexOf(this);
+      float radius = (i == 2 ? 0F : 0.4F) + (playerBeingRidden.isElytraFlying() ? 2 : 0);
+      float angle = 0.01745329251F * playerBeingRidden.renderYawOffset + (i == 1 ? -90 : i == 0 ? 90 : 0);
       double extraX = (double) (radius * MathHelper.sin((float) (Math.PI + angle)));
       double extraZ = (double) (radius * MathHelper.cos(angle));
-      double extraY = (riding.isSneaking() ? 1.3D : 1.4D) + (i == 2 ? 0.4D : 0D);
-      this.rotationYaw = riding.rotationYaw;
-      this.prevRotationYaw = riding.prevRotationYaw;
-      this.rotationYawHead = riding.rotationYawHead;
-      this.prevRotationYawHead = riding.prevRotationYawHead;
-      this.rotationPitch = riding.rotationPitch;
-      this.prevRotationPitch = riding.prevRotationPitch;
-      this.setPosition(riding.posX + extraX, riding.posY + extraY, riding.posZ + extraZ);
-      if (ModKeys.DISMOUNT.isKeyDown() || this.isDead || this.getScale() > 0.35) this.dismountRidingEntity();
-      this.setFlying(isRidingAboveGround(riding) && !((EntityPlayer) riding).capabilities.isFlying && !riding.onGround);
+      double extraY = (playerBeingRidden.isSneaking() ? 1.3D : 1.4D) + (i == 2 ? 0.4D : 0D);
+      this.rotationYaw = playerBeingRidden.rotationYaw;
+      this.prevRotationYaw = playerBeingRidden.prevRotationYaw;
+      this.rotationYawHead = playerBeingRidden.rotationYawHead;
+      this.prevRotationYawHead = playerBeingRidden.prevRotationYawHead;
+      this.rotationPitch = playerBeingRidden.rotationPitch;
+      this.prevRotationPitch = playerBeingRidden.prevRotationPitch;
+      this.setPosition(playerBeingRidden.posX + extraX, playerBeingRidden.posY + extraY, playerBeingRidden.posZ + extraZ);
+      if (ModKeys.DISMOUNT.isKeyDown() || this.isDead || !this.isBaby()) this.dismountRidingEntity();
+      this.setFlying(isRidingAboveGround(playerBeingRidden) && !playerBeingRidden.capabilities.isFlying && !playerBeingRidden.onGround);
     }
   }
 
+  /**
+   * This code is called when the passenger is riding on the dragon
+   * @param passenger
+   */
   @Override
   public void updatePassenger(Entity passenger) {
     if (this.isPassenger(passenger)) {
-      double px = posX;
-      double py = posY + getMountedYOffset() + passenger.getYOffset();
-      double pz = posZ;
-
-      Vec3d pos = new Vec3d(0, 0, 0);
-
-      // dragon position is the middle of the model and the saddle is on
-      // the shoulders, so move player forwards on Z axis relative to the
-      // dragon's rotation to fix that
-      if (passenger == getPassengers().get(0)) {
-        pos = new Vec3d(0 * getScale(), 0.2 * getScale(), 1.1 * getScale());
-      } else if (passenger == getPassengers().get(1)) {
-        pos = new Vec3d(0.3 * getScale(), 0.2 * getScale(), 0.1 * getScale());
-      } else if (passenger == getPassengers().get(2)) {
-        pos = new Vec3d(-0.3 * getScale(), 0.2 * getScale(), 0.1 * getScale());
+      List<Entity> passengers = getPassengers();
+      int passengerNumber = passengers.indexOf(passenger);
+      if (passengerNumber < 0) {  // should never happen!
+        DragonMounts.loggerLimit.error_once("Logic error- passenger not found");
+        return;
       }
+
+      Vec3d mountedPositionOffset = getBreed().getAdultMountedPositionOffset(isSitting(), passengerNumber);
+
+//      // todo remove (debugging only)
+//      mountedPositionOffset = new Vec3d(DebugSettings.getDebugParameter("x"),
+//                                        DebugSettings.getDebugParameter("y"),
+//                                        DebugSettings.getDebugParameter("z"));
+//      System.out.println("MountedOffset:" + mountedPositionOffset);
+
+      double dragonScaling = getScale(); //getBreed().getAdultModelRenderScaleFactor() * getScale();
+
+      mountedPositionOffset = mountedPositionOffset.scale(dragonScaling);
+      mountedPositionOffset = mountedPositionOffset.rotateYaw((float) Math.toRadians(-renderYawOffset)); // oops
+      mountedPositionOffset = mountedPositionOffset.addVector(0, passenger.getYOffset(), 0);
 
       if (!(passenger instanceof EntityPlayer)) {
         passenger.rotationYaw = this.rotationYaw;
         passenger.setRotationYawHead(passenger.getRotationYawHead() + this.rotationYaw);
         this.applyYawToEntity(passenger);
       }
-
-      pos = pos.rotateYaw((float) Math.toRadians(-renderYawOffset)); // oops
-      px += pos.x;
-      py += pos.y;
-      pz += pos.z;
-
-      passenger.setPosition(px, py, pz);
+      Vec3d passengerPosition = mountedPositionOffset.addVector(this.posX, this.posY, this.posZ);
+      passenger.setPosition(passengerPosition.x, passengerPosition.y, passengerPosition.z);
 
       // fix rider rotation
       if (passenger == getControllingPlayer()) {
@@ -2181,7 +2223,6 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 /*    public boolean isGiga() {
         return getLifeStageHelper().isAdult();
     }
-
     public boolean isAdjudicator() {
         return getLifeStageHelper().isAdult();
     }
@@ -2336,8 +2377,8 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     return super.shouldAttackEntity(target, owner);
   }
 
-  protected boolean canFitPassenger(Entity passenger) {
-    return this.getPassengers().size() < 3;
+  public boolean canFitPassenger(Entity passenger) {
+    return this.getPassengers().size() < getBreed().getMaxNumberOfPassengers(getLifeStageHelper().getLifeStage());
   }
 
   /**

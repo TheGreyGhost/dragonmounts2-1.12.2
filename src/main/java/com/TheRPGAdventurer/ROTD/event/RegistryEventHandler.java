@@ -40,7 +40,6 @@ public class RegistryEventHandler {
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
         event.getRegistry().registerAll(ModItems.ITEMS.toArray(new Item[0]));
-        event.getRegistry().registerAll(ModTools.BOWS.toArray(new Item[0]));
         event.getRegistry().registerAll(ModTools.TOOLS.toArray(new Item[0]));
         event.getRegistry().registerAll(ModArmour.ARMOR.toArray(new Item[0]));
         
@@ -84,11 +83,6 @@ public class RegistryEventHandler {
             }
         }
 
-        for (Item item : ModTools.BOWS) {
-            if (item instanceof IHasModel) {
-                ((IHasModel) item).RegisterModels();
-            }
-        }
         for (Item item : ModTools.TOOLS) {
             ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName().toString(), "inventory"));
         }
