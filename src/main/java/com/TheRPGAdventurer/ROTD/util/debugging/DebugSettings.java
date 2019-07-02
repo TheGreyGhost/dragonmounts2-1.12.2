@@ -57,6 +57,14 @@ public class DebugSettings
   }
   private static boolean renderCentrePoints;
 
+  public static boolean isRenderXYZmarkers() {
+    return renderXYZmarkers;
+  }
+  public static void setRenderXYZmarkers(boolean renderXYZmarkers) {
+    DebugSettings.renderXYZmarkers = renderXYZmarkers;
+  }
+  private static boolean renderXYZmarkers;
+
   /**
    * Debug parameters can be set using the command console
    * /dragon debug parameter {name} {value}

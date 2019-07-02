@@ -95,6 +95,8 @@ public class DragonModel extends AdvancedModelBase {
     private EnumDragonBreed breed;
     private DragonModelMode mode;
 
+    private float relativeHeadScale; // the relative scaling for the head.  1.0 = normal size (Adult)
+
     // final X rotation angles for ground
     private float[] xGround={0, 0, 0, 0};
 
@@ -479,6 +481,8 @@ public class DragonModel extends AdvancedModelBase {
         // update pitch
         pitch=dragonAnimator.getBodyPitch();
 
+        relativeHeadScale = dragonAnimator.getDragonHeadPositionHelper().getRelativeHeadSize();
+
         // updateFromAnimator body parts
         animHeadAndNeck(dragon);
         animTail(dragon);
@@ -720,8 +724,9 @@ public class DragonModel extends AdvancedModelBase {
     }
 
     protected void renderHead(float scale) {
-        float headScale=scale * 0.92f;
-        head.render((headScale));
+      // relativeHeadScale is updated in updateFromAnimator, depends on age of dragon
+      head.setRenderScale(relativeHeadScale);
+      head.render(scale);
     }
 
     protected void renderNeck(float scale) {
