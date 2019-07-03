@@ -65,6 +65,22 @@ public class DebugSettings
   }
   private static boolean renderXYZmarkers;
 
+  public static boolean isForceDragonModel() {
+    return forceDragonModel;
+  }
+  public static void setForceDragonModel(boolean forceDragonModel) {
+    DebugSettings.forceDragonModel = forceDragonModel;
+  }
+  private static boolean forceDragonModel = false;
+
+  public static boolean isBoxDragon() {
+    return boxDragon;
+  }
+  public static void setBoxDragon(boolean boxDragon) {
+    DebugSettings.boxDragon = boxDragon;
+  }
+  private static boolean boxDragon = false;
+
   /**
    * Debug parameters can be set using the command console
    * /dragon debug parameter {name} {value}
@@ -83,6 +99,11 @@ public class DebugSettings
   {
     Double value = debugParameters.get(parameterName);
     return (value == null) ? 0.0 : value;
+  }
+
+  public static boolean existsDebugParameter(String parameterName)
+  {
+    return debugParameters.containsKey(parameterName);
   }
 
   private static HashMap<String, Double> debugParameters = new HashMap<>();

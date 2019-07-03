@@ -10,8 +10,6 @@ import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSetting
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -20,7 +18,6 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /** EntityFX used to refer to all BreathFX types
  * Created by TGG on 6/03/2016.
@@ -69,7 +66,7 @@ public class BreathFX extends Particle implements IEntityParticle {
   protected void renderEntityCentrepoint(double x, double y, double z)
   {
     if (!DebugSettings.isRenderCentrePoints()) return;
-    CentrepointCrosshairRenderer.addCentrepointToRender(x, y, z);
+    CentrepointCrosshairRenderer.addCentrepointToRenderWorld(x, y, z);
   }
 
   /** This used to be in EntityMoveAndResizeHelper, had to move it out because Particles aren't Entities any more, and

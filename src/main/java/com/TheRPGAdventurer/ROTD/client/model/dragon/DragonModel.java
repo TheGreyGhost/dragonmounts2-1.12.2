@@ -15,6 +15,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTamea
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.SegmentSizePositionRotation;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelBase;
 import net.minecraft.client.renderer.GlStateManager;
@@ -35,6 +36,8 @@ public class DragonModel extends AdvancedModelBase {
     public static final int VERTS_NECK=7;
     public static final int VERTS_TAIL=12;
     public static final int HEAD_OFS=-16;
+
+    public ModelPart debugBox;
 
     // model parts
     public ModelPart head;
@@ -180,6 +183,8 @@ public class DragonModel extends AdvancedModelBase {
         setTextureOffset("wingfinger.skin", -49, 176);
         setTextureOffset("wingforearm.bone", 0, 164);
 
+        setTextureOffset("debugbox.debugbox", 0, 0);
+
         buildBody();
         buildNeck();
         buildHead();
@@ -318,6 +323,12 @@ public class DragonModel extends AdvancedModelBase {
         saddleMetalL=body.addChildBox("saddleMetalL", 12, 14, -15, 1, 5, 4);
         saddleTieR=body.addChildBox("saddleTieR", -13, 0, -14, 1, 10, 2);
         saddleMetalR=body.addChildBox("saddleMetalR", -13, 10, -15, 1, 5, 4);
+
+        if (DebugSettings.isBoxDragon()) {
+            debugBox = new ModelPart(this, "debugbox");
+            debugBox.setRotationPoint(0, 0, 0);
+            debugBox.addBox("debugbox", -8, 0, -8, 16, 16, 16);
+        }
     }
 
     private void buildWing() {
@@ -483,11 +494,25 @@ public class DragonModel extends AdvancedModelBase {
 
         relativeHeadScale = dragonAnimator.getDragonHeadPositionHelper().getRelativeHeadSize();
 
+        if (DebugSettings.isForceDragonModel()) {
+            offsetX = (float)DebugSettings.getDebugParameter("ox");
+            offsetY = (float)DebugSettings.getDebugParameter("oy");
+            offsetZ = (float)DebugSettings.getDebugParameter("oz");
+        }
+
         // updateFromAnimator body parts
         animHeadAndNeck(dragon);
         animTail(dragon);
         animWings(dragon);
         animLegs(dragon);
+
+        if (DebugSettings.isBoxDragon()) {
+          debugBox.rotationPointX = (float)DebugSettings.getDebugParameter("rpx");
+            debugBox.rotationPointY = (float)DebugSettings.getDebugParameter("rpy");
+            debugBox.rotationPointZ = (float)DebugSettings.getDebugParameter("rpz");
+            debugBox.setAngles((float)DebugSettings.getDebugParameter("rax"), (float)DebugSettings.getDebugParameter("ray"),
+                               (float)DebugSettings.getDebugParameter("raz"));
+        }
     }
 
     protected void animHeadAndNeck(EntityTameableDragon dragon) {
@@ -698,22 +723,26 @@ public class DragonModel extends AdvancedModelBase {
         GlStateManager.translate(offsetX, offsetY, offsetZ);
         GlStateManager.rotate(-pitch, 1, 0, 0);
 
-        switch (mode) {
-            case BODY_ONLY:
-                renderBody(scale);
-                break;
-            case WINGS_ONLY:
-                renderWings(scale);
-                break;
-            default:
-                renderHead(scale);
-                renderNeck(scale);
-                renderBody(scale);
-                renderLegs(scale);
-                renderTail(scale);
-                if (mode!=DragonModelMode.NO_WINGS) {
+        if (DebugSettings.isBoxDragon()) {
+            debugBox.render(scale);
+        } else {
+            switch (mode) {
+                case BODY_ONLY:
+                    renderBody(scale);
+                    break;
+                case WINGS_ONLY:
                     renderWings(scale);
-                }
+                    break;
+                default:
+                    renderHead(scale);
+                    renderNeck(scale);
+                    renderBody(scale);
+                    renderLegs(scale);
+                    renderTail(scale);
+                    if (mode != DragonModelMode.NO_WINGS) {
+                        renderWings(scale);
+                    }
+            }
         }
 
         GlStateManager.popMatrix();

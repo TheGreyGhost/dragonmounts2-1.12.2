@@ -19,7 +19,6 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.Drag
 
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
-import jdk.nashorn.internal.runtime.Debug;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -77,12 +76,36 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 
     if (DebugSettings.isRenderCentrePoints()) {
       Vec3d throat = dragon.getAnimator().getThroatPosition();
-      CentrepointCrosshairRenderer.addCentrepointToRender(throat.x, throat.y, throat.z);
+      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(throat.x, throat.y, throat.z);
     }
 
+    // add rendered markers as defined by debug parameters (eg add marker at world [35, 5, 40]
+    // /dragon debug parameter wx0 35
+    // /dragon debug parameter wy0 5
+    // /dragon debug parameter wz0 40
+    // [ex0, ey0, ez0] = add marker at location relative to origin of entity (posX, posY, posZ)
+
     if (DebugSettings.isRenderXYZmarkers()) {
-      testharness.addmarkers(entity position)  direct in the world perhaps
-              change parameters to force offsetX, offsetY, offsetZ with body diagnostic
+      boolean foundPoint = false;
+      int i = 0;
+      do {
+        foundPoint = DebugSettings.existsDebugParameter("wx"+i);
+        if (foundPoint) {
+          CentrepointCrosshairRenderer.addCentrepointToRenderWorld(DebugSettings.getDebugParameter("wx"+i),
+                                                                   DebugSettings.getDebugParameter("wy"+i),
+                                                                   DebugSettings.getDebugParameter("wz"+i));
+        }
+      } while (foundPoint);
+
+      i = 0;
+      do {
+        foundPoint = DebugSettings.existsDebugParameter("ex"+i);
+        if (foundPoint) {
+          CentrepointCrosshairRenderer.addCentrepointToRenderScene(DebugSettings.getDebugParameter("ex"+i) + x,
+                                                                   DebugSettings.getDebugParameter("ey"+i) + y,
+                                                                   DebugSettings.getDebugParameter("ez"+i) + z);
+        }
+      } while (foundPoint);
     }
 
     DragonModel breedModel=getBreedRenderer(dragon).getModel();
