@@ -80,7 +80,7 @@ public class CentrepointCrosshairRenderer
     double cy = centrepoint.y - py;
     double cz = centrepoint.z - pz;
 
-    final double CROSSHAIR_RADIUS = 1.0;
+    final double CROSSHAIR_RADIUS = 6.0;
     drawLine(cx - CROSSHAIR_RADIUS, cy, cz, cx + CROSSHAIR_RADIUS, cy, cz);
     drawLine(cx, cy - CROSSHAIR_RADIUS, cz, cx, cy + CROSSHAIR_RADIUS, cz);
     drawLine(cx, cy, cz - CROSSHAIR_RADIUS, cx, cy, cz + CROSSHAIR_RADIUS);

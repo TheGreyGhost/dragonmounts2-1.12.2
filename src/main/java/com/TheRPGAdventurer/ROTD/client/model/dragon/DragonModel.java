@@ -327,7 +327,7 @@ public class DragonModel extends AdvancedModelBase {
         if (DebugSettings.isBoxDragon()) {
             debugBox = new ModelPart(this, "debugbox");
             debugBox.setRotationPoint(0, 0, 0);
-            debugBox.addBox("debugbox", -8, 0, -8, 16, 16, 16);
+            debugBox.addBox("debugbox", -8, 0, -8, 16, 24, 16);
         }
     }
 
@@ -512,6 +512,7 @@ public class DragonModel extends AdvancedModelBase {
             debugBox.rotationPointZ = (float)DebugSettings.getDebugParameter("rpz");
             debugBox.setAngles((float)DebugSettings.getDebugParameter("rax"), (float)DebugSettings.getDebugParameter("ray"),
                                (float)DebugSettings.getDebugParameter("raz"));
+          debugBox.setRenderScale((float)DebugSettings.getDebugParameter("renderscale"));
         }
     }
 
@@ -721,7 +722,11 @@ public class DragonModel extends AdvancedModelBase {
 
         GlStateManager.pushMatrix();
         GlStateManager.translate(offsetX, offsetY, offsetZ);
-        GlStateManager.rotate(-pitch, 1, 0, 0);
+        if (DebugSettings.isForceDragonModel()) {
+          GlStateManager.rotate(-(float)DebugSettings.getDebugParameter("pitch"), 1, 0, 0);
+        } else {
+          GlStateManager.rotate(-pitch, 1, 0, 0);
+        }
 
         if (DebugSettings.isBoxDragon()) {
             debugBox.render(scale);

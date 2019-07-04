@@ -60,9 +60,14 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
       addCommand(new CommandDragonLambda("renderCentrepoints", (server, sender, args) -> {
         DebugSettings.setRenderCentrePoints(!DebugSettings.isRenderCentrePoints());
       }));
+
+      addCommand(new CommandDragonLambda("renderXYZmarkers", (server, sender, args) -> {
+        DebugSettings.setRenderXYZmarkers(!DebugSettings.isRenderXYZmarkers());
+      }));
+
         addCommand(new CommandDragonLambda("parameter", (server, sender, args) -> {
           String paramName = args[0];
-          double value = parseDouble(args[1], 0);
+          double value = parseDouble(args[1], -1e10);
           DebugSettings.setDebugParameter(paramName, value);
         }));
 

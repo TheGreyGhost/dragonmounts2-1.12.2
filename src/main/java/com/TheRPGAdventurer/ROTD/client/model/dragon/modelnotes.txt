@@ -1,0 +1,100 @@
+Some notes on how the model scaling works:
+
+The model itself is designed in "model space" coordinates
+eg
+        body.addBox("body", -12, 0, -16, 24, 24, 64);
+this adds a box to the body with [minX, minY, minZ] at [-12, 0, -16] and a size of [24, 24, 64].
+The direction of the x & y axes in model space are different to world space: the x and the y axes point in the opposite direction
+for example y = 0 is higher up on the model than y = 16
+
+When rendering, vanilla applies a scaling factor to this, which is hard-coded at 0.0625F, i.e. 1/16.
+That's the "scale" variable in the call to
+    public void render(EntityTameableDragon dragon, float moveTime, float moveSpeed, float ticksExisted, float lookYaw, float lookPitch, float scale)
+Most vanilla models render with this scaling factor, i.e.
+a box which is [16,16,16] in size corresponds to a [1,1,1] cube in minecraft, i.e. the size of a full block.
+
+If the model needs to be rendered at a different size, this is done using GLStateManager.scale()
+In vanilla, this is either done before the call to the renderer, or it's done in preRenderCallback()
+DragonRenderer uses preRenderCallBack()
+
+The origin of the model space is set up at [0, 24, 0], which means that the "feet" of your model should be at y = 24.  This will ensure that
+  when you scale the model, the feet remain on the ground.
+(This is effected by the GlStateManager.translate(0.0F, -1.501F, 0.0F); in RenderLivingBase
+
+Individual parts of the model can be scaled by setting the corresponding ModelPart.setRenderScale()
+eg
+    protected void renderHead(float scale) {
+      // relativeHeadScale is updated in updateFromAnimator, depends on age of dragon
+      head.setRenderScale(relativeHeadScale);   <---- this one here
+      head.render(scale);
+    }
+
+
+At the point that the render method is called, the (x, y, z) passed to the call is the offset from the player's eye to the
+entity posX, posY, posZ.  posX and posZ are the centre of the entity, and posY is the minimum.
+
+ Each model part contains three relevant transformations, which are applied in ModelPart.postRender()
+ (1) a scaling using renderScaleX, Y, Z around the origin (0,0,0)
+ (2) rotation using rotateX,Y,Z around the origin of the ModelPart = 0,0,0
+ (3) translation to the final rendering position using ModelPart.rotationPointX,Y,Z multiplied by the scale
+     Although it's called "rotationPoint", it actually isn't the rotation point at all, it's just an additional translation:
+     the rotation origin of the model is always 0,0,0.
+     It does, however, affect the rotation point of the entity pitch, unlike offsetX,Y,Z (see below).
+
+ (They are in order 3,2,1 in the function but that's because of the way rendering works, i.e. the transformations are
+   applied in the reverse order).
+
+The DragonModel (eg dragon body) also has:
+offsetX,Y,Z
+offsetX,Y,Z is in world coordinates but is also affected by the dragon scale.  y = inverted, ie positive y makes the
+   entity render lower
+offsetX,Y,Z does not affect the origin used for body pitch rotation
+in contrast, rotationPointX,Y,Z of the modelpart does affect it
+for example
+If the entity pitch is 45 degrees (rotation around X-axis):
+with offsetY = 1.0 metres, the rotation point remains the top of the model (origin 0,0,0)
+with rotationPointY = -8 model points, the rotation point becomes origin (0,8,0), which also has the side effect of translating the model
+  upwards by 8 model points (0.5 metres) when pitch = 0.
+
+When the two are combined, the origin of rotation can be moved without translating
+eg to make the origin of rotation (0,8,0) instead of (0,0,0):
+rotationPoint = -8 and offsetY = 0.5
+
+The overall model scaling (preRenderCallback()) is always around 0,24,0 in the model space;
+  the scaling of the individual model parts (renderScaleX,Y,Z) is around 0,0,0
+
+setAngle(rotx, roty, rotz):
+rotx +x = tilt forwards around y=0, z=0
+roty +ve = clockwise around x=0, z = 0
+rotz +ve = anticlockwise around x=0, y = 0
+
+
+DEBUGGING TOOLS
+DebugSettings to assist:
+DebugSettings.boxDragon : render a 1x1x1 m cube instead of the dragon
+DebugSettings.forceDragonModel: overwrite parameters of the dragon model
+
+commands:
+ /dragon debug parameter
+ /dragon debug renderXYZmarkes: render markers at manually-entered coordinates
+       use parameter to add rendered markers as defined by debug parameters (eg add marker at world [35, 5, 40]
+          /dragon debug parameter wx0 35
+          /dragon debug parameter wy0 5
+          /dragon debug parameter wz0 40
+       likewise [ex0, ey0, ez0] = add marker at location relative to origin of entity (posX, posY, posZ)
+
+For the box dragon, use the following debug parameters:
+          debugBox.rotationPointX = (float)DebugSettings.getDebugParameter("rpx");
+            debugBox.rotationPointY = (float)DebugSettings.getDebugParameter("rpy");
+            debugBox.rotationPointZ = (float)DebugSettings.getDebugParameter("rpz");
+            debugBox.setAngles((float)DebugSettings.getDebugParameter("rax"), (float)DebugSettings.getDebugParameter("ray"),
+                               (float)DebugSettings.getDebugParameter("raz"));
+          debugBox.setRenderScale((float)DebugSettings.getDebugParameter("renderscale"));
+
+For the forceDragonModel, use the following debug parameters:
+            offsetX = (float)DebugSettings.getDebugParameter("ox");
+            offsetY = (float)DebugSettings.getDebugParameter("oy");
+            offsetZ = (float)DebugSettings.getDebugParameter("oz");
+          GlStateManager.rotate(-(float)DebugSettings.getDebugParameter("pitch"), 1, 0, 0);
+      scale = (float)DebugSettings.getDebugParameter("scale");
+

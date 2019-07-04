@@ -71,7 +71,7 @@ public class DebugSettings
   public static void setForceDragonModel(boolean forceDragonModel) {
     DebugSettings.forceDragonModel = forceDragonModel;
   }
-  private static boolean forceDragonModel = false;
+  private static boolean forceDragonModel = true; //todo restore to false
 
   public static boolean isBoxDragon() {
     return boxDragon;
@@ -79,7 +79,7 @@ public class DebugSettings
   public static void setBoxDragon(boolean boxDragon) {
     DebugSettings.boxDragon = boxDragon;
   }
-  private static boolean boxDragon = false;
+  private static boolean boxDragon = true;    //todo restore to false
 
   /**
    * Debug parameters can be set using the command console

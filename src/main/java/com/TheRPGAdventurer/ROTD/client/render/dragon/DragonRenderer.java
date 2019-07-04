@@ -95,6 +95,7 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
                                                                    DebugSettings.getDebugParameter("wy"+i),
                                                                    DebugSettings.getDebugParameter("wz"+i));
         }
+        ++i;
       } while (foundPoint);
 
       i = 0;
@@ -105,6 +106,7 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
                                                                    DebugSettings.getDebugParameter("ey"+i) + y,
                                                                    DebugSettings.getDebugParameter("ez"+i) + z);
         }
+        ++i;
       } while (foundPoint);
     }
 
@@ -252,6 +254,10 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
     final float MODEL_SCALE_FACTOR_FOR_FULLY_GROWN = dragon.getBreed().getAdultModelRenderScaleFactor();
     // a fully grown dragon is larger than the model by this amount
     float scale=dragon.getScale() * MODEL_SCALE_FACTOR_FOR_FULLY_GROWN;
+    if (DebugSettings.isBoxDragon()) {
+      scale = (float)DebugSettings.getDebugParameter("scale");
+      if (scale < 0.01) scale = 1.0F;
+    }
     GlStateManager.scale(scale, scale, scale);
   }
 
