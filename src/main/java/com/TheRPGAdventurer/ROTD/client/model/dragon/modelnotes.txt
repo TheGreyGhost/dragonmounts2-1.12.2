@@ -82,6 +82,9 @@ commands:
           /dragon debug parameter wy0 5
           /dragon debug parameter wz0 40
        likewise [ex0, ey0, ez0] = add marker at location relative to origin of entity (posX, posY, posZ)
+ /dragon debug riderPositionTweak: tweak the rider positions
+
+
 
 For the box dragon, use the following debug parameters:
           debugBox.rotationPointX = (float)DebugSettings.getDebugParameter("rpx");
@@ -97,4 +100,20 @@ For the forceDragonModel, use the following debug parameters:
             offsetZ = (float)DebugSettings.getDebugParameter("oz");
           GlStateManager.rotate(-(float)DebugSettings.getDebugParameter("pitch"), 1, 0, 0);
       scale = (float)DebugSettings.getDebugParameter("scale");
+
+For the rider position tweaks:
+      for rider 0:
+            /dragon debug parameter rx0 35
+            /dragon debug parameter ry0 5
+            /dragon debug parameter rz0 40
+      for rider 1: rx1 etc
+
+The dragon has:
+body model is three parts
+        body.addBox("body", -12, 0, -16, 24, 24, 64);
+        body.addBox("scale", -1, -6, 10, 2, 6, 12);
+        body.addBox("scale", -1, -6, 30, 2, 6, 12);
+a body
+    The "scales" are the
+
 

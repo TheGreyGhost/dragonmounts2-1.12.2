@@ -65,6 +65,10 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
         DebugSettings.setRenderXYZmarkers(!DebugSettings.isRenderXYZmarkers());
       }));
 
+      addCommand(new CommandDragonLambda("setRiderPositionTweak", (server, sender, args) -> {
+        DebugSettings.setRiderPositionTweak(!DebugSettings.isRiderPositionTweak());
+      }));
+
         addCommand(new CommandDragonLambda("parameter", (server, sender, args) -> {
           String paramName = args[0];
           double value = parseDouble(args[1], -1e10);

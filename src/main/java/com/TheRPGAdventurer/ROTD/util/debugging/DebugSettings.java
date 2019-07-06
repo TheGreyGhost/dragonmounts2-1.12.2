@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.sun.javafx.geom.Vec3f;
 import org.lwjgl.input.Keyboard;
 import java.util.HashMap;
 
@@ -79,7 +80,29 @@ public class DebugSettings
   public static void setBoxDragon(boolean boxDragon) {
     DebugSettings.boxDragon = boxDragon;
   }
-  private static boolean boxDragon = true;    //todo restore to false
+  private static boolean boxDragon = false;    //todo restore to false
+
+  public static boolean isRiderPositionTweak() {
+    return riderPositionTweak;
+  }
+  public static void setRiderPositionTweak(boolean riderPositionTweak) {
+    DebugSettings.riderPositionTweak = riderPositionTweak;
+  }
+  public static Vec3f getRiderPositionOffset(int rider, Vec3f offset) {
+    Vec3f retval = new Vec3f(offset);
+    if (existsDebugParameter("rx"+ rider)) {
+      retval.x = (float)DebugSettings.getDebugParameter("rx"+ rider);
+    }
+    if (existsDebugParameter("ry"+ rider)) {
+      retval.y = (float)DebugSettings.getDebugParameter("ry"+ rider);
+    }
+    if (existsDebugParameter("rz"+ rider)) {
+      retval.z = (float)DebugSettings.getDebugParameter("rz"+ rider);
+    }
+    return retval;
+  }
+  private static boolean riderPositionTweak = false;
+
 
   /**
    * Debug parameters can be set using the command console
@@ -107,4 +130,6 @@ public class DebugSettings
   }
 
   private static HashMap<String, Double> debugParameters = new HashMap<>();
+
+
 }
