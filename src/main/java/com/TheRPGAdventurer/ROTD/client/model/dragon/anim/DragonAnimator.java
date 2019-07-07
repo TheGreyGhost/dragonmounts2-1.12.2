@@ -11,6 +11,7 @@ package com.TheRPGAdventurer.ROTD.client.model.dragon.anim;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathHelperP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
@@ -101,6 +102,8 @@ public class DragonAnimator {
     private float wingForearmRotateAngleY;
     private float wingForearmRotateAngleZ;
 
+    private DragonPhysicalModel dragonPhysicalModel;
+
     private final int WING_FINGERS;
     private final int NECK_SEGMENTS;
     private final int TAIL_SEGMENTS;
@@ -156,14 +159,15 @@ public class DragonAnimator {
 */
     public DragonAnimator(EntityTameableDragon dragon) {
         this.dragon = dragon;
-        WING_FINGERS = dragon.getBreedType().getNumberOfWingFingers();
-        NECK_SEGMENTS = dragon.getBreedType().getNumberOfNeckSegments();
-        TAIL_SEGMENTS = dragon.getBreedType().getNumberOfTailSegments();
+        this.dragonPhysicalModel = dragon.getPhysicalModel();
+        WING_FINGERS = dragonPhysicalModel.getNumberOfWingFingers();
+        NECK_SEGMENTS = dragonPhysicalModel.getNumberOfNeckSegments();
+        TAIL_SEGMENTS = dragonPhysicalModel.getNumberOfTailSegments();
 
         wingFingerRotateX = new float[WING_FINGERS];
         wingFingerRotateY = new float[WING_FINGERS];
         tailSegments = new SegmentSizePositionRotation[TAIL_SEGMENTS];
-        dragonHeadPositionHelper = new DragonHeadPositionHelper(dragon, NECK_SEGMENTS);
+        dragonHeadPositionHelper = new DragonHeadPositionHelper(dragon);
     }
 
     public DragonHeadPositionHelper getDragonHeadPositionHelper() {

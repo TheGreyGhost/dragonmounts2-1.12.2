@@ -13,6 +13,7 @@ import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModelMode;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DefaultDragonBreedRenderer;
 import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStageHelper;
@@ -248,17 +249,17 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
   /**
    * Allows the render to do any OpenGL state modifications necessary before
    * the model is rendered. Args: entityLiving, partialTickTime
+   * In the case of our dragon, change the render scale
    */
   @Override
   protected void preRenderCallback(EntityTameableDragon dragon, float partialTicks) {
-    final float MODEL_SCALE_FACTOR_FOR_FULLY_GROWN = dragon.getBreed().getAdultModelRenderScaleFactor();
-    // a fully grown dragon is larger than the model by this amount
-    float scale=dragon.getScale() * MODEL_SCALE_FACTOR_FOR_FULLY_GROWN;
+    DragonPhysicalModel dragonPhysicalModel = dragon.getPhysicalModel();
+    float renderScale =  dragonPhysicalModel.getRenderScaleFactor(dragon.getScale());
     if (DebugSettings.isBoxDragon()) {
-      scale = (float)DebugSettings.getDebugParameter("scale");
-      if (scale < 0.01) scale = 1.0F;
+      renderScale = (float)DebugSettings.getDebugParameter("scale");
+      if (renderScale < 0.01) renderScale = 1.0F;
     }
-    GlStateManager.scale(scale, scale, scale);
+    GlStateManager.scale(renderScale, renderScale, renderScale);
   }
 
   @Override

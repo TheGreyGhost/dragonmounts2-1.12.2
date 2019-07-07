@@ -11,6 +11,7 @@
 package com.TheRPGAdventurer.ROTD.client.model.dragon;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
@@ -99,6 +100,7 @@ public class DragonModel extends AdvancedModelBase {
   public float size;
   private EnumDragonBreed breed;
   private DragonModelMode mode;
+  private DragonPhysicalModel dragonPhysicalModel;
 
   private float relativeHeadScale; // the relative scaling for the head.  1.0 = normal size (Adult)
 
@@ -147,6 +149,7 @@ public class DragonModel extends AdvancedModelBase {
     textureHeight = 256;
 
     this.breed = breed;
+    this.dragonPhysicalModel = breed.getBreed().getDragonPhysicalModel();
 
     setTextureOffset("body.body", 0, 0);
     setTextureOffset("body.ridgeplate", 0, 32);

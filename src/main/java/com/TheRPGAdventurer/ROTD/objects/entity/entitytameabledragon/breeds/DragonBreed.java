@@ -4,6 +4,7 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitter;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitterFire;
 import com.TheRPGAdventurer.ROTD.inits.ModSounds;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFactory;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFire;
@@ -48,9 +49,12 @@ public abstract class DragonBreed {
     protected final Random rand=new Random();
     public static SoundEffectNames[] soundEffectNames;
 
+    private DragonPhysicalModel dragonPhysicalModel; // later: this may vary by breed type
+
     DragonBreed(String skin, int color) {
         this.skin=skin;
         this.color=color;
+        this.dragonPhysicalModel = new DragonPhysicalModel();
 
         // ignore suffocation damage
         setImmunity(DamageSource.DROWN);
@@ -402,26 +406,22 @@ public abstract class DragonBreed {
     return new Pair<Float, Float>(minAttackRange, maxAttackRange);
   }
 
-  /**
-   * returns the width and height of the entity when it's an adult
-   * later: may vary for different breeds
-   * @return a pair of [width, height] for the entity - affects the Axis Aligned Bounding Box
-   */
-  public Pair<Float, Float> getAdultEntitySize()
+  public DragonPhysicalModel getDragonPhysicalModel()
   {
-    return new Pair<>(4.8F, 4.2F);
-//    public static final float BASE_WIDTH = 4.8f; //2.4f;      make the adult twice the size it used to be
-//    public static final float BASE_HEIGHT = 4.2F; //2.1f;      make the adult twice the size it used to be
+    return dragonPhysicalModel;
   }
 
-  /**
-   * used when rendering; scale up the model by this factor for a fully-grown adult
-   * @return the relative scale factor (1.0 = no scaling)
-   */
-  public float getAdultModelRenderScaleFactor()
-  {
-    return 1.6F;  // I don't know why this is the magic number 1.6, it just gives the right size
-  }
+//  /**  moved to DragonPhysicalModel
+//   * returns the width and height of the entity when it's an adult
+//   * later: may vary for different breeds
+//   * @return a pair of [width, height] for the entity - affects the Axis Aligned Bounding Box
+//   */
+//  public Pair<Float, Float> getAdultEntitySize()
+//  {
+//    return new Pair<>(4.8F, 4.2F);
+////    public static final float BASE_WIDTH = 4.8f; //2.4f;      make the adult twice the size it used to be
+////    public static final float BASE_HEIGHT = 4.2F; //2.1f;      make the adult twice the size it used to be
+//  }
 
   /**
    * used for converting the model dimensions into world dimensions (see DragonHeadPositionHelper)
@@ -429,48 +429,34 @@ public abstract class DragonBreed {
    * It's probably linked to getAdultModelRenderScaleFactor
    * @return
    */
-  public float getAdultModelScaleFactor() {
-    return 0.1F;
-  }
+//  public float getAdultModelScaleFactor() {
+//    return 0.1F;
+//  }
 
-  /**
-   * gets the position offset to use for a passenger on a fully-grown adult dragon
-   * @param isSitting is the dragon sitting down?
-   * @param passengerNumber the number (0.. max) of the passenger
-   * @return the [x, y, z] of the mounting position relative to the dragon [posX, posY, posZ]
-   * for smaller-than-adult sizes, multiply by
-   */
-  public Vec3d getAdultMountedPositionOffset(boolean isSitting, int passengerNumber)
-  {
-    double yoffset = (isSitting ? 3.4 : 4.4);
+//  /**
+//   * gets the position offset to use for a passenger on a fully-grown adult dragon
+//   * @param isSitting is the dragon sitting down?
+//   * @param passengerNumber the number (0.. max) of the passenger
+//   * @return the [x, y, z] of the mounting position relative to the dragon [posX, posY, posZ]
+//   * for smaller-than-adult sizes, multiply by
+//   */
+//  public Vec3d getAdultMountedPositionOffset(boolean isSitting, int passengerNumber)
+//  {
+//    double yoffset = (isSitting ? 3.4 : 4.4);
+//
+//    // dragon position is the middle of the model and the saddle is on
+//    // the shoulders, so move player forwards on Z axis relative to the
+//    // dragon's rotation to fix that
+//    //
+//
+//    switch (passengerNumber) {
+//      case 0: return new Vec3d(   0, yoffset, 2.2);
+//      case 1: return new Vec3d(+0.6, yoffset, 1.5);
+//      case 2: return new Vec3d(-0.6, yoffset, 1.5);
+//    }
+//    DragonMounts.loggerLimit.error_once("Illegal passengerNumber:" + passengerNumber);
+//    return new Vec3d(0, yoffset, 2.2);
+//  }
 
-    // dragon position is the middle of the model and the saddle is on
-    // the shoulders, so move player forwards on Z axis relative to the
-    // dragon's rotation to fix that
-    //
-
-    switch (passengerNumber) {
-      case 0: return new Vec3d(   0, yoffset, 2.2);
-      case 1: return new Vec3d(+0.6, yoffset, 1.5);
-      case 2: return new Vec3d(-0.6, yoffset, 1.5);
-    }
-    DragonMounts.loggerLimit.error_once("Illegal passengerNumber:" + passengerNumber);
-    return new Vec3d(0, yoffset, 2.2);
-  }
-
-  /** how many passengers can ride on this breed?
-   * @return
-   */
-  public int getMaxNumberOfPassengers(DragonLifeStage dragonLifeStage)
-  {
-    return 3;
-  }
-
-  // what is the relative eye height of this dragon?
-  // todo: move to headpositionhelper
-  public float getRelativeEyeHeight(boolean isSitting)
-  {
-    return isSitting ? 0.8F : 0.85F;
-  }
 }
 

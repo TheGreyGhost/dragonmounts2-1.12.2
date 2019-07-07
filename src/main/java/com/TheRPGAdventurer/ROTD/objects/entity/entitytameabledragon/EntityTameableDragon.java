@@ -18,7 +18,6 @@ import com.TheRPGAdventurer.ROTD.inits.*;
 import com.TheRPGAdventurer.ROTD.inventory.ContainerDragon;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonExtras;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonInventory;
-import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitycarriage.EntityCarriage;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.ground.EntityAIDragonSit;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.ai.path.PathNavigateFlying;
@@ -27,7 +26,6 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.Drag
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.*;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.interact.DragonInteractBase;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.interact.DragonInteractHelper;
 import com.TheRPGAdventurer.ROTD.objects.items.ItemDragonAmulet;
@@ -187,6 +185,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   private boolean followYaw;
   private DragonAnimator animator;
   private double airSpeedVertical = 0;
+  private DragonPhysicalModel dragonPhysicalModel;
 
   public EntityTameableDragon(World world) {
     super(world);
@@ -196,15 +195,20 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
     // create entity delegates
     addHelper(new DragonBreedHelper(this, DATA_BREED));
+
+    dragonPhysicalModel = getBreed().getDragonPhysicalModel();
+
     addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION));
     addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
     addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
     addHelper(new DragonInteractHelper(this));
     if (isServer()) addHelper(new DragonBrain(this));
 
-    // set base size
-    Pair<Float, Float> adultSize = getBreed().getAdultEntitySize();
-    setSize(adultSize.getFirst(), adultSize.getSecond());           //todo: later - update it when breed changes
+    // set dimensions of full-grown dragon.  The actual width & height is multiplied by the dragon scale (setScale) in EntityAgeable
+    final float FULL_SIZE_DRAGON_SCALE = 1.0F;
+    float adultWidth = dragonPhysicalModel.getHitboxWidthWC(FULL_SIZE_DRAGON_SCALE);
+    float adultHeight = dragonPhysicalModel.getHitboxHeightWC(FULL_SIZE_DRAGON_SCALE);
+    setSize(adultWidth, adultHeight);           //todo: later - update it when breed changes
 
     // init helpers
     moveHelper=new DragonMoveHelper(this);
@@ -1508,7 +1512,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     if (isEgg()) {
       eyeHeight = 1.3f;
     } else {
-      eyeHeight = height * getBreed().getRelativeEyeHeight(isSitting());
+      eyeHeight = dragonPhysicalModel.getEyeHeightWC(getScale(), isSitting());
     }
     return eyeHeight;
   }
@@ -1521,7 +1525,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   @Override
   public double getMountedYOffset() {
     final int DEFAULT_PASSENGER_NUMBER = 0;
-    return getBreed().getAdultMountedPositionOffset(isSitting(), DEFAULT_PASSENGER_NUMBER).y * getScale();
+    return dragonPhysicalModel.getRiderPositionOffsetWC(getScale(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
   }
 
   /**
@@ -1867,6 +1871,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     return getBreedHelper().getBreedType();
   }
 
+  public DragonPhysicalModel getPhysicalModel() {return dragonPhysicalModel;}
   /**
    * Sets the new breed for this
    *
@@ -2035,7 +2040,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         return;
       }
 
-      Vec3d mountedPositionOffset = getBreed().getAdultMountedPositionOffset(isSitting(), passengerNumber);
+      Vec3d mountedPositionOffset = dragonPhysicalModel.getRiderPositionOffsetWC(getScale(), isSitting(), passengerNumber);
 
 //      // todo remove (debugging only)
 //      mountedPositionOffset = new Vec3d(DebugSettings.getDebugParameter("x"),
@@ -2043,11 +2048,11 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 //                                        DebugSettings.getDebugParameter("z"));
 //      System.out.println("MountedOffset:" + mountedPositionOffset);
 
-      double dragonScaling = getScale(); //getBreed().getAdultModelRenderScaleFactor() * getScale();
-
-      mountedPositionOffset = mountedPositionOffset.scale(dragonScaling);
+//      double dragonScaling = getScale(); //getBreed().getAdultModelRenderScaleFactor() * getScale();
+//
+//      mountedPositionOffset = mountedPositionOffset.scale(dragonScaling);
       mountedPositionOffset = mountedPositionOffset.rotateYaw((float) Math.toRadians(-renderYawOffset)); // oops
-      mountedPositionOffset = mountedPositionOffset.addVector(0, passenger.getYOffset(), 0);
+      mountedPositionOffset = mountedPositionOffset.addVector(0, passenger.getYOffset(), 0);  // adjust for passenger's seated change in height
 
       if (!(passenger instanceof EntityPlayer)) {
         passenger.rotationYaw = this.rotationYaw;
@@ -2402,7 +2407,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   }
 
   public boolean canFitPassenger(Entity passenger) {
-    return this.getPassengers().size() < getBreed().getMaxNumberOfPassengers(getLifeStageHelper().getLifeStage());
+    return this.getPassengers().size() < dragonPhysicalModel.getMaxNumberOfPassengers(getLifeStageHelper().getLifeStage());
   }
 
   /**

@@ -1,7 +1,7 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.sun.javafx.geom.Vec3f;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.input.Keyboard;
 import java.util.HashMap;
 
@@ -88,21 +88,22 @@ public class DebugSettings
   public static void setRiderPositionTweak(boolean riderPositionTweak) {
     DebugSettings.riderPositionTweak = riderPositionTweak;
   }
-  public static Vec3f getRiderPositionOffset(int rider, Vec3f offset) {
-    Vec3f retval = new Vec3f(offset);
+  public static Vec3d getRiderPositionOffset(int rider, Vec3d offset) {
+    double x = offset.x;
+    double y = offset.y;
+    double z = offset.z;
     if (existsDebugParameter("rx"+ rider)) {
-      retval.x = (float)DebugSettings.getDebugParameter("rx"+ rider);
+      x = (float)DebugSettings.getDebugParameter("rx"+ rider);
     }
     if (existsDebugParameter("ry"+ rider)) {
-      retval.y = (float)DebugSettings.getDebugParameter("ry"+ rider);
+      y = (float)DebugSettings.getDebugParameter("ry"+ rider);
     }
     if (existsDebugParameter("rz"+ rider)) {
-      retval.z = (float)DebugSettings.getDebugParameter("rz"+ rider);
+      z = (float)DebugSettings.getDebugParameter("rz"+ rider);
     }
-    return retval;
+    return new Vec3d(x, y, z);
   }
   private static boolean riderPositionTweak = false;
-
 
   /**
    * Debug parameters can be set using the command console

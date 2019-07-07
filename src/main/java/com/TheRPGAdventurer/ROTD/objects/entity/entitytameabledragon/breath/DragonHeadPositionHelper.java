@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.SegmentSizePositionRotation;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
@@ -27,11 +28,13 @@ public class DragonHeadPositionHelper {
   public SegmentSizePositionRotation neck;  //not required?  not sure.
 
   private EntityTameableDragon dragon;
+  private DragonPhysicalModel dragonPhysicalModel;
   private final int NUMBER_OF_NECK_SEGMENTS;
 
-  public DragonHeadPositionHelper(EntityTameableDragon parent, int i_numberOfNeckSegments) {
+  public DragonHeadPositionHelper(EntityTameableDragon parent) {
     dragon = parent;
-    NUMBER_OF_NECK_SEGMENTS = i_numberOfNeckSegments;
+    dragonPhysicalModel = parent.getPhysicalModel();
+    NUMBER_OF_NECK_SEGMENTS = dragonPhysicalModel.getNumberOfNeckSegments();
   }
 
   /** calculate the position, rotation angles, and scale of the head and all segments in the neck
@@ -138,61 +141,62 @@ public class DragonHeadPositionHelper {
     }
 
     float renderYawOffset = dragon.renderYawOffset;
-
-    Vec3d bodyOrigin = dragon.getPositionVector();
-    bodyOrigin = bodyOrigin.addVector(0, dragon.getEyeHeight(), 0);
     float scale = dragon.getScale();
-    final float ADULT_SCALE_FACTOR = dragon.getBreed().getAdultModelScaleFactor();
-    final float BODY_X_SCALE = -ADULT_SCALE_FACTOR * scale;
-    final float BODY_Y_SCALE = -ADULT_SCALE_FACTOR * scale;
-    final float BODY_Z_SCALE = ADULT_SCALE_FACTOR * scale;
 
-    final float headScale = scale * getRelativeHeadSize();
-    final float HEAD_X_SCALE = ADULT_SCALE_FACTOR * headScale;
-    final float HEAD_Y_SCALE = ADULT_SCALE_FACTOR * headScale;
-    final float HEAD_Z_SCALE = ADULT_SCALE_FACTOR * headScale;
+    Vec3d bodyOriginOffset = dragonPhysicalModel.offsetOfOriginFromEntityPosWC(scale, dragon.isSitting());
+    Vec3d bodyOriginWC = dragon.getPositionVector().add(bodyOriginOffset);
+
+    final float BODY_SCALE_MC_TO_WC = dragonPhysicalModel.getConversionFactorMCtoWC(scale);
+//    final float BODY_X_SCALE = -ADULT_SCALE_FACTOR * scale;
+//    final float BODY_Y_SCALE = -ADULT_SCALE_FACTOR * scale;
+//    final float BODY_Z_SCALE = ADULT_SCALE_FACTOR * scale;
+
+    final float HEAD_SCALE_MC_TO_WC = BODY_SCALE_MC_TO_WC * getRelativeHeadSize();
+//    final float HEAD_X_SCALE = ADULT_SCALE_FACTOR * headScale;
+//    final float HEAD_Y_SCALE = ADULT_SCALE_FACTOR * headScale;
+//    final float HEAD_Z_SCALE = ADULT_SCALE_FACTOR * headScale;
 
     // the head offset plus the headLocation.rotationPoint is the origin of the head, i.e. the point about which the
     //   head rotates, relative to the origin of the body (getPositionEyes)
-    final float HEAD_X_OFFSET = 0;
-    final float HEAD_Y_OFFSET = 2; // 2  //-4
-    final float HEAD_Z_OFFSET = -23; //-23
+    final float HEAD_X_OFFSET_MC = 0;
+    final float HEAD_Y_OFFSET_MC = 2; // 2  //-4
+    final float HEAD_Z_OFFSET_MC = -23; //-23
 
-    final float THROAT_X_OFFSET = 0;
-    final float THROAT_Y_OFFSET = 4; //  0
-    final float THROAT_Z_OFFSET = -17; //  -20
+    final float THROAT_X_OFFSET_MC = 0;
+    final float THROAT_Y_OFFSET_MC = 0; //  0
+    final float THROAT_Z_OFFSET_MC = -20; //  -20
 
-    Vec3d headOffset =  new Vec3d((head.rotationPointX + HEAD_X_OFFSET) * BODY_X_SCALE,
-                                  (head.rotationPointY + HEAD_Y_OFFSET) * BODY_Y_SCALE,
-                                  (head.rotationPointZ + HEAD_Z_OFFSET) * BODY_Z_SCALE);
+    Vec3d headOffsetWC =  new Vec3d((head.rotationPointX + HEAD_X_OFFSET_MC) * BODY_SCALE_MC_TO_WC,
+                                  (head.rotationPointY + HEAD_Y_OFFSET_MC) * BODY_SCALE_MC_TO_WC,
+                                  (head.rotationPointZ + HEAD_Z_OFFSET_MC) * BODY_SCALE_MC_TO_WC);
 
     // offset of the throat position relative to the head origin- rotate and pitch to match head
 
-    Vec3d throatOffset = new Vec3d(THROAT_X_OFFSET * HEAD_X_SCALE,
-                                   THROAT_Y_OFFSET * HEAD_Y_SCALE,
-                                   THROAT_Z_OFFSET * HEAD_Z_SCALE);
+    Vec3d throatOffsetWC = new Vec3d(THROAT_X_OFFSET_MC * HEAD_SCALE_MC_TO_WC,
+                                   THROAT_Y_OFFSET_MC * HEAD_SCALE_MC_TO_WC,
+                                   THROAT_Z_OFFSET_MC * HEAD_SCALE_MC_TO_WC);
 
-    throatOffset = throatOffset.rotatePitch(head.rotateAngleX);
-    throatOffset = throatOffset.rotateYaw(-head.rotateAngleY);
+    throatOffsetWC = throatOffsetWC.rotatePitch(head.rotateAngleX);
+    throatOffsetWC = throatOffsetWC.rotateYaw(-head.rotateAngleY);
 
-    Vec3d headPlusThroatOffset = headOffset.add(throatOffset);
+    Vec3d headPlusThroatOffsetWC = headOffsetWC.add(throatOffsetWC);
 
     float bodyPitch = dragon.getBodyPitch();
-    Vec3d CENTRE_OFFSET = new Vec3d(0, -6 * BODY_Y_SCALE,  19 * BODY_Z_SCALE);
+    Vec3d CENTRE_OFFSET_WC = new Vec3d(0, -6 * BODY_SCALE_MC_TO_WC,  19 * BODY_SCALE_MC_TO_WC);
 
     //rotate body
 
     bodyPitch = (float)Math.toRadians(bodyPitch);
 
-    headPlusThroatOffset = headPlusThroatOffset.add(CENTRE_OFFSET);
-    headPlusThroatOffset = headPlusThroatOffset.rotatePitch(-bodyPitch);
-    headPlusThroatOffset = headPlusThroatOffset.subtract(CENTRE_OFFSET);
+    headPlusThroatOffsetWC = headPlusThroatOffsetWC.add(CENTRE_OFFSET_WC);
+    headPlusThroatOffsetWC = headPlusThroatOffsetWC.rotatePitch(-bodyPitch);
+    headPlusThroatOffsetWC = headPlusThroatOffsetWC.subtract(CENTRE_OFFSET_WC);
 
-    headPlusThroatOffset = headPlusThroatOffset.rotateYaw((float) (Math.toRadians(-renderYawOffset) + Math.PI));
+    headPlusThroatOffsetWC = headPlusThroatOffsetWC.rotateYaw((float) (Math.toRadians(-renderYawOffset) + Math.PI));
 
-    Vec3d throatPos = bodyOrigin.add(headPlusThroatOffset);
+    Vec3d throatPosWC = bodyOriginWC.add(headPlusThroatOffsetWC);
 
-    return throatPos;
+    return throatPosWC;
   }
 
   /**

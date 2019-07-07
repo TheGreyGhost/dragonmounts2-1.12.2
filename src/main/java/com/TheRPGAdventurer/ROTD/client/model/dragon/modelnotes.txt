@@ -18,8 +18,9 @@ In vanilla, this is either done before the call to the renderer, or it's done in
 DragonRenderer uses preRenderCallBack()
 
 The origin of the model space is set up at [0, 24, 0], which means that the "feet" of your model should be at y = 24.  This will ensure that
-  when you scale the model, the feet remain on the ground.
-(This is effected by the GlStateManager.translate(0.0F, -1.501F, 0.0F); in RenderLivingBase
+  when you scale the model, the feet remain on the ground.  Scaling of the model uses the entity position as the origin (the entity
+  posX, posY, posZ corresponds to the centre of the entity in x,z and the position of its feet in y
+(This is effected by the GlStateManager.translate(0.0F, -1.501F, 0.0F); in RenderLivingBase)
 
 Individual parts of the model can be scaled by setting the corresponding ModelPart.setRenderScale()
 eg
@@ -60,7 +61,7 @@ When the two are combined, the origin of rotation can be moved without translati
 eg to make the origin of rotation (0,8,0) instead of (0,0,0):
 rotationPoint = -8 and offsetY = 0.5
 
-The overall model scaling (preRenderCallback()) is always around 0,24,0 in the model space;
+The overall model scaling (preRenderCallback()) is always around the entity position (0,0,0) - by default this is
   the scaling of the individual model parts (renderScaleX,Y,Z) is around 0,0,0
 
 setAngle(rotx, roty, rotz):
@@ -108,12 +109,6 @@ For the rider position tweaks:
             /dragon debug parameter rz0 40
       for rider 1: rx1 etc
 
-The dragon has:
-body model is three parts
-        body.addBox("body", -12, 0, -16, 24, 24, 64);
-        body.addBox("scale", -1, -6, 10, 2, 6, 12);
-        body.addBox("scale", -1, -6, 30, 2, 6, 12);
-a body
-    The "scales" are the
+To do: need to adjust the various magic numbers in DragonPhysicalModel
 
 
