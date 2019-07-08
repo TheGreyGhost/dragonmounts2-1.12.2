@@ -14,6 +14,7 @@ import com.TheRPGAdventurer.ROTD.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -133,6 +134,10 @@ public class DragonLifeStageHelper extends DragonHelper {
 //    }
 
     public int getTicksSinceCreation() {
+        if (DebugSettings.existsDebugParameter("forcedageticks")) {
+          return (int)DebugSettings.getDebugParameter("forcedageticks");
+        }
+
         if (dragon.isServer()) {
             return ticksSinceCreationServer;
         } else {

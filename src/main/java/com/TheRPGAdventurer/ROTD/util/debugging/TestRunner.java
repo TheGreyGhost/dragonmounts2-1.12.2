@@ -308,7 +308,7 @@ public class TestRunner
   public static boolean testGetRelativeHeadSize(World worldIn)
   {
     EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
-    DragonHeadPositionHelper dhph = new DragonHeadPositionHelper(dragon, 7);
+    DragonHeadPositionHelper dhph = new DragonHeadPositionHelper(dragon);
 
     for (float scale = 0.0f; scale <= 1.0F; scale += 0.01F) {
       float headsize = dhph.getRelativeHeadSize(scale);

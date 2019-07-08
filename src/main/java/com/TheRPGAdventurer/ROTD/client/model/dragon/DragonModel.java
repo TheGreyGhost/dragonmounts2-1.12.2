@@ -16,12 +16,14 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTamea
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.SegmentSizePositionRotation;
+import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelBase;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * Generic model for all winged tetrapod dragons.
@@ -496,6 +498,9 @@ public class DragonModel extends AdvancedModelBase {
 
     // update pitch
     pitch = dragonAnimator.getBodyPitch();
+    if (DebugSettings.existsDebugParameter("dragonpitch")) {
+      pitch = (float)DebugSettings.getDebugParameter("dragonpitch");
+    }
 
     relativeHeadScale = dragonAnimator.getDragonHeadPositionHelper().getRelativeHeadSize();
 

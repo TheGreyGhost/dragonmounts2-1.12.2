@@ -61,6 +61,10 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
         DebugSettings.setRenderCentrePoints(!DebugSettings.isRenderCentrePoints());
       }));
 
+      addCommand(new CommandDragonLambda("renderDragonPoints", (server, sender, args) -> {
+        DebugSettings.setRenderDragonPoints(!DebugSettings.isRenderDragonPoints());
+      }));
+
       addCommand(new CommandDragonLambda("renderXYZmarkers", (server, sender, args) -> {
         DebugSettings.setRenderXYZmarkers(!DebugSettings.isRenderXYZmarkers());
       }));
@@ -75,7 +79,7 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
           DebugSettings.setDebugParameter(paramName, value);
         }));
 
-        addCommand(new CommandDragonLambda("testBreeds", dragon -> {
+      addCommand(new CommandDragonLambda("testBreeds", dragon -> {
           new Thread(() -> {
             try {
               for (EnumDragonBreed breed : EnumDragonBreed.values()) {

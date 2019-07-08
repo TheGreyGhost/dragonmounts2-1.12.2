@@ -2,7 +2,7 @@ package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.input.Keyboard;
+
 import java.util.HashMap;
 
 /**
@@ -66,13 +66,22 @@ public class DebugSettings
   }
   private static boolean renderXYZmarkers;
 
+
+  public static boolean isRenderDragonPoints() {
+    return renderDragonPoints;
+  }
+  public static void setRenderDragonPoints(boolean renderDragonPoints) {
+    DebugSettings.renderDragonPoints = renderDragonPoints;
+  }
+  private static boolean renderDragonPoints;
+
   public static boolean isForceDragonModel() {
     return forceDragonModel;
   }
   public static void setForceDragonModel(boolean forceDragonModel) {
     DebugSettings.forceDragonModel = forceDragonModel;
   }
-  private static boolean forceDragonModel = true; //todo restore to false
+  private static boolean forceDragonModel = false; //todo restore to false
 
   public static boolean isBoxDragon() {
     return boxDragon;

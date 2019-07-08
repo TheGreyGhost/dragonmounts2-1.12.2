@@ -80,7 +80,7 @@ public class DragonPhysicalModel {
   public float getConversionFactorMCtoWC(float scale) {return CONVERSION_FACTOR_MC_TO_BC * RENDER_SCALE_FACTOR * scale;}
 
   /** gets the position offset to use for a passenger
-   * i.e. the position of the rider relative to the origin of the body
+   * i.e. the position of the rider relative to the entity posX, posY, posZ
    * @param scale the scale of the dragon (0 -> 1) , 1.0 is fully grown
    * @param passengerNumber the number (0.. max) of the passenger
    * @return the [x, y, z] of the mounting position relative to the dragon entity origin [posX, posY, posZ]
@@ -88,7 +88,7 @@ public class DragonPhysicalModel {
   public Vec3d getRiderPositionOffsetWC(float scale, boolean sitting, int passengerNumber)
   {
     return offsetOfOriginFromEntityPosWC(scale, sitting)
-            .add(getRiderPositionOffsetBC(passengerNumber).scale(scale));
+            .add(getRiderPositionOffsetBC(passengerNumber).scale(scale*RENDER_SCALE_FACTOR));
   }
 
   /** gets the position offset to use for a passenger at BASE size
@@ -109,7 +109,7 @@ public class DragonPhysicalModel {
 
     switch (passengerNumber) {
       case 0:
-        offset = new Vec3d(0, yoffset, BODY_HALF_LENGTH_BC * 0.75F); break;
+        offset = new Vec3d(0, yoffset, 1.1F); break;  // determined by tweaking
       case 1:
         offset = new Vec3d(+0.6F, yoffset, 0); break;
       case 2:
@@ -140,6 +140,20 @@ public class DragonPhysicalModel {
    */
   public float getEyeHeightWC(float scale, boolean isSitting)
   {
+    if (DebugSettings.existsDebugParameter("headbodyx")) {
+      HEAD_OFFSET_FROM_BODY_BC = new Vec3d(DebugSettings.getDebugParameter("headbodyx"),
+                                           HEAD_OFFSET_FROM_BODY_BC.y, HEAD_OFFSET_FROM_BODY_BC.z);
+    }
+    if (DebugSettings.existsDebugParameter("headbodyy")) {
+      HEAD_OFFSET_FROM_BODY_BC = new Vec3d(HEAD_OFFSET_FROM_BODY_BC.x,
+              DebugSettings.getDebugParameter("headbodyy"),
+              HEAD_OFFSET_FROM_BODY_BC.z);
+    }
+    if (DebugSettings.existsDebugParameter("headbodyz")) {
+      HEAD_OFFSET_FROM_BODY_BC = new Vec3d(HEAD_OFFSET_FROM_BODY_BC.x, HEAD_OFFSET_FROM_BODY_BC.y,
+              DebugSettings.getDebugParameter("headbodyz"));
+    }
+
     double offsetEyeFromBodyOriginWCY = scale * RENDER_SCALE_FACTOR * HEAD_OFFSET_FROM_BODY_BC.y;
     double originBodyWCY = offsetOfOriginFromEntityPosWC(scale, isSitting).y;
     return (float)(offsetEyeFromBodyOriginWCY + originBodyWCY);
@@ -155,7 +169,7 @@ public class DragonPhysicalModel {
    */
   public Vec3d getEyePositionWC(float scale, float rotationYaw, boolean isSitting)
   {
-    Vec3d headRotatedOffset = HEAD_OFFSET_FROM_BODY_BC.rotateYaw(rotationYaw).scale(scale);
+    Vec3d headRotatedOffset = HEAD_OFFSET_FROM_BODY_BC.rotateYaw(-(float)Math.toRadians(rotationYaw)).scale(scale*RENDER_SCALE_FACTOR);
     return offsetOfOriginFromEntityPosWC(scale, isSitting).add(headRotatedOffset);
   }
 
@@ -167,8 +181,8 @@ public class DragonPhysicalModel {
   private float BODY_HALF_HEIGHT_BC = BODY_HEIGHT_BC / 2.0F;
   private float BODY_HALF_LENGTH_BC = 2.0F;
   private float SADDLE_THICKNESS_BC = 2.0F/16.0F;
-  private float BELLY_TO_GROUND_WHEN_SITTING_BC = 0.9F;
-  private float BELLY_TO_GROUND_WHEN_STANDING_BC = 1.5F;
+  private float BELLY_TO_GROUND_WHEN_SITTING_BC = 0.65F;
+  private float BELLY_TO_GROUND_WHEN_STANDING_BC = 1.25F;
 
   private float DESIRED_BODY_HEIGHT_WC = 1.5F * 1.6F;
   private float RENDER_SCALE_FACTOR = DESIRED_BODY_HEIGHT_WC / BODY_HEIGHT_BC;
@@ -179,7 +193,7 @@ public class DragonPhysicalModel {
   // 0.25 metres above the top of the back but through the middle of the body
   private Vec3d ROTATION_POINT_FOR_BODY_PITCH_BC = new Vec3d(0, BODY_HALF_HEIGHT_BC + 0.25F, 0);
   // the origin of the head relative to the body origin
-  private Vec3d HEAD_OFFSET_FROM_BODY_BC = new Vec3d(0, 2.75F * 0.8F, 3.0F);  //todo- adjust this
+  private Vec3d HEAD_OFFSET_FROM_BODY_BC = new Vec3d(0, 1.0F, 4.0F);
 
   private int NUMBER_OF_NECK_SEGMENTS = 7;
   private int NUMBER_OF_WING_FINGERS = 4;

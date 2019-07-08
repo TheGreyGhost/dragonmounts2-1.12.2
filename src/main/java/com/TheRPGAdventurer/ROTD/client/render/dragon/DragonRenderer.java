@@ -75,7 +75,21 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
       partialTicks = DebugSettings.animationFrozenPartialTicks();
     }
 
-    if (DebugSettings.isRenderCentrePoints()) {
+    // show body centre, rider positions, head position, throat position
+    if (DebugSettings.isRenderDragonPoints()) {
+      float dragonScale = dragon.getScale();
+      Vec3d dragonPos = dragon.getPositionVector();
+      Vec3d point = dragon.getPhysicalModel().offsetOfOriginFromEntityPosWC(dragonScale, dragon.isSitting());
+      point = point.rotateYaw(yaw).add(dragonPos);
+      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
+      for (int i = 0; i < dragon.getPhysicalModel().getMaxNumberOfPassengers(dragon.getLifeStageHelper().getLifeStage()); ++i) {
+        point = dragon.getPhysicalModel().getRiderPositionOffsetWC(dragonScale, dragon.isSitting(), i);
+        point = point.rotateYaw(-(float)Math.toRadians(yaw)).add(dragonPos);
+        CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
+      }
+      point = dragon.getPhysicalModel().getEyePositionWC(dragonScale, dragon.renderYawOffset, dragon.isSitting());
+      point = point.add(dragonPos);
+      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
       Vec3d throat = dragon.getAnimator().getThroatPosition();
       CentrepointCrosshairRenderer.addCentrepointToRenderWorld(throat.x, throat.y, throat.z);
     }

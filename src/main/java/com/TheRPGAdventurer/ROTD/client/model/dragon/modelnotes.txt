@@ -83,9 +83,9 @@ commands:
           /dragon debug parameter wy0 5
           /dragon debug parameter wz0 40
        likewise [ex0, ey0, ez0] = add marker at location relative to origin of entity (posX, posY, posZ)
- /dragon debug riderPositionTweak: tweak the rider positions
+ /dragon debug setRiderPositionTweak: tweak the rider positions
 
-
+ /dragon debug renderDragonPoints: show crosshairs at the major points in the dragon model
 
 For the box dragon, use the following debug parameters:
           debugBox.rotationPointX = (float)DebugSettings.getDebugParameter("rpx");
@@ -109,6 +109,18 @@ For the rider position tweaks:
             /dragon debug parameter rz0 40
       for rider 1: rx1 etc
 
+For the tweaking of head position from body origin i.e. HEAD_OFFSET_FROM_BODY_BC:
+     /dragon debug parameter headbodyx 0  (or headbodyy, headbodyz)
+
+To force the dragon to a particular age:
+   /dragon debug parameter forcedageticks number
+
+To force dragon entity parameters:
+     /dragon debug parameter dragonyaw 0
+     /dragon debug parameter dragonpitch 0
+
 To do: need to adjust the various magic numbers in DragonPhysicalModel
+
+
 
 

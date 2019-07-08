@@ -848,6 +848,12 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
   @Override
   public void onLivingUpdate() {
+    if (DebugSettings.existsDebugParameter("dragonyaw")) {
+      this.renderYawOffset = (float)DebugSettings.getDebugParameter("dragonyaw");
+      this.prevRenderYawOffset = renderYawOffset;
+      this.rotationYaw = renderYawOffset;
+    }
+
     if (DebugSettings.isAnimationFrozen()) return;
 
     helpers.values().forEach(DragonHelper::onLivingUpdate);
@@ -2051,8 +2057,11 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 //      double dragonScaling = getScale(); //getBreed().getAdultModelRenderScaleFactor() * getScale();
 //
 //      mountedPositionOffset = mountedPositionOffset.scale(dragonScaling);
-      mountedPositionOffset = mountedPositionOffset.rotateYaw((float) Math.toRadians(-renderYawOffset)); // oops
-      mountedPositionOffset = mountedPositionOffset.addVector(0, passenger.getYOffset(), 0);  // adjust for passenger's seated change in height
+      mountedPositionOffset = mountedPositionOffset.rotateYaw((float) Math.toRadians(-renderYawOffset)); 
+      final double EXTRA_HEIGHT_TO_PLAYER_BUTT = 0.28F;  // the passenger.getYOffset doesn't actually give the correct butt position for the player
+                                                        //  --> need to allow for extra
+      double passengerOriginToButtHeight = -passenger.getYOffset() + EXTRA_HEIGHT_TO_PLAYER_BUTT;
+      mountedPositionOffset = mountedPositionOffset.subtract(0, passengerOriginToButtHeight, 0);  // adjust for passenger's seated change in height
 
       if (!(passenger instanceof EntityPlayer)) {
         passenger.rotationYaw = this.rotationYaw;
