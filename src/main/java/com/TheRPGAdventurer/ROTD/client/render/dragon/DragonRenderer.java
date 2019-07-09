@@ -83,11 +83,11 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
       point = point.rotateYaw(yaw).add(dragonPos);
       CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
       for (int i = 0; i < dragon.getPhysicalModel().getMaxNumberOfPassengers(dragon.getLifeStageHelper().getLifeStage()); ++i) {
-        point = dragon.getPhysicalModel().getRiderPositionOffsetWC(dragonScale, dragon.isSitting(), i);
+        point = dragon.getPhysicalModel().getRiderPositionOffsetWC(dragonScale, dragon.getBodyPitch(), dragon.isSitting(), i);
         point = point.rotateYaw(-(float)Math.toRadians(yaw)).add(dragonPos);
         CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
       }
-      point = dragon.getPhysicalModel().getEyePositionWC(dragonScale, dragon.renderYawOffset, dragon.isSitting());
+      point = dragon.getPhysicalModel().getEyePositionWC(dragonScale, dragon.renderYawOffset, dragon.getBodyPitch(), dragon.isSitting());
       point = point.add(dragonPos);
       CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
       Vec3d throat = dragon.getAnimator().getThroatPosition();

@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
@@ -308,10 +309,10 @@ public class TestRunner
   public static boolean testGetRelativeHeadSize(World worldIn)
   {
     EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
-    DragonHeadPositionHelper dhph = new DragonHeadPositionHelper(dragon);
+    DragonPhysicalModel dpm = new DragonPhysicalModel();
 
     for (float scale = 0.0f; scale <= 1.0F; scale += 0.01F) {
-      float headsize = dhph.getRelativeHeadSize(scale);
+      float headsize = dpm.getRelativeHeadSize(scale);
       System.out.println("scale=" + scale + ", relativeheadsize=" + headsize);
     }
     return true;

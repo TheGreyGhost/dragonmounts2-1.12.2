@@ -38,7 +38,7 @@ public class DragonHeadPositionHelper {
   }
 
   /** calculate the position, rotation angles, and scale of the head and all segments in the neck
-   * @param animBase
+   * @param animRadians
    * @param flutter
    * @param sit
    * @param walk
@@ -48,7 +48,7 @@ public class DragonHeadPositionHelper {
    * @param lookPitch
    * @param breath
    */
-  public void calculateHeadAndNeck(float animBase, float flutter, float sit, float walk, float speed, float ground, float netLookYaw, float lookPitch, float breath) {
+  public void calculateHeadAndNeck(float animRadians, float flutter, float sit, float walk, float speed, float ground, float netLookYaw, float lookPitch, float breath) {
     neckSegments = new SegmentSizePositionRotation[NUMBER_OF_NECK_SEGMENTS];
     head = new SegmentSizePositionRotation();
     SegmentSizePositionRotation currentSegment = new SegmentSizePositionRotation();
@@ -66,7 +66,7 @@ public class DragonHeadPositionHelper {
     for (int i = 0; i < NUMBER_OF_NECK_SEGMENTS; i++) {
       float vertMulti = (i + 1) / (float)NUMBER_OF_NECK_SEGMENTS;
 
-      float baseRotX = MathX.cos((float) i * 0.45f + animBase) * 0.15f;
+      float baseRotX = MathX.cos((float) i * 0.45f + animRadians) * 0.15f;
       if(!dragon.isUsingBreathWeapon()) baseRotX *= MathX.lerp(0.2f, 1, flutter);
       baseRotX *= MathX.lerp(1, 0.2f, sit);
       float ofsRotX = MathX.sin(vertMulti * MathX.PI_F * 0.9f) * 0.63f; // 0.9
@@ -89,7 +89,7 @@ public class DragonHeadPositionHelper {
       neckSegments[i] = currentSegment.getCopy();
 
       // move next segment behind the current one
-      float neckSize = DragonModel.NECK_SIZE * currentSegment.scaleZ - 1.4f;
+      float neckSize = DragonModel.NECK_SIZE * currentSegment.scaleZ - DragonModel.NECK_SEGMENT_OVERLAP;
       currentSegment.rotationPointX -= MathX.sin(currentSegment.rotateAngleY) * MathX.cos(currentSegment.rotateAngleX) * neckSize;
       currentSegment.rotationPointY += MathX.sin(currentSegment.rotateAngleX) * neckSize;
       currentSegment.rotationPointZ -= MathX.cos(currentSegment.rotateAngleY) * MathX.cos(currentSegment.rotateAngleX) * neckSize;
@@ -199,30 +199,12 @@ public class DragonHeadPositionHelper {
     return throatPosWC;
   }
 
-  /**
+  /**Get the relative head size - depends on the age of the dragon.
    * Baby dragon has a relatively larger head compared to its body size (makes it look cuter)
+   * @return the relative size of the head.  1.0 means normal size (adult).  Baby head is larger (eg 1.5)
    */
   public float getRelativeHeadSize() {
-    return getRelativeHeadSize(dragon.getScale());
-  }
-
-  public float getRelativeHeadSize(float scale) {
-    final float RELATIVE_SIZE_OF_ADULT_HEAD = 1.0F;
-    final float RELATIVE_SIZE_OF_BABY_HEAD = 2.0F;
-    final float SCALE_OF_BABY = 0.2F;
-    final float SCALE_OF_ADULT = 1.0F;
-
-    // used to be 1.4F / (scale + 0.4F) i.e. a rational function of the form head_size = A / (scale + B)
-    // We want the headsize of the adult to be RELATIVE_SIZE_OF_ADULT_HEAD at SCALE_OF_ADULT, and
-    //    headsize of the baby to be RELATIVE_SIZE_OF_BABY_HEAD at SCALE_OF_BABY
-    //  we can rearrange to solve for A and B
-    final float B = (RELATIVE_SIZE_OF_ADULT_HEAD * SCALE_OF_ADULT - RELATIVE_SIZE_OF_BABY_HEAD * SCALE_OF_BABY) /
-                    (RELATIVE_SIZE_OF_BABY_HEAD - RELATIVE_SIZE_OF_ADULT_HEAD);
-    final float A = RELATIVE_SIZE_OF_ADULT_HEAD * (SCALE_OF_ADULT + B);
-
-    scale = MathX.clamp(scale, SCALE_OF_BABY, SCALE_OF_ADULT);
-    float relativeHeadSize = A / (scale + B);
-    return relativeHeadSize;
+    return dragonPhysicalModel.getRelativeHeadSize(dragon.getScale());
   }
 
   /**

@@ -118,8 +118,7 @@ To force the dragon to a particular age:
 To force dragon entity parameters:
      /dragon debug parameter dragonyaw 0
      /dragon debug parameter dragonpitch 0
-
-To do: need to adjust the various magic numbers in DragonPhysicalModel
+      /dragon debug parameter dragonjawangle 0
 
 
 

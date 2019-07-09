@@ -3,6 +3,7 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
+import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -82,13 +83,18 @@ public class DragonPhysicalModel {
   /** gets the position offset to use for a passenger
    * i.e. the position of the rider relative to the entity posX, posY, posZ
    * @param scale the scale of the dragon (0 -> 1) , 1.0 is fully grown
+   * @param pitch the body pitch of the dragon (as per vanilla convention)
    * @param passengerNumber the number (0.. max) of the passenger
    * @return the [x, y, z] of the mounting position relative to the dragon entity origin [posX, posY, posZ]
    */
-  public Vec3d getRiderPositionOffsetWC(float scale, boolean sitting, int passengerNumber)
+  public Vec3d getRiderPositionOffsetWC(float scale, float pitch, boolean sitting, int passengerNumber)
   {
+    Vec3d riderPositionOffsetFromBO = getRiderPositionOffsetBC(passengerNumber);
+    Vec3d riderPositionOffsetFromRP = riderPositionOffsetFromBO.subtract(ROTATION_POINT_FOR_BODY_PITCH_BC);
+    Vec3d riderPitchedPositionFromRP = riderPositionOffsetFromRP.rotatePitch((float)Math.toRadians(pitch));
+    Vec3d riderPitchedPositionFromBO = ROTATION_POINT_FOR_BODY_PITCH_BC.add(riderPitchedPositionFromRP);
     return offsetOfOriginFromEntityPosWC(scale, sitting)
-            .add(getRiderPositionOffsetBC(passengerNumber).scale(scale*RENDER_SCALE_FACTOR));
+            .add(riderPitchedPositionFromBO.scale(scale * RENDER_SCALE_FACTOR));
   }
 
   /** gets the position offset to use for a passenger at BASE size
@@ -163,14 +169,42 @@ public class DragonPhysicalModel {
    * Get the position of the eye relative
    *  @param scale the scale of the dragon (0 -> 1) , 1.0 is fully grown
    * @param rotationYaw the rotation (yaw) of the entity - as per vanilla value
+   * @param pitch of the entity - as per vanilla convention
    * @param isSitting
    * @return the world coordinates of the eye relative to the entity position [posX, posY, posZ]
    * todo: currently does an approximation for the head position.
    */
-  public Vec3d getEyePositionWC(float scale, float rotationYaw, boolean isSitting)
+  public Vec3d getEyePositionWC(float scale, float rotationYaw, float pitch, boolean isSitting)
   {
-    Vec3d headRotatedOffset = HEAD_OFFSET_FROM_BODY_BC.rotateYaw(-(float)Math.toRadians(rotationYaw)).scale(scale*RENDER_SCALE_FACTOR);
+    Vec3d headPitchedOffsetFromRP = HEAD_OFFSET_FROM_ROTATION_POINT_BC.rotatePitch((float)Math.toRadians(pitch));
+    Vec3d headPitchedOffsetFromBO = ROTATION_POINT_FOR_BODY_PITCH_BC.add(headPitchedOffsetFromRP);
+    Vec3d headRotatedOffset = headPitchedOffsetFromBO.rotateYaw(-(float)Math.toRadians(rotationYaw)).scale(scale * RENDER_SCALE_FACTOR);
     return offsetOfOriginFromEntityPosWC(scale, isSitting).add(headRotatedOffset);
+  }
+
+  /**Get the relative head size - depends on the age of the dragon.
+   * Baby dragon has a relatively larger head compared to its body size (makes it look cuter)
+   *
+   * @param scale the scale of the dragon (0 -> 1) , 1.0 is fully grown
+   * @return the relative size of the head.  1.0 means normal size (adult).  Baby head is larger (eg 1.5)
+   */
+  public float getRelativeHeadSize(float scale) {
+    final float RELATIVE_SIZE_OF_ADULT_HEAD = 1.0F;
+    final float RELATIVE_SIZE_OF_BABY_HEAD = 2.0F;
+    final float SCALE_OF_BABY = 0.2F;
+    final float SCALE_OF_ADULT = 1.0F;
+
+    // used to be 1.4F / (scale + 0.4F) i.e. a rational function of the form head_size = A / (scale + B)
+    // We want the headsize of the adult to be RELATIVE_SIZE_OF_ADULT_HEAD at SCALE_OF_ADULT, and
+    //    headsize of the baby to be RELATIVE_SIZE_OF_BABY_HEAD at SCALE_OF_BABY
+    //  we can rearrange to solve for A and B
+    final float B = (RELATIVE_SIZE_OF_ADULT_HEAD * SCALE_OF_ADULT - RELATIVE_SIZE_OF_BABY_HEAD * SCALE_OF_BABY) /
+            (RELATIVE_SIZE_OF_BABY_HEAD - RELATIVE_SIZE_OF_ADULT_HEAD);
+    final float A = RELATIVE_SIZE_OF_ADULT_HEAD * (SCALE_OF_ADULT + B);
+
+    scale = MathX.clamp(scale, SCALE_OF_BABY, SCALE_OF_ADULT);
+    float relativeHeadSize = A / (scale + B);
+    return relativeHeadSize;
   }
 
   public int getNumberOfTailSegments() {return  NUMBER_OF_TAIL_SEGMENTS;}
@@ -190,10 +224,12 @@ public class DragonPhysicalModel {
   private float CONVERSION_FACTOR_MC_TO_BC = 1.0F/16.0F;  // is the vanilla value i.e. 0.0625F
 
   // relative to body origin:
-  // 0.25 metres above the top of the back but through the middle of the body
-  private Vec3d ROTATION_POINT_FOR_BODY_PITCH_BC = new Vec3d(0, BODY_HALF_HEIGHT_BC + 0.25F, 0);
+  // 0.25 metres above the top of the back, 1.5 metres forward from body centre
+  private Vec3d ROTATION_POINT_FOR_BODY_PITCH_BC = new Vec3d(0, BODY_HALF_HEIGHT_BC + 0.25F, 1.5F);
   // the origin of the head relative to the body origin
   private Vec3d HEAD_OFFSET_FROM_BODY_BC = new Vec3d(0, 1.0F, 4.0F);
+  private Vec3d HEAD_OFFSET_FROM_ROTATION_POINT_BC = HEAD_OFFSET_FROM_BODY_BC.subtract(ROTATION_POINT_FOR_BODY_PITCH_BC);
+
 
   private int NUMBER_OF_NECK_SEGMENTS = 7;
   private int NUMBER_OF_WING_FINGERS = 4;

@@ -1531,7 +1531,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   @Override
   public double getMountedYOffset() {
     final int DEFAULT_PASSENGER_NUMBER = 0;
-    return dragonPhysicalModel.getRiderPositionOffsetWC(getScale(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
+    return dragonPhysicalModel.getRiderPositionOffsetWC(getScale(), getBodyPitch(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
   }
 
   /**
@@ -2046,7 +2046,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         return;
       }
 
-      Vec3d mountedPositionOffset = dragonPhysicalModel.getRiderPositionOffsetWC(getScale(), isSitting(), passengerNumber);
+      Vec3d mountedPositionOffset = dragonPhysicalModel.getRiderPositionOffsetWC(getScale(), getBodyPitch(), isSitting(), passengerNumber);
 
 //      // todo remove (debugging only)
 //      mountedPositionOffset = new Vec3d(DebugSettings.getDebugParameter("x"),
@@ -2057,7 +2057,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 //      double dragonScaling = getScale(); //getBreed().getAdultModelRenderScaleFactor() * getScale();
 //
 //      mountedPositionOffset = mountedPositionOffset.scale(dragonScaling);
-      mountedPositionOffset = mountedPositionOffset.rotateYaw((float) Math.toRadians(-renderYawOffset)); 
+      mountedPositionOffset = mountedPositionOffset.rotateYaw((float) Math.toRadians(-renderYawOffset));
       final double EXTRA_HEIGHT_TO_PLAYER_BUTT = 0.28F;  // the passenger.getYOffset doesn't actually give the correct butt position for the player
                                                         //  --> need to allow for extra
       double passengerOriginToButtHeight = -passenger.getYOffset() + EXTRA_HEIGHT_TO_PLAYER_BUTT;

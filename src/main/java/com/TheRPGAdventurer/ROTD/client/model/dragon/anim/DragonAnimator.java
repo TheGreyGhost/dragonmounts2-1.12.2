@@ -46,7 +46,7 @@ public class DragonAnimator {
     private double yawAbs;
 
     // timing vars
-    private float animBase;
+    private float animRadians;  // animation timer converted to radians
     private float cycleOfs;
     private float anim;
     private float ground;
@@ -209,8 +209,8 @@ public class DragonAnimator {
         speed = speedTimer.get(partialTicks);
         roar = roarTimer.get(partialTicks);
 
-        animBase = anim * MathX.PI_F * 2;
-        cycleOfs = MathX.sin(animBase - 1) + 1;
+        animRadians = anim * MathX.PI_F * 2;
+        cycleOfs = MathX.sin(animRadians - 1) + 1;
 
         // check if the wings are moving down and trigger the event
         boolean newWingsDown = cycleOfs > 1;
@@ -384,12 +384,15 @@ public class DragonAnimator {
 //    }
 
     protected void animHeadAndNeck() {
-        dragonHeadPositionHelper.calculateHeadAndNeck(animBase, flutter, sit, walk, speed, ground, lookYaw, lookPitch, breath);
+        dragonHeadPositionHelper.calculateHeadAndNeck(animRadians, flutter, sit, walk, speed, ground, lookYaw, lookPitch, breath);
         final float BITE_ANGLE = 0.72F;
         final float ROAR_ANGLE = 0.58F;
         final float BREATH_ANGLE = 0.67F;
         jawRotateAngleX = (bite * BITE_ANGLE + breath * BREATH_ANGLE + roar * ROAR_ANGLE);
-        jawRotateAngleX += (1 - MathX.sin(animBase)) * 0.1f * flutter;
+        jawRotateAngleX += (1 - MathX.sin(animRadians)) * 0.1f * flutter;
+        if (DebugSettings.existsDebugParameter("dragonjawangle")) {
+          jawRotateAngleX = (float)DebugSettings.getDebugParameter("dragonjawangle");
+        }
     }
 
     protected void animWings() {
@@ -397,28 +400,28 @@ public class DragonAnimator {
         float aSpeed = sit > 0 ? 0.6f : 1;
 
         // animation speeds
-        float a1 = animBase * aSpeed * 0.35f;
-        float a2 = animBase * aSpeed * 0.5f;
-        float a3 = animBase * aSpeed * 0.75f;
+        float a1 = animRadians * aSpeed * 0.35f;
+        float a2 = animRadians * aSpeed * 0.5f;
+        float a3 = animRadians * aSpeed * 0.75f;
 
         if (ground < 1) {
             // Hovering
-            wingArmFlutter[0] = 0.125f - MathX.cos(animBase) * 0.2f;
+            wingArmFlutter[0] = 0.125f - MathX.cos(animRadians) * 0.2f;
             wingArmFlutter[1] = 0.25f;
-            wingArmFlutter[2] = (MathX.sin(animBase) + 0.125f) * 0.8f;
+            wingArmFlutter[2] = (MathX.sin(animRadians) + 0.125f) * 0.8f;
 
             wingForearmFlutter[0] = 0;
             wingForearmFlutter[1] = -wingArmFlutter[1] * 2;
-            wingForearmFlutter[2] = -(MathX.sin(animBase + 2) + 0.5f) * 0.75f;
+            wingForearmFlutter[2] = -(MathX.sin(animRadians + 2) + 0.5f) * 0.75f;
 
             // gliding
-            wingArmGlide[0] = -0.25f - MathX.cos(animBase * 2) * MathX.cos(animBase * 1.5f) * 0.04f;
+            wingArmGlide[0] = -0.25f - MathX.cos(animRadians * 2) * MathX.cos(animRadians * 1.5f) * 0.04f;
             wingArmGlide[1] = 0.25f;
-            wingArmGlide[2] = 0.35f + MathX.sin(animBase) * 0.05f;
+            wingArmGlide[2] = 0.35f + MathX.sin(animRadians) * 0.05f;
 
             wingForearmGlide[0] = 0;
             wingForearmGlide[1] = -wingArmGlide[1] * 2;
-            wingForearmGlide[2] = -0.25f + (MathX.sin(animBase + 2) + 0.5f) * 0.05f;
+            wingForearmGlide[2] = -0.25f + (MathX.sin(animRadians + 2) + 0.5f) * 0.05f;
         }
 
         if (ground > 0) {
@@ -503,13 +506,13 @@ public class DragonAnimator {
             float amp = 0.1f + i / (TAIL_SEGMENTS * 2f);
 
             rotXStand = (i - TAIL_SEGMENTS * 0.6f) * -amp * 0.4f;
-            rotXStand += (MathX.sin(animBase * 0.2f) * MathX.sin(animBase * 0.37f) * 0.4f * amp - 0.1f) * (1 - sit);
+            rotXStand += (MathX.sin(animRadians * 0.2f) * MathX.sin(animRadians * 0.37f) * 0.4f * amp - 0.1f) * (1 - sit);
             rotXSit = rotXStand * 0.8f;
 
-            rotYStand = (rotYStand + MathX.sin(i * 0.45f + animBase * 0.5f)) * amp * 0.4f;
+            rotYStand = (rotYStand + MathX.sin(i * 0.45f + animRadians * 0.5f)) * amp * 0.4f;
             rotYSit = MathX.sin(vertMulti * MathX.PI_F) * MathX.PI_F * 1.2f - 0.5f; // curl to the left
 
-            rotXAir -= MathX.sin(i * 0.45f + animBase) * 0.04f * MathX.lerp(0.3f, 1, flutter);
+            rotXAir -= MathX.sin(i * 0.45f + animRadians) * 0.04f * MathX.lerp(0.3f, 1, flutter);
 
             // interpolate between sitting and standing
             tail.rotateAngleX = MathX.lerp(rotXStand, rotXSit, sit);
@@ -602,7 +605,11 @@ public class DragonAnimator {
     }
 
     public float getBodyPitch(float pt) {
-        float pitchMovingMax = 90;
+      if (DebugSettings.existsDebugParameter("dragonpitch")) {
+        return (float)DebugSettings.getDebugParameter("dragonpitch");
+      }
+
+      float pitchMovingMax = 90;
         float pitchMoving = MathX.clamp(yTrail.get(pt, 5, 0) * 10, -pitchMovingMax, pitchMovingMax);
         float pitchHoverMax = 60;
         boolean unhover = dragon.dragonInv.getStackInSlot(33) != null || dragon.dragonInv.getStackInSlot(34) != null
