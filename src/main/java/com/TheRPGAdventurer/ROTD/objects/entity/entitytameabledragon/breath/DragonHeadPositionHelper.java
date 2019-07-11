@@ -37,6 +37,9 @@ public class DragonHeadPositionHelper {
     NUMBER_OF_NECK_SEGMENTS = dragonPhysicalModel.getNumberOfNeckSegments();
   }
 
+  private final Vec3d FIRST_NECK_SEGMENT_OFFSET_FROM_BODY_MODEL_ORIGIN_MC = new Vec3d(0, 10, -16);
+  private final Vec3d BODY_ORIGIN_TRANSLATE_FOR_BODY_PITCH = new Vec3d(0, 4, 8);
+
   /** calculate the position, rotation angles, and scale of the head and all segments in the neck
    * @param animRadians
    * @param flutter
@@ -53,9 +56,10 @@ public class DragonHeadPositionHelper {
     head = new SegmentSizePositionRotation();
     SegmentSizePositionRotation currentSegment = new SegmentSizePositionRotation();
 
-    currentSegment.rotationPointX = 0;
-    currentSegment.rotationPointY = 14;
-    currentSegment.rotationPointZ = -8;
+    final Vec3d firstNeckSegmentOrigin = FIRST_NECK_SEGMENT_OFFSET_FROM_BODY_MODEL_ORIGIN_MC.add(BODY_ORIGIN_TRANSLATE_FOR_BODY_PITCH);
+    currentSegment.rotationPointX = (float)firstNeckSegmentOrigin.x;
+    currentSegment.rotationPointY = (float)firstNeckSegmentOrigin.y;
+    currentSegment.rotationPointZ = (float)firstNeckSegmentOrigin.z;
 
     currentSegment.rotateAngleX = 0;
     currentSegment.rotateAngleY = 0;
@@ -140,61 +144,31 @@ public class DragonHeadPositionHelper {
       throw new IllegalStateException("DragonHeadPositionHelper.calculateHeadAndNeck() must be called first");
     }
 
+    // algorithm is:
+    // rotate and pitch the head->throat vector around the origin of the head
+    // rotate the result around the body rotation point (for body pitch)
+    // yaw this around the entity origin
+    // add the entity origin in world coordinates
+
     float renderYawOffset = dragon.renderYawOffset;
-    float scale = dragon.getScale();
+    float ageScale = dragon.getAgeScale();
 
-    Vec3d bodyOriginOffset = dragonPhysicalModel.offsetOfOriginFromEntityPosWC(scale, dragon.isSitting());
-    Vec3d bodyOriginWC = dragon.getPositionVector().add(bodyOriginOffset);
+    Vec3d throatOffsetWC = dragonPhysicalModel.getThroatOffsetFromHeadOriginWC(ageScale, head.rotateAngleX, head.rotateAngleY);
 
-    final float BODY_SCALE_MC_TO_WC = dragonPhysicalModel.getConversionFactorMCtoWC(scale);
-//    final float BODY_X_SCALE = -ADULT_SCALE_FACTOR * scale;
-//    final float BODY_Y_SCALE = -ADULT_SCALE_FACTOR * scale;
-//    final float BODY_Z_SCALE = ADULT_SCALE_FACTOR * scale;
+    // the position of the head in MC is relative to the body pitch rotation point
+    Vec3d headOffsetFromPitchOriginMC = new Vec3d(head.rotationPointX, head.rotationPointY, head.rotationPointZ);
+    Vec3d headOffsetFromPitchOriginWC = dragonPhysicalModel.convertMCtoWC(headOffsetFromPitchOriginMC);
+    Vec3d headPlusThroatOffsetWC = headOffsetFromPitchOriginWC.add(throatOffsetWC);
 
-    final float HEAD_SCALE_MC_TO_WC = BODY_SCALE_MC_TO_WC * getRelativeHeadSize();
-//    final float HEAD_X_SCALE = ADULT_SCALE_FACTOR * headScale;
-//    final float HEAD_Y_SCALE = ADULT_SCALE_FACTOR * headScale;
-//    final float HEAD_Z_SCALE = ADULT_SCALE_FACTOR * headScale;
+    float bodyPitchRadians = (float)Math.toRadians(dragon.getBodyPitch());
+    //pitch up to match the body
+    headOffsetFromPitchOriginWC = headPlusThroatOffsetWC.rotatePitch(bodyPitchRadians);
 
-    // the head offset plus the headLocation.rotationPoint is the origin of the head, i.e. the point about which the
-    //   head rotates, relative to the origin of the body (getPositionEyes)
-    final float HEAD_X_OFFSET_MC = 0;
-    final float HEAD_Y_OFFSET_MC = 2; // 2  //-4
-    final float HEAD_Z_OFFSET_MC = -23; //-23
+    Vec3d rotationPointOffset = dragonPhysicalModel.offsetOfRotationPointFromEntityPosWC(ageScale, dragon.isSitting());
+    Vec3d throatOffsetFromEntityPosWC = rotationPointOffset.add(headOffsetFromPitchOriginWC);
+    throatOffsetFromEntityPosWC = throatOffsetFromEntityPosWC.rotateYaw((float)Math.toRadians(-renderYawOffset));
 
-    final float THROAT_X_OFFSET_MC = 0;
-    final float THROAT_Y_OFFSET_MC = 0; //  0
-    final float THROAT_Z_OFFSET_MC = -20; //  -20
-
-    Vec3d headOffsetWC =  new Vec3d((head.rotationPointX + HEAD_X_OFFSET_MC) * BODY_SCALE_MC_TO_WC,
-                                  (head.rotationPointY + HEAD_Y_OFFSET_MC) * BODY_SCALE_MC_TO_WC,
-                                  (head.rotationPointZ + HEAD_Z_OFFSET_MC) * BODY_SCALE_MC_TO_WC);
-
-    // offset of the throat position relative to the head origin- rotate and pitch to match head
-
-    Vec3d throatOffsetWC = new Vec3d(THROAT_X_OFFSET_MC * HEAD_SCALE_MC_TO_WC,
-                                   THROAT_Y_OFFSET_MC * HEAD_SCALE_MC_TO_WC,
-                                   THROAT_Z_OFFSET_MC * HEAD_SCALE_MC_TO_WC);
-
-    throatOffsetWC = throatOffsetWC.rotatePitch(head.rotateAngleX);
-    throatOffsetWC = throatOffsetWC.rotateYaw(-head.rotateAngleY);
-
-    Vec3d headPlusThroatOffsetWC = headOffsetWC.add(throatOffsetWC);
-
-    float bodyPitch = dragon.getBodyPitch();
-    Vec3d CENTRE_OFFSET_WC = new Vec3d(0, -6 * BODY_SCALE_MC_TO_WC,  19 * BODY_SCALE_MC_TO_WC);
-
-    //rotate body
-
-    bodyPitch = (float)Math.toRadians(bodyPitch);
-
-    headPlusThroatOffsetWC = headPlusThroatOffsetWC.add(CENTRE_OFFSET_WC);
-    headPlusThroatOffsetWC = headPlusThroatOffsetWC.rotatePitch(-bodyPitch);
-    headPlusThroatOffsetWC = headPlusThroatOffsetWC.subtract(CENTRE_OFFSET_WC);
-
-    headPlusThroatOffsetWC = headPlusThroatOffsetWC.rotateYaw((float) (Math.toRadians(-renderYawOffset) + Math.PI));
-
-    Vec3d throatPosWC = bodyOriginWC.add(headPlusThroatOffsetWC);
+    Vec3d throatPosWC = dragon.getPositionVector().add(throatOffsetFromEntityPosWC);
 
     return throatPosWC;
   }
@@ -204,7 +178,7 @@ public class DragonHeadPositionHelper {
    * @return the relative size of the head.  1.0 means normal size (adult).  Baby head is larger (eg 1.5)
    */
   public float getRelativeHeadSize() {
-    return dragonPhysicalModel.getRelativeHeadSize(dragon.getScale());
+    return dragonPhysicalModel.getRelativeHeadSize(dragon.getAgeScale());
   }
 
   /**

@@ -7,8 +7,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class DragonBreedEnchant extends DragonBreed {
 
@@ -40,7 +38,7 @@ public class DragonBreedEnchant extends DragonBreed {
 	
     private void doParticles(EntityTameableDragon dragon) {
         if (!dragon.isEgg() && !dragon.isBaby()) {
-	        float s = dragon.getScale() * 1.2f;
+	        float s = dragon.getAgeScale() * 1.2f;
 	        for (double x1 = 0; x1 < s + 25; ++x1) {
 		        double x = dragon.posX + (rand.nextDouble() - 0.5) * (dragon.width - 1.2) * s;
 		        double y = dragon.posY + (rand.nextDouble() - 0.5) * dragon.height * s;

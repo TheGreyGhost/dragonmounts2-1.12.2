@@ -89,7 +89,7 @@ public class GuiDragon extends GuiContainer {
             drawModalRectWithCustomSizedTexture(x + 32, y + 69, 0.0F, 0.0F, 99, 51, 99, 51);
         }
 
-        GuiInventory.drawEntityOnScreen(x + 85, y + 65, (int) (13 / dragon.getScale()), x + 51 - this.mousePosX, y + 75 - 50 - this.mousePosY,
+        GuiInventory.drawEntityOnScreen(x + 85, y + 65, (int) (13 / dragon.getAgeScale()), x + 51 - this.mousePosX, y + 75 - 50 - this.mousePosY,
                 this.dragon);
 
         // players poition

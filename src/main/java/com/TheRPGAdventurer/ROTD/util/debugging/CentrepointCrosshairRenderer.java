@@ -1,5 +1,6 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.Pair;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -31,13 +32,13 @@ public class CentrepointCrosshairRenderer
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void centrepointCrosshairRenderer(DrawBlockHighlightEvent event)
   {
-    for (Vec3d cp : pointsToRenderNextFrameWorld) {
-      draw3DCrosshair(cp, event.getPlayer(), event.getPartialTicks(), true);
+    for (Pair<Vec3d, Color> cpc : pointsToRenderNextFrameWorld) {
+      draw3DCrosshair(cpc.getFirst(), cpc.getSecond(), event.getPlayer(), event.getPartialTicks(), true);
     }
     pointsToRenderNextFrameWorld.clear();
 
-    for (Vec3d cp : pointsToRenderNextFrameScene) {
-      draw3DCrosshair(cp, event.getPlayer(), event.getPartialTicks(), false);
+    for (Pair<Vec3d, Color> cpc  : pointsToRenderNextFrameScene) {
+      draw3DCrosshair(cpc.getFirst(), cpc.getSecond(), event.getPlayer(), event.getPartialTicks(), false);
     }
     pointsToRenderNextFrameScene.clear();
 
@@ -50,7 +51,7 @@ public class CentrepointCrosshairRenderer
    * @param partialTick
    * @param isWorldCoordinates if true, use world coordinates.  Otherwise: scene coordinates (player eye = origin)
    */
-  private void draw3DCrosshair(Vec3d centrepoint, EntityPlayer entityPlayer, double partialTick, boolean isWorldCoordinates)
+  private void draw3DCrosshair(Vec3d centrepoint, Color colour, EntityPlayer entityPlayer, double partialTick, boolean isWorldCoordinates)
   {
 
     // copied from DebugRendererCollisionBox
@@ -81,21 +82,21 @@ public class CentrepointCrosshairRenderer
     double cz = centrepoint.z - pz;
 
     final double CROSSHAIR_RADIUS = 6.0;
-    drawLine(cx - CROSSHAIR_RADIUS, cy, cz, cx + CROSSHAIR_RADIUS, cy, cz);
-    drawLine(cx, cy - CROSSHAIR_RADIUS, cz, cx, cy + CROSSHAIR_RADIUS, cz);
-    drawLine(cx, cy, cz - CROSSHAIR_RADIUS, cx, cy, cz + CROSSHAIR_RADIUS);
+    drawLine(cx - CROSSHAIR_RADIUS, cy, cz, cx + CROSSHAIR_RADIUS, cy, cz, colour);
+    drawLine(cx, cy - CROSSHAIR_RADIUS, cz, cx, cy + CROSSHAIR_RADIUS, cz, colour);
+    drawLine(cx, cy, cz - CROSSHAIR_RADIUS, cx, cy, cz + CROSSHAIR_RADIUS, colour);
 
     GlStateManager.depthMask(true);
     GlStateManager.enableTexture2D();
     GlStateManager.disableBlend();
   }
 
-  private static void drawLine(double x1, double y1, double z1, double x2, double y2, double z2) {
+  private static void drawLine(double x1, double y1, double z1, double x2, double y2, double z2, Color colour) {
     Tessellator tessellator = Tessellator.getInstance();
     BufferBuilder bufferbuilder = tessellator.getBuffer();
     bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
-    bufferbuilder.pos(x1, y1, z1).color(0, 0, 255, 255).endVertex();
-    bufferbuilder.pos(x2, y2, z2).color(0, 0, 255, 255).endVertex();
+    bufferbuilder.pos(x1, y1, z1).color(colour.getRed(), colour.getGreen(), colour.getBlue(), 255).endVertex();
+    bufferbuilder.pos(x2, y2, z2).color(colour.getRed(), colour.getGreen(), colour.getBlue(), 255).endVertex();
     tessellator.draw();
   }
   /**
@@ -106,8 +107,18 @@ public class CentrepointCrosshairRenderer
    */
   public static void addCentrepointToRenderWorld(double x, double y, double z)
   {
+    addCentrepointToRenderWorld(x, y, z, Color.WHITE);
+  }
+  /**
+   * add a centrepoint to be rendered (as a crosshair) on the next frame.
+   * @param x world coordinates
+   * @param y
+   * @param z
+   */
+  public static void addCentrepointToRenderWorld(double x, double y, double z, Color colour)
+  {
     if (pointsToRenderNextFrameWorld.size() < MAX_POINTS) {
-      pointsToRenderNextFrameWorld.add(new Vec3d(x, y, z));
+      pointsToRenderNextFrameWorld.add(new Pair(new Vec3d(x, y, z), colour));
     }
   }
 
@@ -119,13 +130,24 @@ public class CentrepointCrosshairRenderer
    */
   public static void addCentrepointToRenderScene(double x, double y, double z)
   {
+    addCentrepointToRenderScene(x, y, z, Color.WHITE);
+  }
+
+  /**
+   * add a centrepoint to be rendered (as a crosshair) on the next frame.
+   * @param x scene coordinates (origin = player's eye)
+   * @param y
+   * @param z
+   */
+  public static void addCentrepointToRenderScene(double x, double y, double z, Color colour)
+  {
     if (pointsToRenderNextFrameScene.size() < MAX_POINTS) {
-      pointsToRenderNextFrameScene.add(new Vec3d(x, y, z));
+      pointsToRenderNextFrameScene.add(new Pair(new Vec3d(x, y, z), colour));
     }
   }
 
   private static  final int MAX_POINTS = 500;
-  private static List<Vec3d> pointsToRenderNextFrameWorld = new ArrayList<>(MAX_POINTS);
-  private static List<Vec3d> pointsToRenderNextFrameScene = new ArrayList<>(MAX_POINTS);
+  private static List<Pair<Vec3d, Color>> pointsToRenderNextFrameWorld = new ArrayList<>(MAX_POINTS);
+  private static List<Pair<Vec3d, Color>> pointsToRenderNextFrameScene = new ArrayList<>(MAX_POINTS);
 
 }

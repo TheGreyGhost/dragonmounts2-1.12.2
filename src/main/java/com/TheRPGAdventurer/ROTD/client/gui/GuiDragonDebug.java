@@ -228,10 +228,10 @@ public class GuiDragonDebug extends Gui {
         text.printf("Life stage: %s (%d)\n", lifeStageName, ticksSinceCreation);
         
         // size
-        String scale = dfShort.format(lifeStage.getScale());
+        String ageScale = dfShort.format(lifeStage.getAgeScale());
         String width = dfShort.format(dragon.width);
         String height = dfShort.format(dragon.height);
-        text.printf("Size: %s (w:%s h:%s)\n", scale, width, height);
+        text.printf("Size: %s (w:%s h:%s)\n", ageScale, width, height);
         
         // tamed flag/owner name
         //String tamedString = dragon.getOwnerName();

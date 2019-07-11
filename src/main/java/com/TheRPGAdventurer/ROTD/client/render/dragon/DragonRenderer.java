@@ -36,6 +36,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
+import java.awt.*;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -77,21 +78,21 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 
     // show body centre, rider positions, head position, throat position
     if (DebugSettings.isRenderDragonPoints()) {
-      float dragonScale = dragon.getScale();
+      float dragonScale = dragon.getAgeScale();
       Vec3d dragonPos = dragon.getPositionVector();
       Vec3d point = dragon.getPhysicalModel().offsetOfOriginFromEntityPosWC(dragonScale, dragon.isSitting());
       point = point.rotateYaw(yaw).add(dragonPos);
-      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
+      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z, Color.WHITE);
       for (int i = 0; i < dragon.getPhysicalModel().getMaxNumberOfPassengers(dragon.getLifeStageHelper().getLifeStage()); ++i) {
         point = dragon.getPhysicalModel().getRiderPositionOffsetWC(dragonScale, dragon.getBodyPitch(), dragon.isSitting(), i);
         point = point.rotateYaw(-(float)Math.toRadians(yaw)).add(dragonPos);
-        CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
+        CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z, Color.BLUE);
       }
       point = dragon.getPhysicalModel().getEyePositionWC(dragonScale, dragon.renderYawOffset, dragon.getBodyPitch(), dragon.isSitting());
       point = point.add(dragonPos);
-      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z);
+      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z, Color.WHITE);
       Vec3d throat = dragon.getAnimator().getThroatPosition();
-      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(throat.x, throat.y, throat.z);
+      CentrepointCrosshairRenderer.addCentrepointToRenderWorld(throat.x, throat.y, throat.z, Color.RED);
     }
 
     // add rendered markers as defined by debug parameters (eg add marker at world [35, 5, 40]
@@ -268,7 +269,7 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
   @Override
   protected void preRenderCallback(EntityTameableDragon dragon, float partialTicks) {
     DragonPhysicalModel dragonPhysicalModel = dragon.getPhysicalModel();
-    float renderScale =  dragonPhysicalModel.getRenderScaleFactor(dragon.getScale());
+    float renderScale = dragonPhysicalModel.getRenderScaleFactor(dragon.getAgeScale());
     if (DebugSettings.isBoxDragon()) {
       renderScale = (float)DebugSettings.getDebugParameter("scale");
       if (renderScale < 0.01) renderScale = 1.0F;

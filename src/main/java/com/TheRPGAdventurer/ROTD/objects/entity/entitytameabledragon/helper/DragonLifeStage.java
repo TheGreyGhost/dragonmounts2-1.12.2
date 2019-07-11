@@ -11,7 +11,6 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper;
 
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.util.math.MathHelper;
-import scala.Int;
 
 import java.util.HashMap;
 import java.util.SortedMap;
@@ -43,22 +42,22 @@ public enum DragonLifeStage {
   //
   private final int order;
   private final int durationTicks; // -1 means infinite
-  private final float startScale;
-  private final float finalScale;
+  private final float startAgeScale;
+  private final float finalAgeScale;
 
   /**
    * Which life stage is the dragon in?
    * @param order = the sort order of this stage (0 = first, 1 = second, etc)
    * @param minecraftTimeHours = the duration of this stage in game time hours (each hour game time is 50 seconds in real life)
-   * @param scaleAtEndOfStage size of this stage relative to the final scale (adult)
+   * @param ageScaleAtEndOfStage size of this stage relative to the final scale (adult)
    */
-  DragonLifeStage(int order, int minecraftTimeHours, float scaleAtStartOfStage, float scaleAtEndOfStage) {
+  DragonLifeStage(int order, int minecraftTimeHours, float ageScaleAtStartOfStage, float ageScaleAtEndOfStage) {
     this.order = order;
     final int TICKS_PER_MINECRAFT_HOUR = 20 * 60 * 20 / 24;  // 20 (ticks/real life second) * 60 (seconds / min)
                                                              //   * 20 (real life minutes per minecraft day) / 24 (hours/day)
     this.durationTicks = minecraftTimeHours * TICKS_PER_MINECRAFT_HOUR;
-    this.startScale = scaleAtStartOfStage;
-    this.finalScale = scaleAtEndOfStage;
+    this.startAgeScale = ageScaleAtStartOfStage;
+    this.finalAgeScale = ageScaleAtEndOfStage;
   }
 
   /** true if we're in the egg, false otherwise
@@ -124,16 +123,16 @@ public enum DragonLifeStage {
     return lifeStageTicks / (float)lifeStage.durationTicks;
   }
 
-  public static float getScaleFromTickCount(int ticksSinceCreation) {
+  public static float getAgeScaleFromTickCount(int ticksSinceCreation) {
     DragonLifeStage lifeStage = getLifeStageFromTickCount(ticksSinceCreation);
     StageInfo si = stageInfo.get(lifeStage);
     int timeInThisStage = ticksSinceCreation - si.startTicks;
     if (lifeStage.durationTicks == 0) {
-      return lifeStage.startScale;
+      return lifeStage.startAgeScale;
     }
     float fractionOfStage = timeInThisStage / (float)lifeStage.durationTicks;
 
-    return MathX.lerp(lifeStage.startScale, lifeStage.finalScale, fractionOfStage);
+    return MathX.lerp(lifeStage.startAgeScale, lifeStage.finalAgeScale, fractionOfStage);
   }
 
   /**

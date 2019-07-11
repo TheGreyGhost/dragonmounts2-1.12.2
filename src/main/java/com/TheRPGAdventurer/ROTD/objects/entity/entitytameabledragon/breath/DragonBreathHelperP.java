@@ -488,7 +488,7 @@ public class DragonBreathHelperP extends DragonHelper {
       Vec3d origin;
       origin = dragon.getAnimator().getThroatPosition();
       infoToUpdate.dragonHeadLocation = origin;
-      infoToUpdate.relativeVolume = dragon.getScale();
+      infoToUpdate.relativeVolume = dragon.getAgeScale();
       infoToUpdate.lifeStage = dragon.getLifeStageHelper().getLifeStage();
 
       boolean isBreathing = false;
@@ -513,7 +513,7 @@ public class DragonBreathHelperP extends DragonHelper {
     public boolean refreshWeaponSoundInfo(SoundEffectBreathWeapon.WeaponSoundInfo infoToUpdate) {
       Vec3d origin = dragon.getAnimator().getThroatPosition();
       infoToUpdate.dragonHeadLocation = origin;
-      infoToUpdate.relativeVolume = dragon.getScale();
+      infoToUpdate.relativeVolume = dragon.getAgeScale();
       infoToUpdate.lifeStage = dragon.getLifeStageHelper().getLifeStage();
 
       boolean isUsingBreathweapon = false;

@@ -1,7 +1,6 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
@@ -89,7 +88,7 @@ public class DragonBreedStorm extends DragonBreed {
 	
     private void doParticles(EntityTameableDragon dragon) {
         if (!dragon.isEgg() && !dragon.isBaby()) {
-	        float s = dragon.getScale() * 1.2f;
+	        float s = dragon.getAgeScale() * 1.2f;
 	        for (double x1 = 0; x1 < s; ++x1) {
 		        double x = dragon.posX + (rand.nextDouble() - 0.5) * (dragon.width - 0.65) * s;
 		        double y = dragon.posY + (rand.nextDouble() - 0.5) * dragon.height * s;

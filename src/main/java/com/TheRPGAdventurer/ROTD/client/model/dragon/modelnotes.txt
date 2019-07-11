@@ -4,7 +4,8 @@ The model itself is designed in "model space" coordinates
 eg
         body.addBox("body", -12, 0, -16, 24, 24, 64);
 this adds a box to the body with [minX, minY, minZ] at [-12, 0, -16] and a size of [24, 24, 64].
-The direction of the x & y axes in model space are different to world space: the x and the y axes point in the opposite direction
+The direction of the x, y and z axes in model space are different to world space:
+x points to the left of the entity, y points to its feet, and z points to its tail
 for example y = 0 is higher up on the model than y = 16
 
 When rendering, vanilla applies a scaling factor to this, which is hard-coded at 0.0625F, i.e. 1/16.
@@ -38,9 +39,15 @@ entity posX, posY, posZ.  posX and posZ are the centre of the entity, and posY i
  (1) a scaling using renderScaleX, Y, Z around the origin (0,0,0)
  (2) rotation using rotateX,Y,Z around the origin of the ModelPart = 0,0,0
  (3) translation to the final rendering position using ModelPart.rotationPointX,Y,Z multiplied by the scale
-     Although it's called "rotationPoint", it actually isn't the rotation point at all, it's just an additional translation:
-     the rotation origin of the model is always 0,0,0.
-     It does, however, affect the rotation point of the entity pitch, unlike offsetX,Y,Z (see below).
+     Although it's called "rotationPoint", it isn't the rotation point on the model part itself, rather it
+       is a translation of the model's rotation point to a location on the parent.
+     The rotation origin of the model is always 0,0,0.
+
+     So in the case of the jaw, the jaw itself rotates around 0,0,0.  If the rotation point is (0,4,-8) then the 0,0,0
+       of the jaw is translated to (0,4,-8) on the parent (the head)
+
+    In the case of a model which is not a child (has no parents), it affect the rotation point of the entity's body pitch,
+    unlike offsetX,Y,Z (see below).
 
  (They are in order 3,2,1 in the function but that's because of the way rendering works, i.e. the transformations are
    applied in the reverse order).

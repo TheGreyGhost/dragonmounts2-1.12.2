@@ -1,10 +1,8 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.objects.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonHeadPositionHelper;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
@@ -18,14 +16,11 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import scala.tools.nsc.backend.icode.TypeKinds;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -297,7 +292,7 @@ public class TestRunner
       }
       if (printCalcs) {
         System.out.println("At tick=" + i + ": " +
-                           "Scale = " + DragonLifeStage.getScaleFromTickCount(i) + ", " +
+                           "Scale = " + DragonLifeStage.getAgeScaleFromTickCount(i) + ", " +
                            "StageProgress = " + DragonLifeStage.getStageProgressFromTickCount(i) );
       }
 

@@ -1064,7 +1064,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
   public void spawnBodyParticle(EnumParticleTypes type) {
     double ox, oy, oz;
-    float s = this.getScale() * 1.2f;
+    float s = this.getAgeScale() * 1.2f;
 
     switch (type) {
       case EXPLOSION_NORMAL:
@@ -1100,7 +1100,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   }
 
   public void spawnBodyParticles(EnumParticleTypes type, int baseAmount) {
-    int amount = (int) (baseAmount * this.getScale());
+    int amount = (int) (baseAmount * this.getAgeScale());
     for (int i = 0; i < amount; i++) {
       spawnBodyParticle(type);
     }
@@ -1263,8 +1263,8 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
   public void roar() {
     if (!isDead && getBreed().getRoarSoundEvent(this) != null && !isUsingBreathWeapon()) {
-      this.roarTicks = 0; // MathX.clamp(getScale(), 0.88f
-      world.playSound(posX, posY, posZ, getBreed().getRoarSoundEvent(this), SoundCategory.NEUTRAL, MathX.clamp(getScale(), 0.4F, 1.0F), getSoundPitch(), true);
+      this.roarTicks = 0; // MathX.clamp(getAgeScale(), 0.88f
+      world.playSound(posX, posY, posZ, getBreed().getRoarSoundEvent(this), SoundCategory.NEUTRAL, MathX.clamp(getAgeScale(), 0.4F, 1.0F), getSoundPitch(), true);
       // sound volume should be between 0 - 1, and scale is also 0 - 1
     }
   }
@@ -1390,7 +1390,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
    * Returns the volume for a sound to play.
    */
   public float getVolume(SoundEvent sound) {
-    return MathX.clamp(getScale(), 0, 1.0F);
+    return MathX.clamp(getAgeScale(), 0, 1.0F);
   }
 
   /**
@@ -1518,7 +1518,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
     if (isEgg()) {
       eyeHeight = 1.3f;
     } else {
-      eyeHeight = dragonPhysicalModel.getEyeHeightWC(getScale(), isSitting());
+      eyeHeight = dragonPhysicalModel.getEyeHeightWC(getAgeScale(), isSitting());
     }
     return eyeHeight;
   }
@@ -1531,7 +1531,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   @Override
   public double getMountedYOffset() {
     final int DEFAULT_PASSENGER_NUMBER = 0;
-    return dragonPhysicalModel.getRiderPositionOffsetWC(getScale(), getBodyPitch(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
+    return dragonPhysicalModel.getRiderPositionOffsetWC(getAgeScale(), getBodyPitch(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
   }
 
   /**
@@ -1539,7 +1539,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
    */
   @Override
   public float getRenderSizeModifier() {
-    return getScale() / (isChild() ? 0.5F : 1.0F);
+    return getAgeScale() / (isChild() ? 0.5F : 1.0F);
 //  0.5 isChild() correction is required due to the code in Render::renderShadow which shrinks the shadow for a child
 //    if (entityIn instanceof EntityLiving)
 //    {
@@ -2046,7 +2046,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
         return;
       }
 
-      Vec3d mountedPositionOffset = dragonPhysicalModel.getRiderPositionOffsetWC(getScale(), getBodyPitch(), isSitting(), passengerNumber);
+      Vec3d mountedPositionOffset = dragonPhysicalModel.getRiderPositionOffsetWC(getAgeScale(), getBodyPitch(), isSitting(), passengerNumber);
 
 //      // todo remove (debugging only)
 //      mountedPositionOffset = new Vec3d(DebugSettings.getDebugParameter("x"),
@@ -2150,17 +2150,17 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
   /**
    * Public wrapper for protected final setScale(), used by DragonLifeStageHelper.
    *
-   * @param scale
+   * @param ageScale
    */
-  public void setScalePublic(float scale) {
+  public void setAgeScalePublic(float ageScale) {
     double posXTmp = posX;
     double posYTmp = posY;
     double posZTmp = posZ;
     boolean onGroundTmp = onGround;
 
-    setScale(scale);
+    setScale(ageScale);
 
-    // workaround for a vanilla bug; the position is apparently not set correcty
+    // workaround for a vanilla bug; the position is apparently not set correctly
     // after changing the entity size, causing asynchronous server/client
     // positioning
     setPosition(posXTmp, posYTmp, posZTmp);
@@ -2210,8 +2210,8 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
    *
    * @return scale
    */
-  public float getScale() {
-    return getLifeStageHelper().getScale();
+  public float getAgeScale() {
+    return getLifeStageHelper().getAgeScale();
   }
 
   public boolean isEgg() {
@@ -4810,7 +4810,7 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 //   *
 //   * @param scale
 //   */
-//  public void setScalePublic(float scale) {
+//  public void setAgeScalePublic(float scale) {
 //    double posXTmp=posX;
 //    double posYTmp=posY;
 //    double posZTmp=posZ;

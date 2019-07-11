@@ -15,7 +15,7 @@ public class EventLiving {
             if (event.isDismounting() && event.getEntityMounting() instanceof EntityPlayer && !event.getEntityMounting().world.isRemote) {
                 EntityPlayer player = (EntityPlayer) event.getEntityMounting();
 
-                double extraY = dragon.getScale() * 0.2D;
+                double extraY = dragon.getAgeScale() * 0.2D;
                 player.setPositionAndUpdate(dragon.posX, dragon.posY - extraY, dragon.posZ);
             }
         }

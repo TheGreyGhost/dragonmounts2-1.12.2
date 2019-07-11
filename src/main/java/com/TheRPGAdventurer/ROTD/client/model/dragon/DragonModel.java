@@ -22,7 +22,6 @@ import net.ilexiconn.llibrary.client.model.tools.AdvancedModelBase;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.Vec3d;
 
 /**
  * Generic model for all winged tetrapod dragons.
@@ -37,7 +36,6 @@ public class DragonModel extends AdvancedModelBase {
   public static final int TAIL_SIZE = 10;
   public static final int VERTS_NECK = 7;
   public static final int VERTS_TAIL = 12;
-  public static final Vec3d HEAD_ORIGIN_MC = new Vec3d(0, 0, -16);
 
   public static final float NECK_SEGMENT_OVERLAP = 1.4F; // the amount that each neck segment overlaps the next
 
@@ -46,7 +44,7 @@ public class DragonModel extends AdvancedModelBase {
   // model parts
   public ModelPart head;
   public ModelPart neck;
-  public ModelPart neckScale;
+  public ModelPart neckRidgePlate;
   public ModelPart tail;
   public ModelPart tailHornLeft;
   public ModelPart tailHornRight;
@@ -100,7 +98,7 @@ public class DragonModel extends AdvancedModelBase {
   public float offsetY;
   public float offsetZ;
   public float pitch;
-  public float size;
+  public float ageScale;
   private EnumDragonBreed breed;
   private DragonModelMode mode;
   private DragonPhysicalModel dragonPhysicalModel;
@@ -206,23 +204,23 @@ public class DragonModel extends AdvancedModelBase {
   }
 
   private void buildHead() {
-    // the mainhead extends from y=-8 to y = +8, and from z = 6 to z = 22.
-    // The upperjaw extends from z = -8 to z = +8, so it overlaps the mainhead slightly
-    // The head rotates about its origin which is set to z = 16, i.e. not in the centre of the mainhead
+    // the mainhead extends from y=-8 to y = +8, and from z = -10 to z = 6
+    // The upperjaw extends from z = -24 to z = -8, so it overlaps the mainhead slightly
+    // The head rotates about its origin which is [0,0,0], i.e. not in the centre of the mainhead
     head = new ModelPart(this, "head");
-    head.addBox("upperjaw", -6, -1, -8 + (float)HEAD_ORIGIN_MC.z, 12, 5, 16);
-    head.addBox("mainhead", -8, -8, 6 + (float)HEAD_ORIGIN_MC.z, 16, 16, 16); // 6
-    head.addBox("nostril", -5, -3, -6 + (float)HEAD_ORIGIN_MC.z, 2, 2, 4);
+    head.addBox("upperjaw", -6, -1, -24 , 12, 5, 16);
+    head.addBox("mainhead", -8, -8, -10, 16, 16, 16);
+    head.addBox("nostril", -5, -3, -22, 2, 2, 4);
     head.mirror = true;
-    head.addBox("nostril", 3, -3, -6 + (float)HEAD_ORIGIN_MC.z, 2, 2, 4);
+    head.addBox("nostril", 3, -3, -22, 2, 2, 4);
 
     buildHorn(false);
     buildHorn(true);
 
-    // the jaw extends from z = -16 to z = 0.  It rotates around its own z = 0, and its z=0 is translated to z=8 on the
-    // parent model (likewise its y=0 is translated to y = 4 on the parent model)
+    // the jaw extends from z = -16 to z = 0.  It rotates around its own [y=0, z = 0], and its z=0 is translated to z=-8 on the
+    // parent model (likewise its y=0 is translated to y = 4 on the parent model), so the jaw hinges at [y=4, z=-8] on the parent
     jaw = head.addChildBox("lowerjaw", -6, 0, -16, 12, 4, 16);
-    jaw.setRotationPoint(0, 4, 8 + (float)HEAD_ORIGIN_MC.z);
+    jaw.setRotationPoint(0, 4, -8);
   }
 
   private void buildHorn(boolean mirror) {
@@ -254,7 +252,7 @@ public class DragonModel extends AdvancedModelBase {
   private void buildNeck() {
     neck = new ModelPart(this, "neck");
     neck.addBox("box", -5, -5, -5, NECK_SIZE, NECK_SIZE, NECK_SIZE);
-    neckScale = neck.addChildBox("ridgeplate", -1, -7, -3, 2, 4, 6);
+    neckRidgePlate = neck.addChildBox("ridgeplate", -1, -7, -3, 2, 4, 6);
 
     // initialize model proxies
     for (int i = 0; i < neckProxy.length; i++) {
@@ -541,7 +539,7 @@ public class DragonModel extends AdvancedModelBase {
     for (int i = 0; i < neckProxy.length; i++) {
       copyPositionRotationLocation(neck, segmentData[i]);
       // hide the first and every second scale
-      neckScale.isHidden = i % 2 != 0 || i == 0;
+      neckRidgePlate.isHidden = i % 2 != 0 || i == 0;
 
       // update proxy
       neckProxy[i].update();
@@ -720,7 +718,7 @@ public class DragonModel extends AdvancedModelBase {
     animator.animate();
     updateFromAnimator(dragon);
 
-    size = dragon.getScale();
+    ageScale = dragon.getAgeScale();
 
     renderModel(dragon, scale);
   }

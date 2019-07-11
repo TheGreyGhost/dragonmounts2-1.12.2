@@ -22,7 +22,7 @@ public class DragonScaleModifier extends AttributeModifier {
     public static final UUID ID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b");
 
     public DragonScaleModifier(double amount) {
-        super(ID, "Dragon size modifier", amount, 1);
+        super(ID, "Dragon ageScale modifier", amount, 1);
         setSaved(false);
     }
 }

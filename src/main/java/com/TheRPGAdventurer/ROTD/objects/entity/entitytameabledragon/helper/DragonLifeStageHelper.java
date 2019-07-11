@@ -87,7 +87,7 @@ public class DragonLifeStageHelper extends DragonHelper {
         if (oldModifier != null) {
             instance.removeModifier(oldModifier);
         }
-        instance.applyModifier(new DragonScaleModifier(MathX.clamp(getScale(), 0.1, 1)));
+        instance.applyModifier(new DragonScaleModifier(MathX.clamp(getAgeScale(), 0.1, 1)));
     }
 
     private void applyScaleModifierArmor(IAttribute attribute) {
@@ -95,7 +95,7 @@ public class DragonLifeStageHelper extends DragonHelper {
         AttributeModifier oldModifier = instance.getModifier(DragonScaleModifier.ID);
         if (oldModifier != null) {
             instance.removeModifier(oldModifier);
-        }        instance.applyModifier(new DragonScaleModifier(MathX.clamp(getScale(), 0.1, 1.2)));
+        }        instance.applyModifier(new DragonScaleModifier(MathX.clamp(getAgeScale(), 0.1, 1.2)));
     }
 
     /**
@@ -171,8 +171,8 @@ public class DragonLifeStageHelper extends DragonHelper {
      *
      * @return size
      */
-    public float getScale() {
-        return DragonLifeStage.getScaleFromTickCount(getTicksSinceCreation());
+    public float getAgeScale() {
+        return DragonLifeStage.getAgeScaleFromTickCount(getTicksSinceCreation());
     }
 
     /**
@@ -255,7 +255,7 @@ public class DragonLifeStageHelper extends DragonHelper {
 
         updateLifeStage();
         updateEgg();
-        updateScale();
+        updateAgeScale();
     }
 
     public EntityDataManager getDataWatcher() {
@@ -325,8 +325,8 @@ public class DragonLifeStageHelper extends DragonHelper {
         }
     }
 
-    private void updateScale() {
-        dragon.setScalePublic(getScale());
+    private void updateAgeScale() {
+        dragon.setAgeScalePublic(getAgeScale());
     }
 
     @Override
