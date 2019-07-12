@@ -67,7 +67,7 @@ public class DragonModel extends AdvancedModelBase {
   public ModelPart chestL;
   
   public ModelPart forethigh;
-  public ModelPart forecrus;
+  public ModelPart forecrus;      //Definition of crus. 1 : the lower or hind limb especially between the knee and the ankle
   public ModelPart forefoot;
   public ModelPart foretoe;
   public ModelPart hindthigh;
@@ -106,7 +106,7 @@ public class DragonModel extends AdvancedModelBase {
   private float relativeHeadScale; // the relative scaling for the head.  1.0 = normal size (Adult)
 
   // final X rotation angles for ground
-  private float[] xGround = {0, 0, 0, 0};
+  private float[] xGround = {0, 0, 0, 0};  // thigh, crus, foot, toe
 
   // X rotation angles for ground
   // 1st dim - front, hind
@@ -621,7 +621,10 @@ public class DragonModel extends AdvancedModelBase {
     for (int i = 0; i < thighProxy.length; i++) {
       ModelPart thigh, crus, foot, toe;
 
-      if (i % 2 == 0) {
+      boolean leftSide = i > 1;
+      int frontBackIdx = (i % 2);
+      boolean frontLegs = frontBackIdx == 0;
+      if (frontLegs) {
         thigh = forethigh;
         crus = forecrus;
         foot = forefoot;
@@ -640,7 +643,7 @@ public class DragonModel extends AdvancedModelBase {
       xAir = xAirAll[i % 2];
 
       // interpolate between sitting and standing
-      DragonAnimator.slerpArrays(xGroundStand[i % 2], xGroundSit[i % 2], xGround, sit);
+      DragonAnimator.slerpArrays(xGroundStand[frontBackIdx], xGroundSit[frontBackIdx], xGround, sit);
 
       // align the toes so they're always horizontal on the ground
       xGround[3] = -(xGround[0] + xGround[1] + xGround[2]);
@@ -648,21 +651,23 @@ public class DragonModel extends AdvancedModelBase {
       // apply walking cycle
       if (walk > 0) {
         // interpolate between the keyframes, based on the cycle
-        DragonAnimator.splineArrays(DragonAnimator.getMoveTime() * 0.2f, i > 1, xGroundWalk2, xGroundWalk[0][i % 2], xGroundWalk[1][i % 2], xGroundWalk[2][i % 2]);
+
+        DragonAnimator.splineArrays(DragonAnimator.getMoveDistanceBlocks() * 0.2f, leftSide,
+                xGroundWalk2, xGroundWalk[0][frontBackIdx], xGroundWalk[1][frontBackIdx], xGroundWalk[2][frontBackIdx]);
         // align the toes so they're always horizontal on the ground
         xGroundWalk2[3] -= xGroundWalk2[0] + xGroundWalk2[1] + xGroundWalk2[2];
 
         DragonAnimator.slerpArrays(xGround, xGroundWalk2, xGround, walk);
       }
 
-      float yAir = yAirAll[i % 2];
+      float yAir = yAirAll[frontBackIdx];
       float yGround;
 
       // interpolate between sitting and standing
-      yGround = MathX.slerp(yGroundStand[i % 2], yGroundSit[i % 2], sit);
+      yGround = MathX.slerp(yGroundStand[frontBackIdx], yGroundSit[frontBackIdx], sit);
 
       // interpolate between standing and walking
-      yGround = MathX.slerp(yGround, yGroundWalk[i % 2], walk);
+      yGround = MathX.slerp(yGround, yGroundWalk[frontBackIdx], walk);
 
       // interpolate between flying and grounded
       thigh.rotateAngleY = MathX.slerp(yAir, yGround, ground);
@@ -707,13 +712,13 @@ public class DragonModel extends AdvancedModelBase {
    * Sets the models various rotation angles then renders the model.
    */
   @Override
-  public void render(Entity entity, float moveTime, float moveSpeed, float ticksExisted, float lookYaw, float lookPitch, float scale) {
-    render((EntityTameableDragon) entity, moveTime, moveSpeed, ticksExisted, lookYaw, lookPitch, scale);
+  public void render(Entity entity, float moveDistanceBlocks, float moveSpeedBlocksPerTick, float ticksExisted, float lookYaw, float lookPitch, float scale) {
+    render((EntityTameableDragon) entity, moveDistanceBlocks, moveSpeedBlocksPerTick, ticksExisted, lookYaw, lookPitch, scale);
   }
 
-  public void render(EntityTameableDragon dragon, float moveTime, float moveSpeed, float ticksExisted, float lookYaw, float lookPitch, float scale) {
+  public void render(EntityTameableDragon dragon, float moveDistanceBlocks, float moveSpeedBlocksPerTick, float ticksExisted, float lookYaw, float lookPitch, float scale) {
     DragonAnimator animator = dragon.getAnimator();
-    animator.setMovement(moveTime, moveSpeed);
+    animator.setMovement(moveDistanceBlocks, moveSpeedBlocksPerTick);
     animator.setLook(lookYaw, lookPitch);
     animator.animate();
     updateFromAnimator(dragon);

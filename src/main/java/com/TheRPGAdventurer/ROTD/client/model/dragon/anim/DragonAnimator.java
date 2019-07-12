@@ -38,8 +38,8 @@ public class DragonAnimator {
     // entity parameters
     private final EntityTameableDragon dragon;
     private float partialTicks;
-    private float moveTime;
-    private float moveSpeed;
+    private float moveDistanceBlocks;
+    private float moveSpeedBlocksPerTick;
     private float lookYaw;
     private float lookPitch;
     private double prevRenderYawOffset;
@@ -182,8 +182,8 @@ public class DragonAnimator {
     }
 
     public void setMovement(float moveTime, float moveSpeed) {
-        this.moveTime = moveTime;
-        this.moveSpeed = moveSpeed;
+        this.moveDistanceBlocks = moveTime;
+        this.moveSpeedBlocksPerTick = moveSpeed;
     }
 
     public void setLook(float lookYaw, float lookPitch) {
@@ -294,7 +294,7 @@ public class DragonAnimator {
         FlutterTimer.add(FlutterFlag ? 0.1f : -0.1f);
 
         // update walking transition
-        boolean walkFlag = moveSpeed > 0.1 && !dragon.isSitting();
+        boolean walkFlag = moveSpeedBlocksPerTick > 0.1 && !dragon.isSitting();
         float walkVal = 0.1f;
         walkTimer.add(walkFlag ? walkVal : -walkVal);
 
@@ -431,8 +431,8 @@ public class DragonAnimator {
             wingArmGround[2] = 0.8f + MathX.sin(a2) * MathX.sin(a3) * 0.05f;
 
             // walking
-            wingArmGround[1] += MathX.sin(moveTime * 0.5f) * 0.02f * walk;
-            wingArmGround[2] += MathX.cos(moveTime * 0.5f) * 0.05f * walk;
+            wingArmGround[1] += MathX.sin(moveDistanceBlocks * 0.5f) * 0.02f * walk;
+            wingArmGround[2] += MathX.cos(moveDistanceBlocks * 0.5f) * 0.05f * walk;
 
             wingForearmGround[0] = 0;
             wingForearmGround[1] = -wingArmGround[1] * 2;
@@ -581,22 +581,30 @@ public class DragonAnimator {
         }
     }
 
-    public void slerpArrays(float[] a, float[] b, float[] c, float x) {
-        if (a.length != b.length || b.length != c.length) {
+  /**
+   * Smoothed linear interpolation between a and b, using x
+   * Performed on an array
+   * @param a
+   * @param b
+   * @param result  return value
+   * @param x
+   */
+    public void slerpArrays(float[] a, float[] b, float[] result, float x) {
+        if (a.length != b.length || b.length != result.length) {
             throw new IllegalArgumentException();
         }
 
         if (x <= 0) {
-            System.arraycopy(a, 0, c, 0, a.length);
+            System.arraycopy(a, 0, result, 0, a.length);
             return;
         }
         if (x >= 1) {
-            System.arraycopy(b, 0, c, 0, a.length);
+            System.arraycopy(b, 0, result, 0, a.length);
             return;
         }
 
-        for (int i = 0; i < c.length; i++) {
-            c[i] = MathX.slerp(a[i], b[i], x);
+        for (int i = 0; i < result.length; i++) {
+            result[i] = MathX.slerp(a[i], b[i], x);
         }
     }
 
@@ -649,8 +657,8 @@ public class DragonAnimator {
         return jawRotateAngleX;
     }
 
-    public float getMoveTime() {
-        return moveTime;
+    public float getMoveDistanceBlocks() {
+        return moveDistanceBlocks;
     }
 
     public float getSpeed() {
