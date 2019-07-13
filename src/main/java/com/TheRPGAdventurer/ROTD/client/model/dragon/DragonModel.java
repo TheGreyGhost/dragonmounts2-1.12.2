@@ -115,19 +115,19 @@ public class DragonModel extends AdvancedModelBase {
   private float[][] xGroundSit = {{0.3f, -1.8f, 1.8f, 0}, {-0.8f, 1.8f, -0.9f, 0},};
 
   // X rotation angles for walking
-  // 1st dim - animation keyframe
+  // 1st dim - animation keyframe (three frames)
   // 2nd dim - front, hind
   // 3rd dim - thigh, crus, foot, toe
-  private float[][][] xGroundWalk = {{{0.4f, -1.4f, 1.3f, 0}, // move down and forward
-          {0.1f, 1.2f, -0.5f, 0} // move back
-  }, {{1.2f, -1.6f, 1.3f, 0}, // move back
-          {-0.3f, 2.1f, -0.9f, 0.6f} // move up and forward
-  }, {{0.9f, -2.1f, 1.8f, 0.6f}, // move up and forward
-          {-0.7f, 1.4f, -0.2f, 0} // move down and forward
-  }};
-
-  // final X rotation angles for walking
-  private float[] xGroundWalk2 = {0, 0, 0, 0};
+  private final float[][][] X_GROUND_WALK_FRAMES = {
+          { {0.4f, -1.4f, 1.3f, 0}, // move down and forward
+            {0.1f, 1.2f, -0.5f, 0} // move back
+          },
+          { {1.2f, -1.6f, 1.3f, 0}, // move back
+            {-0.3f, 2.1f, -0.9f, 0.6f} // move up and forward
+          },
+          { {0.9f, -2.1f, 1.8f, 0.6f}, // move up and forward
+            {-0.7f, 1.4f, -0.2f, 0} // move down and forward
+          } };
 
   // Y rotation angles for ground, thigh only
   private float[] yGroundStand = {-0.25f, 0.25f};
@@ -648,16 +648,34 @@ public class DragonModel extends AdvancedModelBase {
       // align the toes so they're always horizontal on the ground
       xGround[3] = -(xGround[0] + xGround[1] + xGround[2]);
 
+      if (DebugSettings.isForceDragonWalk()) {
+        walk = 1.0F;
+        sit = 0.0F;
+        ground = 1.0F;
+      }
+
       // apply walking cycle
       if (walk > 0) {
         // interpolate between the keyframes, based on the cycle
+        // final X rotation angles for walking
+        float[] xGroundWalk = {0, 0, 0, 0};
 
-        DragonAnimator.splineArrays(DragonAnimator.getMoveDistanceBlocks() * 0.2f, leftSide,
-                xGroundWalk2, xGroundWalk[0][frontBackIdx], xGroundWalk[1][frontBackIdx], xGroundWalk[2][frontBackIdx]);
+        float cyclesMoved = DragonAnimator.getMoveDistanceBlocksX4()
+                            / dragonPhysicalModel.getMoveDistancePerWalkAnimationCycleWC(dragon.getAgeScale()) / 4.0F;
+
+        if (DebugSettings.isForceDragonWalk()) {
+          cyclesMoved = DebugSettings.getForceDragonWalkCycles();
+        }
+
+        DragonAnimator.interpolateBetweenFrames(cyclesMoved, leftSide,
+                xGroundWalk, // result
+                X_GROUND_WALK_FRAMES[0][frontBackIdx], //nodes
+                X_GROUND_WALK_FRAMES[1][frontBackIdx],
+                X_GROUND_WALK_FRAMES[2][frontBackIdx]);
         // align the toes so they're always horizontal on the ground
-        xGroundWalk2[3] -= xGroundWalk2[0] + xGroundWalk2[1] + xGroundWalk2[2];
+        xGroundWalk[3] -= xGroundWalk[0] + xGroundWalk[1] + xGroundWalk[2];
 
-        DragonAnimator.slerpArrays(xGround, xGroundWalk2, xGround, walk);
+        DragonAnimator.slerpArrays(xGround, xGroundWalk, xGround, walk);
       }
 
       float yAir = yAirAll[frontBackIdx];
@@ -716,9 +734,9 @@ public class DragonModel extends AdvancedModelBase {
     render((EntityTameableDragon) entity, moveDistanceBlocks, moveSpeedBlocksPerTick, ticksExisted, lookYaw, lookPitch, scale);
   }
 
-  public void render(EntityTameableDragon dragon, float moveDistanceBlocks, float moveSpeedBlocksPerTick, float ticksExisted, float lookYaw, float lookPitch, float scale) {
+  public void render(EntityTameableDragon dragon, float moveDistanceBlocksX4, float moveSpeedBlocksPerTick, float ticksExisted, float lookYaw, float lookPitch, float scale) {
     DragonAnimator animator = dragon.getAnimator();
-    animator.setMovement(moveDistanceBlocks, moveSpeedBlocksPerTick);
+    animator.setMovement(moveDistanceBlocksX4, moveSpeedBlocksPerTick);
     animator.setLook(lookYaw, lookPitch);
     animator.animate();
     updateFromAnimator(dragon);

@@ -114,6 +114,30 @@ public class DebugSettings
   }
   private static boolean riderPositionTweak = false;
 
+  public static boolean isForceDragonWalk() {
+    return forceDragonWalk;
+  }
+  public static void setForceDragonWalk(boolean forceDragonWalk) {DebugSettings.forceDragonWalk = forceDragonWalk;}
+  private static boolean forceDragonWalk = false;
+  public static float getForceDragonWalkCycles() {
+    float dragonWalkCycle = (float)getDebugParameter("dragonwalkcycle");
+    if (dragonWalkCycle < 0) {
+      final long FULL_CYCLE_MS = 3000;
+      long cycleRemainder = System.currentTimeMillis() % FULL_CYCLE_MS;
+      dragonWalkCycle = cycleRemainder / (float)FULL_CYCLE_MS;
+    }
+    return dragonWalkCycle;
+  }
+
+  public static boolean isDragonWalkStraightLine() {
+    return dragonWalkStraightLine;
+  }
+  public static void setDragonWalkStraightLine(boolean dragonWalkStraightLine) {DebugSettings.dragonWalkStraightLine = dragonWalkStraightLine;}
+  private static boolean dragonWalkStraightLine = false;
+  public static float getDragonWalkSpeed() {
+    return (float)getDebugParameter("dragonwalkspeed");
+  }
+
   /**
    * Debug parameters can be set using the command console
    * /dragon debug parameter {name} {value}

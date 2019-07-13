@@ -223,6 +223,7 @@ public class DragonPhysicalModel {
 
   /**
    * Get the position of the throat relative to the origin of the head
+   * @param ageScale the scale of the dragon (0 -> 1) , 1.0 is fully grown
    * @param headPitchRadians pitch of the head - as per vanilla convention, in radians not degrees
    * @param headYawRadians yaw of the head - as per vanilla convention, in radians not degrees
    * @return the vector offset of the throat from the head centre point
@@ -245,6 +246,21 @@ public class DragonPhysicalModel {
     return new Vec3d(vecMC.x * CONVERT_MC_TO_WC,
                      vecMC.y * CONVERT_MC_TO_WC * -1,
                      vecMC.z * CONVERT_MC_TO_WC * -1);
+  }
+
+  private float MOVE_DISTANCE_PER_WALK_ANIMATION_CYCLE_BC = 4.2F;  //theoretical is 4.0 but 4.2 looks a bit better
+
+  /**
+   * How far does the dragon move for one full cycle of the walk animation
+   * @param ageScale the scale of the dragon (0 -> 1) , 1.0 is fully grown
+   * @return the number of blocks moved in one full cycle of the walk legs
+   */
+  public float getMoveDistancePerWalkAnimationCycleWC(float ageScale)
+  {
+    if (DebugSettings.existsDebugParameter("walkdistancepercycle")) {
+      return (float)DebugSettings.getDebugParameter("walkdistancepercycle");
+    }
+    return ageScale * MOVE_DISTANCE_PER_WALK_ANIMATION_CYCLE_BC * CONVERT_BC_TO_WC;
   }
 
   public int getNumberOfTailSegments() {return  NUMBER_OF_TAIL_SEGMENTS;}

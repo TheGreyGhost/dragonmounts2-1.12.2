@@ -809,6 +809,12 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 
   @Override
   public void onUpdate() {
+    if (DebugSettings.isDragonWalkStraightLine()) {
+      this.rotationYaw = -90.0F;
+      this.motionX = DebugSettings.getDragonWalkSpeed();
+      this.motionY = 0;
+      this.motionZ = 0;
+    }
     super.onUpdate();
     if (world.isRemote) {
       this.updateKeys();

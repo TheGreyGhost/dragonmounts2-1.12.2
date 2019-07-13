@@ -127,6 +127,16 @@ To force dragon entity parameters:
      /dragon debug parameter dragonpitch 0
       /dragon debug parameter dragonjawangle 0
 
+To force the dragon into walking animation:
+    /dragon debug forcedragonwalk
+    with the cycle position set by
+    /dragon debug parameter dragonwalkcycle {value}.   If {value} < 0, slowly animate
 
+To make the dragon walk at a steady pace in a straight line:
+    /dragon debug dragonWalkStraightLine
+    /dragon debug parameter dragonwalkspeed 0.1
 
+and change the animation getMoveDistancePerWalkAnimationCycleWC() using
+    /dragon debug parameter walkdistancepercycle 6.0;
 
+/kill @e[type=!Player]

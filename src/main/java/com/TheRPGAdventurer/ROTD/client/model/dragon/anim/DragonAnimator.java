@@ -38,8 +38,8 @@ public class DragonAnimator {
     // entity parameters
     private final EntityTameableDragon dragon;
     private float partialTicks;
-    private float moveDistanceBlocks;
-    private float moveSpeedBlocksPerTick;
+    private float moveDistanceBlocksX4;       // the distance moved along the ground in blocks, multiplied by four
+    private float moveSpeedBlocksPer200ms;  // the ground movement speed, in blocks per 200 milliseconds
     private float lookYaw;
     private float lookPitch;
     private double prevRenderYawOffset;
@@ -181,9 +181,9 @@ public class DragonAnimator {
         this.partialTicks = partialTicks;
     }
 
-    public void setMovement(float moveTime, float moveSpeed) {
-        this.moveDistanceBlocks = moveTime;
-        this.moveSpeedBlocksPerTick = moveSpeed;
+    public void setMovement(float moveDistanceBlocksX4, float moveSpeedBlocksPer200ms) {
+        this.moveDistanceBlocksX4 = moveDistanceBlocksX4;
+        this.moveSpeedBlocksPer200ms = moveSpeedBlocksPer200ms;
     }
 
     public void setLook(float lookYaw, float lookPitch) {
@@ -294,7 +294,7 @@ public class DragonAnimator {
         FlutterTimer.add(FlutterFlag ? 0.1f : -0.1f);
 
         // update walking transition
-        boolean walkFlag = moveSpeedBlocksPerTick > 0.1 && !dragon.isSitting();
+        boolean walkFlag = moveSpeedBlocksPer200ms > 0.1 && !dragon.isSitting();
         float walkVal = 0.1f;
         walkTimer.add(walkFlag ? walkVal : -walkVal);
 
@@ -431,8 +431,8 @@ public class DragonAnimator {
             wingArmGround[2] = 0.8f + MathX.sin(a2) * MathX.sin(a3) * 0.05f;
 
             // walking
-            wingArmGround[1] += MathX.sin(moveDistanceBlocks * 0.5f) * 0.02f * walk;
-            wingArmGround[2] += MathX.cos(moveDistanceBlocks * 0.5f) * 0.05f * walk;
+            wingArmGround[1] += MathX.sin(moveDistanceBlocksX4 * 0.5f) * 0.02f * walk;
+            wingArmGround[2] += MathX.cos(moveDistanceBlocksX4 * 0.5f) * 0.05f * walk;
 
             wingForearmGround[0] = 0;
             wingForearmGround[1] = -wingArmGround[1] * 2;
@@ -553,7 +553,7 @@ public class DragonAnimator {
         // do nothing - server doesn't need any of these positions so the DragonModel can do it all
     }
 
-    public void splineArrays(float x, boolean shift, float[] result, float[]... nodes) {
+    public void splineArraysOld(float x, boolean shift, float[] result, float[]... nodes) {
         // uncomment to disable interpolation
 //        if (true) {
 //            if (shift) {
@@ -580,6 +580,39 @@ public class DragonAnimator {
             Spline.interp(xn, result, a1, a2, a3, a1);
         }
     }
+
+  /**
+   * Interpolate (cubic spline smoothing) between the keyFrames of the animation
+   * @param numberOfCycles the number of full cycles of the animation
+   * @param phaseShift if true, apply a phase shift to the cycle
+   * @param result the interpolated result
+   * @param keyFrames
+   */
+  public void interpolateBetweenFrames(float numberOfCycles, boolean phaseShift, float[] result, float[]... keyFrames)
+  {
+    float cycleFraction = numberOfCycles % 1.0F;
+    if (cycleFraction < 0) cycleFraction += 1.0F;
+    float keyFrameIndex = cycleFraction * keyFrames.length;
+    // find the frames that we are interpolating between (using splines)
+
+    int frameIndex0 = (int)keyFrameIndex;
+    frameIndex0 = frameIndex0 % keyFrames.length;   // in case keyFrameIndex == keyFrames.length
+    int frameIndex1 = (frameIndex0 + 1) % keyFrames.length;
+    int frameIndex2 = (frameIndex0 + 2) % keyFrames.length;
+
+    float[] frame0 = keyFrames[frameIndex0];
+    float[] frame1 = keyFrames[frameIndex1];
+    float[] frame2 = keyFrames[frameIndex2];
+
+    float fractionOfFrame = keyFrameIndex - frameIndex0;
+
+    if (phaseShift) {
+      Spline.interp(fractionOfFrame, result, frame1, frame2, frame0, frame1);
+    } else {
+      Spline.interp(fractionOfFrame, result, frame0, frame1, frame2, frame0);
+    }
+  }
+
 
   /**
    * Smoothed linear interpolation between a and b, using x
@@ -657,8 +690,8 @@ public class DragonAnimator {
         return jawRotateAngleX;
     }
 
-    public float getMoveDistanceBlocks() {
-        return moveDistanceBlocks;
+    public float getMoveDistanceBlocksX4() {
+        return moveDistanceBlocksX4;
     }
 
     public float getSpeed() {

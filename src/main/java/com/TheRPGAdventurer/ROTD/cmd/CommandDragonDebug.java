@@ -73,7 +73,15 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
         DebugSettings.setRiderPositionTweak(!DebugSettings.isRiderPositionTweak());
       }));
 
-        addCommand(new CommandDragonLambda("parameter", (server, sender, args) -> {
+      addCommand(new CommandDragonLambda("forceDragonWalk", (server, sender, args) -> {
+        DebugSettings.setForceDragonWalk(!DebugSettings.isForceDragonWalk());
+      }));
+
+      addCommand(new CommandDragonLambda("dragonWalkStraightLine", (server, sender, args) -> {
+        DebugSettings.setDragonWalkStraightLine(!DebugSettings.isDragonWalkStraightLine());
+      }));
+
+      addCommand(new CommandDragonLambda("parameter", (server, sender, args) -> {
           String paramName = args[0];
           double value = parseDouble(args[1], -1e10);
           DebugSettings.setDebugParameter(paramName, value);
