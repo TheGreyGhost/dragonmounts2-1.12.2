@@ -67,6 +67,7 @@ import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -1558,6 +1559,23 @@ public class EntityTameableDragon extends EntityTameable implements IShearable {
 //      }
 //    }
 
+  }
+
+  @SideOnly(Side.CLIENT)
+  @Override
+  // makes the visual rendering limit of the dragon bigger (otherwise the head or tail sometimes doesn't render when you
+  //   can't see the body AABB)
+  // The dragon is so big that parts of the dragon will still sometimes disappear if the dragon posX, posZ is not in the
+  //   same chunk as the player - this is due to the way vanilla eliminates chunks it won't render, there's
+  //   not much we can do about that.  It only happens when the player is right up close to the dragon
+  public AxisAlignedBB getRenderBoundingBox()
+  {
+    // the dragon visual limits are up to four times the body radius, including the tail
+    AxisAlignedBB bodyAABB = this.getEntityBoundingBox();
+    double halfwidth = (bodyAABB.maxX - bodyAABB.minX)/2.0;  // width is equal in x and z directions
+    double extraRadius = 3 * halfwidth;
+    return new AxisAlignedBB(bodyAABB.minX - extraRadius, bodyAABB.minY, bodyAABB.minZ - extraRadius,
+                             bodyAABB.maxX + extraRadius, bodyAABB.maxY, bodyAABB.maxZ + extraRadius );
   }
 
   /**

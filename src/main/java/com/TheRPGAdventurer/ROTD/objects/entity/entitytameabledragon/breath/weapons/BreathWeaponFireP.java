@@ -135,27 +135,42 @@ public class BreathWeaponFireP extends BreathWeaponP
 
   private BlockBurnProperties getBurnProperties(IBlockState iBlockState)
   {
+
     Block block = iBlockState.getBlock();
     if (blockBurnPropertiesCache.containsKey(block)) {
-      return  blockBurnPropertiesCache.get(block);
+      return blockBurnPropertiesCache.get(block);
     }
 
+
     BlockBurnProperties blockBurnProperties = new BlockBurnProperties();
-    IBlockState result = getSmeltingResult(iBlockState);
-    blockBurnProperties.threshold = 20;
-    if (result == null) {
-      blockBurnProperties.threshold = 3;
-      result = getScorchedResult(iBlockState);
+
+    float blockHardness = -1;
+    try {
+      blockHardness = iBlockState.getBlockHardness(null, null); // the nulls might cause a crash in future versions?
+    } catch (Exception e) {
+      DragonMounts.loggerLimit.error_once("Unexpected exception in BreathWeaponFireP::getBurnProperties");
     }
-    if (result == null) {
-      blockBurnProperties.threshold = 5;
-      result = getVaporisedLiquidResult(iBlockState);
+
+    if (blockHardness < 0) {  //hardness < 0 is used for indestructible blocks eg bedrock
+      blockBurnProperties.burnResult = null;
+    } else {
+      IBlockState result = getSmeltingResult(iBlockState);
+      blockBurnProperties.threshold = 20;
+      if (result == null) {
+        blockBurnProperties.threshold = 3;
+        result = getScorchedResult(iBlockState);
+      }
+      if (result == null) {
+        blockBurnProperties.threshold = 5;
+        result = getVaporisedLiquidResult(iBlockState);
+      }
+      if (result == null) {
+        blockBurnProperties.threshold = 100;
+        result = getMoltenLavaResult(iBlockState);
+      }
+      blockBurnProperties.burnResult = result;
     }
-    if (result == null) {
-      blockBurnProperties.threshold = 100;
-      result = getMoltenLavaResult(iBlockState);
-    }
-    blockBurnProperties.burnResult = result;
+
     blockBurnPropertiesCache.put(block, blockBurnProperties);
     return blockBurnProperties;
   }
@@ -177,9 +192,9 @@ public class BreathWeaponFireP extends BreathWeaponP
     }
 
     ItemStack smeltingResult = FurnaceRecipes.instance().getSmeltingResult(itemStack);
-    if (smeltingResult != null) {
+    if (smeltingResult != null && smeltingResult != ItemStack.EMPTY) {
       Block smeltedResultBlock = Block.getBlockFromItem(smeltingResult.getItem());
-      if (smeltedResultBlock != null) {
+      if (smeltedResultBlock != null && smeltedResultBlock != Blocks.AIR) {
         IBlockState iBlockStateSmelted = smeltedResultBlock.getStateFromMeta(smeltingResult.getMetadata());
         return iBlockStateSmelted;
       }
