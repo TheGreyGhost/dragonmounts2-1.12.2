@@ -239,13 +239,14 @@ public class DragonPhysicalModel {
 
   /**
    * convert a vector in MC (Modelspace coordinates) into World coordinates (including inversion of the z, y axes)
+   * @param ageScale the scale of the dragon (0 -> 1) , 1.0 is fully grown
    * @param vecMC
    * @return
    */
-  public Vec3d convertMCtoWC(Vec3d vecMC) {
-    return new Vec3d(vecMC.x * CONVERT_MC_TO_WC,
-                     vecMC.y * CONVERT_MC_TO_WC * -1,
-                     vecMC.z * CONVERT_MC_TO_WC * -1);
+  public Vec3d convertMCtoWC(float ageScale, Vec3d vecMC) {
+    return new Vec3d(vecMC.x * CONVERT_MC_TO_WC * ageScale,
+                     vecMC.y * CONVERT_MC_TO_WC * ageScale * -1,
+                     vecMC.z * CONVERT_MC_TO_WC * ageScale * -1);
   }
 
   private float MOVE_DISTANCE_PER_WALK_ANIMATION_CYCLE_BC = 4.2F;  //theoretical is 4.0 but 4.2 looks a bit better

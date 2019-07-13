@@ -157,7 +157,7 @@ public class DragonHeadPositionHelper {
 
     // the position of the head in MC is relative to the body pitch rotation point
     Vec3d headOffsetFromPitchOriginMC = new Vec3d(head.rotationPointX, head.rotationPointY, head.rotationPointZ);
-    Vec3d headOffsetFromPitchOriginWC = dragonPhysicalModel.convertMCtoWC(headOffsetFromPitchOriginMC);
+    Vec3d headOffsetFromPitchOriginWC = dragonPhysicalModel.convertMCtoWC(ageScale, headOffsetFromPitchOriginMC);
     Vec3d headPlusThroatOffsetWC = headOffsetFromPitchOriginWC.add(throatOffsetWC);
 
     float bodyPitchRadians = (float)Math.toRadians(dragon.getBodyPitch());

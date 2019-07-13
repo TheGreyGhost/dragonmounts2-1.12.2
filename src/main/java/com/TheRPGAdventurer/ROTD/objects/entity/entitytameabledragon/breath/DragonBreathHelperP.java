@@ -13,6 +13,7 @@ import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.soun
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons.*;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonHelper;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
@@ -444,9 +445,14 @@ public class DragonBreathHelperP extends DragonHelper {
   private void onLivingUpdateClientLegacy() {
     if (dragon.isUsingBreathWeapon()) {
       Vec3d origin = dragon.getAnimator().getThroatPosition();
+      final double LEGACY_Y_OFFSET = -0.4;  // adjusts to account for the different x,y,z of the legacy breath
+
+      origin = origin.addVector(0.0, LEGACY_Y_OFFSET, 0.0);
+
       Vec3d lookDirection = dragon.getLook(1.0f);
       Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
       if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
+
         BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
         dragon.getBreed().spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
       }
