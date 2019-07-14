@@ -10,13 +10,13 @@ import java.util.Optional;
  * Each of these tags represents a variation that can be applied to a dragon
  * For example -
  *   NUMBER_OF_NECK_SEGMENTS = 4
- *   TWIN_RIDGE_SPIKES
+ *   TWIN_RIDGE_PLATES
  *
  *   The variants may have an associated value, eg
  *   NUMBER_OF_NECK_SEGMENTS = 4
  *   PRIMARY_BREATH_WEAPON = fire
- *   or they may have just a tag itself (no value), in which case 'true' is the associated value eg
- *   TWIN_RIDGE_SPIKES
+ *   or they may have just a tag itself (no value- just a flag), in which case 'true' is the associated value eg
+ *   TWIN_RIDGE_PLATES
  */
 public enum DragonVariantTag {
 
@@ -24,7 +24,8 @@ public enum DragonVariantTag {
   NUMBER_OF_WING_FINGERS("numberofwingfingers", 4, 2, 6),
   NUMBER_OF_TAIL_SEGMENTS("numberoftailsegments", 12, 0, 20),
   MAX_NUMBER_OF_PASSENGERS("maxpassengers", 3),
-  TWIN_RIDGE_SPIKES("twinridgespikes");
+  TWIN_RIDGE_PLATES("twinridgeplates"),
+  TAIL_SPIKE("tailspike");
 
   DragonVariantTag(String textname, Object defaultValue) {
     this.textname = textname;
@@ -51,45 +52,40 @@ public enum DragonVariantTag {
   public Object getDefaultValue() {return defaultValue;}
 
   /**
-   * returns true if the input value matches the type of the tag
-   * Enums with no default always return true
-   * @param value  the class to be compared with
-   * @return true for match, false otherwise
-   */
-  public boolean doesTypeMatchValue(String value) {
-    return convertValue(value).isPresent();
-  }
-
-  /**
    * Convert the given input string value to the suitable type for this tag
    * @param value the value to be converted
-   * @return the converted value, or EMPTY if can't be converted
+   * @return the converted value, or throws if an error
    */
-  public Optional<Object> convertValue(String value) {
+  public Object convertValue(String value) throws IllegalArgumentException{
     if (defaultValue instanceof Boolean) {
-      return Optional.of(true);
+      return true;
     }
     if (defaultValue instanceof Number) {
       Number number;
       try {
         number = NumberFormat.getInstance().parse(value);
       } catch (ParseException exception) {
-        return Optional.empty();
+        throw new IllegalArgumentException("Not a number:" + value);
       }
-      if (minValue.isPresent() && minValue.get().compareTo(number) > 0 ) return Optional.empty();
-      if (maxValue.isPresent() && maxValue.get().compareTo(number) > 0 ) return Optional.empty();
-      return Optional.of(number);
+      if (minValue.isPresent() && minValue.get().compareTo(number) > 0 ) {
+        throw new IllegalArgumentException("Number out of range:" + number + " < min (" + minValue.get() + ")");
+      }
+      if (maxValue.isPresent() && maxValue.get().compareTo(number) < 0 ) {
+        throw new IllegalArgumentException("Number out of range:" + number + " > max (" + maxValue.get() + ")");
+      }
+      return number;
     }
-    return Optional.of(value);
+    return value;
   }
 
   /**Checks if the given name has a corresponding tag
    * @param nameToFind the text name to be looked for
-   * @return the corresponding tag, or Optional.empty() if none found
+   * @return the corresponding tag, or throw IllegalArgumentException if not found
    */
-  static public Optional<DragonVariantTag> getTagFromName(String nameToFind) {
+  static public DragonVariantTag getTagFromName(String nameToFind) throws IllegalArgumentException {
     DragonVariantTag retval = allTagNames.get(nameToFind);
-    return (retval == null) ? Optional.empty() : Optional.of(retval);
+    if (retval == null) throw new IllegalArgumentException("Tag not valid:" + nameToFind);
+    return retval;
   }
 
   private final String textname;

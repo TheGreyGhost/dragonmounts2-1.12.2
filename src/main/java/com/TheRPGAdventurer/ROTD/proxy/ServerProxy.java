@@ -10,6 +10,7 @@
 package com.TheRPGAdventurer.ROTD.proxy;
 
 import java.io.File;
+import java.util.Map;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.DragonMountsConfig;
@@ -64,7 +65,7 @@ public class ServerProxy {
         DragonMountsConfig.PreInit();
         StartupDebugCommon.preInitCommon();
       DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(Minecraft.getMinecraft().getResourceManager());
-      DragonVariants dragonVariants = dragonVariantsReader.readVariants();
+      Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readVariants();
     }
 
     @SuppressWarnings("deprecation")

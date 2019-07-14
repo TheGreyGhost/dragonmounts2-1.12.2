@@ -7,6 +7,6 @@
   },
   "ice": {
     "numberoftailsegments": 20,
-    "twinridgespikes": true
+    "flags": ["twinridgeplates", "tailspike"]
   }
 }
