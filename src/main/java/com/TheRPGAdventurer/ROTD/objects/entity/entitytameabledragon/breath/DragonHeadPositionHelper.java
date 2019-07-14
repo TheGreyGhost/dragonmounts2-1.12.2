@@ -1,7 +1,7 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.DragonPhysicalModel;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.SegmentSizePositionRotation;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;

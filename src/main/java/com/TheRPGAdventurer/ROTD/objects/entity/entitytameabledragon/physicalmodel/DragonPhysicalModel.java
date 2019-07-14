@@ -1,4 +1,4 @@
-package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon;
+package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
@@ -34,13 +34,13 @@ import net.minecraft.util.math.Vec3d;
  */
 public class DragonPhysicalModel {
 
-  float getHitboxWidthWC(float ageScale) {return ageScale * getHitboxWidthBC() * CONVERT_BC_TO_WC;}
+  public float getHitboxWidthWC(float ageScale) {return ageScale * getHitboxWidthBC() * CONVERT_BC_TO_WC;}
 
-  float getHitboxHeightWC(float ageScale) {return ageScale * getHitboxHeightBC() * CONVERT_BC_TO_WC;}
+  public float getHitboxHeightWC(float ageScale) {return ageScale * getHitboxHeightBC() * CONVERT_BC_TO_WC;}
 
-  float getHitboxWidthBC() {return 2.75F;}
+  public float getHitboxWidthBC() {return 2.75F;}
 
-  float getHitboxHeightBC() {return 2.75F;}
+  public float getHitboxHeightBC() {return 2.75F;}
 
   public float bodyOriginHeightAboveGroundBC(boolean sitting)
   {

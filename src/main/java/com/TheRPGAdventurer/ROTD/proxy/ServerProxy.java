@@ -19,9 +19,12 @@ import com.TheRPGAdventurer.ROTD.network.MessageDragonTarget;
 import com.TheRPGAdventurer.ROTD.network.MessageDragonTargetHandlerServer;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitycarriage.EntityCarriage;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel.DragonVariants;
+import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel.DragonVariantsReader;
 import com.TheRPGAdventurer.ROTD.objects.items.entity.ImmuneEntityItem;
 import com.TheRPGAdventurer.ROTD.util.debugging.StartupDebugCommon;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
@@ -60,6 +63,8 @@ public class ServerProxy {
     public void PreInitialization(FMLPreInitializationEvent event) {
         DragonMountsConfig.PreInit();
         StartupDebugCommon.preInitCommon();
+      DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(Minecraft.getMinecraft().getResourceManager());
+      DragonVariants dragonVariants = dragonVariantsReader.readVariants();
     }
 
     @SuppressWarnings("deprecation")

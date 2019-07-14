@@ -1,0 +1,12 @@
+{
+  "fire": {
+    "numberofnecksegments": 8,
+    "numberofwingfingers": 3,
+    "numberoftailsegments": 10,
+    "maxpassengers": 3
+  },
+  "ice": {
+    "numberoftailsegments": 20,
+    "twinridgespikes": true
+  }
+}

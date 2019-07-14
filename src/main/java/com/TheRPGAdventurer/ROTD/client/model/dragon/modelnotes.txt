@@ -140,3 +140,6 @@ and change the animation getMoveDistancePerWalkAnimationCycleWC() using
     /dragon debug parameter walkdistancepercycle 6.0;
 
 /kill @e[type=!Player]
+
+
+------------------
