@@ -2,9 +2,12 @@ package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmo
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkElementIndex;
 
 /**
  * Created by TGG on 14/07/2019.
@@ -14,13 +17,26 @@ import java.util.Optional;
  * See DragonVariantTag for more information
  * The advantage of using tags is that the different dragons can be easily configured without changing any code,
  *   and all the different combinations are located in a single file, rather than being scattered throughout the code
+ *
+ *  Each tag is grouped into a category (allows re-use of the same tag for different categories eg primary and secondary
+ *    breath weapon
+ *
  */
 public class DragonVariants {
 
-  public void addTagAndValue(DragonVariantTag tag, String tagValue) throws IllegalArgumentException
+  public DragonVariants() {
+    int categoryCount = Category.values().length;
+    allAppliedTags = new ArrayList<>(categoryCount);
+    for (Category category : Category.values()) {
+      checkElementIndex(category.getIdx(), categoryCount);
+      allAppliedTags.set(category.getIdx(), new HashMap<>());
+    }
+  }
+
+  public void addTagAndValue(Category category, DragonVariantTag tag, String tagValue) throws IllegalArgumentException
   {
     Object convertedValue = tag.convertValue(tagValue);
-    allAppliedTags.put(tag, convertedValue);
+    allAppliedTags.get(category.getIdx()).put(tag, convertedValue);
   }
 
   /**
@@ -28,10 +44,42 @@ public class DragonVariants {
    * @param tag
    * @return
    */
-  public Object getValueOrDefault(DragonVariantTag tag)
+  public Object getValueOrDefault(Category category, DragonVariantTag tag)
   {
-    return allAppliedTags.getOrDefault(tag, tag.getDefaultValue());
+    return allAppliedTags.get(category.getIdx()).getOrDefault(tag, tag.getDefaultValue());
   }
 
-  private HashMap<DragonVariantTag, Object> allAppliedTags = new HashMap();
+  public enum Category {
+    BREATH_WEAPON_PRIMARY("breathweaponprimary", 0),
+    BREATH_WEAPON_SECONDARY("breathweaponsecondary", 1),
+    PHYSICAL_MODEL("physicalmodel", 2);
+
+    Category(String textName, int idx) {
+      this.textName = textName;
+      this.idx = idx;
+    }
+    public String getTextName() {
+      return textName;
+    }
+    public int getIdx() {
+      return idx;
+    }
+    /**Checks if the given name has a corresponding Category
+     * @param nameToFind the text name to be looked for
+     * @return the corresponding Category, or throw IllegalArgumentException if not found
+     */
+    static public Category getCategoryFromName(String nameToFind) throws IllegalArgumentException {
+      for (Category category : Category.values()) {
+        if (category.getTextName() == nameToFind) {
+          return category;
+        }
+      }
+      throw new IllegalArgumentException("Category not valid:" + nameToFind);
+    }
+
+    private String textName;
+    private int idx;
+  }
+
+  private ArrayList<HashMap<DragonVariantTag, Object>> allAppliedTags;
 }

@@ -25,7 +25,15 @@ public enum DragonVariantTag {
   NUMBER_OF_TAIL_SEGMENTS("numberoftailsegments", 12, 0, 20),
   MAX_NUMBER_OF_PASSENGERS("maxpassengers", 3),
   TWIN_RIDGE_PLATES("twinridgeplates"),
-  TAIL_SPIKE("tailspike");
+  TAIL_SPIKE("tailspike"),
+
+  PARTICLE_FACTORY("particlefactory", "fire"),
+  PARTICLE_RESOURCE_LOCATION("particleresourcelocation", ""),
+  NODE_SPEED("nodespeed", 1.2, 0.0, 5.0),
+  NODE_DIAMETER("nodediameter", 2.0, 0.1, 5.0),
+  NODE_LIFETIME("nodelifetime", 40, 1, 200),
+  NODE_INTENSITY("nodeintensity", 1.0, 0.0, 5.0)
+  ;
 
   DragonVariantTag(String textname, Object defaultValue) {
     this.textname = textname;

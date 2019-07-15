@@ -64,7 +64,8 @@ public class ServerProxy {
     public void PreInitialization(FMLPreInitializationEvent event) {
         DragonMountsConfig.PreInit();
         StartupDebugCommon.preInitCommon();
-      DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(Minecraft.getMinecraft().getResourceManager());
+      DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
+              Minecraft.getMinecraft().getResourceManager(), "dragonvariants.json");
       Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readVariants();
     }
 

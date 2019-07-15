@@ -1,0 +1,8 @@
+// value too high
+{
+  "fire": {
+    "physicalmodel": {
+      "maxpassengers": 20
+    }
+  }
+}

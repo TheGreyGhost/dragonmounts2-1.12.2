@@ -1,16 +1,15 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.util.Minify;
+import com.google.common.io.CharStreams;
 import com.google.gson.*;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -28,8 +27,9 @@ import java.util.Map;
  */
 public class DragonVariantsReader {
 
-  public DragonVariantsReader(IResourceManager manager) {
+  public DragonVariantsReader(IResourceManager manager, String configFilename) {
     this.iResourceManager = manager;
+    this.configFilename = configFilename;
   }
 
   /**
@@ -43,18 +43,19 @@ public class DragonVariantsReader {
     boolean foundAtLeastOne = false;
     for (String s : iResourceManager.getResourceDomains()) {
       try {
-        for (IResource iresource : iResourceManager.getAllResources(new ResourceLocation(s, "dragonvariants.json"))) {
+        for (IResource iresource : iResourceManager.getAllResources(new ResourceLocation(s, configFilename))) {
           foundAtLeastOne = true;
           InputStream inputStream = iresource.getInputStream();
           try {
-            Map<String, DragonVariants> allBreeds = deserialiseAllBreeds(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String inputString = CharStreams.toString(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String stripped = Minify.minify(inputString);
+            Map<String, DragonVariants> allBreeds = deserialiseAllBreeds(new StringReader(stripped));
             if (invalidSyntaxFound) {
-              DragonMounts.logger.warn("One or more errors occurred parsing dragonvariants.json:\n" + invalidSyntaxFields);
+              DragonMounts.logger.warn("One or more errors occurred parsing " + configFilename + ":\n" + invalidSyntaxFields);
             }
             return allBreeds;
           } catch (RuntimeException runtimeexception) {
-            DragonMounts.logger.warn("Invalid dragonvariants.json", (Throwable) runtimeexception);
+            DragonMounts.logger.warn("Invalid " + configFilename, (Throwable) runtimeexception);
           } finally {
             IOUtils.closeQuietly(inputStream);
           }
@@ -64,7 +65,7 @@ public class DragonVariantsReader {
       }
     }
     if (!foundAtLeastOne) {
-      DragonMounts.logger.warn("Couldn't find dragonvariants.json");
+      DragonMounts.logger.warn("Couldn't find " + configFilename);
     }
 
     return new HashMap<>();  // just return empty if we had trouble.
@@ -93,18 +94,43 @@ public class DragonVariantsReader {
 
   /**
    * Deserialise all the tags for the specified breed's json object
-   * @param object
+   * @param jsonObject the object for this breed
    * @return
    */
-  private DragonVariants deserializeAllTagsForOneBreed(JsonObject object) {
+  private DragonVariants deserializeAllTagsForOneBreed(JsonObject jsonObject) {
     DragonVariants dragonVariants = new DragonVariants();
+    if (!jsonObject.isJsonObject()) {
+      syntaxError("Malformed entry");
+      return dragonVariants;
+    }
+
+    for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+      String categoryName = entry.getKey();
+      try {
+        DragonVariants.Category category = DragonVariants.Category.getCategoryFromName(categoryName);
+        deserializeAllTagsForOneCategory(dragonVariants, category, entry.getValue());
+      } catch (IllegalArgumentException iae) {
+        syntaxError(iae.getMessage());
+      }
+    }
+    return dragonVariants;
+  }
+
+  /**
+   * Deserialise all the tags within the supplied category
+   * @param jsonElement the object comprising the category
+   * @return
+   */
+  private DragonVariants deserializeAllTagsForOneCategory(DragonVariants dragonVariants, DragonVariants.Category category, JsonElement jsonElement) {
+    if (!jsonElement.isJsonObject()) throw new IllegalArgumentException("malformed entry for category " + category);
+    JsonObject object = jsonElement.getAsJsonObject();
     for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
       String tagName = entry.getKey();
       if (tagName == "flags" && entry.getValue().isJsonArray()) {
-        deserializeFlagTags(dragonVariants, entry.getValue().getAsJsonArray());
+        deserializeFlagTags(dragonVariants, category, entry.getValue().getAsJsonArray());
       } else {
         try {
-          deserialiseTagWithValue(dragonVariants, tagName, entry.getValue());
+          deserialiseTagWithValue(dragonVariants, category, tagName, entry.getValue());
         } catch (IllegalArgumentException iae) {
           syntaxError(iae.getMessage());
         }
@@ -117,16 +143,16 @@ public class DragonVariantsReader {
    * @param dragonVariants
    * @param jsonArray
    */
-  private void deserializeFlagTags(DragonVariants dragonVariants, JsonArray jsonArray) {
+  private void deserializeFlagTags(DragonVariants dragonVariants, DragonVariants.Category category, JsonArray jsonArray) {
     // Iterator to traverse the list
-    Iterator<JsonElement> iterator = jsonArray.iterator();
-    while (iterator.hasNext()) {
-      JsonElement element = iterator.next();
+    Iterator<JsonElement> flagIterator = jsonArray.iterator();
+    while (flagIterator.hasNext()) {
+      JsonElement element = flagIterator.next();
       try {
         if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
-          syntaxError("flags");
+          syntaxError("problem with tag " + category + ":flags");
         } else {
-          deserialiseFlagTag(dragonVariants, element.getAsJsonPrimitive().getAsString());
+          deserialiseFlagTag(dragonVariants, category, element.getAsJsonPrimitive().getAsString());
         }
       } catch (IllegalArgumentException iae) {
         syntaxError(iae.getMessage());
@@ -134,20 +160,22 @@ public class DragonVariantsReader {
     }
   }
 
-  private void deserialiseTagWithValue(DragonVariants dragonVariants, String tagName, JsonElement tagValue) throws IllegalArgumentException {
+  private void deserialiseTagWithValue(DragonVariants dragonVariants, DragonVariants.Category category,
+                                       String tagName, JsonElement tagValue) throws IllegalArgumentException {
     DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
     String value;
     try {
       value = tagValue.getAsJsonPrimitive().getAsString();
     } catch (Exception e) {
-      throw new IllegalArgumentException("problem with tag " + tagName);
+      throw new IllegalArgumentException("problem with tag " + category + ":" + tagName);
     }
-    dragonVariants.addTagAndValue(tag, value);
+    dragonVariants.addTagAndValue(category, tag, value);
   }
 
-  private void deserialiseFlagTag(DragonVariants dragonVariants, String tagName) throws IllegalArgumentException {
+  private void deserialiseFlagTag(DragonVariants dragonVariants, DragonVariants.Category category,
+                                  String tagName) throws IllegalArgumentException {
     DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
-    dragonVariants.addTagAndValue(tag, "");
+    dragonVariants.addTagAndValue(category, tag, "");
   }
 
   /** Raises a flag that an error occurred during parsing, and adds a message
@@ -171,4 +199,5 @@ public class DragonVariantsReader {
   private String currentBreed;
 
   private final IResourceManager iResourceManager;
+  private final String configFilename;
 }

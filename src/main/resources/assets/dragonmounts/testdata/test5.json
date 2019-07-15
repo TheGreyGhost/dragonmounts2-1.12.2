@@ -1,0 +1,12 @@
+// unknown flag
+{
+  "ice": {
+    "physicalmodel": {
+      "numberoftailsegments": 20,
+      "flags": [
+        "twinridgeplates",
+        "incorrectflag"
+      ]
+    }
+  }
+}
