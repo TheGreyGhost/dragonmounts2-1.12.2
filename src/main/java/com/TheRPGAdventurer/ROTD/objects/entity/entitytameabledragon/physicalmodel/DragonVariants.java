@@ -27,13 +27,16 @@ public class DragonVariants {
   public DragonVariants() {
     int categoryCount = Category.values().length;
     allAppliedTags = new ArrayList<>(categoryCount);
+    for (int i = 0; i < categoryCount; ++i) {
+      allAppliedTags.add(i, null);
+    }
     for (Category category : Category.values()) {
       checkElementIndex(category.getIdx(), categoryCount);
       allAppliedTags.set(category.getIdx(), new HashMap<>());
     }
   }
 
-  public void addTagAndValue(Category category, DragonVariantTag tag, String tagValue) throws IllegalArgumentException
+  public void addTagAndValue(Category category, DragonVariantTag tag, Object tagValue) throws IllegalArgumentException
   {
     Object convertedValue = tag.convertValue(tagValue);
     allAppliedTags.get(category.getIdx()).put(tag, convertedValue);
@@ -70,7 +73,7 @@ public class DragonVariants {
      */
     static public Category getCategoryFromName(String nameToFind) throws IllegalArgumentException {
       for (Category category : Category.values()) {
-        if (category.getTextName() == nameToFind) {
+        if (category.getTextName().equals(nameToFind)) {
           return category;
         }
       }

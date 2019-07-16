@@ -1,8 +1,12 @@
 package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.LongSummaryStatistics;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -35,26 +39,48 @@ public enum DragonVariantTag {
   NODE_INTENSITY("nodeintensity", 1.0, 0.0, 5.0)
   ;
 
-  DragonVariantTag(String textname, Object defaultValue) {
-    this.textname = textname;
-    this.defaultValue = defaultValue;
-    this.minValue = Optional.empty();
-    this.maxValue = Optional.empty();
-  }
-
-  DragonVariantTag(String textname, Comparable defaultValue, Comparable minValue, Comparable maxValue) {
-    this.textname = textname;
-    this.defaultValue = defaultValue;
-    this.minValue = Optional.of(minValue);
-    this.maxValue = Optional.of(maxValue);
-  }
-
   DragonVariantTag(String textname) {
     this.textname = textname;
     this.defaultValue = false;
     this.minValue = Optional.empty();
     this.maxValue = Optional.empty();
   }
+
+  DragonVariantTag(String textname, String defaultValue) {
+    this.textname = textname;
+    this.defaultValue = defaultValue;
+    this.minValue = Optional.empty();
+    this.maxValue = Optional.empty();
+  }
+
+  DragonVariantTag(String textname, long defaultValue) {
+    this.textname = textname;
+    this.defaultValue = defaultValue;
+    this.minValue = Optional.empty();
+    this.maxValue = Optional.empty();
+  }
+
+  DragonVariantTag(String textname, long defaultValue, long minValue, long maxValue) {
+    this.textname = textname;
+    this.defaultValue = defaultValue;
+    this.minValue = Optional.of(minValue);
+    this.maxValue = Optional.of(maxValue);
+  }
+
+  DragonVariantTag(String textname, double defaultValue) {
+    this.textname = textname;
+    this.defaultValue = defaultValue;
+    this.minValue = Optional.empty();
+    this.maxValue = Optional.empty();
+  }
+
+  DragonVariantTag(String textname, double defaultValue, double minValue, double maxValue) {
+    this.textname = textname;
+    this.defaultValue = defaultValue;
+    this.minValue = Optional.of(minValue);
+    this.maxValue = Optional.of(maxValue);
+  }
+
 
   public String getTextname() {return textname;}
   public Object getDefaultValue() {return defaultValue;}
@@ -64,26 +90,37 @@ public enum DragonVariantTag {
    * @param value the value to be converted
    * @return the converted value, or throws if an error
    */
-  public Object convertValue(String value) throws IllegalArgumentException{
+  public Object convertValue(Object value) throws IllegalArgumentException{
     if (defaultValue instanceof Boolean) {
       return true;
     }
-    if (defaultValue instanceof Number) {
-      Number number;
-      try {
-        number = NumberFormat.getInstance().parse(value);
-      } catch (ParseException exception) {
-        throw new IllegalArgumentException("Not a number:" + value);
-      }
-      if (minValue.isPresent() && minValue.get().compareTo(number) > 0 ) {
-        throw new IllegalArgumentException("Number out of range:" + number + " < min (" + minValue.get() + ")");
-      }
-      if (maxValue.isPresent() && maxValue.get().compareTo(number) < 0 ) {
-        throw new IllegalArgumentException("Number out of range:" + number + " > max (" + maxValue.get() + ")");
-      }
-      return number;
+    if (defaultValue instanceof String) {
+      if (value instanceof String) return value;
+      throw new IllegalArgumentException("Expected a string");
     }
-    return value;
+    if (!(value instanceof Number)) {
+      throw new IllegalArgumentException("Expected a number");
+    }
+    Number numberValue;
+    try {
+      if (defaultValue instanceof Long) {
+        numberValue = Long.parseLong(value.toString());
+      } else if (defaultValue instanceof Double) {
+        numberValue = Double.parseDouble(value.toString());
+      } else {
+        throw new IllegalArgumentException("internal error:unknown tag format in DragonVariantTag");
+      }
+    } catch (NumberFormatException nfe) {
+      throw new IllegalArgumentException("expected a number with format:" + defaultValue.getClass());
+    }
+
+    if (minValue.isPresent() && minValue.get().compareTo(numberValue) > 0 ) {
+      throw new IllegalArgumentException("Number out of range:" + numberValue + " < min (" + minValue.get() + ")");
+    }
+    if (maxValue.isPresent() && maxValue.get().compareTo(numberValue) < 0 ) {
+      throw new IllegalArgumentException("Number out of range:" + numberValue + " > max (" + maxValue.get() + ")");
+    }
+    return numberValue;
   }
 
   /**Checks if the given name has a corresponding tag

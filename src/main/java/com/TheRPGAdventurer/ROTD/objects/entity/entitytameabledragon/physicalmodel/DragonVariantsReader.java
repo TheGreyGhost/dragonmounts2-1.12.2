@@ -10,8 +10,6 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,15 +19,15 @@ import java.util.Map;
  * Created by TGG on 14/07/2019.
  * This class reads the dragonvariants.json file to load in the DragonVariantTag information for all breeds
  * Usage:
- * 1) Create with DragonVariantsReader, giving it the Minecraft resource manager.  dragonvariants.json should be
- *      located in resources\assets\dragonmounts, same as sounds.json
+ * 1) Create with DragonVariantsReader, giving it the Minecraft resource manager and the resourcelocation of the
+ *      the config file (dragonmounts.json)
  * 2) In common preinit(), call readVariants() to get the DragonVariants for all breeds
  */
 public class DragonVariantsReader {
 
-  public DragonVariantsReader(IResourceManager manager, String configFilename) {
+  public DragonVariantsReader(IResourceManager manager, ResourceLocation configFileLocation) {
     this.iResourceManager = manager;
-    this.configFilename = configFilename;
+    this.configFileLocation = configFileLocation;
   }
 
   /**
@@ -40,36 +38,71 @@ public class DragonVariantsReader {
     invalidSyntaxFound = false;
     invalidSyntaxFields = "";
 
-    boolean foundAtLeastOne = false;
-    for (String s : iResourceManager.getResourceDomains()) {
+    try {
+      IResource iResource = iResourceManager.getResource(configFileLocation);
+      InputStream inputStream = iResource.getInputStream();
       try {
-        for (IResource iresource : iResourceManager.getAllResources(new ResourceLocation(s, configFilename))) {
-          foundAtLeastOne = true;
-          InputStream inputStream = iresource.getInputStream();
-          try {
-            String inputString = CharStreams.toString(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String stripped = Minify.minify(inputString);
-            Map<String, DragonVariants> allBreeds = deserialiseAllBreeds(new StringReader(stripped));
-            if (invalidSyntaxFound) {
-              DragonMounts.logger.warn("One or more errors occurred parsing " + configFilename + ":\n" + invalidSyntaxFields);
-            }
-            return allBreeds;
-          } catch (RuntimeException runtimeexception) {
-            DragonMounts.logger.warn("Invalid " + configFilename, (Throwable) runtimeexception);
-          } finally {
-            IOUtils.closeQuietly(inputStream);
-          }
-
+        String inputString = CharStreams.toString(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        String stripped = Minify.minify(inputString);
+        Map<String, DragonVariants> allBreeds = deserialiseAllBreeds(new StringReader(stripped));
+        if (invalidSyntaxFound) {
+          DragonMounts.logger.warn("One or more errors occurred parsing " + configFileLocation + ":\n" + invalidSyntaxFields);
         }
-      } catch (IOException e) {  // didn't find the file in this resourcedomain
+        return allBreeds;
+      } catch (RuntimeException runtimeexception) {
+        DragonMounts.logger.warn("Invalid " + configFileLocation, (Throwable) runtimeexception);
+      } finally {
+        IOUtils.closeQuietly(inputStream);
       }
-    }
-    if (!foundAtLeastOne) {
-      DragonMounts.logger.warn("Couldn't find " + configFilename);
+
+    } catch (IOException e) {  // didn't find the file in this resourcedomain
+      DragonMounts.logger.warn("Couldn't find " + configFileLocation);
     }
 
     return new HashMap<>();  // just return empty if we had trouble.
   }
+
+//  // old - search all domains
+//  /**
+//   * Read all variant information for all breeds from the dragonvariants.json file
+//   * @return Map of breed names (from json) to DragonVariants
+//   */
+//  public Map<String, DragonVariants> readVariants() {
+//    invalidSyntaxFound = false;
+//    invalidSyntaxFields = "";
+//
+//
+//
+//    boolean foundAtLeastOne = false;
+//    for (String s : iResourceManager.getResourceDomains()) {
+//      try {
+//        for (IResource iresource : iResourceManager.getAllResources(new ResourceLocation(s, configFilename))) {
+//          foundAtLeastOne = true;
+//          InputStream inputStream = iresource.getInputStream();
+//          try {
+//            String inputString = CharStreams.toString(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+//            String stripped = Minify.minify(inputString);
+//            Map<String, DragonVariants> allBreeds = deserialiseAllBreeds(new StringReader(stripped));
+//            if (invalidSyntaxFound) {
+//              DragonMounts.logger.warn("One or more errors occurred parsing " + configFilename + ":\n" + invalidSyntaxFields);
+//            }
+//            return allBreeds;
+//          } catch (RuntimeException runtimeexception) {
+//            DragonMounts.logger.warn("Invalid " + configFilename, (Throwable) runtimeexception);
+//          } finally {
+//            IOUtils.closeQuietly(inputStream);
+//          }
+//
+//        }
+//      } catch (IOException e) {  // didn't find the file in this resourcedomain
+//      }
+//    }
+//    if (!foundAtLeastOne) {
+//      DragonMounts.logger.warn("Couldn't find " + configFilename);
+//    }
+//
+//    return new HashMap<>();  // just return empty if we had trouble.
+//  }
 
   /**
    * Deserialise all tags for all breeds
@@ -126,7 +159,7 @@ public class DragonVariantsReader {
     JsonObject object = jsonElement.getAsJsonObject();
     for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
       String tagName = entry.getKey();
-      if (tagName == "flags" && entry.getValue().isJsonArray()) {
+      if (tagName.equals("flags") && entry.getValue().isJsonArray()) {
         deserializeFlagTags(dragonVariants, category, entry.getValue().getAsJsonArray());
       } else {
         try {
@@ -165,11 +198,17 @@ public class DragonVariantsReader {
     DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
     String value;
     try {
-      value = tagValue.getAsJsonPrimitive().getAsString();
+      JsonPrimitive jsonPrimitive = tagValue.getAsJsonPrimitive();
+      if (jsonPrimitive.isNumber()) {
+        dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsNumber());
+      } else if (jsonPrimitive.isString()) {
+        dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsString());
+      } else {
+        throw new IllegalArgumentException("value has an unexpected type");
+      }
     } catch (Exception e) {
-      throw new IllegalArgumentException("problem with tag " + category + ":" + tagName);
+      throw new IllegalArgumentException("problem with tag " + category + ":" + tagName + "-" + e.getMessage());
     }
-    dragonVariants.addTagAndValue(category, tag, value);
   }
 
   private void deserialiseFlagTag(DragonVariants dragonVariants, DragonVariants.Category category,
@@ -199,5 +238,5 @@ public class DragonVariantsReader {
   private String currentBreed;
 
   private final IResourceManager iResourceManager;
-  private final String configFilename;
+  private final ResourceLocation configFileLocation;
 }

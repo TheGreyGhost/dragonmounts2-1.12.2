@@ -7,6 +7,7 @@ import com.TheRPGAdventurer.ROTD.items.ItemTestRunner;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel.DragonVariantsReader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
@@ -46,13 +47,13 @@ public class StartupDebugCommon
 
   public static void testDragonVariantsReader()
   {
-    String testfiles[] = {"testdata\\test1.json", "testdata\\test2.json", "testdata\\test3.json", "testdata\\test4.json",
-                          "testdata\\test5.json", "testdata\\test6.json"};
+    String testfiles[] = {"testdata/test1.json", "testdata/test2.json", "testdata/test3.json", "testdata/test4.json",
+                          "testdata/test5.json", "testdata/test6.json"};
 
     for (String filename : testfiles) {
       DragonMounts.logger.info("DragonVariantsReader Test:" + filename);
       DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
-              Minecraft.getMinecraft().getResourceManager(), filename);
+              Minecraft.getMinecraft().getResourceManager(), new ResourceLocation("dragonmounts", filename));
       Map<String, DragonVariants> allVariants = dragonVariantsReader.readVariants();
       int i = 1; // put breakpoint here and inspect allVariants; compare to the json file, which contain comments
     }

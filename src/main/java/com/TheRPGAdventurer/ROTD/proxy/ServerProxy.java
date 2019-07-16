@@ -65,7 +65,7 @@ public class ServerProxy {
         DragonMountsConfig.PreInit();
         StartupDebugCommon.preInitCommon();
       DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
-              Minecraft.getMinecraft().getResourceManager(), "dragonvariants.json");
+              Minecraft.getMinecraft().getResourceManager(), new ResourceLocation("dragonmounts:dragonvariants.json"));
       Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readVariants();
     }
 
