@@ -17,6 +17,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
+ *
+ *
+ *
  * Enum for dragon life stages. Used as aliases for the age value of dragons.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>

@@ -1,0 +1,29 @@
+
+
+
+LIFE STAGE
+The original idea of life stages seems a bit irrelevant now
+What do we want the age to affect?
+ * size of dragon (ageScale)
+ * size of breath weapon  - breathweapon maturity
+ * behaviour:
+    - baby follows parents
+    - running away from threats
+    - hunting
+ * abilities
+   - can dragon carry someone?
+   - can dragon fly?
+   - how many passengers?
+   - can dragon ride on someone's shoulder?  (is this a factor of size not age ?)
+
+
+Could still apply a label to the age eg infant, child, juvenile (teenager), adult
+see TypicalGrowthCurve figures
+For gameplay reasons we probably want to add a longer infant phase because it's cuter.
+Do they get elderly too?
+
+Controllable parameters:
+Age of teenager (growth spurt?)
+Age fully grown
+Size at birth
+Full-grown size
