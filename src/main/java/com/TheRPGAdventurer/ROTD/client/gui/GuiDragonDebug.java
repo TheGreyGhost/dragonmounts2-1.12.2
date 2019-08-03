@@ -10,11 +10,11 @@
 package com.TheRPGAdventurer.ROTD.client.gui;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonBreedHelper;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStageHelper;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonReproductionHelper;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
+import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonBreedHelper;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonReproductionHelper;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -41,345 +41,342 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 
 /**
- * @TheRPGAdventurer NOT affiliated with GuiDragon.class
  * @author Nico Bergemann <barracuda415 at yahoo.de>
+ * @TheRPGAdventurer NOT affiliated with GuiDragon.class
  */
 public class GuiDragonDebug extends Gui {
-    
-    private static final int WHITE = 0xFFFFFF;
-    private static final int GREY = 0xAAAAAA;
-    private static final int YELLOW = 0xFFFF00;
-    private static final int RED = 0xFF8888;
-    
-    public static Object probe;
-//    public static boolean enabled = true;
-    
-    private final Minecraft mc = Minecraft.getMinecraft();
-    private final FontRenderer fr;
-    private final GuiTextPrinter text;
-    private final DecimalFormat dfShort = new DecimalFormat("0.00");
-    private final DecimalFormat dfLong = new DecimalFormat("0.0000");
-    private ScaledResolution res;
-    private EntityTameableDragon dragonClient;
-    private EntityTameableDragon dragonServer;
-    
-    public GuiDragonDebug() {
-        fr = mc.fontRenderer;
-        text = new GuiTextPrinter(fr);
+
+  public static Object probe;
+  public GuiDragonDebug() {
+    fr = mc.fontRenderer;
+    text = new GuiTextPrinter(fr);
+  }
+
+  @SubscribeEvent
+  public void onRenderOverlay(RenderGameOverlayEvent event) {
+    if (!DebugSettings.isDebugGuiEnabled() || event.isCancelable() || event.getType() != ElementType.TEXT) {
+      return;
     }
-    
-    @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent event) {
-        if (!DebugSettings.isDebugGuiEnabled() || event.isCancelable() || event.getType() != ElementType.TEXT) {
-            return;
-        }
 
-        getClientDragon();
-        getServerDragon();
+    getClientDragon();
+    getServerDragon();
 
-        if (dragonClient != null) {
-            GuiIngameForge ingameGUI = (GuiIngameForge) mc.ingameGUI;
-            res = ingameGUI.getResolution();
+    if (dragonClient != null) {
+      GuiIngameForge ingameGUI = (GuiIngameForge) mc.ingameGUI;
+      res = ingameGUI.getResolution();
 
-            renderTitle();
+      renderTitle();
 
-            try {
-                if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-                    renderNavigation();
-                    renderAttributes();
-                    renderBreedPoints();
-                } else {
-                    renderEntityInfo();
-                    renderAITasks();
+      try {
+        if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+          renderNavigation();
+          renderAttributes();
+          renderBreedPoints();
+        } else {
+          renderEntityInfo();
+          renderAITasks();
 //                    renderWatchedObjects();
-                }
-
-                renderProbe();
-            } catch (Exception ex) {
-                renderException(ex);
-            }
-
-            if (dragonClient.isDead) {
-                dragonClient = null;
-                dragonServer = null;
-            }
         }
 
-    }
-    
-    private void getClientDragon() {
-        // always return currently ridden dragon first
-        if (mc.player.getRidingEntity() instanceof EntityTameableDragon) {
-            dragonClient = (EntityTameableDragon) mc.player.getRidingEntity();
-            return;
-        }
-        
-        if (mc.objectMouseOver == null) {
-            return;
-        }
-        
-        if (mc.objectMouseOver.entityHit == null) {
-            return;
-        }
-        
-        if (!(mc.objectMouseOver.entityHit instanceof EntityTameableDragon)) {
-            return;
-        }
-        
-        dragonClient = (EntityTameableDragon) mc.objectMouseOver.entityHit;
+        renderProbe();
+      } catch (Exception ex) {
+        renderException(ex);
+      }
+
+      if (dragonClient.isDead) {
+        dragonClient = null;
+        dragonServer = null;
+      }
     }
 
-    private void getServerDragon() {
-        if (!mc.isSingleplayer()) {
-            // not possible on dedicated
-            return;
-        }
-        
-        if (dragonClient == null) {
-            // client dragon required
-            dragonServer = null;
-            return;
-        }
-        
-        if (dragonServer != null && dragonServer.getEntityId() == dragonClient.getEntityId()) {
-            // done before
-            return;
-        }
-        
-        MinecraftServer mcs = mc.getIntegratedServer();
-        
-        for (WorldServer ws : mcs.worlds) {
-            Entity ent = ws.getEntityByID(dragonClient.getEntityId());
-            if (ent != null && ent instanceof EntityTameableDragon) {
-                dragonServer = (EntityTameableDragon) ent;
-                return;
-            }
-        }
-    }
-    
-    private EntityTameableDragon getSelectedDragon() {
-        return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) ? dragonClient : dragonServer;
+  }
+
+  private void getClientDragon() {
+    // always return currently ridden dragon first
+    if (mc.player.getRidingEntity() instanceof EntityTameableDragon) {
+      dragonClient = (EntityTameableDragon) mc.player.getRidingEntity();
+      return;
     }
 
-    private void renderTitle() {
-        String title = String.format("%s %s Debug", DragonMounts.NAME,
-                DragonMounts.instance.getMetadata().version);
-        
-        text.setOrigin(16, 8);
-        text.setColor(GREY);
-        text.println(title);
-        text.setColor(WHITE);
+    if (mc.objectMouseOver == null) {
+      return;
     }
-    
-    private void renderEntityInfo() {
-        EntityTameableDragon dragon = getSelectedDragon();
-        if (dragon == null) {
-            return;
-        }
-        
-        text.setOrigin(16, 32);
-        
-        text.setColor(YELLOW);
-        text.println("Entity");
-        text.setColor(WHITE);
-        
-        text.println("Side: " + (dragon.isServer() ? "server" : "client"));
-        
-        text.println("ID: " + dragon.getEntityId());
-        text.println("UUID: " + StringUtils.abbreviate(dragon.getUniqueID().toString(), 22));
-        text.println("Name: " + dragon.getName());
-        
-        // position
-        String px = dfShort.format(dragon.posX);
-        String py = dfShort.format(dragon.posY);
-        String pz = dfShort.format(dragon.posZ);
-        String mx = dfShort.format(dragon.motionX);
-        String my = dfShort.format(dragon.motionY);
-        String mz = dfShort.format(dragon.motionZ);
-        text.printf("x: %s y: %s z: %s\n", px, py, pz, mx, my, mz);
-        
-        // rotation
-        String pitch = dfShort.format(dragon.rotationPitch);
-        String yaw = dfShort.format(dragon.rotationYaw);
-        String yawHead = dfShort.format(dragon.rotationYawHead);
-        text.printf("p: %s y: %s yh: %s\n", pitch, yaw, yawHead);
-        
-        // health
-        String health = dfShort.format(dragon.getHealth());
-        String healthMax = dfShort.format(dragon.getMaxHealth());
-        String healthRel = dfShort.format(dragon.getHealthRelative() * 100);
-        String airTicks = dfShort.format(dragon.inAirTicks);
+
+    if (mc.objectMouseOver.entityHit == null) {
+      return;
+    }
+
+    if (!(mc.objectMouseOver.entityHit instanceof EntityTameableDragon)) {
+      return;
+    }
+
+    dragonClient = (EntityTameableDragon) mc.objectMouseOver.entityHit;
+  }
+
+  private void getServerDragon() {
+    if (!mc.isSingleplayer()) {
+      // not possible on dedicated
+      return;
+    }
+
+    if (dragonClient == null) {
+      // client dragon required
+      dragonServer = null;
+      return;
+    }
+
+    if (dragonServer != null && dragonServer.getEntityId() == dragonClient.getEntityId()) {
+      // done before
+      return;
+    }
+
+    MinecraftServer mcs = mc.getIntegratedServer();
+
+    for (WorldServer ws : mcs.worlds) {
+      Entity ent = ws.getEntityByID(dragonClient.getEntityId());
+      if (ent != null && ent instanceof EntityTameableDragon) {
+        dragonServer = (EntityTameableDragon) ent;
+        return;
+      }
+    }
+  }
+//    public static boolean enabled = true;
+
+  private EntityTameableDragon getSelectedDragon() {
+    return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) ? dragonClient : dragonServer;
+  }
+
+  private void renderTitle() {
+    String title = String.format("%s %s Debug", DragonMounts.NAME,
+            DragonMounts.instance.getMetadata().version);
+
+    text.setOrigin(16, 8);
+    text.setColor(GREY);
+    text.println(title);
+    text.setColor(WHITE);
+  }
+
+  private void renderEntityInfo() {
+    EntityTameableDragon dragon = getSelectedDragon();
+    if (dragon == null) {
+      return;
+    }
+
+    text.setOrigin(16, 32);
+
+    text.setColor(YELLOW);
+    text.println("Entity");
+    text.setColor(WHITE);
+
+    text.println("Side: " + (dragon.isServer() ? "server" : "client"));
+
+    text.println("ID: " + dragon.getEntityId());
+    text.println("UUID: " + StringUtils.abbreviate(dragon.getUniqueID().toString(), 22));
+    text.println("Name: " + dragon.getName());
+
+    // position
+    String px = dfShort.format(dragon.posX);
+    String py = dfShort.format(dragon.posY);
+    String pz = dfShort.format(dragon.posZ);
+    String mx = dfShort.format(dragon.motionX);
+    String my = dfShort.format(dragon.motionY);
+    String mz = dfShort.format(dragon.motionZ);
+    text.printf("x: %s y: %s z: %s\n", px, py, pz, mx, my, mz);
+
+    // rotation
+    String pitch = dfShort.format(dragon.rotationPitch);
+    String yaw = dfShort.format(dragon.rotationYaw);
+    String yawHead = dfShort.format(dragon.rotationYawHead);
+    text.printf("p: %s y: %s yh: %s\n", pitch, yaw, yawHead);
+
+    // health
+    String health = dfShort.format(dragon.getHealth());
+    String healthMax = dfShort.format(dragon.getMaxHealth());
+    String healthRel = dfShort.format(dragon.getHealthRelative() * 100);
+    String airTicks = dfShort.format(dragon.inAirTicks);
     //    String airTargetX = dfShort.format(dragon.airTarget.getX());
     //    String airTargetY = dfShort.format(dragon.airTarget.getY());
     //    String airTargetZ = dfShort.format(dragon.airTarget.getZ());
-        text.printf("Health: %s/%s (%s%%)\n", health, healthMax, healthRel, airTicks);
-        
-        // breed
-        text.print("Breed: ");
-        EnumDragonBreed breedType = dragon.getBreedType();
-        text.setColor(breedType.getBreed().getColor());
-        text.println(breedType.getName());
-        text.setColor(WHITE);
-        
-        // life stage
-        DragonLifeStageHelper lifeStage = dragon.getLifeStageHelper();
-        String lifeStageName = lifeStage.getLifeStage().name().toLowerCase();
-        int ticksSinceCreation = dragon.getLifeStageHelper().getTicksSinceCreation();
-        text.printf("Life stage: %s (%d)\n", lifeStageName, ticksSinceCreation);
-        
-        // size
-        String ageScale = dfShort.format(lifeStage.getAgeScale());
-        String width = dfShort.format(dragon.width);
-        String height = dfShort.format(dragon.height);
-        text.printf("Size: %s (w:%s h:%s)\n", ageScale, width, height);
-        
-        // tamed flag/owner name
-        //String tamedString = dragon.getOwnerName();
-        String tamedString;
-        if (dragon.isTamed()) {
-            Entity player = dragon.getOwner();
-            if (player != null) {
-                tamedString = "yes (" + player.getName()+ ")";
-            } else {
-                tamedString = "yes (" + StringUtils.abbreviate(dragon.getOwnerId().toString(), 22) + ")";
-            }
-        } else {
-            tamedString = "no";
-        }
-        text.println("Tamed: " + tamedString);
-        
-        String allowOthersString;
-        if (dragon.allowedOtherPlayers()) {
-        	allowOthersString = "yes"; 
-        } else {
-        	allowOthersString = "no";
-        }
-        text.println("AllowedOthers: " + allowOthersString);
+    text.printf("Health: %s/%s (%s%%)\n", health, healthMax, healthRel, airTicks);
 
-        
-        // breeder name
-        DragonReproductionHelper reproduction = dragon.getReproductionHelper();
-        EntityPlayer breeder = reproduction.getBreeder();
-        String breederName;
-        if (breeder == null) {
-            breederName = "none";
-        } else {
-            breederName = breeder.getName();
-        }
-        text.println("Breeder: " + breederName);
-        text.println("Reproduced: " + reproduction.getReproCount());
-        text.println("Saddled: " + dragon.isSaddled());
+    // breed
+    text.print("Breed: ");
+    EnumDragonBreed breedType = dragon.getBreedType();
+    text.setColor(breedType.getBreed().getColor());
+    text.println(breedType.getName());
+    text.setColor(WHITE);
 
-        text.printf("Command:" + dragon.getWhistleState());
+    // life stage
+    DragonLifeStageHelper lifeStage = dragon.getLifeStageHelper();
+    String lifeStageName = lifeStage.getLifeStage().name().toLowerCase();
+    int ticksSinceCreation = dragon.getLifeStageHelper().getTicksSinceCreation();
+    text.printf("Life stage: %s (%d)\n", lifeStageName, ticksSinceCreation);
+
+    // size
+    String ageScale = dfShort.format(lifeStage.getAgeScale());
+    String width = dfShort.format(dragon.width);
+    String height = dfShort.format(dragon.height);
+    text.printf("Size: %s (w:%s h:%s)\n", ageScale, width, height);
+
+    // tamed flag/owner name
+    //String tamedString = dragon.getOwnerName();
+    String tamedString;
+    if (dragon.isTamed()) {
+      Entity player = dragon.getOwner();
+      if (player != null) {
+        tamedString = "yes (" + player.getName() + ")";
+      } else {
+        tamedString = "yes (" + StringUtils.abbreviate(dragon.getOwnerId().toString(), 22) + ")";
+      }
+    } else {
+      tamedString = "no";
     }
-    
-    private void renderAttributes() {
-        EntityTameableDragon dragon = getSelectedDragon();
-        if (dragon == null) {
-            return;
-        }
-        
-        text.setOrigin(text.getX() + 180, 8);
-        
-        text.setColor(YELLOW);
-        text.println("Attributes");
-        text.setColor(WHITE);
-        
-        Collection<IAttributeInstance> attribs = dragon.getAttributeMap().getAllAttributes();
-        
-        attribs.forEach(attrib -> {
-            String attribName = net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name." + attrib.getAttribute().getName());
-            String attribValue = dfShort.format(attrib.getAttributeValue());
-            String attribBase = dfShort.format(attrib.getBaseValue());
-            text.println(attribName + " = " + attribValue + " (" + attribBase + ")");
-        });
-        
-        text.println();
+    text.println("Tamed: " + tamedString);
+
+    String allowOthersString;
+    if (dragon.allowedOtherPlayers()) {
+      allowOthersString = "yes";
+    } else {
+      allowOthersString = "no";
     }
-    
+    text.println("AllowedOthers: " + allowOthersString);
+
+
+    // breeder name
+    DragonReproductionHelper reproduction = dragon.getReproductionHelper();
+    EntityPlayer breeder = reproduction.getBreeder();
+    String breederName;
+    if (breeder == null) {
+      breederName = "none";
+    } else {
+      breederName = breeder.getName();
+    }
+    text.println("Breeder: " + breederName);
+    text.println("Reproduced: " + reproduction.getReproCount());
+    text.println("Saddled: " + dragon.isSaddled());
+
+    text.printf("Command:" + dragon.getWhistleState());
+  }
+
+  private void renderAttributes() {
+    EntityTameableDragon dragon = getSelectedDragon();
+    if (dragon == null) {
+      return;
+    }
+
+    text.setOrigin(text.getX() + 180, 8);
+
+    text.setColor(YELLOW);
+    text.println("Attributes");
+    text.setColor(WHITE);
+
+    Collection<IAttributeInstance> attribs = dragon.getAttributeMap().getAllAttributes();
+
+    attribs.forEach(attrib -> {
+      String attribName = net.minecraft.util.text.translation.I18n.translateToLocal("attribute.name." + attrib.getAttribute().getName());
+      String attribValue = dfShort.format(attrib.getAttributeValue());
+      String attribBase = dfShort.format(attrib.getBaseValue());
+      text.println(attribName + " = " + attribValue + " (" + attribBase + ")");
+    });
+
+    text.println();
+  }
+
   private void renderBreedPoints() {
-     if (dragonServer == null) {
-         return;
-     }
-        
-     text.setColor(YELLOW);
-     text.println("Breed points");
-     text.setColor(WHITE);
-        
-      DragonBreedHelper breedHelper = dragonServer.getBreedHelper();
-      breedHelper.getBreedPoints().forEach((breedType, points) -> {
-        text.setColor(breedType.getBreed().getColor());
-        text.printf("%s: %d\n", breedType, points.get());
-      });
+    if (dragonServer == null) {
+      return;
     }
 
-    private void renderNavigation() {
-        text.setOrigin(16, 32);
-        
-        text.setColor(YELLOW);
-        text.println("Navigation (Ground)");
-        text.setColor(WHITE);
-        
-        PathNavigate nav = dragonServer.getNavigator();
-        PathNavigateGround pathNavigateGround = null;
-        if (nav instanceof PathNavigateGround) {
-            pathNavigateGround = (PathNavigateGround) nav;
-        }
-        
-        text.println("Search range: " + nav.getPathSearchRange());
-        text.println("Can swim: " + (pathNavigateGround == null ? "N/A" : pathNavigateGround.getCanSwim()));
-        text.println("Break doors: " + (pathNavigateGround == null ? "N/A" : pathNavigateGround.getEnterDoors()));
-        text.println("No path: " + nav.noPath());
+    text.setColor(YELLOW);
+    text.println("Breed points");
+    text.setColor(WHITE);
 
-        Path path = nav.getPath();
-        
-        if (path != null) {
-            text.println("Length: " + path.getCurrentPathLength());
-            text.println("Index: " + path.getCurrentPathIndex());
-            
-            PathPoint finalPoint = path.getFinalPathPoint();
-            text.println("Final point: " + finalPoint);
-        }
-        
-        text.println();
+    DragonBreedHelper breedHelper = dragonServer.getBreedHelper();
+    breedHelper.getBreedPoints().forEach((breedType, points) -> {
+      text.setColor(breedType.getBreed().getColor());
+      text.printf("%s: %d\n", breedType, points.get());
+    });
+  }
 
-        text.setColor(YELLOW);
-        text.println("Navigation (Air)");
-        text.setColor(WHITE);
-        
-        text.println("Can fly: " + dragonClient.canFly());
-        text.println("Flying: " + dragonClient.isFlying());
-        text.println("Altitude: " + dfLong.format(dragonClient.getAltitude()));
-    }
-  
-    private void renderAITasks() {
-        if (dragonServer == null) {
-            return;
-        }
+  private void renderNavigation() {
+    text.setOrigin(16, 32);
 
-        text.setOrigin(text.getX() + 180, 8);
-        
-        text.setColor(YELLOW);
-        text.println("AI tasks");
-        text.setColor(WHITE);
-    }
-    
-    private void renderProbe() {
-        if (probe == null) {
-            return;
-        }
-        
-        text.setOrigin(16, res.getScaledHeight() - text.getLineSpace() * 2);
-        
-        text.println(probe.getClass().getSimpleName() + ":" + String.valueOf(probe));
+    text.setColor(YELLOW);
+    text.println("Navigation (Ground)");
+    text.setColor(WHITE);
+
+    PathNavigate nav = dragonServer.getNavigator();
+    PathNavigateGround pathNavigateGround = null;
+    if (nav instanceof PathNavigateGround) {
+      pathNavigateGround = (PathNavigateGround) nav;
     }
 
-    private void renderException(Exception ex) {
-        text.setOrigin(16, 32);
+    text.println("Search range: " + nav.getPathSearchRange());
+    text.println("Can swim: " + (pathNavigateGround == null ? "N/A" : pathNavigateGround.getCanSwim()));
+    text.println("Break doors: " + (pathNavigateGround == null ? "N/A" : pathNavigateGround.getEnterDoors()));
+    text.println("No path: " + nav.noPath());
 
-        text.setColor(RED);
-        text.println("GUI exception:");
-        text.printf(ExceptionUtils.getStackTrace(ex));
-        text.setColor(WHITE);
+    Path path = nav.getPath();
+
+    if (path != null) {
+      text.println("Length: " + path.getCurrentPathLength());
+      text.println("Index: " + path.getCurrentPathIndex());
+
+      PathPoint finalPoint = path.getFinalPathPoint();
+      text.println("Final point: " + finalPoint);
     }
+
+    text.println();
+
+    text.setColor(YELLOW);
+    text.println("Navigation (Air)");
+    text.setColor(WHITE);
+
+    text.println("Can fly: " + dragonClient.canFly());
+    text.println("Flying: " + dragonClient.isFlying());
+    text.println("Altitude: " + dfLong.format(dragonClient.getAltitude()));
+  }
+
+  private void renderAITasks() {
+    if (dragonServer == null) {
+      return;
+    }
+
+    text.setOrigin(text.getX() + 180, 8);
+
+    text.setColor(YELLOW);
+    text.println("AI tasks");
+    text.setColor(WHITE);
+  }
+
+  private void renderProbe() {
+    if (probe == null) {
+      return;
+    }
+
+    text.setOrigin(16, res.getScaledHeight() - text.getLineSpace() * 2);
+
+    text.println(probe.getClass().getSimpleName() + ":" + String.valueOf(probe));
+  }
+
+  private void renderException(Exception ex) {
+    text.setOrigin(16, 32);
+
+    text.setColor(RED);
+    text.println("GUI exception:");
+    text.printf(ExceptionUtils.getStackTrace(ex));
+    text.setColor(WHITE);
+  }
+  private static final int WHITE = 0xFFFFFF;
+  private static final int GREY = 0xAAAAAA;
+  private static final int YELLOW = 0xFFFF00;
+  private static final int RED = 0xFF8888;
+  private final Minecraft mc = Minecraft.getMinecraft();
+  private final FontRenderer fr;
+  private final GuiTextPrinter text;
+  private final DecimalFormat dfShort = new DecimalFormat("0.00");
+  private final DecimalFormat dfLong = new DecimalFormat("0.0000");
+  private ScaledResolution res;
+  private EntityTameableDragon dragonClient;
+  private EntityTameableDragon dragonServer;
 }

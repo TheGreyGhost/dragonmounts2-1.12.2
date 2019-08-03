@@ -10,9 +10,8 @@
 package com.TheRPGAdventurer.ROTD.client.model.dragon;
 
 /**
- *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public enum DragonModelMode {
-    FULL, NO_WINGS, WINGS_ONLY, BODY_ONLY
+  FULL, NO_WINGS, WINGS_ONLY, BODY_ONLY
 }

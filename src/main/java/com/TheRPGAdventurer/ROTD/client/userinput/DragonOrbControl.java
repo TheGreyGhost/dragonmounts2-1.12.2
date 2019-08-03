@@ -1,11 +1,10 @@
-
 package com.TheRPGAdventurer.ROTD.client.userinput;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.inits.ModItems;
-import com.TheRPGAdventurer.ROTD.network.MessageDragonTarget;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathWeaponTarget;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathWeaponTarget;
+import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
+import com.TheRPGAdventurer.ROTD.common.network.MessageDragonTarget;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.RayTraceServer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
@@ -21,31 +20,30 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 /**
  * This event handler is used to capture player input while the player is holding the dragon orb:
  * If the player is holding the dragon orb, records whether the player is holding down the
- *   trigger and what the current target is (where the player is pointing the cursor)
+ * trigger and what the current target is (where the player is pointing the cursor)
  * Transmits this information to the server.
  * If the AutoLock option is selected, the orb will lock on to a target for as long as the trigger is held down.
  * If the autolock option isn't selected, the orb will change to whatever target is currently being looked at
- *
+ * <p>
  * Usage:
  * SETUP
  * (1) Register a server-side message handler for MessageDragonTarget
  * (2) Create the singleton in PostInit (client only) using DragonOrbControl.createSingleton(getNetwork());
  * (3) Initialise the keypress interception in PostInit (client only) using DragonOrbControl.initialiseInterceptors();
  * (4) Register the handler in PostInit(client only) using FMLCommonHandler.instance().bus()
- *        .register(DragonOrbControl.getInstance());
- *
+ * .register(DragonOrbControl.getInstance());
+ * <p>
  * MODIFYING
  * (1) Optionally: setKeyBreathState() to allow the rider of a dragon to breathe by pressing KEY_BREATH_PRIMARY, without holding a
- *        dragon orb
- *
+ * dragon orb
+ * <p>
  * POLLING
  * (1) get the singleton instance using getInstance()
  * (2) getTargetBeingLookedAt() returns the target being looked at, regardless of whether the trigger is held or not, and
- *       regardless of whether there is an autolock target
+ * regardless of whether there is an autolock target
  * (3) getTarget() returns the target of the orb while the trigger is being held.
  * (4) getTargetLockedOn() returns the target being breathed at (may be different to getTarget() if autolock is on).
- *     Client side only.
- *
+ * Client side only.
  */
 
 /*
@@ -60,8 +58,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 public class DragonOrbControl {
 
-  private SimpleNetworkWrapper network;
-
   static public DragonOrbControl createSingleton(SimpleNetworkWrapper i_network) {
     instance = new DragonOrbControl(i_network);
     return instance;
@@ -71,11 +67,26 @@ public class DragonOrbControl {
     return instance;
   }
 
+  public static void initialiseInterceptors() {
+    attackButtonInterceptor = new KeyBindingInterceptor(Minecraft.getMinecraft().gameSettings.keyBindAttack);
+    Minecraft.getMinecraft().gameSettings.keyBindAttack = attackButtonInterceptor;
+    attackButtonInterceptor.setInterceptionActive(false);
+
+    useItemButtonInterceptor = new KeyBindingInterceptor(Minecraft.getMinecraft().gameSettings.keyBindUseItem);
+    Minecraft.getMinecraft().gameSettings.keyBindUseItem = useItemButtonInterceptor;
+    useItemButtonInterceptor.setInterceptionActive(false);
+  }
+
+  public static void enableClickInterception(boolean interception) {
+    useItemButtonInterceptor.setInterceptionActive(interception);
+    attackButtonInterceptor.setInterceptionActive(interception);
+  }
+
   /**
    * Every tick, check if the player is holding the Dragon Orb, and if so, whether the player is targeting something with it
    * Additionally, check whether the player is riding the dragon and using the breath key to make the dragon breathe straight ahead
    * Send the target to the server at periodic intervals (if the target has changed significantly, or at least every x ticks)
-   *
+   * <p>
    * Debug settings for freezing animation:
    * 1) hold the dragon orb
    * 2) hold either left or right mouse button to start the desired breath
@@ -84,7 +95,7 @@ public class DragonOrbControl {
    * It will also stop any further target messages being sent
    * Once the animation has been frozen, it will stay frozen even after you release the mouse buttons
    * To cancel the freezing, use /dragon debug animationFrozen to toggle it off
-
+   *
    * @param evt
    */
   @SubscribeEvent
@@ -129,7 +140,7 @@ public class DragonOrbControl {
       }
     }
     if (!orbTriggerHeld && breathKeyHeld) {
-       breathWeaponTarget = BreathWeaponTarget.targetDirection(dragonLookDirection, breathKeyWeaponUsed);
+      breathWeaponTarget = BreathWeaponTarget.targetDirection(dragonLookDirection, breathKeyWeaponUsed);
     }
 
     triggerHeld = orbTriggerHeld || breathKeyHeld;
@@ -173,14 +184,12 @@ public class DragonOrbControl {
     }
   }
 
-  private final int MAX_TIME_NO_MESSAGE = 20;  // send a message at least this many ticks or less
-  private int ticksSinceLastMessage = 0;
   /**
    * Get the block or entity being targeted by the dragon orb
+   *
    * @return BreathWeaponTarget, or null for no target
    */
-  public BreathWeaponTarget getTarget()
-  {
+  public BreathWeaponTarget getTarget() {
     if (triggerHeld) {
       return breathWeaponTarget;
     } else {
@@ -190,8 +199,9 @@ public class DragonOrbControl {
 
   /**
    * Used for breathing when riding without a Dragon Orb, i.e. holding down the KEY_BREATH_PRIMARY will cause the dragon to
-   *   breathe straight ahead where the dragon is looking.
-   * @param dragon  the dragon being ridden
+   * breathe straight ahead where the dragon is looking.
+   *
+   * @param dragon      the dragon being ridden
    * @param newKeyState
    */
   public void setKeyBreathState(EntityTameableDragon dragon, boolean newKeyState, BreathWeaponTarget.WeaponUsed weaponUsed) {
@@ -202,18 +212,27 @@ public class DragonOrbControl {
 
   /**
    * Get the block or entity that the dragon orb cursor is currently pointing at
+   *
    * @return BreathWeaponTarget, or null for none
    */
-  public BreathWeaponTarget getTargetBeingLookedAt()
-  {
+  public BreathWeaponTarget getTargetBeingLookedAt() {
     return targetBeingLookedAt;
   }
 
-  public BreathWeaponTarget getTargetLockedOn()
-  {
+  public BreathWeaponTarget getTargetLockedOn() {
     return targetLockedOn;
   }
 
+  private DragonOrbControl(SimpleNetworkWrapper i_network) {
+    network = i_network;
+    lastTargetSent = null;
+  }
+  private static DragonOrbControl instance = null;
+  private static KeyBindingInterceptor attackButtonInterceptor;
+  private static KeyBindingInterceptor useItemButtonInterceptor;
+  private final int MAX_TIME_NO_MESSAGE = 20;  // send a message at least this many ticks or less
+  private SimpleNetworkWrapper network;
+  private int ticksSinceLastMessage = 0;
   private boolean triggerHeld = false;
   private boolean breathKeyHeld = false;
   private BreathWeaponTarget.WeaponUsed breathKeyWeaponUsed = BreathWeaponTarget.WeaponUsed.NONE;
@@ -222,32 +241,5 @@ public class DragonOrbControl {
   private BreathWeaponTarget lastTargetSent;
   private BreathWeaponTarget targetBeingLookedAt;
   private BreathWeaponTarget targetLockedOn;  // used client side only, for rendering.  server-side lockon is in AI
-
-  private static DragonOrbControl instance = null;
-
-  private DragonOrbControl(SimpleNetworkWrapper i_network) {
-    network = i_network;
-    lastTargetSent = null;
-  }
-
-  private static KeyBindingInterceptor attackButtonInterceptor;
-  private static KeyBindingInterceptor useItemButtonInterceptor;
-
-  public static void initialiseInterceptors()
-  {
-    attackButtonInterceptor = new KeyBindingInterceptor(Minecraft.getMinecraft().gameSettings.keyBindAttack);
-    Minecraft.getMinecraft().gameSettings.keyBindAttack = attackButtonInterceptor;
-    attackButtonInterceptor.setInterceptionActive(false);
-
-    useItemButtonInterceptor = new KeyBindingInterceptor(Minecraft.getMinecraft().gameSettings.keyBindUseItem);
-    Minecraft.getMinecraft().gameSettings.keyBindUseItem = useItemButtonInterceptor;
-    useItemButtonInterceptor.setInterceptionActive(false);
-  }
-
-  public static void enableClickInterception(boolean interception)
-  {
-    useItemButtonInterceptor.setInterceptionActive(interception);
-    attackButtonInterceptor.setInterceptionActive(interception);
-  }
 
 }

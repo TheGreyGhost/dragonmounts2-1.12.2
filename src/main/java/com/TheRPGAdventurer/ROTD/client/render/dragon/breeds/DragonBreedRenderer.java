@@ -11,43 +11,41 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon.breeds;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-
+import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
 
 /**
- *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 public interface DragonBreedRenderer {
 
-    public ResourceLocation getMaleBodyTexture(boolean hatchling, boolean albino);
-    
-    public ResourceLocation getFemaleBodyTexture(boolean hatchling, boolean albino);
+  public ResourceLocation getMaleBodyTexture(boolean hatchling, boolean albino);
 
-    public ResourceLocation getDissolveTexture();
+  public ResourceLocation getFemaleBodyTexture(boolean hatchling, boolean albino);
 
-    public ResourceLocation getEggTexture();
+  public ResourceLocation getDissolveTexture();
 
-    public ResourceLocation getMaleGlowTexture(boolean hatchling, boolean albino);
-    
-    public ResourceLocation getFemaleGlowTexture(boolean hatchling, boolean albino);
-    
-    public ResourceLocation getGlowAnimTexture();
+  public ResourceLocation getEggTexture();
 
-    public List<LayerRenderer<EntityTameableDragon>> getLayers();
+  public ResourceLocation getMaleGlowTexture(boolean hatchling, boolean albino);
 
-    public DragonModel getModel();
+  public ResourceLocation getFemaleGlowTexture(boolean hatchling, boolean albino);
 
-    public DragonRenderer getRenderer();
+  public ResourceLocation getGlowAnimTexture();
 
-    public ResourceLocation getSaddleTexture();
-    
-    public ResourceLocation getChestTexture();
-    
-    public ResourceLocation getArmorTexture();
+  public List<LayerRenderer<EntityTameableDragon>> getLayers();
+
+  public DragonModel getModel();
+
+  public DragonRenderer getRenderer();
+
+  public ResourceLocation getSaddleTexture();
+
+  public ResourceLocation getChestTexture();
+
+  public ResourceLocation getArmorTexture();
 
 }

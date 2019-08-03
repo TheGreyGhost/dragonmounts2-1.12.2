@@ -7,8 +7,7 @@ package com.TheRPGAdventurer.ROTD.util.debugging.testclasses;
 public class DebugBreathFXSettings {
 
 
-  static public boolean isMotionFrozen()
-  {
+  static public boolean isMotionFrozen() {
     return freezeMotion;
   }
 
@@ -18,11 +17,11 @@ public class DebugBreathFXSettings {
    * (1) set the spawnSingleOnly to true
    * (2) When the breath weapon is not running, call resetSpawnSuppressor()
    * (3) Each time a breathFX is spawned, check okToSpawnSingle().  If true, spawn it, Otherwise don't
-   *     okToSpawnSingle will return true on the first call after resetSpawnSuppressor, false for all the rest until reset
+   * okToSpawnSingle will return true on the first call after resetSpawnSuppressor, false for all the rest until reset
+   *
    * @return
    */
-  static public boolean okToSpawnSingle()
-  {
+  static public boolean okToSpawnSingle() {
     if (!spawnSingleOnly) return true;
     if (haveSpawnedSingleAlready) return false;
     haveSpawnedSingleAlready = true;
@@ -32,16 +31,14 @@ public class DebugBreathFXSettings {
   /**
    * see okToSpawnSingle
    */
-  static public boolean isSpawnSingleOnly()
-  {
+  static public boolean isSpawnSingleOnly() {
     return spawnSingleOnly;
   }
 
   /**
    * see okToSpawnSingle
    */
-  static public void resetSpawnSuppressor()
-  {
+  static public void resetSpawnSuppressor() {
     haveSpawnedSingleAlready = false;
   }
 

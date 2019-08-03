@@ -1,6 +1,0 @@
-{
-    "parent": "item/handheld",
-	"textures": {
-	    "layer0": "dragonmounts:items/tools/shovel/nether_dragon_shovel"
-	}
-}

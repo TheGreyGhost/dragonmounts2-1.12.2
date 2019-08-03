@@ -7,11 +7,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 /**
  * Created by TGG on 19/06/2015.
  * Used to stitch the textures used by the breath weapon EntityFX into the blocks+items texture sheet, so that the
- *   EntityFX renderer can use them.
- *   I should probably have used some sort of registry, or asked each BreathFX for its RL, but this was easier...
+ * EntityFX renderer can use them.
+ * I should probably have used some sort of registry, or asked each BreathFX for its RL, but this was easier...
  */
-public class TextureStitcherBreathFX
-{
+public class TextureStitcherBreathFX {
   @SubscribeEvent
   public void stitcherEventPre(TextureStitchEvent.Pre event) {
     ResourceLocation flameRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_fire");

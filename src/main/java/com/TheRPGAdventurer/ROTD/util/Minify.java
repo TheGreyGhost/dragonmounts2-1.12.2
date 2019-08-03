@@ -11,12 +11,11 @@ import java.util.regex.Pattern;
 //  Copyright © 2013 Bernhard Gass. All rights reserved.
 public abstract class Minify {
   /**
-   *
    * @param json a json object with comments
    * @return a compact json object with comments stripped out
    */
   public static String minify(CharSequence json) {
-    if(json == null)
+    if (json == null)
       throw new IllegalArgumentException("Parameter 'json' cannot be null.");
 
     String jsonString = json.toString();
@@ -63,25 +62,15 @@ public abstract class Minify {
         }
         from--;
         rc = jsonString.substring(from);
-      }
-      else
-      if (tmp.startsWith("/*") && !in_string && !in_multiline_comment && !in_singleline_comment) {
+      } else if (tmp.startsWith("/*") && !in_string && !in_multiline_comment && !in_singleline_comment) {
         in_multiline_comment = true;
-      }
-      else
-      if (tmp.startsWith("*/") && !in_string && in_multiline_comment) {
+      } else if (tmp.startsWith("*/") && !in_string && in_multiline_comment) {
         in_multiline_comment = false;
-      }
-      else
-      if (tmp.startsWith("//") && !in_string && !in_multiline_comment && !in_singleline_comment) {
+      } else if (tmp.startsWith("//") && !in_string && !in_multiline_comment && !in_singleline_comment) {
         in_singleline_comment = true;
-      }
-      else
-      if ((tmp.startsWith("\n") || tmp.startsWith("\r")) && !in_string && !in_multiline_comment && in_singleline_comment) {
+      } else if ((tmp.startsWith("\n") || tmp.startsWith("\r")) && !in_string && !in_multiline_comment && in_singleline_comment) {
         in_singleline_comment = false;
-      }
-      else
-      if (!in_multiline_comment && !in_singleline_comment && !tmp.substring(0, 1).matches("\\n|\\r|\\s")) {
+      } else if (!in_multiline_comment && !in_singleline_comment && !tmp.substring(0, 1).matches("\\n|\\r|\\s")) {
         new_str.append(tmp);
       }
     }

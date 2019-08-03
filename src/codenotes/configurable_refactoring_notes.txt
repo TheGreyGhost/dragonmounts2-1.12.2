@@ -1,0 +1,56 @@
+TGG 03 Aug 2019
+
+RPG has just resigned, DM2 has stopped
+
+My thoughts on the code at the moment:
+* no roadmap or desired feature list
+* too complex, too many special cases
+* buggy; many half-implemented features
+* not configurable enough
+* a lot of optional extras that may be better off in a separate mod eg all the items
+* formatting isn't consistent; package locations a bit strange in places
+
+Purpose of this refactoring:
+* make configurable:
+- the basic model plus configurable variations
+- remove hard-coded constants from the code
+  configurable parameters:
+  # physical variants such as number of segments in the tail
+  # the breath appearance
+    - nodes, projectile
+    - texture file
+    - speed, size, number etc
+  # the breath movement style (eg beam, cloud)
+  # the breath effects
+    - effects on entities - damage, type of damage
+    - effects on blocks
+  # sound effects of breath
+    - different life stages
+  # dragon effects eg on the ground
+  # behaviour eg aggression, laziness, etc
+- life stages defined properly
+
+Features to be retained:
+* Dragons breathing
+* Dragon parents, breeding
+* Dragon eggs
+* Saddles
+* Rideable dragons, dragon ride on shoulder
+* Dragon whistle and dragon orb / wand
+* Dragon flying
+* Dragon GUI - perhaps
+
+Components to be removed for now:
+* All non-core features and items such as bows, armour, gems, recipes
+* All non-core AI
+* Carriage/saddlebags
+* Capes
+* loot tables, shearable
+
+Order of refactoring:
+1) Remove un-used components
+2) Fix life stage
+3) Remove hard-coded breeds and replace with configurable breeds:
+  * Remove all variants back to a single base, add configurable options back
+  * DragonVariants refactor to have one file per breed
+  * Create interactive tool for configuration in-game

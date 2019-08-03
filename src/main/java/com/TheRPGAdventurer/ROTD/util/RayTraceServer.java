@@ -19,14 +19,15 @@ public class RayTraceServer {
    * Find what the player is looking at (block or entity), up to a maximum range
    * based on code from EntityRenderer.getMouseOver
    * Will not target entities which are tamed by the player
+   *
    * @return the block or entity that the player is looking at / targeting with their cursor.  null if no collision
    */
   public static RayTraceResult getMouseOver(World world, EntityPlayer entityPlayerSP, double range) { // int range
-    final float PARTIAL_TICK = 1.0F; 
+    final float PARTIAL_TICK = 1.0F;
     Vec3d positionEyes = entityPlayerSP.getPositionEyes(PARTIAL_TICK);
     Vec3d lookDirection = entityPlayerSP.getLook(PARTIAL_TICK);
     Vec3d endOfLook = positionEyes.addVector(lookDirection.x * range,
-            lookDirection.y * range, 
+            lookDirection.y * range,
             lookDirection.z * range);
     final boolean STOP_ON_LIQUID = true;
     final boolean IGNORE_BOUNDING_BOX = true;
@@ -55,7 +56,7 @@ public class RayTraceServer {
         continue;
       }
       if (entity instanceof EntityTameable) {
-        EntityTameable tamedEntity = (EntityTameable)entity;
+        EntityTameable tamedEntity = (EntityTameable) entity;
         if (tamedEntity.isOwner(entityPlayerSP)) {
           continue;
         }

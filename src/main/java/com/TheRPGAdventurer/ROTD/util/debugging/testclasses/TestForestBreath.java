@@ -3,7 +3,6 @@ package com.TheRPGAdventurer.ROTD.util.debugging.testclasses;
 import com.TheRPGAdventurer.ROTD.util.debugging.TestRunner;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -16,8 +15,7 @@ public class TestForestBreath {
   // dummy test: check the correct functioning of the breath weapons
   // testA - test various ignition sources for generating an explosion when breathed upon
 
-  public boolean test1(World worldIn, EntityPlayer playerIn)
-  {
+  public boolean test1(World worldIn, EntityPlayer playerIn) {
     BlockPos sourceRegionOrigin = new BlockPos(0, 204, 0);
     final int SOURCE_REGION_SIZE_X = 20;
     final int SOURCE_REGION_SIZE_Y = 10;
@@ -45,7 +43,7 @@ public class TestForestBreath {
 
     // copy the test blocks to the destination region
     TestRunner.copyTestRegion(playerIn, sourceRegionOrigin, testRegionOriginA,
-                              SOURCE_REGION_SIZE_X, SOURCE_REGION_SIZE_Y, SOURCE_REGION_SIZE_Z);
+            SOURCE_REGION_SIZE_X, SOURCE_REGION_SIZE_Y, SOURCE_REGION_SIZE_Z);
     //todo reinstate for testing
 
 //    DragonBreed forestDragonBreed = DragonBreedRegistry.getInstance().getBreedByName("forest");

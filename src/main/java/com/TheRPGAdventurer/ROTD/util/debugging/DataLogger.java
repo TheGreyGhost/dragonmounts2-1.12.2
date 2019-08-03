@@ -12,10 +12,8 @@ import java.util.HashMap;
  * Log data values with time stamp to a datalog file
  * Created by TGG on 22/07/2015.
  */
-public class DataLogger
-{
-  static public void logData(String datalogName, String valueToLog)
-  {
+public class DataLogger {
+  static public void logData(String datalogName, String valueToLog) {
     try {
       PrintStream printStream = getOrCreate(datalogName);
 
@@ -30,8 +28,7 @@ public class DataLogger
     }
   }
 
-  static private PrintStream getOrCreate(String datalogName) throws FileNotFoundException
-  {
+  static private PrintStream getOrCreate(String datalogName) throws FileNotFoundException {
     if (!dataLogs.containsKey(datalogName)) {
       File newDataLog = new File(DragonMounts.proxy.getDataDirectory(), datalogName + ".txt");
       final boolean AUTOFLUSH = true;

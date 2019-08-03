@@ -1,9 +1,9 @@
 package com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX;
 
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathMode;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.IEntityParticle;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.Pair;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathMode;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.IEntityParticle;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
@@ -19,18 +19,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/** EntityFX used to refer to all BreathFX types
+/**
+ * EntityFX used to refer to all BreathFX types
  * Created by TGG on 6/03/2016.
  */
 public class BreathFX extends Particle implements IEntityParticle {
 
   /**
    * Create a new BreathFX particle
+   *
    * @param worldIn
-   * @param xCoordIn  [x,y,z] is the location of the centre of the particle (unlike vanilla where y is the MINIMUM) of the particle
+   * @param xCoordIn [x,y,z] is the location of the centre of the particle (unlike vanilla where y is the MINIMUM) of the particle
    * @param yCoordIn
    * @param zCoordIn
-   * @param xSpeedIn  speed as per vanilla
+   * @param xSpeedIn speed as per vanilla
    * @param ySpeedIn
    * @param zSpeedIn
    */
@@ -43,50 +45,41 @@ public class BreathFX extends Particle implements IEntityParticle {
     motionY = ySpeedIn;
     motionZ = zSpeedIn;
     if (DebugBreathFXSettings.isMotionFrozen()) {
-      motionX = 0; motionY = 0; motionZ = 0;
+      motionX = 0;
+      motionY = 0;
+      motionZ = 0;
     }
 
     // correct posY so that the centre of the Particle is at the initial [x,y,z]
-    posY -= height/2.0;
+    posY -= height / 2.0;
     prevPosY = posY;
     setPosition(posX, posY, posZ);
     prevPosY = posY;
   }
 
-  public void updateBreathMode(DragonBreathMode dragonBreathMode)
-  {
+  public void updateBreathMode(DragonBreathMode dragonBreathMode) {
     breathNode.changeBreathMode(dragonBreathMode);
   }
 
-  protected BreathNodeP breathNode;
-
   /**
-   * For debugging purposes: render the centrepoint of the entity as a 3D crosshair
-   */
-  protected void renderEntityCentrepoint(double x, double y, double z)
-  {
-    if (!DebugSettings.isRenderCentrePoints()) return;
-    CentrepointCrosshairRenderer.addCentrepointToRenderWorld(x, y, z);
-  }
-
-  /** This used to be in EntityMoveAndResizeHelper, had to move it out because Particles aren't Entities any more, and
-   *   because all the particle sizes etc are now protected fields
-   *
+   * This used to be in EntityMoveAndResizeHelper, had to move it out because Particles aren't Entities any more, and
+   * because all the particle sizes etc are now protected fields
+   * <p>
    * Tries to moves the entity by the passed in displacement. Args: dx, dy, dz
    * Copied from vanilla; irrelevant parts deleted; modify to accommodate a change in size
    * expands the entity around the centre position:
-   *   if the expansion causes it to bump against another collision box, temporarily ignore the expansion on
-   *   that side.  bumping into x also constrains z because width is common to both.
-   * @param dx dx, dy, dz are the desired movement/displacement of the entity
+   * if the expansion causes it to bump against another collision box, temporarily ignore the expansion on
+   * that side.  bumping into x also constrains z because width is common to both.
+   *
+   * @param dx        dx, dy, dz are the desired movement/displacement of the entity
    * @param newHeight the new entity height
-   * @param newWidth the new entity width
-   *@return returns a collection showing which parts of the entity collided with an object- eg
-   *        (WEST, [3,2,6]-->[3.5, 2, 6] means the west face of the entity collided; the entity tried to move to
-   *          x = 3, but got pushed back to x=3.5
-   *
+   * @param newWidth  the new entity width
+   * @return returns a collection showing which parts of the entity collided with an object- eg
+   * (WEST, [3,2,6]-->[3.5, 2, 6] means the west face of the entity collided; the entity tried to move to
+   * x = 3, but got pushed back to x=3.5
+   * <p>
    * Note: posX, posY, posZ uses the vanilla representation, where posX and posZ are the middle of the object (the AABB) but
-   *       posY is the bottom (minY) of the AABB.
-   *
+   * posY is the bottom (minY) of the AABB.
    */
   public Collection<Pair<EnumFacing, AxisAlignedBB>> moveAndResizeParticle(double dx, double dy, double dz, float newWidth, float newHeight) {
     world.profiler.startSection("moveAndResizeEntity");
@@ -100,8 +93,8 @@ public class BreathFX extends Particle implements IEntityParticle {
     double wDZneg = -wDZplus;
 
     AxisAlignedBB collisionZone = entityAABB.grow(wDXneg, wDYneg, wDZneg)
-                                            .grow(wDXplus, wDYplus, wDZplus)
-                                            .grow(dx, dy, dz);
+            .grow(wDXplus, wDYplus, wDZplus)
+            .grow(dx, dy, dz);
     List<AxisAlignedBB> collidingAABB = world.getCollisionBoxes(null, collisionZone);
 
     if (MathX.isSignificantlyDifferent(newHeight, height)) {
@@ -136,7 +129,7 @@ public class BreathFX extends Particle implements IEntityParticle {
     }
 
     entityAABB = new AxisAlignedBB(entityAABB.minX + wDXneg, entityAABB.minY + wDYneg, entityAABB.minZ + wDZneg,
-                                   entityAABB.maxX + wDXplus, entityAABB.maxY + wDYplus, entityAABB.maxZ + wDZplus);
+            entityAABB.maxX + wDXplus, entityAABB.maxY + wDYplus, entityAABB.maxZ + wDZplus);
 
     double desiredDX = dx;
     double desiredDY = dy;
@@ -176,11 +169,11 @@ public class BreathFX extends Particle implements IEntityParticle {
       AxisAlignedBB collidedZone;
       if (desiredDX < 0) {
         collidedZone = new AxisAlignedBB(entityAABB.minX + (desiredDX - dx), entityAABB.minY, entityAABB.minZ,
-                                         entityAABB.minX, entityAABB.maxY, entityAABB.maxZ);
+                entityAABB.minX, entityAABB.maxY, entityAABB.maxZ);
         collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.WEST, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.maxX, entityAABB.minY, entityAABB.minZ,
-                                         entityAABB.maxX + (desiredDX - dx), entityAABB.maxY, entityAABB.maxZ);
+                entityAABB.maxX + (desiredDX - dx), entityAABB.maxY, entityAABB.maxZ);
         collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.EAST, collidedZone));
       }
     }
@@ -189,12 +182,12 @@ public class BreathFX extends Particle implements IEntityParticle {
       motionY = 0.0D;
       AxisAlignedBB collidedZone;
       if (desiredDY < 0) {
-        collidedZone = new AxisAlignedBB(entityAABB.minX,  entityAABB.minY + (desiredDY - dy), entityAABB.minZ,
-                                         entityAABB.maxX, entityAABB.minY, entityAABB.maxZ);
+        collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY + (desiredDY - dy), entityAABB.minZ,
+                entityAABB.maxX, entityAABB.minY, entityAABB.maxZ);
         collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.DOWN, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.maxY, entityAABB.minZ,
-                                         entityAABB.maxX, entityAABB.maxY + (desiredDY - dy), entityAABB.maxZ);
+                entityAABB.maxX, entityAABB.maxY + (desiredDY - dy), entityAABB.maxZ);
         collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.UP, collidedZone));
       }
     }
@@ -204,11 +197,11 @@ public class BreathFX extends Particle implements IEntityParticle {
       AxisAlignedBB collidedZone;
       if (desiredDZ < 0) {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY, entityAABB.minZ + (desiredDZ - dz),
-                                         entityAABB.maxX, entityAABB.maxY, entityAABB.minZ);
+                entityAABB.maxX, entityAABB.maxY, entityAABB.minZ);
         collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.NORTH, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY, entityAABB.maxZ,
-                                         entityAABB.maxX, entityAABB.maxY, entityAABB.maxZ + (desiredDZ - dz));
+                entityAABB.maxX, entityAABB.maxY, entityAABB.maxZ + (desiredDZ - dz));
         collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.SOUTH, collidedZone));
       }
     }
@@ -216,26 +209,35 @@ public class BreathFX extends Particle implements IEntityParticle {
     return collisions;
   }
 
-  // a record of which parts of the entity collided with an object during moving
-  // each entry is the face of the entity and the zone (AABB) that collided
-  // eg (WEST, [3,2,6]-->[3.5, 2, 6] means the west face of the entity collided; the entity tried to move to
-  //   x = 3, but got pushed back out to x=3.5
-  private List<Pair<EnumFacing, AxisAlignedBB>> collisions = new ArrayList<Pair<EnumFacing, AxisAlignedBB>>();
-
-  protected boolean isCollided;
+  @Override
+  public double getMotionX() {
+    return motionX;
+  }
 
   @Override
-  public double getMotionX() {return motionX;}
+  public double getMotionY() {
+    return motionY;
+  }
+
   @Override
-  public double getMotionY() {return motionY;}
+  public double getMotionZ() {
+    return motionZ;
+  }
+
   @Override
-  public double getMotionZ() {return motionZ;}
+  public double getSpeedSQ() {
+    return motionX * motionX + motionY * motionY + motionZ * motionZ;
+  }
+
   @Override
-  public double getSpeedSQ() {return motionX*motionX + motionY*motionY + motionZ*motionZ;}
+  public boolean isCollided() {
+    return isCollided;
+  }
+
   @Override
-  public boolean isCollided() {return isCollided;}
-  @Override
-  public boolean isOnGround() {return onGround;}
+  public boolean isOnGround() {
+    return onGround;
+  }
 
   @Override
   public void setMotion(Vec3d newMotion) {
@@ -263,5 +265,20 @@ public class BreathFX extends Particle implements IEntityParticle {
     }
     return false;
   }
+
+  /**
+   * For debugging purposes: render the centrepoint of the entity as a 3D crosshair
+   */
+  protected void renderEntityCentrepoint(double x, double y, double z) {
+    if (!DebugSettings.isRenderCentrePoints()) return;
+    CentrepointCrosshairRenderer.addCentrepointToRenderWorld(x, y, z);
+  }
+  protected BreathNodeP breathNode;
+  protected boolean isCollided;
+  // a record of which parts of the entity collided with an object during moving
+  // each entry is the face of the entity and the zone (AABB) that collided
+  // eg (WEST, [3,2,6]-->[3.5, 2, 6] means the west face of the entity collided; the entity tried to move to
+  //   x = 3, but got pushed back out to x=3.5
+  private List<Pair<EnumFacing, AxisAlignedBB>> collisions = new ArrayList<Pair<EnumFacing, AxisAlignedBB>>();
 
 }

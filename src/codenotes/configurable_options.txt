@@ -1,0 +1,14 @@
+Configuration system:
+* look in a configuration directory and read all the files in there
+* One json file per breed
+
+
+Questions?
+* How to keep entity ID etc stable if config options change?
+* How to register resources?
+ - text
+ - textures
+ - models
+ - sounds
+
+One egg only; don't use variants explicitly

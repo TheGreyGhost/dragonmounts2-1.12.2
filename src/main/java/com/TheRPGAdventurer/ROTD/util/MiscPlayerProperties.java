@@ -6,35 +6,35 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class MiscPlayerProperties extends EntityProperties<EntityPlayer> {
 
-    public boolean hasDismountedDragon;
+  public boolean hasDismountedDragon;
 
-    @Override
-    public int getTrackingTime() {
-        return 20;
-    }
+  @Override
+  public int getTrackingTime() {
+    return 20;
+  }
 
-    @Override
-    public void saveNBTData(NBTTagCompound compound) {
-        compound.setBoolean("DismountedDragon", hasDismountedDragon);
-    }
+  @Override
+  public void saveNBTData(NBTTagCompound compound) {
+    compound.setBoolean("DismountedDragon", hasDismountedDragon);
+  }
 
-    @Override
-    public void loadNBTData(NBTTagCompound compound) {
-        this.hasDismountedDragon = compound.getBoolean("DismountedDragon");
-    }
+  @Override
+  public void loadNBTData(NBTTagCompound compound) {
+    this.hasDismountedDragon = compound.getBoolean("DismountedDragon");
+  }
 
-    @Override
-    public void init() {
-        hasDismountedDragon = false;
-    }
+  @Override
+  public void init() {
+    hasDismountedDragon = false;
+  }
 
-    @Override
-    public String getID() {
-        return "Dragon Mounts 2 - Player Property Tracker";
-    }
+  @Override
+  public String getID() {
+    return "Dragon Mounts 2 - Player Property Tracker";
+  }
 
-    @Override
-    public Class<EntityPlayer> getEntityClass() {
-        return EntityPlayer.class;
-    }
+  @Override
+  public Class<EntityPlayer> getEntityClass() {
+    return EntityPlayer.class;
+  }
 }

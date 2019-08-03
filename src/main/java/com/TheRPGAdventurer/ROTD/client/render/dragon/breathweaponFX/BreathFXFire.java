@@ -1,63 +1,51 @@
 package com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX;
 
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.DragonBreathMode;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeFire;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.util.RotatingQuad;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathMode;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeFire;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.util.RotatingQuad;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.lwjgl.Sys;
 
-import java.nio.Buffer;
-import java.util.Optional;
 import java.util.Random;
 
 /**
  * Created by TGG on 21/06/2015.
  * EntityFX that makes up the flame breath weapon; client side.
- *
+ * <p>
  * Usage:
  * (1) create a new BreathFXFire using createBreathFXIce
  * (2) spawn it as per normal
- *
  */
 public class BreathFXFire extends BreathFX {
-  private final ResourceLocation fireballRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_fire");
-
-  private final float SMOKE_CHANCE = 0.1f;
-  private final float LARGE_SMOKE_CHANCE = 0.3f;
-
-  private static final float MAX_ALPHA = 0.99F;
-
   /**
    * creates a single EntityFX from the given parameters.  Applies some random spread to direction.
+   *
    * @param world
-   * @param x world [x,y,z] to spawn at (coordinates are the centre point of the fireball)
+   * @param x                     world [x,y,z] to spawn at (coordinates are the centre point of the fireball)
    * @param y
    * @param z
-   * @param directionX initial world direction [x,y,z] - will be normalised.
+   * @param directionX            initial world direction [x,y,z] - will be normalised.
    * @param directionY
    * @param directionZ
-   * @param power the power of the ball
+   * @param power                 the power of the ball
    * @param partialTicksHeadStart if spawning multiple EntityFX per tick, use this parameter to spread the starting
    *                              location in the direction
    * @return the new BreathFXFire
    */
   public static BreathFXFire createBreathFXFire(World world, double x, double y, double z,
-                                                  double directionX, double directionY, double directionZ,
-                                                  BreathNodeP.Power power,
-                                                  float partialTicksHeadStart)
-  {
+                                                double directionX, double directionY, double directionZ,
+                                                BreathNodeP.Power power,
+                                                float partialTicksHeadStart) {
     Vec3d direction = new Vec3d(directionX, directionY, directionZ).normalize();
 
     Random rand = new Random();
@@ -72,23 +60,9 @@ public class BreathFXFire extends BreathFX {
     return newBreathFXFire;
   }
 
-  private BreathFXFire(World world, double x, double y, double z, Vec3d motion,
-                       BreathNodeP i_breathNode) {
-    super(world, x, y, z, motion.x, motion.y, motion.z);
-
-    breathNode = i_breathNode;
-    particleGravity = Blocks.FIRE.blockParticleGravity;  /// arbitrary block!  maybe not even required.
-    particleMaxAge = (int)breathNode.getMaxLifeTime(); // not used, but good for debugging
-    this.particleAlpha = MAX_ALPHA;  // a value less than 1 turns on alpha blending
-
-    // set the texture to the flame texture, which we have previously added using TextureStitchEvent
-    TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(fireballRL.toString());
-    setParticleTexture(sprite);
-//    entityMoveAndResizeHelper = new EntityMoveAndResizeHelper(this);
-  }
-
   /**
    * Returns 1, which means "use a texture from the blocks + items texture sheet"
+   *
    * @return
    */
   @Override
@@ -100,31 +74,30 @@ public class BreathFXFire extends BreathFX {
   // BreathFXWater uses alphablending but we want depthmask writing on, otherwise translucent objects (such as water)
   //   render over the top of our breath.
   @Override
-  public boolean shouldDisableDepth()
-  {
+  public boolean shouldDisableDepth() {
     return true;
   }
 
   @Override
-  public int getBrightnessForRender(float partialTick)
-  {
+  public int getBrightnessForRender(float partialTick) {
     return 0xf000f0;
   }
 
   /**
    * Render the EntityFX onto the screen.
    * The EntityFX is rendered as a two-dimensional object (Quad) in the world (three-dimensional coordinates).
-   *   The corners of the quad are chosen so that the EntityFX is drawn directly facing the viewer (or in other words,
-   *   so that the quad is always directly face-on to the screen.)
+   * The corners of the quad are chosen so that the EntityFX is drawn directly facing the viewer (or in other words,
+   * so that the quad is always directly face-on to the screen.)
    * In order to manage this, it needs to know two direction vectors:
    * 1) the 3D vector direction corresponding to left-right on the viewer's screen (edgeLRdirection)
    * 2) the 3D vector direction corresponding to up-down on the viewer's screen (edgeURdirection)
    * These two vectors are calculated by the caller.
    * For example, the top right corner of the quad on the viewer's screen is equal to the centre point of the quad (x,y,z)
-   *   plus the edgeLRdirection vector multiplied by half the quad's width, plus the edgeUDdirection vector multiplied
-   *   by half the quad's height.
+   * plus the edgeLRdirection vector multiplied by half the quad's width, plus the edgeUDdirection vector multiplied
+   * by half the quad's height.
    * NB edgeLRdirectionY is not provided because it's always 0, i.e. the top of the viewer's screen is always directly
-   *    up so moving left-right on the viewer's screen doesn't affect the y coordinate position in the world
+   * up so moving left-right on the viewer's screen doesn't affect the y coordinate position in the world
+   *
    * @param bufferBuilder
    * @param entity
    * @param partialTick
@@ -133,15 +106,14 @@ public class BreathFXFire extends BreathFX {
    * @param edgeLRdirectionZ edgeLRdirection[XYZ] is the vector direction pointing left-right on the player's screen
    * @param edgeUDdirectionX edgeUDdirection[XYZ] is the vector direction pointing up-down on the player's screen
    * @param edgeUDdirectionZ edgeUDdirection[XYZ] is the vector direction pointing up-down on the player's screen
-   *
-   * NOTE - in accordance with the vanilla convention, this.posX and this.posZ are the centre of the particle but
-   *          this.posY is the bottom (minY)
+   *                         <p>
+   *                         NOTE - in accordance with the vanilla convention, this.posX and this.posZ are the centre of the particle but
+   *                         this.posY is the bottom (minY)
    */
   @Override
   public void renderParticle(BufferBuilder bufferBuilder, Entity entity, float partialTick,
                              float edgeLRdirectionX, float edgeUDdirectionY, float edgeLRdirectionZ,
-                             float edgeUDdirectionX, float edgeUDdirectionZ)
-  {
+                             float edgeUDdirectionX, float edgeUDdirectionZ) {
     double minU = this.particleTexture.getMinU();
     double maxU = this.particleTexture.getMaxU();
     double minV = this.particleTexture.getMinV();
@@ -152,7 +124,7 @@ public class BreathFXFire extends BreathFX {
 
     if (DebugSettings.isAnimationFrozen()) {  // stop jitter
       partialTick = DebugSettings.animationFrozenPartialTicks();
-      final long FIXED_SEED = (long)((10000*(this.posX + this.posZ))%10000);
+      final long FIXED_SEED = (long) ((10000 * (this.posX + this.posZ)) % 10000);
       random.setSeed(FIXED_SEED);
     }
 
@@ -180,34 +152,35 @@ public class BreathFXFire extends BreathFX {
     bufferBuilder.pos(x - edgeLRdirectionX * scaleLR - edgeUDdirectionX * scaleUD,
             y - edgeUDdirectionY * scaleUD,
             z - edgeLRdirectionZ * scaleLR - edgeUDdirectionZ * scaleUD)
-                .tex(tex.getU(0), tex.getV(0))
-                .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
+            .tex(tex.getU(0), tex.getV(0))
+            .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
             .lightmap(skyLightTimes16, blockLightTimes16)
-                .endVertex();
+            .endVertex();
     bufferBuilder.pos(x - edgeLRdirectionX * scaleLR + edgeUDdirectionX * scaleUD,
             y + edgeUDdirectionY * scaleUD,
             z - edgeLRdirectionZ * scaleLR + edgeUDdirectionZ * scaleUD)
             .tex(tex.getU(1), tex.getV(1))
-                .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
+            .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
             .lightmap(skyLightTimes16, blockLightTimes16)
             .endVertex();
     bufferBuilder.pos(x + edgeLRdirectionX * scaleLR + edgeUDdirectionX * scaleUD,
             y + edgeUDdirectionY * scaleUD,
             z + edgeLRdirectionZ * scaleLR + edgeUDdirectionZ * scaleUD)
             .tex(tex.getU(2), tex.getV(2))
-                .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
+            .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
             .lightmap(skyLightTimes16, blockLightTimes16)
             .endVertex();
     bufferBuilder.pos(x + edgeLRdirectionX * scaleLR - edgeUDdirectionX * scaleUD,
             y - edgeUDdirectionY * scaleUD,
             z + edgeLRdirectionZ * scaleLR - edgeUDdirectionZ * scaleUD)
-            .tex(tex.getU(3),  tex.getV(3))
-                .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
+            .tex(tex.getU(3), tex.getV(3))
+            .color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha)
             .lightmap(skyLightTimes16, blockLightTimes16)
             .endVertex();
   }
 
-  /** call once per tick to update the EntityFX size, position, collisions, etc
+  /**
+   * call once per tick to update the EntityFX size, position, collisions, etc
    */
   @Override
   public void onUpdate() {
@@ -247,20 +220,33 @@ public class BreathFXFire extends BreathFX {
 
     if (DebugBreathFXSettings.isLogBreathFXinfo()) {
       System.out.println("prevPos; pos; motion; w,h:" +
-                         new Vec3d(prevPosX, prevPosY, prevPosZ) + "," +
-                         new Vec3d(posX, posY, posZ) + "," +
-                         new Vec3d(motionX, motionY, motionZ) + "," +
-                         "[" + width + "," + height +"]");
+              new Vec3d(prevPosX, prevPosY, prevPosZ) + "," +
+              new Vec3d(posX, posY, posZ) + "," +
+              new Vec3d(motionX, motionY, motionZ) + "," +
+              "[" + width + "," + height + "]");
     }
 
     if (isCollided && onGround) {
-        motionY -= 0.01F;         // ensure that we hit the ground next time too
+      motionY -= 0.01F;         // ensure that we hit the ground next time too
     }
     breathNode.updateAge(this);
-    particleAge = (int)breathNode.getAgeTicks();  // not used, but good for debugging
+    particleAge = (int) breathNode.getAgeTicks();  // not used, but good for debugging
     if (breathNode.isDead()) {
       setExpired();
     }
+  }
+
+  /**
+   * Vanilla moveEntity does a pile of unneeded calculations, and also doesn't handle resize around the centre properly,
+   * so replace with a custom one
+   *
+   * @param dx the amount to move the entity in world coordinates [dx, dy, dz]
+   * @param dy
+   * @param dz
+   */
+  @Override
+  public void move(double dx, double dy, double dz) {
+    moveAndResizeParticle(dx, dy, dz, this.width, this.height);
   }
 
   protected EnumParticleTypes getSmokeParticleID() {
@@ -271,16 +257,24 @@ public class BreathFXFire extends BreathFX {
     }
   }
 
-  /** Vanilla moveEntity does a pile of unneeded calculations, and also doesn't handle resize around the centre properly,
-   * so replace with a custom one
-   * @param dx the amount to move the entity in world coordinates [dx, dy, dz]
-   * @param dy
-   * @param dz
-   */
-  @Override
-  public void move(double dx, double dy, double dz) {
-    moveAndResizeParticle(dx, dy, dz, this.width, this.height);
+  private BreathFXFire(World world, double x, double y, double z, Vec3d motion,
+                       BreathNodeP i_breathNode) {
+    super(world, x, y, z, motion.x, motion.y, motion.z);
+
+    breathNode = i_breathNode;
+    particleGravity = Blocks.FIRE.blockParticleGravity;  /// arbitrary block!  maybe not even required.
+    particleMaxAge = (int) breathNode.getMaxLifeTime(); // not used, but good for debugging
+    this.particleAlpha = MAX_ALPHA;  // a value less than 1 turns on alpha blending
+
+    // set the texture to the flame texture, which we have previously added using TextureStitchEvent
+    TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(fireballRL.toString());
+    setParticleTexture(sprite);
+//    entityMoveAndResizeHelper = new EntityMoveAndResizeHelper(this);
   }
+  private static final float MAX_ALPHA = 0.99F;
+  private final ResourceLocation fireballRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_fire");
+  private final float SMOKE_CHANCE = 0.1f;
+  private final float LARGE_SMOKE_CHANCE = 0.3f;
 
 //  private EntityMoveAndResizeHelper entityMoveAndResizeHelper;
 }

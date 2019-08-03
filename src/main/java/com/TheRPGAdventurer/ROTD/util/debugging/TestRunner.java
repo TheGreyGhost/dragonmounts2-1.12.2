@@ -1,11 +1,11 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.physicalmodel.DragonPhysicalModel;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.nodes.BreathNodeP;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breeds.EnumDragonBreed;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.helper.DragonLifeStage;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
+import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.TestForestBreath;
 import net.minecraft.block.BlockLadder;
 import net.minecraft.command.CommandClone;
@@ -29,10 +29,124 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Example test runner which is called when the player activate the testrunner item.
  * Created by TGG on 4/01/2016.
  */
-public class TestRunner
-{
-  public boolean runServerSideTest(World worldIn, EntityPlayer playerIn, int testNumber)
-  {
+public class TestRunner {
+  /**
+   * Teleport the player to the test region (so you can see the results of the test)
+   *
+   * @param playerIn
+   * @param location
+   * @return
+   */
+  public static boolean teleportPlayerToTestRegion(EntityPlayer playerIn, BlockPos location) {
+    if (!(playerIn instanceof EntityPlayerMP)) {
+      throw new UnsupportedOperationException("teleport not supported on client side; server side only");
+    }
+    EntityPlayerMP entityPlayerMP = (EntityPlayerMP) playerIn;
+
+    String tpArguments = "@p " + location.getX() + " " + location.getY() + " " + location.getZ();
+    String[] tpArgumentsArray = tpArguments.split(" ");
+
+    CommandTeleport commandTeleport = new CommandTeleport();
+    try {
+      commandTeleport.execute(entityPlayerMP.mcServer, playerIn, tpArgumentsArray);
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Copy a cuboid Test Region from one part of the world to another
+   * The cuboid is x blocks wide, by y blocks high, by z blocks long
+   *
+   * @param entityPlayer
+   * @param sourceOrigin origin of the source region
+   * @param destOrigin   origin of the destination region
+   * @param xCount       >=1
+   * @param yCount       >=1
+   * @param zCount       >=1
+   * @return true for success, false otherwise
+   */
+  public static boolean copyTestRegion(EntityPlayer entityPlayer,
+                                       BlockPos sourceOrigin, BlockPos destOrigin,
+                                       int xCount, int yCount, int zCount) {
+    checkArgument(xCount >= 1);
+    checkArgument(yCount >= 1);
+    checkArgument(zCount >= 1);
+    String[] args = new String[9];
+
+    if (!(entityPlayer instanceof EntityPlayerMP)) {
+      throw new UnsupportedOperationException("teleport not supported on client side; server side only");
+    }
+    EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entityPlayer;
+
+
+    args[0] = String.valueOf(sourceOrigin.getX());
+    args[1] = String.valueOf(sourceOrigin.getY());
+    args[2] = String.valueOf(sourceOrigin.getZ());
+    args[3] = String.valueOf(sourceOrigin.getX() + xCount - 1);
+    args[4] = String.valueOf(sourceOrigin.getY() + yCount - 1);
+    args[5] = String.valueOf(sourceOrigin.getZ() + zCount - 1);
+    args[6] = String.valueOf(destOrigin.getX());
+    args[7] = String.valueOf(destOrigin.getY());
+    args[8] = String.valueOf(destOrigin.getZ());
+
+    CommandClone commandClone = new CommandClone();
+    try {
+      commandClone.execute(entityPlayerMP.mcServer, entityPlayer, args);
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  public static boolean testDragonLifeStage() {
+    final int ARBITRARY_MINUS = -1000000;
+    final int ARBITRARY_LARGE = 1000000;
+
+    int minTick = DragonLifeStage.clipTickCountToValid(ARBITRARY_MINUS);
+    int maxTick = DragonLifeStage.clipTickCountToValid(ARBITRARY_LARGE);
+
+    System.out.println("Minimum tick:" + minTick);
+    System.out.println("Maximum tick:" + maxTick);
+
+    DragonLifeStage lastStage = null;
+    int printAnywayTicks = 0;
+    for (int i = minTick - 3; i <= maxTick + 10000; ++i) {
+      boolean printCalcs = false;
+      DragonLifeStage thisStage = DragonLifeStage.getLifeStageFromTickCount(i);
+      if (thisStage != lastStage) {
+        lastStage = thisStage;
+        System.out.println("Changed to " + thisStage + " at tick=" + i);
+        printAnywayTicks = 1000;
+        printCalcs = true;
+      } else if (--printAnywayTicks <= 0) {
+        printAnywayTicks = 1000;
+        printCalcs = true;
+      }
+      if (printCalcs) {
+        System.out.println("At tick=" + i + ": " +
+                "Scale = " + DragonLifeStage.getAgeScaleFromTickCount(i) + ", " +
+                "StageProgress = " + DragonLifeStage.getStageProgressFromTickCount(i));
+      }
+
+    }
+    System.out.println("Final stage was:" + lastStage);
+    return true;
+  }
+
+  public static boolean testGetRelativeHeadSize(World worldIn) {
+    EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
+    DragonPhysicalModel dpm = new DragonPhysicalModel();
+
+    for (float scale = 0.0f; scale <= 1.0F; scale += 0.01F) {
+      float headsize = dpm.getRelativeHeadSize(scale);
+      System.out.println("scale=" + scale + ", relativeheadsize=" + headsize);
+    }
+    return true;
+  }
+
+  public boolean runServerSideTest(World worldIn, EntityPlayer playerIn, int testNumber) {
     boolean success = false;
     switch (testNumber) {
       case 59: {
@@ -56,8 +170,8 @@ public class TestRunner
         Vec3d origin = new Vec3d(0, 24, 0);
         Vec3d target = new Vec3d(0, 4, 0);
         if (testCounter == 1) {
-           origin = new Vec3d(0, 24, 0);
-           target = new Vec3d(0, 4, 0);
+          origin = new Vec3d(0, 24, 0);
+          target = new Vec3d(0, 4, 0);
         }
         if (testCounter == 2) {
           origin = new Vec3d(0, 24, 0);
@@ -94,10 +208,7 @@ public class TestRunner
     return success;
   }
 
-  static private int testCounter = 0;
-
-  public boolean runClientSideTest(World worldIn, EntityPlayer playerIn, int testNumber)
-  {
+  public boolean runClientSideTest(World worldIn, EntityPlayer playerIn, int testNumber) {
     boolean success = false;
 
     switch (testNumber) {
@@ -114,126 +225,7 @@ public class TestRunner
     return success;
   }
 
-  // dummy test: check the correct functioning of the ladder - to see which blocks it can stay attached to
-  // The test region contains a ladder attached to a stone block.  We then replace it with different blocks and see
-  //   whether the ladder remains or breaks appropriately; eg
-  // testA - replace with wood
-  // testB - replace with a glass block
-  // testC - replace with diamond block
-  private boolean test1(World worldIn, EntityPlayer playerIn)
-  {
-    BlockPos sourceRegionOrigin = new BlockPos(0, 204, 0);
-    final int SOURCE_REGION_SIZE_X = 4;
-    final int SOURCE_REGION_SIZE_Y = 2;
-    final int SOURCE_REGION_SIZE_Z = 3;
-
-    // put a stone block with attached ladder in the middle of our test region
-    worldIn.setBlockState(sourceRegionOrigin.add(1, 0, 1), Blocks.STONE.getDefaultState());
-    worldIn.setBlockState(sourceRegionOrigin.add(2, 0, 1),
-                            Blocks.LADDER.getDefaultState().withProperty(BlockLadder.FACING, EnumFacing.EAST));
-
-    BlockPos testRegionOriginA = new BlockPos(5, 204, 0);
-    BlockPos testRegionOriginB = new BlockPos(10, 204, 0);
-    BlockPos testRegionOriginC = new BlockPos(15, 204, 0);
-
-    teleportPlayerToTestRegion(playerIn, testRegionOriginA.south(5));  // teleport the player nearby so you can watch
-
-    // copy the test blocks to the destination region
-    copyTestRegion(playerIn, sourceRegionOrigin, testRegionOriginA,
-                          SOURCE_REGION_SIZE_X, SOURCE_REGION_SIZE_Y, SOURCE_REGION_SIZE_Z);
-    copyTestRegion(playerIn, sourceRegionOrigin, testRegionOriginB,
-                          SOURCE_REGION_SIZE_X, SOURCE_REGION_SIZE_Y, SOURCE_REGION_SIZE_Z);
-    copyTestRegion(playerIn, sourceRegionOrigin, testRegionOriginC,
-                          SOURCE_REGION_SIZE_X, SOURCE_REGION_SIZE_Y, SOURCE_REGION_SIZE_Z);
-
-    boolean success = true;
-    // testA: replace stone with wood; ladder should remain
-    worldIn.setBlockState(testRegionOriginA.add(1, 0, 1), Blocks.LOG.getDefaultState());
-    success &= worldIn.getBlockState(testRegionOriginA.add(2, 0, 1)).getBlock() == Blocks.LADDER;
-
-    // testB: replace stone with glass; ladder should be destroyed
-    worldIn.setBlockState(testRegionOriginB.add(1, 0, 1), Blocks.GLASS.getDefaultState());
-    success &= worldIn.getBlockState(testRegionOriginB.add(2, 0, 1)).getBlock() == Blocks.AIR;
-
-    // testC: replace stone with diamond block; ladder should remain
-    worldIn.setBlockState(testRegionOriginC.add(1, 0, 1), Blocks.DIAMOND_BLOCK.getDefaultState());
-    success &= worldIn.getBlockState(testRegionOriginC.add(2, 0, 1)).getBlock() == Blocks.LADDER;
-
-    return success;
-  }
-
-  /**
-   * Teleport the player to the test region (so you can see the results of the test)
-   * @param playerIn
-   * @param location
-   * @return
-   */
-  public static boolean teleportPlayerToTestRegion(EntityPlayer playerIn, BlockPos location)
-  {
-    if (!(playerIn instanceof EntityPlayerMP)) {
-      throw new UnsupportedOperationException("teleport not supported on client side; server side only");
-    }
-    EntityPlayerMP entityPlayerMP = (EntityPlayerMP)playerIn;
-
-    String tpArguments = "@p " + location.getX() + " " + location.getY() + " " + location.getZ();
-    String[] tpArgumentsArray = tpArguments.split(" ");
-
-    CommandTeleport commandTeleport = new CommandTeleport();
-    try {
-      commandTeleport.execute(entityPlayerMP.mcServer, playerIn, tpArgumentsArray);
-    } catch (Exception e) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Copy a cuboid Test Region from one part of the world to another
-   * The cuboid is x blocks wide, by y blocks high, by z blocks long
-   * @param entityPlayer
-   * @param sourceOrigin origin of the source region
-   * @param destOrigin origin of the destination region
-   * @param xCount >=1
-   * @param yCount >=1
-   * @param zCount >=1
-   * @return true for success, false otherwise
-   */
-  public static boolean copyTestRegion(EntityPlayer entityPlayer,
-                                 BlockPos sourceOrigin, BlockPos destOrigin,
-                                 int xCount, int yCount, int zCount)
-  {
-    checkArgument(xCount >= 1);
-    checkArgument(yCount >= 1);
-    checkArgument(zCount >= 1);
-    String [] args = new String[9];
-
-    if (!(entityPlayer instanceof EntityPlayerMP)) {
-      throw new UnsupportedOperationException("teleport not supported on client side; server side only");
-    }
-    EntityPlayerMP entityPlayerMP = (EntityPlayerMP)entityPlayer;
-
-
-    args[0] = String.valueOf(sourceOrigin.getX());
-    args[1] = String.valueOf(sourceOrigin.getY());
-    args[2] = String.valueOf(sourceOrigin.getZ());
-    args[3] = String.valueOf(sourceOrigin.getX() + xCount - 1);
-    args[4] = String.valueOf(sourceOrigin.getY() + yCount - 1);
-    args[5] = String.valueOf(sourceOrigin.getZ() + zCount - 1);
-    args[6] = String.valueOf(destOrigin.getX());
-    args[7] = String.valueOf(destOrigin.getY());
-    args[8] = String.valueOf(destOrigin.getZ());
-
-    CommandClone commandClone = new CommandClone();
-    try {
-      commandClone.execute(entityPlayerMP.mcServer, entityPlayer, args);
-    } catch (Exception e) {
-      return false;
-    }
-    return true;
-  }
-
-  public void spawnTamedDragon(World worldIn, EntityPlayer playerIn, EnumDragonBreed dragonBreedToSpawn)
-  {
+  public void spawnTamedDragon(World worldIn, EntityPlayer playerIn, EnumDragonBreed dragonBreedToSpawn) {
     DragonMounts.logger.info("spawnTamedDragon:" + dragonBreedToSpawn);
 
     // destroy all dragons in this radius, pesky critters
@@ -265,51 +257,51 @@ public class TestRunner
     entityDragon.getNavigator().clearPath();
   }
 
-  public static boolean testDragonLifeStage()
-  {
-    final int ARBITRARY_MINUS = -1000000;
-    final int ARBITRARY_LARGE = 1000000;
+  // dummy test: check the correct functioning of the ladder - to see which blocks it can stay attached to
+  // The test region contains a ladder attached to a stone block.  We then replace it with different blocks and see
+  //   whether the ladder remains or breaks appropriately; eg
+  // testA - replace with wood
+  // testB - replace with a glass block
+  // testC - replace with diamond block
+  private boolean test1(World worldIn, EntityPlayer playerIn) {
+    BlockPos sourceRegionOrigin = new BlockPos(0, 204, 0);
+    final int SOURCE_REGION_SIZE_X = 4;
+    final int SOURCE_REGION_SIZE_Y = 2;
+    final int SOURCE_REGION_SIZE_Z = 3;
 
-    int minTick = DragonLifeStage.clipTickCountToValid(ARBITRARY_MINUS);
-    int maxTick = DragonLifeStage.clipTickCountToValid(ARBITRARY_LARGE);
+    // put a stone block with attached ladder in the middle of our test region
+    worldIn.setBlockState(sourceRegionOrigin.add(1, 0, 1), Blocks.STONE.getDefaultState());
+    worldIn.setBlockState(sourceRegionOrigin.add(2, 0, 1),
+            Blocks.LADDER.getDefaultState().withProperty(BlockLadder.FACING, EnumFacing.EAST));
 
-    System.out.println("Minimum tick:" + minTick);
-    System.out.println("Maximum tick:" + maxTick);
+    BlockPos testRegionOriginA = new BlockPos(5, 204, 0);
+    BlockPos testRegionOriginB = new BlockPos(10, 204, 0);
+    BlockPos testRegionOriginC = new BlockPos(15, 204, 0);
 
-    DragonLifeStage lastStage = null;
-    int printAnywayTicks = 0;
-    for (int i = minTick - 3; i <= maxTick + 10000; ++i) {
-      boolean printCalcs = false;
-      DragonLifeStage thisStage = DragonLifeStage.getLifeStageFromTickCount(i);
-      if (thisStage != lastStage) {
-        lastStage = thisStage;
-        System.out.println("Changed to " + thisStage + " at tick=" + i);
-        printAnywayTicks = 1000;
-        printCalcs = true;
-      } else if (--printAnywayTicks <= 0){
-        printAnywayTicks = 1000;
-        printCalcs = true;
-      }
-      if (printCalcs) {
-        System.out.println("At tick=" + i + ": " +
-                           "Scale = " + DragonLifeStage.getAgeScaleFromTickCount(i) + ", " +
-                           "StageProgress = " + DragonLifeStage.getStageProgressFromTickCount(i) );
-      }
+    teleportPlayerToTestRegion(playerIn, testRegionOriginA.south(5));  // teleport the player nearby so you can watch
 
-    }
-    System.out.println("Final stage was:" + lastStage);
-    return true;
+    // copy the test blocks to the destination region
+    copyTestRegion(playerIn, sourceRegionOrigin, testRegionOriginA,
+            SOURCE_REGION_SIZE_X, SOURCE_REGION_SIZE_Y, SOURCE_REGION_SIZE_Z);
+    copyTestRegion(playerIn, sourceRegionOrigin, testRegionOriginB,
+            SOURCE_REGION_SIZE_X, SOURCE_REGION_SIZE_Y, SOURCE_REGION_SIZE_Z);
+    copyTestRegion(playerIn, sourceRegionOrigin, testRegionOriginC,
+            SOURCE_REGION_SIZE_X, SOURCE_REGION_SIZE_Y, SOURCE_REGION_SIZE_Z);
+
+    boolean success = true;
+    // testA: replace stone with wood; ladder should remain
+    worldIn.setBlockState(testRegionOriginA.add(1, 0, 1), Blocks.LOG.getDefaultState());
+    success &= worldIn.getBlockState(testRegionOriginA.add(2, 0, 1)).getBlock() == Blocks.LADDER;
+
+    // testB: replace stone with glass; ladder should be destroyed
+    worldIn.setBlockState(testRegionOriginB.add(1, 0, 1), Blocks.GLASS.getDefaultState());
+    success &= worldIn.getBlockState(testRegionOriginB.add(2, 0, 1)).getBlock() == Blocks.AIR;
+
+    // testC: replace stone with diamond block; ladder should remain
+    worldIn.setBlockState(testRegionOriginC.add(1, 0, 1), Blocks.DIAMOND_BLOCK.getDefaultState());
+    success &= worldIn.getBlockState(testRegionOriginC.add(2, 0, 1)).getBlock() == Blocks.LADDER;
+
+    return success;
   }
-
-  public static boolean testGetRelativeHeadSize(World worldIn)
-  {
-    EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
-    DragonPhysicalModel dpm = new DragonPhysicalModel();
-
-    for (float scale = 0.0f; scale <= 1.0F; scale += 0.01F) {
-      float headsize = dpm.getRelativeHeadSize(scale);
-      System.out.println("scale=" + scale + ", relativeheadsize=" + headsize);
-    }
-    return true;
-  }
+  static private int testCounter = 0;
 }
