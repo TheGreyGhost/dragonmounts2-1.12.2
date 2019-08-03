@@ -1,10 +1,10 @@
-package com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.weapons;
+package com.TheRPGAdventurer.ROTD.common.entity.breath.weapons;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.inits.ModItems;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathAffectedBlock;
-import com.TheRPGAdventurer.ROTD.objects.entity.entitytameabledragon.breath.BreathAffectedEntity;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathAffectedBlock;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathAffectedEntity;
+import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
@@ -34,17 +34,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by TGG on 7/12/2015.
  */
-public class BreathWeaponFireP extends BreathWeaponP
-{
-  public BreathWeaponFireP(EntityTameableDragon i_dragon)
-  {
+public class BreathWeaponFireP extends BreathWeaponP {
+  public BreathWeaponFireP(EntityTameableDragon i_dragon) {
     super(i_dragon);
   }
 
   @Override
   public BreathAffectedBlock affectBlock(World world, Vec3i blockPosition,
-                                                     BreathAffectedBlock currentHitDensity)
-  {
+                                         BreathAffectedBlock currentHitDensity) {
     checkNotNull(world);
     checkNotNull(blockPosition);
     checkNotNull(currentHitDensity);
@@ -86,7 +83,7 @@ public class BreathWeaponFireP extends BreathWeaponP
 
     BlockBurnProperties burnProperties = getBurnProperties(iBlockState);
     if (burnProperties.burnResult == null
-        || currentHitDensity.getMaxHitDensity() < burnProperties.threshold) {
+            || currentHitDensity.getMaxHitDensity() < burnProperties.threshold) {
       return currentHitDensity;
     }
     world.setBlockState(blockPos, burnProperties.burnResult);
@@ -94,8 +91,7 @@ public class BreathWeaponFireP extends BreathWeaponP
   }
 
   @Override
-  public BreathAffectedEntity affectEntity(World world, Integer entityID, BreathAffectedEntity currentHitDensity)
-  {
+  public BreathAffectedEntity affectEntity(World world, Integer entityID, BreathAffectedEntity currentHitDensity) {
     checkNotNull(world);
     checkNotNull(entityID);
     checkNotNull(currentHitDensity);
@@ -108,9 +104,9 @@ public class BreathWeaponFireP extends BreathWeaponP
     }
 
     if (entity instanceof EntityPlayer) {
-      EntityPlayer entityPlayer = (EntityPlayer)entity;
+      EntityPlayer entityPlayer = (EntityPlayer) entity;
       if (DragonMounts.instance.getConfig().isOrbHolderImmune()
-          && DMUtils.hasEquipped(entityPlayer, ModItems.dragon_orb)) {
+              && DMUtils.hasEquipped(entityPlayer, ModItems.dragon_orb)) {
         return null;
       }
     }
@@ -123,7 +119,7 @@ public class BreathWeaponFireP extends BreathWeaponP
 
     float hitDensity = currentHitDensity.getHitDensity();
     if (hitDensity > CATCH_FIRE_THRESHOLD) {
-      entity.setFire((int)(hitDensity * BURN_SECONDS_PER_HIT_DENSITY));
+      entity.setFire((int) (hitDensity * BURN_SECONDS_PER_HIT_DENSITY));
     }
     if (currentHitDensity.applyDamageThisTick()) {
       entity.attackEntityFrom(DamageSource.IN_FIRE, hitDensity * DAMAGE_PER_HIT_DENSITY);
@@ -133,14 +129,12 @@ public class BreathWeaponFireP extends BreathWeaponP
     return currentHitDensity;
   }
 
-  private BlockBurnProperties getBurnProperties(IBlockState iBlockState)
-  {
+  private BlockBurnProperties getBurnProperties(IBlockState iBlockState) {
 
     Block block = iBlockState.getBlock();
     if (blockBurnPropertiesCache.containsKey(block)) {
       return blockBurnPropertiesCache.get(block);
     }
-
 
     BlockBurnProperties blockBurnProperties = new BlockBurnProperties();
 
@@ -175,16 +169,34 @@ public class BreathWeaponFireP extends BreathWeaponP
     return blockBurnProperties;
   }
 
-  /** if sourceBlock can be smelted, return the smelting result as a block
+  /**
+   * returns the hitDensity threshold for the given block flammability (0 - 300 as per Block.getFlammability)
+   *
+   * @param flammability
+   * @return the hit density threshold above which the block catches fire
+   */
+  private float convertFlammabilityToHitDensityThreshold(int flammability) {
+    checkArgument(flammability >= 0 && flammability <= 300);
+    if (flammability == 0) return Float.MAX_VALUE;
+    // typical values for items are 5 (coal, logs), 20 (gates etc), 60 - 100 for leaves & flowers & grass
+    // want: leaves & flowers to burn instantly; gates to take ~1 second at full power, coal / logs to take ~3 seconds
+    // hitDensity of 1 is approximately 1-2 ticks of full exposure from a single beam, so 3 seconds is ~30
+
+    float threshold = 50.0F / flammability;
+    return threshold;
+  }
+
+  /**
+   * if sourceBlock can be smelted, return the smelting result as a block
+   *
    * @param sourceBlock
    * @return the smelting result, or null if none
    */
-  private static IBlockState getSmeltingResult(IBlockState sourceBlock)
-  {
+  private static IBlockState getSmeltingResult(IBlockState sourceBlock) {
     Block block = sourceBlock.getBlock();
     Item itemFromBlock = Item.getItemFromBlock(block);
     ItemStack itemStack;
-    if (itemFromBlock != null && itemFromBlock.getHasSubtypes())     {
+    if (itemFromBlock != null && itemFromBlock.getHasSubtypes()) {
       int metadata = block.getMetaFromState(sourceBlock);
       itemStack = new ItemStack(itemFromBlock, 1, metadata);
     } else {
@@ -210,13 +222,13 @@ public class BreathWeaponFireP extends BreathWeaponP
     return null;
   }
 
-  /** if sourceBlock is a liquid or snow that can be molten or vaporised, return the result as a block
+  /**
+   * if sourceBlock is a liquid or snow that can be molten or vaporised, return the result as a block
    *
    * @param sourceBlock
    * @return the vaporised result, or null if none
    */
-  private static IBlockState getVaporisedLiquidResult(IBlockState sourceBlock)
-  {
+  private static IBlockState getVaporisedLiquidResult(IBlockState sourceBlock) {
     Block block = sourceBlock.getBlock();
     Material material = sourceBlock.getMaterial();
 
@@ -232,12 +244,13 @@ public class BreathWeaponFireP extends BreathWeaponP
     return null;
   }
 
-  /** if sourceBlock is a block that can be melted to lave, return the result as a block
+  /**
+   * if sourceBlock is a block that can be melted to lave, return the result as a block
+   *
    * @param sourceBlock
    * @return the molten lava result, or null if none
    */
-  private static IBlockState getMoltenLavaResult(IBlockState sourceBlock)
-  {
+  private static IBlockState getMoltenLavaResult(IBlockState sourceBlock) {
     Block block = sourceBlock.getBlock();
     Material material = sourceBlock.getMaterial();
 
@@ -250,12 +263,13 @@ public class BreathWeaponFireP extends BreathWeaponP
     return null;
   }
 
-  /** if sourceBlock is a block that isn't flammable but can be scorched / changed, return the result as a block
+  /**
+   * if sourceBlock is a block that isn't flammable but can be scorched / changed, return the result as a block
+   *
    * @param sourceBlock
    * @return the scorched result, or null if none
    */
-  private static IBlockState getScorchedResult(IBlockState sourceBlock)
-  {
+  private static IBlockState getScorchedResult(IBlockState sourceBlock) {
     Block block = sourceBlock.getBlock();
     Material material = sourceBlock.getMaterial();
 
@@ -264,24 +278,6 @@ public class BreathWeaponFireP extends BreathWeaponP
     }
     return null;
   }
-
-  /**
-   * returns the hitDensity threshold for the given block flammability (0 - 300 as per Block.getFlammability)
-   * @param flammability
-   * @return the hit density threshold above which the block catches fire
-   */
-  private float convertFlammabilityToHitDensityThreshold(int flammability)
-  {
-    checkArgument(flammability >= 0 && flammability <= 300);
-    if (flammability == 0) return Float.MAX_VALUE;
-    // typical values for items are 5 (coal, logs), 20 (gates etc), 60 - 100 for leaves & flowers & grass
-    // want: leaves & flowers to burn instantly; gates to take ~1 second at full power, coal / logs to take ~3 seconds
-    // hitDensity of 1 is approximately 1-2 ticks of full exposure from a single beam, so 3 seconds is ~30
-
-    float threshold = 50.0F / flammability;
-    return threshold;
-  }
-
   private HashMap<Block, BlockBurnProperties> blockBurnPropertiesCache = new HashMap<Block, BlockBurnProperties>();
 
   private static class BlockBurnProperties {
