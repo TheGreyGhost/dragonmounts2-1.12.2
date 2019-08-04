@@ -22,7 +22,8 @@ public class DragonVariants {
   public enum Category {
     BREATH_WEAPON_PRIMARY("breathweaponprimary", 0),
     BREATH_WEAPON_SECONDARY("breathweaponsecondary", 1),
-    PHYSICAL_MODEL("physicalmodel", 2);
+    PHYSICAL_MODEL("physicalmodel", 2),
+    LIFE_STAGE("lifestage",3);
 
     /**
      * Checks if the given name has a corresponding Category

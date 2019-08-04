@@ -1,2 +1,4 @@
-# Dragon Mounts 2 - WolfShotz Fork
-Fork made to help develop the Dragon mounts 2 mod alongside @TheRPGAdventurer
+# Dragon Mounts Configurable
+Fork intended to make Dragon Mounts much easier to configure
+Just focussing on the core elements for now, i.e. the dragon itself
+ 

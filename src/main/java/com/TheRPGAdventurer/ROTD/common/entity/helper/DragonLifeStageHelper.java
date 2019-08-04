@@ -17,8 +17,10 @@ import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
+import com.TheRPGAdventurer.ROTD.util.math.Interpolation;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -33,6 +35,7 @@ import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import static net.minecraft.entity.SharedMonsterAttributes.*;
@@ -461,12 +464,52 @@ public class DragonLifeStageHelper extends DragonHelper {
   private final DragonVariantTag BREATHMATURITY_LATE_TEEN = DragonVariantTag.addTag("breathmaturitylateteen", 75.0);
 
 
+  /** interpolation arrays:
+   * lifeStageAges is the age corresponding to each ageLabel, in minecraft days
+   * breathMaturityPoints, physicalMaturityPoints, emotionalMaturityPoints are the corresponding curve points, to be
+   *    linearly interpolated
+   * physicalSizePoints is the curve points for physical size, except some regions are parabolic instead of linear interp
+   */
+  AgeLabel [] ageLabels = new AgeLabel[AgeLabel.values().length];
+  double [] lifeStageAges = new double[AgeLabel.values().length];
+  double [] breathMaturityPoints = new double[AgeLabel.values().length];
+  double [] physicalMaturityPoints = new double[AgeLabel.values().length];
+  double [] emotionalMaturityPoints = new double[AgeLabel.values().length];
+  double [] physicalSizePoints = new double[AgeLabel.values().length];
+
   /**
    * Read the configuration parameters from the DragonVariants config file, validate them, and convert them into
    *   internal structures
    * @param dragonVariants
+   * @throws IllegalArgumentException if the configuration is bad (defaults to safe values before throwing)
    */
-  private void readConfiguration(DragonVariants dragonVariants) {
+  private void readConfiguration(DragonVariants dragonVariants) throws IllegalArgumentException {
+    boolean configOK = true;
+    String configErrors = "";
+
+    double [] lifeStageAgesConfig = {
+            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_INFANT),
+            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_CHILD),
+            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_EARLY_TEEN),
+            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_LATE_TEEN),
+            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_ADULT)
+            };
+
+    if (Interpolation.isValidInterpolationArray(lifeStageAgesConfig)) {
+      lifeStageAges = lifeStageAgesConfig;
+    } else {
+      double [] lifeStageAgesDefault = {0.0,
+              (double) AGE_INFANT.getDefaultValue(),
+              (double) AGE_CHILD.getDefaultValue(),
+              (double) AGE_EARLY_TEEN.getDefaultValue(),
+              (double) AGE_LATE_TEEN.getDefaultValue(),
+              (double) AGE_ADULT.getDefaultValue()
+      };
+      lifeStageAges = lifeStageAgesDefault;
+      configOK = false;
+      configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " age values invalid (out of order, or too similar)";
+    }
+    if (!configOK) throw new IllegalArgumentException(configErrors);
 
   }
 
