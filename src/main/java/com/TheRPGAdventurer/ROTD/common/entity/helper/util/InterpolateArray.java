@@ -26,7 +26,7 @@ import java.util.TreeMap;
  */
 public enum InterpolateArray {
 
-  
+
 
   //order, duration of stage in hours of minecraft time, scaleAtStartOfStage, scaleAtEndOfStage
   EGG(0, 36, 0.25f, 0.25f),
