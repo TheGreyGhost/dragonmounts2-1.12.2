@@ -1,5 +1,7 @@
 package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
+
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -15,9 +17,25 @@ import java.util.Optional;
  * PRIMARY_BREATH_WEAPON = fire
  * or they may have just a tag itself (no value- just a flag), in which case 'true' is the associated value eg
  * TWIN_RIDGE_PLATES
+ *
+ * Usage:
+ * 1) During setup, all classes which need to use a tag should add their desired tags
+ *     eg DragonVariantTag NUMBER_OF_NECK_SEGMENTS = DragonVariantTag.addTag("numberofnecksegments", 5);
+ *     Tags can have one of four types:
+ *     Flag (true or false)
+ *     String
+ *     Long
+ *     Double
+ *     String, Long and Double must have a default value
+ *     Long and Double can have optional minimum and maximum  (Inclusive i.e. [min = 3, max = 6] -> 3, 4, 5, 6 ok)
+ * 2) The tag parser uses the following methods:
+ *     getTagFromName() to find the tag corresponding to a string
+ *     convertValue() to convert a tag value to the format expected by the tag
+ *     getDefaultValue() - for use if the tag doesn't exist in the config file
  */
-public enum DragonVariantTag {
+public class DragonVariantTag {
 
+  /*
   NUMBER_OF_NECK_SEGMENTS("numberofnecksegments", 7, 4, 12),
   NUMBER_OF_WING_FINGERS("numberofwingfingers", 4, 2, 6),
   NUMBER_OF_TAIL_SEGMENTS("numberoftailsegments", 12, 0, 20),
@@ -31,6 +49,33 @@ public enum DragonVariantTag {
   NODE_DIAMETER("nodediameter", 2.0, 0.1, 5.0),
   NODE_LIFETIME("nodelifetime", 40, 1, 200),
   NODE_INTENSITY("nodeintensity", 1.0, 0.0, 5.0);
+
+
+*/
+
+  public static DragonVariantTag addTag(String textname) {
+    return addTag(textname, false, Optional.empty(), Optional.empty());
+  }
+
+  public static DragonVariantTag addTag(String textname, String defaultValue) {
+    return addTag(textname, defaultValue, Optional.empty(), Optional.empty());
+  }
+
+  public static DragonVariantTag addTag(String textname, long defaultValue) {
+    return addTag(textname, defaultValue, Optional.empty(), Optional.empty());
+  }
+
+  public static DragonVariantTag addTag(String textname, double defaultValue) {
+    return addTag(textname, defaultValue, Optional.empty(), Optional.empty());
+  }
+
+  public static DragonVariantTag addTag(String textname, long defaultValue, long minValue, long maxValue) {
+    return addTag(textname, defaultValue, Optional.of(minValue), Optional.of(maxValue));
+  }
+
+  public static DragonVariantTag addTag(String textname, double defaultValue, double minValue, double maxValue) {
+    return addTag(textname, defaultValue, Optional.of(minValue), Optional.of(maxValue));
+  }
 
   /**
    * Checks if the given name has a corresponding tag
@@ -53,10 +98,10 @@ public enum DragonVariantTag {
   }
 
   /**
-   * Convert the given input string value to the suitable type for this tag
+   * Convert the given input value to the suitable type for this tag
    *
    * @param value the value to be converted
-   * @return the converted value, or throws if an error
+   * @return the converted value, or throws if the value can't be converted
    */
   public Object convertValue(Object value) throws IllegalArgumentException {
     if (defaultValue instanceof Boolean) {
@@ -90,57 +135,28 @@ public enum DragonVariantTag {
     }
     return numberValue;
   }
-  static private HashMap<String, DragonVariantTag> allTagNames;
+
+  private static DragonVariantTag addTag(String textname, Object defaultValue, Optional<Comparable> minValue, Optional<Comparable> maxValue)
+  {
+    if (allTagNames.containsKey(textname)) {
+      DragonMounts.loggerLimit.warn_once("DragonVariantTag already contains:"+textname);
+      return allTagNames.get(textname);
+    }
+    DragonVariantTag newTag = new DragonVariantTag(textname, defaultValue, minValue, maxValue);
+    allTagNames.put(textname, newTag);
+    return newTag;
+  }
+
+  private DragonVariantTag(String textname, Object defaultValue, Optional<Comparable> minValue, Optional<Comparable> maxValue) {
+    this.textname = textname;
+    this.defaultValue = defaultValue;
+    this.minValue = minValue;
+    this.maxValue = maxValue;
+  }
+
+  static private HashMap<String, DragonVariantTag> allTagNames = new HashMap<>();
   private final String textname;
   private final Object defaultValue;
   private final Optional<Comparable> minValue;
   private final Optional<Comparable> maxValue;
-
-  // set up helper structure
-  static { // guaranteed to run only after all enums have been created
-    allTagNames = new HashMap<>(DragonVariantTag.values().length);
-    for (DragonVariantTag dragonVariantTag : DragonVariantTag.values()) {
-      allTagNames.put(dragonVariantTag.getTextname(), dragonVariantTag);
-    }
-  }
-
-  DragonVariantTag(String textname) {
-    this.textname = textname;
-    this.defaultValue = false;
-    this.minValue = Optional.empty();
-    this.maxValue = Optional.empty();
-  }
-  DragonVariantTag(String textname, String defaultValue) {
-    this.textname = textname;
-    this.defaultValue = defaultValue;
-    this.minValue = Optional.empty();
-    this.maxValue = Optional.empty();
-  }
-  DragonVariantTag(String textname, long defaultValue) {
-    this.textname = textname;
-    this.defaultValue = defaultValue;
-    this.minValue = Optional.empty();
-    this.maxValue = Optional.empty();
-  }
-  DragonVariantTag(String textname, long defaultValue, long minValue, long maxValue) {
-    this.textname = textname;
-    this.defaultValue = defaultValue;
-    this.minValue = Optional.of(minValue);
-    this.maxValue = Optional.of(maxValue);
-  }
-
-  DragonVariantTag(String textname, double defaultValue) {
-    this.textname = textname;
-    this.defaultValue = defaultValue;
-    this.minValue = Optional.empty();
-    this.maxValue = Optional.empty();
-  }
-
-  DragonVariantTag(String textname, double defaultValue, double minValue, double maxValue) {
-    this.textname = textname;
-    this.defaultValue = defaultValue;
-    this.minValue = Optional.of(minValue);
-    this.maxValue = Optional.of(maxValue);
-  }
-
 }

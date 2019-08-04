@@ -54,3 +54,24 @@ Order of refactoring:
   * Remove all variants back to a single base, add configurable options back
   * DragonVariants refactor to have one file per breed
   * Create interactive tool for configuration in-game
+
+Convert egg to a separate entity, it's not a dragon.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

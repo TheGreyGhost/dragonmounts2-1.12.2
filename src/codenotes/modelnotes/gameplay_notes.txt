@@ -1,6 +1,3 @@
-
-
-
 LIFE STAGE
 The original idea of life stages seems a bit irrelevant now
 What do we want the age to affect?
@@ -17,13 +14,41 @@ What do we want the age to affect?
    - can dragon ride on someone's shoulder?  (is this a factor of size not age ?)
 
 
-Could still apply a label to the age eg infant, child, juvenile (teenager), adult
+Could still apply a label to the age for modelling purposes:
+Hatchling -> Infant -> Child -> EarlyTeen -> LateTeen -> Adult
 see TypicalGrowthCurve figures
-For gameplay reasons we probably want to add a longer infant phase because it's cuter.
-Do they get elderly too?
+For gameplay reasons we probably want to add a longer hatchling phase because it's cuter.
+Do they get elderly too?  no.
 
 Controllable parameters:
+
+
 Age of teenager (growth spurt?)
 Age fully grown
 Size at birth
 Full-grown size
+
+
+----------------
+How to model maturity?
+Make LifeStageHelper responsible?
+
+LifeStageHelper should produce:
+1) PhysicalSize (metres)
+2) PhysicalMaturity (0->100%)
+3) EmotionalMaturity (0->100%)
+4) BreathWeaponMaturity (0->100%)
+
+Configurable parameters:
+AGEHATCHLING = 0
+AGEINFANT
+AGECHILD
+AGEEARLYTEEN
+AGELATETEEN
+AGEADULT
+
+GROWTHRATE{HATCHLING TO LATETEEN}
+PHYSICALMATURITY{HATCHLING TO LATETEEN}
+EMOTIONALMATURITY{HATCHLING TO LATETEEN}
+BREATHWEAPONMATURITY{HATCHLING TO LATETEEN}
+

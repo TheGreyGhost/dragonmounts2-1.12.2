@@ -43,6 +43,7 @@ public abstract class DragonHelper {
 
   public void onDeath() {
   }
+
   protected final EntityTameableDragon dragon;
   protected final EntityDataManager dataWatcher;
   protected final Random rand;

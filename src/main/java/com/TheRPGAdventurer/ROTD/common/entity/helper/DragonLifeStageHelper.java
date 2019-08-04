@@ -12,6 +12,8 @@ package com.TheRPGAdventurer.ROTD.common.entity.helper;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
@@ -37,6 +39,23 @@ import static net.minecraft.entity.SharedMonsterAttributes.*;
 
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
+ *
+ * DragonLifeStageHelper is responsible for keeping track of the dragon's age and maturity
+ *
+ * The age of the dragon affects the following aspects:
+ * 1) PhysicalSize (metres) - for the base dragon, this is the height of the top of the back
+ * 2) PhysicalMaturity (0->100%) - the physical abilities of the dragon such as being able to fly
+ * 3) EmotionalMaturity (0->100%) - the behaviour of the dragon eg sticking close to parent, running away from mobs
+ * 4) BreathWeaponMaturity (0->100%) - the strength of the breath weapon
+ *
+ * It uses a number of DragonVariantTags to customise the effects of age on each of these
+ *
+ * Usage:
+ * 1) During initial setup, call DragonLifeStageHelper.registerConfigurationTags() to register all the tags that are
+ *    used to configure this
+ * 2) Create the DragonLifeStageHelper
+ * 3) Call its update methods to keep it synchronised as described in DragonHelper
+ *
  */
 public class DragonLifeStageHelper extends DragonHelper {
 
@@ -50,7 +69,16 @@ public class DragonLifeStageHelper extends DragonHelper {
                   .put(DragonLifeStage.ADULT, BreathNodeP.Power.LARGE)
                   .build();
 
-  public DragonLifeStageHelper(EntityTameableDragon dragon, DataParameter<Integer> dataParam) {
+
+  /**
+   * Initialise all the configuration tags used by this helper
+   */
+  public static void registerConfigurationTags()
+  {
+    // dummy method -the initialisation is all done in static initialisers
+  }
+
+  public DragonLifeStageHelper(EntityTameableDragon dragon, DataParameter<Integer> dataParam, DragonVariants dragonVariants) {
     super(dragon);
 
     this.dataParam = dataParam;
@@ -354,6 +382,23 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   }
 
+  private enum AgeLabel {
+
+    HATCHLING("hatchling"),
+    INFANT("infant"),
+    CHILD("child"),
+    EARLYTEEN("earlyteen"),
+    LATETEEN("lateteen"),
+    ADULT("adult");
+
+    public String getTextLabel() {return textLabel;}
+
+    AgeLabel(String textlabel) {
+      this.textLabel = textlabel;
+    }
+    private String textLabel;
+  }
+
   private void updateAgeScale() {
     dragon.setAgeScalePublic(getAgeScale());
   }
@@ -371,53 +416,73 @@ public class DragonLifeStageHelper extends DragonHelper {
   private DragonLifeStage lifeStagePrev;
   private int eggWiggleX;
 
-//    public boolean isHatchling() {
-//        return getLifeStage() == HATCHLING;
-//    }
-//
-//    public boolean isInfant() {
-//        return getLifeStage() == INFANT;
-//    }
-//
-//    public boolean isPreJuvenile() {
-//        return getLifeStage() == PREJUVENILE;
-//    }
-//
-//    public boolean isJuvenile() {
-//        return getLifeStage() == JUVENILE;
-//    }
-//
-//    public boolean isAdult() {
-//        return getLifeStage() == ADULT;
-//    }
-
-//    public boolean isGiga() {
-//        return getLifeStage() == GIGA;
-//    }
-//
-//    public boolean isAdjudicator() {
-//        return getLifeStage() == ADJUDICATOR;
-//    }
-
-//  public static final Map<DragonLifeStage, BreathNode.Power> BREATHNODE_POWER_BY_STAGE =
-//          ImmutableMap.<DragonLifeStage, BreathNode.Power> builder()
-//                  .put(DragonLifeStage.EGG, BreathNode.Power.SMALL)           // dummy
-//                  .put(DragonLifeStage.HATCHLING, BreathNode.Power.SMALL)     // dummy
-//                  .put(DragonLifeStage.INFANT, BreathNode.Power.SMALL)        // dummy
-//                  .put(DragonLifeStage.PREJUVENILE, BreathNode.Power.SMALL)
-//                  .put(DragonLifeStage.JUVENILE, BreathNode.Power.MEDIUM)
-//                  .put(DragonLifeStage.ADULT, BreathNode.Power.LARGE)
-//                  .build();
   private int eggWiggleZ;
-
-//    public BreathNode.Power getBreathPower() {
-//      BreathNode.Power power = BREATHNODE_POWER_BY_STAGE.get(getLifeStage());
-//      if (power == null) {
-//        DragonMounts.loggerLimit.error_once("Illegal lifestage in getBreathPower():" + getLifeStage());
-//        power = BreathNode.Power.SMALL;
-//      }
-//      return power;
-//    }
-  //    private final Map<EnumDragonBreed, AtomicInteger> breedPoints = new EnumMap<>(EnumDragonBreed.class);
   private int ticksSinceCreationServer;
+
+  // see codenotes - 190804-GrowthProfile and AgeProfile for explanation
+  // assume dragons follow roughly human growth / maturity (why not?)
+  private final float AGE_HUMAN_INFANT = 2;
+  private final float AGE_HUMAN_CHILD = 5;
+  private final float AGE_HUMAN_EARLY_TEEN = 12;
+  private final float AGE_HUMAN_LATE_TEEN = 15;
+  private final float AGE_HUMAN_ADULT = 18;
+  private final float AGE_ADULT_MINECRAFT_DAYS = 3;  // we want our standard dragon to grow to full size in 1 hour = 3 minecraft days
+  private final float H2D = AGE_ADULT_MINECRAFT_DAYS / AGE_HUMAN_ADULT;  // human to dragon conversion
+
+  private final DragonVariantTag AGE_INFANT = DragonVariantTag.addTag("ageinfant", AGE_HUMAN_INFANT * H2D);
+  private final DragonVariantTag AGE_CHILD = DragonVariantTag.addTag("agechild", AGE_HUMAN_CHILD * H2D);
+  private final DragonVariantTag AGE_EARLY_TEEN = DragonVariantTag.addTag("ageearlyteen", AGE_HUMAN_EARLY_TEEN * H2D);
+  private final DragonVariantTag AGE_LATE_TEEN = DragonVariantTag.addTag("agelateteen", AGE_HUMAN_LATE_TEEN * H2D);
+  private final DragonVariantTag AGE_ADULT = DragonVariantTag.addTag("ageadult", AGE_HUMAN_ADULT * H2D);
+
+  // see 190804-GrowthProfile and AgeProfile for explanation
+  private final DragonVariantTag GROWTHRATE_HATCHLING = DragonVariantTag.addTag("growthratehatchling", 10.0);   // relative growth rate
+  private final DragonVariantTag GROWTHRATE_CHILD = DragonVariantTag.addTag("growthratechild",  100.0);
+  private final DragonVariantTag GROWTHRATE_LATE_TEEN = DragonVariantTag.addTag("growthratelateteen", 400.0);
+  private final DragonVariantTag SIZE_HATCHLING = DragonVariantTag.addTag("sizehatchling", 0.1);  // height of back in m
+  private final DragonVariantTag SIZE_ADULT = DragonVariantTag.addTag("sizeadult", 2.0);          // height of back in m
+
+  // physical maturity = for physical abilities such as flying; 0% (hatchling) - 100% (adult)
+  private final DragonVariantTag PHYSICALMATURITY_INFANT = DragonVariantTag.addTag("physicalmaturityinfant", 10.0);
+  private final DragonVariantTag PHYSICALMATURITY_CHILD = DragonVariantTag.addTag("physicalmaturitychild", 30.0);
+  private final DragonVariantTag PHYSICALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("physicalmaturityearlyteen", 50.0);
+  private final DragonVariantTag PHYSICALMATURITY_LATE_TEEN = DragonVariantTag.addTag("physicalmaturitylateteen", 80.0);
+
+  // emotional maturity = for behaviour such as seeking out parents, danger aversion, etc
+  private final DragonVariantTag EMOTIONALMATURITY_INFANT = DragonVariantTag.addTag("emotionalmaturityinfant", 0.0);
+  private final DragonVariantTag EMOTIONALMATURITY_CHILD = DragonVariantTag.addTag("emotionalmaturitychild", 30.0);
+  private final DragonVariantTag EMOTIONALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("emotionalmaturityearlyteen", 30.0);
+  private final DragonVariantTag EMOTIONALMATURITY_LATE_TEEN = DragonVariantTag.addTag("emotionalmaturitylateteen", 75.0);
+
+  // breathweapon maturity 0% (hatchling) - 100% (adult)
+  private final DragonVariantTag BREATHMATURITY_INFANT = DragonVariantTag.addTag("breathmaturityinfant", 0.0);
+  private final DragonVariantTag BREATHMATURITY_CHILD = DragonVariantTag.addTag("breathmaturitychild", 0.0);
+  private final DragonVariantTag BREATHMATURITY_EARLY_TEEN = DragonVariantTag.addTag("breathmaturityearlyteen", 25.0);
+  private final DragonVariantTag BREATHMATURITY_LATE_TEEN = DragonVariantTag.addTag("breathmaturitylateteen", 75.0);
+
+
+  /**
+   * Read the configuration parameters from the DragonVariants config file, validate them, and convert them into
+   *   internal structures
+   * @param dragonVariants
+   */
+  private void readConfiguration(DragonVariants dragonVariants) {
+
+  }
+
+  ordinal
+
+
+  Integral (%.day)
+  Hatchling	20
+  Infant	165
+  Child	700
+  EarlyTeen	600
+  LateTeen	450
+  TOTAL	1935	%.day
+
+  Net size increase:	1.9	m
+  ScalingFactor:	0.000981912	m/%.day
+
+
 }
