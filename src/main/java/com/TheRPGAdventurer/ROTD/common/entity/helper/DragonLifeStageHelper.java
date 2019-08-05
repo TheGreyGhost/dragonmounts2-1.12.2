@@ -47,9 +47,13 @@ import static net.minecraft.entity.SharedMonsterAttributes.*;
  *
  * The age of the dragon affects the following aspects:
  * 1) PhysicalSize (metres) - for the base dragon, this is the height of the top of the back
- * 2) PhysicalMaturity (0->100%) - the physical abilities of the dragon such as being able to fly
+ * 2) PhysicalMaturity (0->100%) - the physical abilities of the dragon such as being able to fly,
  * 3) EmotionalMaturity (0->100%) - the behaviour of the dragon eg sticking close to parent, running away from mobs
  * 4) BreathWeaponMaturity (0->100%) - the strength of the breath weapon
+ * 5) AttackDamageMultiplier (0->100%) - physical attack damage
+ * 6) HealthMultiplier (0->100%) - health
+ * 7) ArmourMultiplier (0->100%) - armour
+ * 8) ArmourToughnessMultiplier (0->100%) - armour toughness
  *
  * It uses a number of DragonVariantTags to customise the effects of age on each of these
  *
@@ -58,6 +62,8 @@ import static net.minecraft.entity.SharedMonsterAttributes.*;
  *    used to configure this
  * 2) Create the DragonLifeStageHelper
  * 3) Call its update methods to keep it synchronised as described in DragonHelper
+ *
+ * The ageScale, used by vanilla, is set to 0->1.0 and is
  *
  */
 public class DragonLifeStageHelper extends DragonHelper {
@@ -83,6 +89,11 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   public DragonLifeStageHelper(EntityTameableDragon dragon, DataParameter<Integer> dataParam, DragonVariants dragonVariants) {
     super(dragon);
+    try {
+      readConfiguration(dragonVariants);
+    } catch (IllegalArgumentException iae) {
+      DragonMounts.loggerLimit.warn_once(iae.getMessage());
+    }
 
     this.dataParam = dataParam;
     dataWatcher.register(dataParam, ticksSinceCreationServer);
@@ -93,6 +104,48 @@ public class DragonLifeStageHelper extends DragonHelper {
     } else {
       ticksSinceCreationClient = null;
     }
+  }
+
+  /** get the physical maturity of the dragon at its current age
+   * @return  physical maturity, from 0 % to 100.0 %
+   */
+  public double getPhysicalMaturity() { return Interpolation.linearArray(getTicksSinceCreation() / adultAgeTicks,
+          lifeStageAges, physicalMaturityPoints);  }
+
+  /** get the emotional maturity of the dragon at its current age
+   * @return  emotional maturity, from 0 % to 100.0 %
+   */
+  public double getEmotionalMaturity() { return Interpolation.linearArray(getTicksSinceCreation() / adultAgeTicks,
+          lifeStageAges, emotionalMaturityPoints);  }
+
+  /** get the breath maturity of the dragon at its current age
+   * @return  breath maturity, from 0 % to 100.0 %
+   */
+  public double getBreathMaturity() { return Interpolation.linearArray(getTicksSinceCreation() / adultAgeTicks,
+          lifeStageAges, breathMaturityPoints);  }
+
+  /** get the physical size of the dragon at its current age
+   * @return  height to the top of the dragon's back, in metres.
+   */
+  public double getPhysicalSize() {
+    double index = Interpolation.findIndex(getTicksSinceCreation() / adultAgeTicks, lifeStageAges);
+    int idx = (int)index;
+    double frac = index - idx;
+    double partialStage = 0;
+
+    if (idx < growthratePoints.length-1) {
+      partialStage = frac * (lifeStageAges[idx+1] - lifeStageAges[idx]) * (growthratePoints[idx] + growthratePoints[idx+1]) / 2.0;
+    }
+    return physicalSizePoints[idx] + partialStage;
+  }
+
+  /**
+   * get the text label for this age (infant, child, etc)
+   * @return
+   */
+  public String getAgeLabel() {
+    double index = Interpolation.findIndex(getTicksSinceCreation() / adultAgeTicks, lifeStageAges);
+    return ageLabels[(int)index].getTextLabel();
   }
 
   @Override
@@ -168,26 +221,13 @@ public class DragonLifeStageHelper extends DragonHelper {
     }
   }
 
-  @Override
-  public void writeToNBT(NBTTagCompound nbt) {
-    nbt.setInteger(NBT_TICKS_SINCE_CREATION, getTicksSinceCreation());
-  }
-
-  @Override
-  public void readFromNBT(NBTTagCompound nbt) {
-    int ticksRead = nbt.getInteger(NBT_TICKS_SINCE_CREATION);
-    ticksRead = DragonLifeStage.clipTickCountToValid(ticksRead);
-    ticksSinceCreationServer = ticksRead;
-    dataWatcher.set(dataParam, ticksSinceCreationServer);
-  }
-
   /**
-   * Returns the size multiplier for the current age.
-   *
-   * @return size
+   * What is the maximum size of this dragon at any age?
+   * Useful for rendering scale calculations
+   * @return the maximum size (in metres to the top of the back)
    */
-  public float getAgeScale() {
-    return DragonLifeStage.getAgeScaleFromTickCount(getTicksSinceCreation());
+  public double getMaximumSizeAtAnyAge() {
+    return maximumSizeAtAnyAge;
   }
 
   /**
@@ -405,6 +445,16 @@ public class DragonLifeStageHelper extends DragonHelper {
   private void updateAgeScale() {
     dragon.setAgeScalePublic(getAgeScale());
   }
+
+  /**
+   * Returns the size multiplier for the current age.
+   *
+   * @return size
+   */
+  public float getAgeScale() {
+    return DragonLifeStage.getAgeScaleFromTickCount(getTicksSinceCreation());
+  }
+
   private static final Logger L = LogManager.getLogger();
   private static final String NBT_TICKS_SINCE_CREATION = "TicksSinceCreation";
   private static final int TICKS_SINCE_CREATION_UPDATE_INTERVAL = 100;
@@ -421,6 +471,19 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   private int eggWiggleZ;
   private int ticksSinceCreationServer;
+
+  @Override
+  public void writeToNBT(NBTTagCompound nbt) {
+    nbt.setInteger(NBT_TICKS_SINCE_CREATION, getTicksSinceCreation());
+  }
+
+  @Override
+  public void readFromNBT(NBTTagCompound nbt) {
+    int ticksRead = nbt.getInteger(NBT_TICKS_SINCE_CREATION);
+    ticksRead = DragonLifeStage.clipTickCountToValid(ticksRead);
+    ticksSinceCreationServer = ticksRead;
+    dataWatcher.set(dataParam, ticksSinceCreationServer);
+  }
 
   // see codenotes - 190804-GrowthProfile and AgeProfile for explanation
   // assume dragons follow roughly human growth / maturity (why not?)
@@ -439,43 +502,54 @@ public class DragonLifeStageHelper extends DragonHelper {
   private final DragonVariantTag AGE_ADULT = DragonVariantTag.addTag("ageadult", AGE_HUMAN_ADULT * H2D);
 
   // see 190804-GrowthProfile and AgeProfile for explanation
-  private final DragonVariantTag GROWTHRATE_HATCHLING = DragonVariantTag.addTag("growthratehatchling", 10.0);   // relative growth rate
-  private final DragonVariantTag GROWTHRATE_CHILD = DragonVariantTag.addTag("growthratechild",  100.0);
-  private final DragonVariantTag GROWTHRATE_LATE_TEEN = DragonVariantTag.addTag("growthratelateteen", 400.0);
-  private final DragonVariantTag SIZE_HATCHLING = DragonVariantTag.addTag("sizehatchling", 0.1);  // height of back in m
-  private final DragonVariantTag SIZE_ADULT = DragonVariantTag.addTag("sizeadult", 2.0);          // height of back in m
+  private final double MINIMUM_SIZE = 0.01;
+  private final double MAXIMUM_SIZE = 10.0;
+
+  private final DragonVariantTag GROWTHRATE_HATCHLING = DragonVariantTag.addTag("growthratehatchling", 10.0, -1000, 1000);   // relative growth rate
+  private final DragonVariantTag GROWTHRATE_INFANT = DragonVariantTag.addTag("growthrateinfant",  10.0, -1000, 1000);
+  private final DragonVariantTag GROWTHRATE_CHILD = DragonVariantTag.addTag("growthratechild",  100.0, -1000, 1000);
+  private final DragonVariantTag GROWTHRATE_EARLY_TEEN = DragonVariantTag.addTag("growthratearlyteen", 100.0, -1000, 1000);
+  private final DragonVariantTag GROWTHRATE_LATE_TEEN = DragonVariantTag.addTag("growthratelateteen", 400.0, -1000, 1000);
+  private final DragonVariantTag SIZE_HATCHLING = DragonVariantTag.addTag("sizehatchling", 0.1, MINIMUM_SIZE, MAXIMUM_SIZE);  // height of back in m
+  private final DragonVariantTag SIZE_ADULT = DragonVariantTag.addTag("sizeadult", 2.0, MINIMUM_SIZE, MAXIMUM_SIZE);          // height of back in m
 
   // physical maturity = for physical abilities such as flying; 0% (hatchling) - 100% (adult)
-  private final DragonVariantTag PHYSICALMATURITY_INFANT = DragonVariantTag.addTag("physicalmaturityinfant", 10.0);
-  private final DragonVariantTag PHYSICALMATURITY_CHILD = DragonVariantTag.addTag("physicalmaturitychild", 30.0);
-  private final DragonVariantTag PHYSICALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("physicalmaturityearlyteen", 50.0);
-  private final DragonVariantTag PHYSICALMATURITY_LATE_TEEN = DragonVariantTag.addTag("physicalmaturitylateteen", 80.0);
+  private final DragonVariantTag PHYSICALMATURITY_INFANT = DragonVariantTag.addTag("physicalmaturityinfant", 10.0, 0, 100);
+  private final DragonVariantTag PHYSICALMATURITY_CHILD = DragonVariantTag.addTag("physicalmaturitychild", 30.0, 0, 100);
+  private final DragonVariantTag PHYSICALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("physicalmaturityearlyteen", 50.0, 0, 100);
+  private final DragonVariantTag PHYSICALMATURITY_LATE_TEEN = DragonVariantTag.addTag("physicalmaturitylateteen", 80.0, 0, 100);
 
   // emotional maturity = for behaviour such as seeking out parents, danger aversion, etc
-  private final DragonVariantTag EMOTIONALMATURITY_INFANT = DragonVariantTag.addTag("emotionalmaturityinfant", 0.0);
-  private final DragonVariantTag EMOTIONALMATURITY_CHILD = DragonVariantTag.addTag("emotionalmaturitychild", 30.0);
-  private final DragonVariantTag EMOTIONALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("emotionalmaturityearlyteen", 30.0);
-  private final DragonVariantTag EMOTIONALMATURITY_LATE_TEEN = DragonVariantTag.addTag("emotionalmaturitylateteen", 75.0);
+  private final DragonVariantTag EMOTIONALMATURITY_INFANT = DragonVariantTag.addTag("emotionalmaturityinfant", 0.0, 0, 100);
+  private final DragonVariantTag EMOTIONALMATURITY_CHILD = DragonVariantTag.addTag("emotionalmaturitychild", 30.0, 0, 100);
+  private final DragonVariantTag EMOTIONALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("emotionalmaturityearlyteen", 30.0, 0, 100);
+  private final DragonVariantTag EMOTIONALMATURITY_LATE_TEEN = DragonVariantTag.addTag("emotionalmaturitylateteen", 75.0, 0, 100);
 
-  // breathweapon maturity 0% (hatchling) - 100% (adult)
-  private final DragonVariantTag BREATHMATURITY_INFANT = DragonVariantTag.addTag("breathmaturityinfant", 0.0);
-  private final DragonVariantTag BREATHMATURITY_CHILD = DragonVariantTag.addTag("breathmaturitychild", 0.0);
-  private final DragonVariantTag BREATHMATURITY_EARLY_TEEN = DragonVariantTag.addTag("breathmaturityearlyteen", 25.0);
-  private final DragonVariantTag BREATHMATURITY_LATE_TEEN = DragonVariantTag.addTag("breathmaturitylateteen", 75.0);
+  // breathweapon maturity 0% - 100%
+  private final DragonVariantTag BREATHMATURITY_HATCHLING = DragonVariantTag.addTag("breathmaturityhatchling", 0.0, 0, 100);
+  private final DragonVariantTag BREATHMATURITY_INFANT = DragonVariantTag.addTag("breathmaturityinfant", 0.0, 0, 100);
+  private final DragonVariantTag BREATHMATURITY_CHILD = DragonVariantTag.addTag("breathmaturitychild", 0.0, 0, 100);
+  private final DragonVariantTag BREATHMATURITY_EARLY_TEEN = DragonVariantTag.addTag("breathmaturityearlyteen", 25.0, 0, 100);
+  private final DragonVariantTag BREATHMATURITY_LATE_TEEN = DragonVariantTag.addTag("breathmaturitylateteen", 75.0, 0, 100);
+  private final DragonVariantTag BREATHMATURITY_ADULT = DragonVariantTag.addTag("breathmaturityadult", 100.0, 0, 100);
 
 
   /** interpolation arrays:
    * lifeStageAges is the age corresponding to each ageLabel, in minecraft days
    * breathMaturityPoints, physicalMaturityPoints, emotionalMaturityPoints are the corresponding curve points, to be
    *    linearly interpolated
-   * physicalSizePoints is the curve points for physical size, except some regions are parabolic instead of linear interp
+   * growthratePoints is the growth rate curve points which are then integrated to give the physical size
+   * physicalSizePoints is the integral of the growth rate
    */
-  AgeLabel [] ageLabels = new AgeLabel[AgeLabel.values().length];
-  double [] lifeStageAges = new double[AgeLabel.values().length];
-  double [] breathMaturityPoints = new double[AgeLabel.values().length];
-  double [] physicalMaturityPoints = new double[AgeLabel.values().length];
-  double [] emotionalMaturityPoints = new double[AgeLabel.values().length];
-  double [] physicalSizePoints = new double[AgeLabel.values().length];
+  private AgeLabel [] ageLabels = new AgeLabel[AgeLabel.values().length];
+  private double [] lifeStageAges = new double[AgeLabel.values().length];             // in ticks
+  private double [] breathMaturityPoints = new double[AgeLabel.values().length];      // 0 - 100%
+  private double [] physicalMaturityPoints = new double[AgeLabel.values().length];    // 0 - 100%
+  private double [] emotionalMaturityPoints = new double[AgeLabel.values().length];   // 0 - 100%
+  private double [] physicalSizePoints = new double[AgeLabel.values().length];        // metres to top of back
+  private double [] growthratePoints = new double[AgeLabel.values().length];          // metres per tick (yes I know this is very small)
+  private double adultAgeTicks = 0.0;
+  private double maximumSizeAtAnyAge = 0.0;
 
   /**
    * Read the configuration parameters from the DragonVariants config file, validate them, and convert them into
@@ -487,45 +561,124 @@ public class DragonLifeStageHelper extends DragonHelper {
     boolean configOK = true;
     String configErrors = "";
 
-    double [] lifeStageAgesConfig = {
-            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_INFANT),
-            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_CHILD),
-            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_EARLY_TEEN),
-            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_LATE_TEEN),
-            (double) dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_ADULT)
+    double [] lifeStageAgesConfig = {0.0,
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_INFANT),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_CHILD),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_ADULT)
             };
 
     if (Interpolation.isValidInterpolationArray(lifeStageAgesConfig)) {
       lifeStageAges = lifeStageAgesConfig;
     } else {
       double [] lifeStageAgesDefault = {0.0,
-              (double) AGE_INFANT.getDefaultValue(),
-              (double) AGE_CHILD.getDefaultValue(),
-              (double) AGE_EARLY_TEEN.getDefaultValue(),
-              (double) AGE_LATE_TEEN.getDefaultValue(),
-              (double) AGE_ADULT.getDefaultValue()
+              (double)AGE_INFANT.getDefaultValue(),
+              (double)AGE_CHILD.getDefaultValue(),
+              (double)AGE_EARLY_TEEN.getDefaultValue(),
+              (double)AGE_LATE_TEEN.getDefaultValue(),
+              (double)AGE_ADULT.getDefaultValue()
       };
       lifeStageAges = lifeStageAgesDefault;
       configOK = false;
-      configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " age values invalid (out of order, or too similar)";
+      configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " age values invalid (each age must be bigger than the previous age)";
     }
+
+    final double TICKS_PER_SECOND = 20.0;
+    final double REAL_LIFE_MINUTES_PER_MINECRAFT_DAY = 20.0;
+    final double TICKS_PER_MINECRAFT_DAY = REAL_LIFE_MINUTES_PER_MINECRAFT_DAY * 60.0 * TICKS_PER_SECOND;
+    adultAgeTicks = lifeStageAges[lifeStageAges.length - 1] * TICKS_PER_MINECRAFT_DAY;
+
+
+
+    AgeLabel [] init1 = {AgeLabel.HATCHLING, AgeLabel.INFANT, AgeLabel.CHILD, AgeLabel.EARLYTEEN, AgeLabel.LATETEEN, AgeLabel.ADULT};
+    ageLabels = init1;
+
+    double [] init2 = {
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_HATCHLING),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_INFANT),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_CHILD),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_ADULT)
+            };
+    breathMaturityPoints = init2;
+
+    double [] init3 = {
+            0.0,
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, PHYSICALMATURITY_INFANT),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, PHYSICALMATURITY_CHILD),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, PHYSICALMATURITY_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, PHYSICALMATURITY_LATE_TEEN),
+            100.0
+    };
+    physicalMaturityPoints = init3;
+
+    double [] init4 = {
+            0.0,
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, EMOTIONALMATURITY_INFANT),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, EMOTIONALMATURITY_CHILD),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, EMOTIONALMATURITY_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, EMOTIONALMATURITY_LATE_TEEN),
+            100.0
+    };
+    emotionalMaturityPoints = init4;
+
+    double [] init5 = {
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_HATCHLING),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_INFANT),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_CHILD),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_LATE_TEEN),
+            100.0
+    };
+    growthratePoints = init5;
+
+    // The curve for physical size is produced by integrating the growth curve:
+    // 1) Find the integral of growth rate.  This is the profile to grow from the initial size to the final size
+    // 2) Renormalise the growth rate integral to match the units of size.
+    //  eg if our growth rate is 100% for 1 day then 50% for 2 days, initial size is 1m and final size 2m:
+    //  integral = 100%*1 + 50%*2 = 200%.days.  Growth = 2m - 1m = 1m
+    //  So 200%.days is equivalent to 1m of growth, the normalisefactor is 1m / 200%.days = 0.005 m/%.days
+    //  After the first day at 100% growth = 100%.days * 0.005 m/%.days = 0.5m + 1m initial size = 1.5m size.
+    // The size is also clipped to the valid size range (can't go too small or too large)
+    physicalSizePoints[0] = 0.0;
+    double minIntegral = 0;
+    double maxIntegral = 0;
+    for (int i = 1; i < growthratePoints.length; ++i) {
+      physicalSizePoints[i] = physicalSizePoints[0]
+              + (lifeStageAges[i] - lifeStageAges[i-1]) * (growthratePoints[i] + growthratePoints[i-1]) / 2.0;
+      minIntegral = Math.min(minIntegral, physicalSizePoints[i]);
+      maxIntegral = Math.max(maxIntegral, physicalSizePoints[i]);
+    }
+    double sizeHatchling = (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, SIZE_HATCHLING);
+    double sizeAdult = (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, SIZE_ADULT);
+    double integral = physicalSizePoints[growthratePoints.length-1];
+
+    final double SMALL_NON_ZERO = 1;
+    double normaliseFactor = 0.0;
+    if (   (sizeAdult >= sizeHatchling && integral < SMALL_NON_ZERO)
+        || (sizeAdult < sizeHatchling && integral > -SMALL_NON_ZERO))  {
+      configOK = false;
+      configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " growthrate curve can't be fitted to sizehatchling->sizeadult "
+                                                                       + " (eg growthrates are positive but adult is smaller than hatchling)"  ;
+    } else {
+      normaliseFactor = (sizeAdult - sizeHatchling) / normaliseFactor;
+      if (sizeHatchling + minIntegral * normaliseFactor < MINIMUM_SIZE) {
+        normaliseFactor = 0.0;
+        configOK = false;
+        configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " growthrate curve produces a dragon less than the minimum size of " + MINIMUM_SIZE;
+      } else if (sizeHatchling + minIntegral * normaliseFactor > MAXIMUM_SIZE) {
+        normaliseFactor = 0.0;
+        configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " growthrate curve produces a dragon bigger than the maximum size of " + MAXIMUM_SIZE;
+      }
+    }
+    for (int i = 1; i < physicalSizePoints.length; ++i) {
+      physicalSizePoints[i] = sizeHatchling + physicalSizePoints[i] * normaliseFactor;
+    }
+    maximumSizeAtAnyAge = sizeHatchling + maxIntegral * normaliseFactor;
+
     if (!configOK) throw new IllegalArgumentException(configErrors);
-
   }
-
-  ordinal
-
-
-  Integral (%.day)
-  Hatchling	20
-  Infant	165
-  Child	700
-  EarlyTeen	600
-  LateTeen	450
-  TOTAL	1935	%.day
-
-  Net size increase:	1.9	m
-  ScalingFactor:	0.000981912	m/%.day
-
 
 }
