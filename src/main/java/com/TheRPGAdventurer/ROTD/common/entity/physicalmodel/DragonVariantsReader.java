@@ -149,6 +149,13 @@ public class DragonVariantsReader {
         syntaxError(iae.getMessage());
       }
     }
+
+    try {
+      dragonVariants.validateCollection();
+    } catch (IllegalArgumentException iae) {
+      syntaxError(iae.getMessage());
+    }
+
     return dragonVariants;
   }
 
