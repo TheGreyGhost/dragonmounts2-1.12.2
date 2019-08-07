@@ -1,0 +1,33 @@
+// test all tags
+{
+  "fire": {
+    "lifestage": {
+      "ageinfant": 1,
+      "agechild": 3,
+      "ageearlyteen": 6,
+      "agelateteen": 10,
+      "ageadult": 15,
+      "growthratehatchling": 100.0,
+      "growthrateinfant": 100.0,
+      "growthratechild": 100.0,
+      "growthrateearlyteen": 100.0,
+      "growthratelateteen": 100.0,
+      "sizehatchling": 1,
+      "sizeadult": 2,
+      "physicalmaturityinfant": 50,
+      "emotionalmaturityinfant": 50,
+      "breathmaturityinfant": 50,
+      "physicalmaturitychild": 50,
+      "emotionalmaturitychild": 50,
+      "breathmaturitychild": 50,
+      "physicalmaturityearlyteen": 50,
+      "emotionalmaturityearlyteen": 50,
+      "breathmaturityearlyteen": 50,
+      "physicalmaturitylateteen": 50,
+      "emotionalmaturitylateteen": 50,
+      "breathmaturitylateteen": 50,
+      "breathmaturityhatchling": 50,
+      "breathmaturityadult": 50
+    }
+  }
+}

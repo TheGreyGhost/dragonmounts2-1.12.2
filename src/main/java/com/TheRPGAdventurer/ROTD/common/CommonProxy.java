@@ -13,6 +13,7 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.cmd.CommandDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsReader;
 import com.TheRPGAdventurer.ROTD.common.event.VanillaEggHandler;
@@ -52,6 +53,7 @@ abstract public class CommonProxy {
   public void PreInitialization(FMLPreInitializationEvent event) {
     DragonMountsConfig.PreInit();
     StartupDebugCommon.preInitCommon();
+    DragonLifeStageHelper.registerConfigurationTags();
     DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
             Minecraft.getMinecraft().getResourceManager(), new ResourceLocation("dragonmounts:dragonvariants.json"));
     Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readVariants();

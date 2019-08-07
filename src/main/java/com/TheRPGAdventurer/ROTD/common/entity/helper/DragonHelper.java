@@ -44,6 +44,14 @@ public abstract class DragonHelper {
   public void onDeath() {
   }
 
+  // for testing only
+  protected DragonHelper() {
+    dragon = null;
+    dataWatcher = null;
+    rand = null;
+  }
+
+
   protected final EntityTameableDragon dragon;
   protected final EntityDataManager dataWatcher;
   protected final Random rand;

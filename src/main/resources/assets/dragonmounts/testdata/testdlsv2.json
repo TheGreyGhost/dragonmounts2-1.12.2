@@ -1,0 +1,12 @@
+// test validation ages not ascending: expect error
+{
+  "fire": {
+    "lifestage": {
+      "ageinfant": 1,
+      "agechild": 3,
+      "ageearlyteen": 6,
+      "agelateteen": 5,
+      "ageadult": 15
+   }
+  }
+}

@@ -1,0 +1,37 @@
+// test profiles
+{
+  "fire": {
+    "lifestage": {
+      "ageinfant": 1,
+      "agechild": 3,
+      "ageearlyteen": 6,
+      "agelateteen": 10,
+      "ageadult": 15,
+      "growthratehatchling": 10.0,
+      "growthrateinfant": 20.0,
+      "growthratechild": 10.0,
+      "growthrateearlyteen": -10.0,
+      "growthratelateteen": 10.0,
+      "sizehatchling": 1,
+      "sizeadult": 2,
+
+      "physicalmaturityinfant": 10,
+      "physicalmaturitychild": 20,
+      "physicalmaturityearlyteen": 30,
+      "physicalmaturitylateteen": 40,
+
+      "emotionalmaturityinfant": 20,
+      "emotionalmaturitychild": 30,
+      "emotionalmaturityearlyteen": 40,
+      "emotionalmaturitylateteen": 50,
+
+      "breathmaturityhatchling": 100,
+      "breathmaturityinfant": 30,
+      "breathmaturitychild": 40,
+      "breathmaturityearlyteen": 50,
+      "breathmaturitylateteen": 60,
+      "breathmaturityadult": 20
+
+    }
+  }
+}

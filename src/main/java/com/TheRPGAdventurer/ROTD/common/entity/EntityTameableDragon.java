@@ -118,7 +118,7 @@ public class EntityTameableDragon extends EntityTameable {
 
     dragonPhysicalModel = getBreed().getDragonPhysicalModel();
 
-    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION));
+    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, getBreed().getDragonVariants()));
     addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
     addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
     addHelper(new DragonInteractHelper(this));

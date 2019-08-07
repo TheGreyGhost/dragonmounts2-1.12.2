@@ -17,6 +17,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EnumCreatureAttribute;
@@ -283,6 +284,8 @@ public abstract class DragonBreed {
     return dragonPhysicalModel;
   }
 
+  public DragonVariants getDragonVariants() {return dragonVariants;}
+
   protected final void setImmunity(DamageSource dmg) {
     immunities.add(dmg.damageType);
   }
@@ -391,11 +394,13 @@ public abstract class DragonBreed {
   private final Set<Block> breedBlocks = new HashSet<>();
   private final Set<Biome> biomes = new HashSet<>();
   private DragonPhysicalModel dragonPhysicalModel; // later: this may vary by breed type
+  private DragonVariants dragonVariants;
 
   DragonBreed(String skin, int color) {
     this.skin = skin;
     this.color = color;
     this.dragonPhysicalModel = new DragonPhysicalModel();
+    this.dragonVariants = new DragonVariants();    // todo: just for now, fix up later
 
     // ignore suffocation damage
     setImmunity(DamageSource.DROWN);
