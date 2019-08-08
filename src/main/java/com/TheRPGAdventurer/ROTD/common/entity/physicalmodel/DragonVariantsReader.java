@@ -28,6 +28,8 @@ public class DragonVariantsReader {
   public DragonVariantsReader(IResourceManager manager, ResourceLocation configFileLocation) {
     this.iResourceManager = manager;
     this.configFileLocation = configFileLocation;
+    final int MAX_ERROR_LENGTH = 1000;
+    dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors(MAX_ERROR_LENGTH);
   }
 
   /**
@@ -36,8 +38,7 @@ public class DragonVariantsReader {
    * @return Map of breed names (from json) to DragonVariants
    */
   public Map<String, DragonVariants> readVariants() {
-    invalidSyntaxFound = false;
-    invalidSyntaxFields = "";
+    dragonVariantsErrors.clear();
 
     try {
       IResource iResource = iResourceManager.getResource(configFileLocation);
@@ -46,12 +47,12 @@ public class DragonVariantsReader {
         String inputString = CharStreams.toString(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String stripped = Minify.minify(inputString);
         Map<String, DragonVariants> allBreeds = deserialiseAllBreeds(new StringReader(stripped));
-        if (invalidSyntaxFound) {
-          DragonMounts.logger.warn("One or more errors occurred parsing " + configFileLocation + ":\n" + invalidSyntaxFields);
+        if (dragonVariantsErrors.hasErrors()) {
+          DragonMounts.logger.warn("One or more errors occurred parsing " + configFileLocation + ":\n" + dragonVariantsErrors.toString());
         }
         return allBreeds;
       } catch (RuntimeException runtimeexception) {
-        DragonMounts.logger.warn("Invalid " + configFileLocation, (Throwable) runtimeexception);
+        DragonMounts.logger.warn("Invalid " + configFileLocation + "; " + runtimeexception.getMessage());
       } finally {
         IOUtils.closeQuietly(inputStream);
       }
@@ -136,7 +137,7 @@ public class DragonVariantsReader {
   private DragonVariants deserializeAllTagsForOneBreed(JsonObject jsonObject) {
     DragonVariants dragonVariants = new DragonVariants();
     if (!jsonObject.isJsonObject()) {
-      syntaxError("Malformed entry");
+      dragonVariantsErrors.addError("Malformed entry");
       return dragonVariants;
     }
 
@@ -146,14 +147,14 @@ public class DragonVariantsReader {
         DragonVariants.Category category = DragonVariants.Category.getCategoryFromName(categoryName);
         deserializeAllTagsForOneCategory(dragonVariants, category, entry.getValue());
       } catch (IllegalArgumentException iae) {
-        syntaxError(iae.getMessage());
+        dragonVariantsErrors.addError(iae);
       }
     }
 
     try {
       dragonVariants.validateCollection();
-    } catch (IllegalArgumentException iae) {
-      syntaxError(iae.getMessage());
+    } catch (DragonVariantsException dve) {
+      dragonVariantsErrors.addError(dve);
     }
 
     return dragonVariants;
@@ -176,7 +177,7 @@ public class DragonVariantsReader {
         try {
           deserialiseTagWithValue(dragonVariants, category, tagName, entry.getValue());
         } catch (IllegalArgumentException iae) {
-          syntaxError(iae.getMessage());
+          dragonVariantsErrors.addError(iae);
         }
       }
     }
@@ -196,12 +197,12 @@ public class DragonVariantsReader {
       JsonElement element = flagIterator.next();
       try {
         if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
-          syntaxError("problem with tag " + category + ":flags");
+          dragonVariantsErrors.addError("problem with tag " + category + ":flags");
         } else {
           deserialiseFlagTag(dragonVariants, category, element.getAsJsonPrimitive().getAsString());
         }
       } catch (IllegalArgumentException iae) {
-        syntaxError(iae.getMessage());
+        dragonVariantsErrors.addError(iae);
       }
     }
   }
@@ -230,27 +231,8 @@ public class DragonVariantsReader {
     dragonVariants.addTagAndValue(category, tag, "");
   }
 
-  /**
-   * Raises a flag that an error occurred during parsing, and adds a message
-   *
-   * @param msg error message
-   */
-  private void syntaxError(String msg) {
-    invalidSyntaxFound = true;
-    msg = currentBreed + "::" + msg;
-    int spaceLeft = MAX_ERROR_LENGTH - invalidSyntaxFields.length();
-    if (spaceLeft < 0) return;
-    if (spaceLeft < msg.length()) {
-      invalidSyntaxFields += msg.substring(0, Math.min(spaceLeft, msg.length())) + " {..more..}";
-    } else {
-      invalidSyntaxFields += msg + "\n";
-    }
-  }
-
-  final int MAX_ERROR_LENGTH = 1000;
   private final IResourceManager iResourceManager;
   private final ResourceLocation configFileLocation;
-  private boolean invalidSyntaxFound;
-  private String invalidSyntaxFields;
+  private DragonVariantsException.DragonVariantsErrors dragonVariantsErrors;
   private String currentBreed;
 }

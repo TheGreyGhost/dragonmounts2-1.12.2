@@ -4,7 +4,7 @@
     "lifestage": {
       "growthratehatchling": -100.0,
       "growthrateinfant": -100.0,
-      "growthratechild": 100.0,
+      "growthratechild": 0.0,
       "growthrateearlyteen": 100.0,
       "growthratelateteen": 100.0,
       "sizehatchling": 1,

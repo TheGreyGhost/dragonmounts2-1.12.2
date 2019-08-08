@@ -28,7 +28,7 @@ import java.util.Map;
 public class StartupDebugCommon {
   public static void preInitCommon() {
     if (!DragonMountsConfig.isDebug()) return;
-//    testDragonVariantsReader(); //todo comment back out again when testing finished
+    testDragonVariantsReader(); //todo comment back out again when testing finished
     testDragonLifeStageHelperTags();
   }
 
@@ -55,7 +55,7 @@ public class StartupDebugCommon {
   }
 
   public static void testDragonLifeStageHelperTags() {
-    DragonVariants.addVariantTagValidator(new DragonLifeStageHelper.DragonLifeStageValidator());
+    DragonLifeStageHelper.registerConfigurationTags();
     String testfiles[] = {"testdata/testdlsv1.json", "testdata/testdlsv2.json", "testdata/testdlsv3.json", "testdata/testdlsv4.json",
             "testdata/testdlsv5.json", "testdata/testdlsv6.json"};
 

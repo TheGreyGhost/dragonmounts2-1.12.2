@@ -103,19 +103,18 @@ public class DragonVariants {
    * Check the collection of tags for validity according to the registered VariantTagValidators
    * @throws IllegalArgumentException if errors found
    */
-  public void validateCollection() throws IllegalArgumentException
+  public void validateCollection() throws DragonVariantsException
   {
-    String errorMsg = "";
-    boolean errorFound = false;
+    DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
+
     for (VariantTagValidator variantTagValidator : variantTagValidators) {
       try {
         variantTagValidator.validateVariantTags(this);
-      } catch (IllegalArgumentException iae) {
-        errorFound = true;
-        errorMsg += iae.getMessage() + "\n";
+      } catch (DragonVariantsException dve) {
+        dragonVariantsErrors.addError(dve);
       }
     }
-    if (errorFound) throw new IllegalArgumentException(errorMsg);
+    if (dragonVariantsErrors.hasErrors()) throw new DragonVariantsException(dragonVariantsErrors);
   }
 
   /**

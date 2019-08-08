@@ -15,6 +15,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
@@ -123,11 +124,11 @@ public class DragonLifeStageHelper extends DragonHelper {
     DragonLifeStageHelper test = new DragonLifeStageHelper(dragonVariants);
     switch (testnumber) {
       case 0: {
-        DragonMounts.logger.info("Age AgeLabel physicalmaturity breathmaturity emotionalmaturity physicalsize\n");
+        DragonMounts.logger.info("Age AgeLabel physicalmaturity breathmaturity emotionalmaturity physicalsize");
 
         for (double age = 0; age < 25; age += 1) {
           test.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
-          String output = String.format("%3d:%15s%20f%20f%20f%20f\n", test.getAgeLabel(), test.getPhysicalMaturity(),
+          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, test.getAgeLabel(), test.getPhysicalMaturity(),
                   test.getBreathMaturity(), test.getEmotionalMaturity(), test.getPhysicalSize());
           DragonMounts.logger.info(output);
         }
@@ -552,7 +553,7 @@ public class DragonLifeStageHelper extends DragonHelper {
   private static final DragonVariantTag GROWTHRATE_HATCHLING = DragonVariantTag.addTag("growthratehatchling", 10.0, -1000, 1000);   // relative growth rate
   private static final DragonVariantTag GROWTHRATE_INFANT = DragonVariantTag.addTag("growthrateinfant",  10.0, -1000, 1000);
   private static final DragonVariantTag GROWTHRATE_CHILD = DragonVariantTag.addTag("growthratechild",  100.0, -1000, 1000);
-  private static final DragonVariantTag GROWTHRATE_EARLY_TEEN = DragonVariantTag.addTag("growthratearlyteen", 100.0, -1000, 1000);
+  private static final DragonVariantTag GROWTHRATE_EARLY_TEEN = DragonVariantTag.addTag("growthrateearlyteen", 100.0, -1000, 1000);
   private static final DragonVariantTag GROWTHRATE_LATE_TEEN = DragonVariantTag.addTag("growthratelateteen", 400.0, -1000, 1000);
   private static final DragonVariantTag SIZE_HATCHLING = DragonVariantTag.addTag("sizehatchling", 0.1, MINIMUM_SIZE, MAXIMUM_SIZE);  // height of back in m
   private static final DragonVariantTag SIZE_ADULT = DragonVariantTag.addTag("sizeadult", 2.0, MINIMUM_SIZE, MAXIMUM_SIZE);          // height of back in m
@@ -612,7 +613,7 @@ public class DragonLifeStageHelper extends DragonHelper {
             (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_CHILD),
             (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_EARLY_TEEN),
             (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_LATE_TEEN),
-            100.0
+            0.0
     };
     return growthRatePointsConfig;
   }
@@ -658,7 +659,9 @@ public class DragonLifeStageHelper extends DragonHelper {
     emotionalMaturityPoints = init4;
 
     growthratePoints = getGrowthRatePoints(dragonVariants);
-    physicalSizePoints = calculatePhysicalSizeCurve(dragonVariants, lifeStageAges, growthratePoints);
+    Pair<double[], double []> curves = calculatePhysicalSizeCurve(dragonVariants, lifeStageAges, growthratePoints);
+    physicalSizePoints = curves.getFirst();
+    growthratePoints = curves.getSecond();
     maximumSizeAtAnyAge = Doubles.max(physicalSizePoints);
   }
 
@@ -668,15 +671,14 @@ public class DragonLifeStageHelper extends DragonHelper {
    * @param dragonVariants
    * @param lifeStageAges
    * @param growthratePoints
-   * @return the physical size curve
+   * @return the physical size curve and the growth curve, scaled to units of metres and metres/day respectively
    * @throws IllegalArgumentException
    */
-  private static double [] calculatePhysicalSizeCurve(DragonVariants dragonVariants,
-                                                      double[] lifeStageAges, double[] growthratePoints)
-          throws IllegalArgumentException
+  private static Pair<double[], double[]> calculatePhysicalSizeCurve(DragonVariants dragonVariants,
+                                                                     double[] lifeStageAges, double[] growthratePoints)
+          throws DragonVariantsException
   {
-    boolean configOK = true;
-    String configErrors = "";
+    DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
 
     // The curve for physical size is produced by integrating the growth curve:
     // 1) Find the integral of growth rate.  This is the profile to grow from the initial size to the final size
@@ -691,7 +693,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     double minIntegral = 0;
     double maxIntegral = 0;
     for (int i = 1; i < growthratePoints.length; ++i) {
-      physicalSizePoints[i] = physicalSizePoints[0]
+      physicalSizePoints[i] = physicalSizePoints[i-1]
               + (lifeStageAges[i] - lifeStageAges[i-1]) * (growthratePoints[i] + growthratePoints[i-1]) / 2.0;
       minIntegral = Math.min(minIntegral, physicalSizePoints[i]);
       maxIntegral = Math.max(maxIntegral, physicalSizePoints[i]);
@@ -704,26 +706,33 @@ public class DragonLifeStageHelper extends DragonHelper {
     double normaliseFactor = 0.0;
     if (   (sizeAdult >= sizeHatchling && integral < SMALL_NON_ZERO)
         || (sizeAdult < sizeHatchling && integral > -SMALL_NON_ZERO))  {
-      configOK = false;
-      configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " growthrate curve can't be fitted to sizehatchling->sizeadult "
-                                                                       + " (eg growthrates are positive but adult is smaller than hatchling)\n"  ;
+      dragonVariantsErrors.addError(DragonVariants.Category.LIFE_STAGE.getTextName()
+                                      + " growthrate curve can't be fitted to sizehatchling->sizeadult "
+                                      + " (eg growthrates are positive but adult is smaller than hatchling)");
     } else {
-      normaliseFactor = (sizeAdult - sizeHatchling) / normaliseFactor;
+      normaliseFactor = (sizeAdult - sizeHatchling) / integral;
       if (sizeHatchling + minIntegral * normaliseFactor < MINIMUM_SIZE) {
         normaliseFactor = 0.0;
-        configOK = false;
-        configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " growthrate curve produces a dragon less than the minimum size of " + MINIMUM_SIZE + "\n";
+        dragonVariantsErrors.addError(DragonVariants.Category.LIFE_STAGE.getTextName()
+                + " growthrate curve produces a dragon less than the minimum size of " + MINIMUM_SIZE);
       } else if (sizeHatchling + maxIntegral * normaliseFactor > MAXIMUM_SIZE) {
         normaliseFactor = 0.0;
-        configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " growthrate curve produces a dragon bigger than the maximum size of " + MAXIMUM_SIZE + "\n";
+        dragonVariantsErrors.addError(DragonVariants.Category.LIFE_STAGE.getTextName()
+                + " growthrate curve produces a dragon bigger than the maximum size of " + MAXIMUM_SIZE);
       }
     }
     for (int i = 1; i < physicalSizePoints.length; ++i) {
       physicalSizePoints[i] = sizeHatchling + physicalSizePoints[i] * normaliseFactor;
     }
 
-    if (!configOK) throw new IllegalArgumentException(configErrors);
-    return physicalSizePoints;
+    if (dragonVariantsErrors.hasErrors()) throw new DragonVariantsException(dragonVariantsErrors);
+
+    double [] growthcurveNormalised = growthratePoints.clone();
+    for (int i = 0; i < growthcurveNormalised.length; ++i) {
+      growthcurveNormalised[i] *= normaliseFactor;
+    }
+
+    return new Pair(physicalSizePoints, growthcurveNormalised);
   }
 
   /**
@@ -736,30 +745,29 @@ public class DragonLifeStageHelper extends DragonHelper {
   public static class DragonLifeStageValidator implements DragonVariants.VariantTagValidator {
     @Override
     public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
-      boolean configOK = true;
-      String configErrors = "";
+      DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
+
       double [] lifeStageAgesConfig = getLifeStageAges(dragonVariants);
       if (!Interpolation.isValidInterpolationArray(lifeStageAgesConfig)) {
         DragonVariantTag [] tagsToRemove = {AGE_INFANT, AGE_CHILD, AGE_EARLY_TEEN, AGE_LATE_TEEN, AGE_ADULT};
         dragonVariants.removeTags(DragonVariants.Category.LIFE_STAGE, tagsToRemove);
         lifeStageAgesConfig = getLifeStageAges(dragonVariants);  // read defaults
-        configOK = false;
-        configErrors += DragonVariants.Category.LIFE_STAGE.getTextName() + " age values invalid (each age must be bigger than the previous age)\n";
+        dragonVariantsErrors.addError(DragonVariants.Category.LIFE_STAGE.getTextName()
+                + " age values invalid (each age must be bigger than the previous age)");
       }
 
       double [] growthRatePointsConfig = getGrowthRatePoints(dragonVariants);
       try {
-        double[] physicalSizeCurve = calculatePhysicalSizeCurve(dragonVariants, lifeStageAgesConfig, growthRatePointsConfig);
-      } catch (IllegalArgumentException iae) {
+        Pair<double[], double []> curves = calculatePhysicalSizeCurve(dragonVariants, lifeStageAgesConfig, growthRatePointsConfig);
+      } catch (DragonVariantsException dve) {
         DragonVariantTag [] tagsToRemove = {GROWTHRATE_HATCHLING, GROWTHRATE_INFANT, GROWTHRATE_CHILD,
                                             GROWTHRATE_EARLY_TEEN, GROWTHRATE_LATE_TEEN, SIZE_HATCHLING, SIZE_ADULT};
         dragonVariants.removeTags(DragonVariants.Category.LIFE_STAGE, tagsToRemove);
-        configOK = false;
-        configErrors += iae.getMessage();
+        dragonVariantsErrors.addError(dve);
       }
 
-      if (!configOK) {
-        throw new IllegalArgumentException(configErrors);
+      if (dragonVariantsErrors.hasErrors()) {
+        throw new DragonVariantsException(dragonVariantsErrors);
       }
     }
   }
