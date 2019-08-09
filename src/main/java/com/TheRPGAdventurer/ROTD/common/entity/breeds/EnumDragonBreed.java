@@ -17,21 +17,21 @@ import java.util.stream.Collectors;
 
 public enum EnumDragonBreed implements IStringSerializable {
 
-  AETHER(0, DragonBreedAir::new),
-  FIRE(1, DragonBreedFire::new),
-  FOREST(2, DragonBreedForest::new),
-  SYLPHID(3, DragonBreedWater::new),
-  ICE(4, DragonBreedIce::new),
-  END(5, DragonBreedEnd::new),
-  NETHER(6, DragonBreedNether::new),
-  SKELETON(7, DragonBreedSkeleton::new),
-  WITHER(8, DragonBreedWither::new),
-  ENCHANT(9, DragonBreedEnchant::new),
-  SUNLIGHT(10, DragonBreedSunlight::new),
-  STORM(11, DragonBreedStorm::new),
-  ZOMBIE(12, DragonBreedZombie::new),
-  TERRA(13, DragonBreedTerra::new),
-  MOONLIGHT(14, DragonBreedMoonlight::new);
+//  AETHER(0, DragonBreedAir::new),
+  FIRE(1, DragonBreedFire::new);
+//  FOREST(2, DragonBreedForest::new),
+//  SYLPHID(3, DragonBreedWater::new),
+//  ICE(4, DragonBreedIce::new),
+//  END(5, DragonBreedEnd::new),
+//  NETHER(6, DragonBreedNether::new),
+//  SKELETON(7, DragonBreedSkeleton::new),
+//  WITHER(8, DragonBreedWither::new),
+//  ENCHANT(9, DragonBreedEnchant::new),
+//  SUNLIGHT(10, DragonBreedSunlight::new),
+//  STORM(11, DragonBreedStorm::new),
+//  ZOMBIE(12, DragonBreedZombie::new),
+//  TERRA(13, DragonBreedTerra::new),
+//  MOONLIGHT(14, DragonBreedMoonlight::new);
 //	LIGHT(15, DragonBreedLight::new);
 //	DARK(16, DragonBreedDark::new);
 //	SPECTER(17, DragonBreedSpecter::new);

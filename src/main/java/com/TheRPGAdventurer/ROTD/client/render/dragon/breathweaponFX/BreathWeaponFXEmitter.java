@@ -129,7 +129,7 @@ public abstract class BreathWeaponFXEmitter {
   protected Vec3d previousOrigin;
   protected Vec3d previousDirection;
   protected int previousTickCount;
-  protected BreathWeaponEmitter breathWeaponEmitterLegacy = new BreathWeaponEmitter();
+//  protected BreathWeaponEmitter breathWeaponEmitterLegacy = new BreathWeaponEmitter();
   protected DragonBreathMode dragonBreathMode = DragonBreathMode.DEFAULT;
 
 

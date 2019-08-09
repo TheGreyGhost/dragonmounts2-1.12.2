@@ -73,17 +73,17 @@ public class DragonBreedFire extends DragonBreed {
       doParticles(dragon);
   }
 
-  @Override
-  public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNodeP.Power power, EntityTameableDragon dragon) {
-    dragon.getBreathHelperP().getBreathAffectedAreaFire().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
-    dragon.getBreathHelperP().getBreathAffectedAreaFire().updateTickLegacy(world);
-  }
-
-  @Override
-  public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-    dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
-    dragon.getBreathHelperP().getEmitter().spawnBreathParticlesForFireDragon(world, power, tickCounter);
-  }
+//  @Override
+//  public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNodeP.Power power, EntityTameableDragon dragon) {
+//    dragon.getBreathHelperP().getBreathAffectedAreaFire().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
+//    dragon.getBreathHelperP().getBreathAffectedAreaFire().updateTickLegacy(world);
+//  }
+//
+//  @Override
+//  public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
+//    dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
+//    dragon.getBreathHelperP().getEmitter().spawnBreathParticlesForFireDragon(world, power, tickCounter);
+//  }
 
   /**
    * return a new fire breathweapon FX emitter

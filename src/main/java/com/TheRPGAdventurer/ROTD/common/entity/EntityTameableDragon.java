@@ -1283,9 +1283,9 @@ public class EntityTameableDragon extends EntityTameable {
       return false;
     }
 
-    if (getBreedType() == EnumDragonBreed.WITHER) {
-      ((EntityLivingBase) entityIn).addPotionEffect(new PotionEffect(MobEffects.WITHER, 200));
-    }
+//    if (getBreedType() == EnumDragonBreed.WITHER) {
+//      ((EntityLivingBase) entityIn).addPotionEffect(new PotionEffect(MobEffects.WITHER, 200));
+//    }
 
     return attacked;
   }
@@ -1821,19 +1821,19 @@ public class EntityTameableDragon extends EntityTameable {
   public void onStruckByLightning(EntityLightningBolt lightningBolt) {
     EnumDragonBreed currentType = getBreedType();
     super.onStruckByLightning(lightningBolt);
-    if (currentType == EnumDragonBreed.SKELETON) {
-      this.setBreedType(EnumDragonBreed.WITHER);
-
-      this.playSound(SoundEvents.BLOCK_PORTAL_TRIGGER, 2, 1);
-      this.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 2, 1);
-    }
-
-    if (currentType == EnumDragonBreed.SYLPHID) {
-      this.setBreedType(EnumDragonBreed.STORM);
-
-      this.playSound(SoundEvents.BLOCK_PORTAL_TRIGGER, 2, 1);
-      this.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 2, 1);
-    }
+//    if (currentType == EnumDragonBreed.SKELETON) {
+//      this.setBreedType(EnumDragonBreed.WITHER);
+//
+//      this.playSound(SoundEvents.BLOCK_PORTAL_TRIGGER, 2, 1);
+//      this.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 2, 1);
+//    }
+//
+//    if (currentType == EnumDragonBreed.SYLPHID) {
+//      this.setBreedType(EnumDragonBreed.STORM);
+//
+//      this.playSound(SoundEvents.BLOCK_PORTAL_TRIGGER, 2, 1);
+//      this.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, 2, 1);
+//    }
 
     addPotionEffect(new PotionEffect(MobEffects.STRENGTH, 35 * 20));
   }

@@ -170,45 +170,45 @@ public abstract class DragonBreed {
     return true;
   }
 
-  @Deprecated
-  abstract public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNodeP.Power power, EntityTameableDragon dragon);
-
-  @Deprecated
-  abstract public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon);
-
-  @Deprecated
-  public SoundEffectNames[] getBreathWeaponSoundEffects(DragonLifeStage stage) {
-    final SoundEffectNames prejuvenile[] = {SoundEffectNames.HATCHLING_BREATHE_FIRE_START, SoundEffectNames.HATCHLING_BREATHE_FIRE_LOOP, SoundEffectNames.HATCHLING_BREATHE_FIRE_STOP};
-
-    final SoundEffectNames juvenile[] = {SoundEffectNames.JUVENILE_BREATHE_FIRE_START, SoundEffectNames.JUVENILE_BREATHE_FIRE_LOOP, SoundEffectNames.JUVENILE_BREATHE_FIRE_STOP};
-
-    final SoundEffectNames adult[] = {SoundEffectNames.ADULT_BREATHE_FIRE_START, SoundEffectNames.ADULT_BREATHE_FIRE_LOOP, SoundEffectNames.ADULT_BREATHE_FIRE_STOP};
-
-    switch (stage) {
-      case EGG:
-      case INFANT:
-      case HATCHLING:
-        break;
-
-      case PREJUVENILE:
-        soundEffectNames = prejuvenile;
-        break;
-
-      case JUVENILE:
-        soundEffectNames = juvenile;
-        break;
-
-      case ADULT:
-        soundEffectNames = adult;
-        break;
-
-      default:
-        DragonMounts.loggerLimit.error_once("Invalid life stage:" + stage);
-        break;
-    }
-
-    return soundEffectNames;
-  }
+//  @Deprecated
+//  abstract public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNodeP.Power power, EntityTameableDragon dragon);
+//
+//  @Deprecated
+//  abstract public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon);
+//
+//  @Deprecated
+//  public SoundEffectNames[] getBreathWeaponSoundEffects(DragonLifeStage stage) {
+//    final SoundEffectNames prejuvenile[] = {SoundEffectNames.HATCHLING_BREATHE_FIRE_START, SoundEffectNames.HATCHLING_BREATHE_FIRE_LOOP, SoundEffectNames.HATCHLING_BREATHE_FIRE_STOP};
+//
+//    final SoundEffectNames juvenile[] = {SoundEffectNames.JUVENILE_BREATHE_FIRE_START, SoundEffectNames.JUVENILE_BREATHE_FIRE_LOOP, SoundEffectNames.JUVENILE_BREATHE_FIRE_STOP};
+//
+//    final SoundEffectNames adult[] = {SoundEffectNames.ADULT_BREATHE_FIRE_START, SoundEffectNames.ADULT_BREATHE_FIRE_LOOP, SoundEffectNames.ADULT_BREATHE_FIRE_STOP};
+//
+//    switch (stage) {
+//      case EGG:
+//      case INFANT:
+//      case HATCHLING:
+//        break;
+//
+//      case PREJUVENILE:
+//        soundEffectNames = prejuvenile;
+//        break;
+//
+//      case JUVENILE:
+//        soundEffectNames = juvenile;
+//        break;
+//
+//      case ADULT:
+//        soundEffectNames = adult;
+//        break;
+//
+//      default:
+//        DragonMounts.loggerLimit.error_once("Invalid life stage:" + stage);
+//        break;
+//    }
+//
+//    return soundEffectNames;
+//  }
 
   public void onLivingUpdate(EntityTameableDragon dragon) {
 

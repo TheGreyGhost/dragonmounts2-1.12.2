@@ -35,9 +35,9 @@ public class LayerRendererDragonGlow extends LayerRendererDragon {
 
     GlStateManager.disableBlend();
 
-    if (dragon.getBreedType() == EnumDragonBreed.ENCHANT) {
-      renderEnchantedGlint(this.renderer, dragon, model, moveTime, moveSpeed, partialTicks, ticksExisted, lookYaw, lookPitch, scale);
-    }
+//    if (dragon.getBreedType() == EnumDragonBreed.ENCHANT) { //todo
+//      renderEnchantedGlint(this.renderer, dragon, model, moveTime, moveSpeed, partialTicks, ticksExisted, lookYaw, lookPitch, scale);
+//    }
   }
 
   @Override

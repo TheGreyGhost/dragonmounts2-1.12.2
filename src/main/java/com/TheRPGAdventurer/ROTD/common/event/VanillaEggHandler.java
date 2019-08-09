@@ -1,6 +1,8 @@
 package com.TheRPGAdventurer.ROTD.common.event;
 
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
@@ -35,9 +37,9 @@ public class VanillaEggHandler {
 
     world.setBlockToAir(evt.getPos());
 
-    EntityTameableDragon entityDragon = new EntityTameableDragon(world);
+    EntityTameableDragon entityDragon = DragonFactory.getDefaultDragonFactory().createDragon(world, DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed());
     entityDragon.setPosition(pos.getX() + 0.5, pos.getY() + 0.2, pos.getZ() + 0.5);
-    entityDragon.setBreedType(EnumDragonBreed.END);
+    entityDragon.setBreedType(EnumDragonBreed.FIRE);
     entityDragon.getLifeStageHelper().setLifeStage(DragonLifeStage.EGG);
     entityDragon.getReproductionHelper().setBreeder(evt.getEntityPlayer());
 

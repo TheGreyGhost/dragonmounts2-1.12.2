@@ -10,6 +10,8 @@
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
 import com.google.common.base.Optional;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -148,7 +150,9 @@ public class DragonReproductionHelper extends DragonHelper {
 
     EntityTameableDragon parent1 = dragon;
     EntityTameableDragon parent2 = (EntityTameableDragon) mate;
-    EntityTameableDragon baby = new EntityTameableDragon(dragon.world);
+    DragonBreedNew dragonBreed = rand.nextBoolean() ? parent1.getBreedHelper().getDragonBreedNew()
+                                                    : parent2.getBreedHelper().getDragonBreedNew();
+    EntityTameableDragon baby = DragonFactory.getDefaultDragonFactory().createDragon(dragon.world, dragonBreed);
 
     // mix the custom names in case both parents have one
     if (parent1.hasCustomName() && parent2.hasCustomName()) {

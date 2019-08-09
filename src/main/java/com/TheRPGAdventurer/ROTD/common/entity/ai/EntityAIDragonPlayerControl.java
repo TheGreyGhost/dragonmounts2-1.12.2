@@ -51,12 +51,12 @@ public class EntityAIDragonPlayerControl extends EntityAIDragonBase implements P
 
     dragon.setSitting(false);
 
-    if (dragon.getBreedType() == EnumDragonBreed.SYLPHID) {
-      PotionEffect watereffect = new PotionEffect(MobEffects.WATER_BREATHING, 200);
-      if (!rider.isPotionActive(watereffect.getPotion()) && rider.isInWater()) { // If the Potion isn't currently active,
-        rider.addPotionEffect(watereffect); // Apply a copy of the PotionEffect to the player
-      }
-    }
+//    if (dragon.getBreedType() == EnumDragonBreed.SYLPHID) { // todo
+//      PotionEffect watereffect = new PotionEffect(MobEffects.WATER_BREATHING, 200);
+//      if (!rider.isPotionActive(watereffect.getPotion()) && rider.isInWater()) { // If the Potion isn't currently active,
+//        rider.addPotionEffect(watereffect); // Apply a copy of the PotionEffect to the player
+//      }
+//    }
 
     // if we're breathing at a target, look at it
     if ((dragon.isUsingBreathWeapon() && dragon.getBreed().canUseBreathWeapon())) {

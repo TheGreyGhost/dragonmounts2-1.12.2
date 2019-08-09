@@ -2,6 +2,8 @@ package com.TheRPGAdventurer.ROTD.util.debugging;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
@@ -136,7 +138,7 @@ public class TestRunner {
   }
 
   public static boolean testGetRelativeHeadSize(World worldIn) {
-    EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
+//    EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
     DragonPhysicalModel dpm = new DragonPhysicalModel();
 
     for (float scale = 0.0f; scale <= 1.0F; scale += 0.01F) {
@@ -164,7 +166,7 @@ public class TestRunner {
         break;
       }
       case 62: {
-        EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
+        EntityTameableDragon dragon = DragonFactory.getDefaultDragonFactory().createDragon(worldIn, DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed());
         BreathNodeP.Power power = BreathNodeP.Power.SMALL;
         ++testCounter;
         Vec3d origin = new Vec3d(0, 24, 0);
@@ -241,7 +243,7 @@ public class TestRunner {
       dragon.setDead();
     }
 
-    EntityTameableDragon entityDragon = new EntityTameableDragon(worldIn);
+    EntityTameableDragon entityDragon = DragonFactory.getDefaultDragonFactory().createDragon(worldIn, DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed());
     entityDragon.setBreedType(dragonBreedToSpawn);
     entityDragon.getLifeStageHelper().setLifeStage(DragonLifeStage.ADULT);
     entityDragon.getReproductionHelper().setBreeder(playerIn);

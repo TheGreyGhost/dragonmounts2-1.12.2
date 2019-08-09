@@ -542,7 +542,7 @@ public class DragonModel extends AdvancedModelBase {
     tailRidgePlateMiddle = tail.addChildBox("ridgeplate", -1, -8, -3, 2, 4, 6).setAngles(0, 0, 0);
     tailRidgePlateRight = tail.addChildBox("ridgeplate", -1, -8, -3, 2, 4, 6).setAngles(0, 0, -scaleRotZ);
 
-    boolean ice = breed == EnumDragonBreed.ICE;
+    boolean ice = false; // todo breed == EnumDragonBreed.ICE;
 
     tailRidgePlateMiddle.showModel = !ice;
     tailRidgePlateLeft.showModel = ice;
@@ -581,7 +581,7 @@ public class DragonModel extends AdvancedModelBase {
     horn.setRotationPoint(hornPosX, hornPosY, hornPosZ);
     horn.setAngles(hornRotX, hornRotY, hornRotZ);
     horn.isHidden = true;
-    boolean showSpike = breed == EnumDragonBreed.NETHER || breed == EnumDragonBreed.SYLPHID || breed == EnumDragonBreed.STORM;
+    boolean showSpike = false; // todo breed == EnumDragonBreed.NETHER || breed == EnumDragonBreed.SYLPHID || breed == EnumDragonBreed.STORM;
     horn.showModel = showSpike;
 
     if (mirror) {
@@ -664,7 +664,7 @@ public class DragonModel extends AdvancedModelBase {
 
   private void buildLeg(boolean hind) {
     // thinner legs for skeletons
-    boolean skeleton = breed == EnumDragonBreed.SKELETON || breed == EnumDragonBreed.WITHER;
+    boolean skeleton = false; //breed == EnumDragonBreed.SKELETON || breed == EnumDragonBreed.WITHER;  todo
 
     float baseLength = 26;
     String baseName = hind ? "hind" : "fore";

@@ -1,10 +1,8 @@
 package com.TheRPGAdventurer.ROTD.common.entity.breath;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponEmitter;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX.BreathWeaponFXEmitter;
 import com.TheRPGAdventurer.ROTD.client.sound.SoundController;
-import com.TheRPGAdventurer.ROTD.client.sound.SoundEffectBreathWeapon;
 import com.TheRPGAdventurer.ROTD.client.sound.SoundEffectBreathWeaponP;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
@@ -54,20 +52,20 @@ public class DragonBreathHelperP extends DragonHelper {
   public enum BreathState {
     IDLE, STARTING, SUSTAIN, STOPPING
   }
-  @Deprecated
-  public BreathAffectedArea breathAffectedAreaEnder = null;
-  @Deprecated
-  public BreathAffectedArea breathAffectedAreaNether = null;
-  @Deprecated
-  public BreathAffectedArea breathAffectedAreaIce = null;
-  @Deprecated
-  public BreathAffectedArea breathAffectedAreaHydro = null;
-  @Deprecated
-  public BreathAffectedArea breathAffectedAreaWither = null;
-  @Deprecated
-  public BreathAffectedArea breathAffectedAreaPoison = null;
-  @Deprecated
-  public BreathAffectedArea breathAffectedAreaAether = null;
+//  @Deprecated
+//  public BreathAffectedArea breathAffectedAreaEnder = null;
+//  @Deprecated
+//  public BreathAffectedArea breathAffectedAreaNether = null;
+//  @Deprecated
+//  public BreathAffectedArea breathAffectedAreaIce = null;
+//  @Deprecated
+//  public BreathAffectedArea breathAffectedAreaHydro = null;
+//  @Deprecated
+//  public BreathAffectedArea breathAffectedAreaWither = null;
+//  @Deprecated
+//  public BreathAffectedArea breathAffectedAreaPoison = null;
+//  @Deprecated
+//  public BreathAffectedArea breathAffectedAreaAether = null;
 
   public DragonBreathHelperP(EntityTameableDragon dragon, DataParameter<String> i_dataParamBreathWeaponTarget,
                              DataParameter<Integer> i_dataParamBreathWeaponMode) {
@@ -76,17 +74,17 @@ public class DragonBreathHelperP extends DragonHelper {
     dataParamBreathWeaponMode = i_dataParamBreathWeaponMode;
     refreshBreed(dragon);
 
-    breathAffectedAreaFire = new BreathAffectedArea(new BreathWeaponFire(dragon));
-    breathAffectedAreaNether = new BreathAffectedArea(new BreathWeaponNether(dragon));
-    breathAffectedAreaIce = new BreathAffectedArea(new BreathWeaponIce(dragon));
-    breathAffectedAreaHydro = new BreathAffectedArea(new BreathWeaponHydro(dragon));
-    breathAffectedAreaEnder = new BreathAffectedArea(new BreathWeaponEnder(dragon));
-    breathAffectedAreaWither = new BreathAffectedArea(new BreathWeaponWither(dragon));
-    breathAffectedAreaPoison = new BreathAffectedArea(new BreathWeaponPoison(dragon));
-    breathAffectedAreaAether = new BreathAffectedArea(new BreathWeaponAether(dragon));
-    if (dragon.isClient()) {
-      breathWeaponEmitter = new BreathWeaponEmitter();
-    }
+//    breathAffectedAreaFire = new BreathAffectedArea(new BreathWeaponFire(dragon));
+//    breathAffectedAreaNether = new BreathAffectedArea(new BreathWeaponNether(dragon));
+//    breathAffectedAreaIce = new BreathAffectedArea(new BreathWeaponIce(dragon));
+//    breathAffectedAreaHydro = new BreathAffectedArea(new BreathWeaponHydro(dragon));
+//    breathAffectedAreaEnder = new BreathAffectedArea(new BreathWeaponEnder(dragon));
+//    breathAffectedAreaWither = new BreathAffectedArea(new BreathWeaponWither(dragon));
+//    breathAffectedAreaPoison = new BreathAffectedArea(new BreathWeaponPoison(dragon));
+//    breathAffectedAreaAether = new BreathAffectedArea(new BreathWeaponAether(dragon));
+//    if (dragon.isClient()) {
+//      breathWeaponEmitter = new BreathWeaponEmitter();
+//    }
 
   }
 
@@ -301,50 +299,50 @@ public class DragonBreathHelperP extends DragonHelper {
     return soundController;
   }
 
-  @Deprecated
-  public BreathWeaponEmitter getEmitter() {
-    return breathWeaponEmitter;
-  }
-
-  @Deprecated
-  public BreathAffectedArea getBreathAffectedAreaFire() {
-    return breathAffectedAreaFire;
-  }
-
-  @Deprecated
-  public BreathAffectedArea getBreathAffectedAreaNether() {
-    return breathAffectedAreaNether;
-  }
-
-  @Deprecated
-  public BreathAffectedArea getBreathAffectedAreaIce() {
-    return breathAffectedAreaIce;
-  }
-
-  @Deprecated
-  public BreathAffectedArea getBreathAffectedAreaEnd() {
-    return breathAffectedAreaEnder;
-  }
-
-  @Deprecated
-  public BreathAffectedArea getbreathAffectedAreaHydro() {
-    return breathAffectedAreaHydro;
-  }
-
-  @Deprecated
-  public BreathAffectedArea getbreathAffectedAreaWither() {
-    return breathAffectedAreaWither;
-  }
-
-  @Deprecated
-  public BreathAffectedArea getbreathAffectedAreaPoison() {
-    return breathAffectedAreaPoison;
-  }
-
-  @Deprecated
-  public BreathAffectedArea getbreathAffectedAreaAether() {
-    return breathAffectedAreaAether;
-  }
+//  @Deprecated
+//  public BreathWeaponEmitter getEmitter() {
+//    return breathWeaponEmitter;
+//  }
+//
+//  @Deprecated
+//  public BreathAffectedArea getBreathAffectedAreaFire() {
+//    return breathAffectedAreaFire;
+//  }
+//
+//  @Deprecated
+//  public BreathAffectedArea getBreathAffectedAreaNether() {
+//    return breathAffectedAreaNether;
+//  }
+//
+//  @Deprecated
+//  public BreathAffectedArea getBreathAffectedAreaIce() {
+//    return breathAffectedAreaIce;
+//  }
+//
+//  @Deprecated
+//  public BreathAffectedArea getBreathAffectedAreaEnd() {
+//    return breathAffectedAreaEnder;
+//  }
+//
+//  @Deprecated
+//  public BreathAffectedArea getbreathAffectedAreaHydro() {
+//    return breathAffectedAreaHydro;
+//  }
+//
+//  @Deprecated
+//  public BreathAffectedArea getbreathAffectedAreaWither() {
+//    return breathAffectedAreaWither;
+//  }
+//
+//  @Deprecated
+//  public BreathAffectedArea getbreathAffectedAreaPoison() {
+//    return breathAffectedAreaPoison;
+//  }
+//
+//  @Deprecated
+//  public BreathAffectedArea getbreathAffectedAreaAether() {
+//    return breathAffectedAreaAether;
+//  }
 
   // Callback link to provide the Sound generator with state information
   public class WeaponInfoLink implements SoundEffectBreathWeaponP.WeaponSoundUpdateLink {
@@ -372,32 +370,32 @@ public class DragonBreathHelperP extends DragonHelper {
     }
   }
 
-  // Callback link to provide the Sound generator with state information
-  @Deprecated
-  public class WeaponInfoLinkLegacy implements SoundEffectBreathWeapon.WeaponSoundUpdateLinkLegacy {
-
-    @Override
-    public boolean refreshWeaponSoundInfo(SoundEffectBreathWeapon.WeaponSoundInfo infoToUpdate) {
-      Vec3d origin = dragon.getAnimator().getThroatPosition();
-      infoToUpdate.dragonHeadLocation = origin;
-      infoToUpdate.relativeVolume = dragon.getAgeScale();
-      infoToUpdate.lifeStage = dragon.getLifeStageHelper().getLifeStage();
-
-      boolean isUsingBreathweapon = false;
-      if (dragon.isUsingBreathWeapon()) {
-        Vec3d lookDirection = dragon.getLook(1.0f);
-        Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
-        if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
-          isUsingBreathweapon = true;
-        }
-      }
-
-      infoToUpdate.breathingState = isUsingBreathweapon ? SoundEffectBreathWeapon.WeaponSoundInfo.State.BREATHING : SoundEffectBreathWeapon.WeaponSoundInfo.State.IDLE;
-      return true;
-    }
-  }
-  @Deprecated
-  protected BreathWeaponEmitter breathWeaponEmitter = null;
+//  // Callback link to provide the Sound generator with state information
+//  @Deprecated
+//  public class WeaponInfoLinkLegacy implements SoundEffectBreathWeapon.WeaponSoundUpdateLinkLegacy {
+//
+//    @Override
+//    public boolean refreshWeaponSoundInfo(SoundEffectBreathWeapon.WeaponSoundInfo infoToUpdate) {
+//      Vec3d origin = dragon.getAnimator().getThroatPosition();
+//      infoToUpdate.dragonHeadLocation = origin;
+//      infoToUpdate.relativeVolume = dragon.getAgeScale();
+//      infoToUpdate.lifeStage = dragon.getLifeStageHelper().getLifeStage();
+//
+//      boolean isUsingBreathweapon = false;
+//      if (dragon.isUsingBreathWeapon()) {
+//        Vec3d lookDirection = dragon.getLook(1.0f);
+//        Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
+//        if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
+//          isUsingBreathweapon = true;
+//        }
+//      }
+//
+//      infoToUpdate.breathingState = isUsingBreathweapon ? SoundEffectBreathWeapon.WeaponSoundInfo.State.BREATHING : SoundEffectBreathWeapon.WeaponSoundInfo.State.IDLE;
+//      return true;
+//    }
+//  }
+//  @Deprecated
+//  protected BreathWeaponEmitter breathWeaponEmitter = null;
 
   private void updateBreathState(BreathWeaponTarget targetBeingBreathedAt) {
     if (targetBeingBreathedAt == null) {
@@ -449,11 +447,11 @@ public class DragonBreathHelperP extends DragonHelper {
     refreshBreed(dragon);
     BreathWeaponTarget target = getTarget();
     updateBreathState(target);
-    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()
-            || isLegacyBreath(target)) {
-      onLivingUpdateServerLegacy();
-      return;
-    }
+//    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()
+//            || isLegacyBreath(target)) {
+//      onLivingUpdateServerLegacy();
+//      return;
+//    }
 
     dragon.getBreed().getBreathWeapon(dragon).updateBreathWeaponMode();
     DragonBreathMode dragonBreathMode = dragon.getBreathHelperP().getBreathMode();
@@ -495,30 +493,30 @@ public class DragonBreathHelperP extends DragonHelper {
     }
   }
 
-  @Deprecated
-  private void onLivingUpdateServerLegacy() {
-//        updateBreathState(dragon.isUsingBreathWeapon());
-    if (dragon.isUsingBreathWeapon()) {
-      Vec3d origin = dragon.getAnimator().getThroatPosition();
-      Vec3d lookDirection = dragon.getLook(1.0f);
-      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
-      BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
-      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN) {
-        dragon.getBreed().continueAndUpdateBreathingLegacy(dragon.getEntityWorld(), origin, endOfLook, power, dragon);
-      }
-    }
-  }
+//  @Deprecated
+//  private void onLivingUpdateServerLegacy() {
+////        updateBreathState(dragon.isUsingBreathWeapon());
+//    if (dragon.isUsingBreathWeapon()) {
+//      Vec3d origin = dragon.getAnimator().getThroatPosition();
+//      Vec3d lookDirection = dragon.getLook(1.0f);
+//      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
+//      BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+//      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN) {
+//        dragon.getBreed().continueAndUpdateBreathingLegacy(dragon.getEntityWorld(), origin, endOfLook, power, dragon);
+//      }
+//    }
+//  }
 
   private void onLivingUpdateClient() {
     refreshBreed(dragon);
     BreathWeaponTarget target = getTarget();
     updateBreathState(target);
 
-    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()
-            || isLegacyBreath(target)) {
-      onLivingUpdateClientLegacy();
-      return;
-    }
+//    if (!DragonMounts.instance.getConfig().isPrototypeBreathweapons()
+//            || isLegacyBreath(target)) {
+//      onLivingUpdateClientLegacy();
+//      return;
+//    }
 
     switch (dragon.getBreed().getBreathWeaponSpawnType(dragon)) {
       case NODES: {
@@ -556,28 +554,28 @@ public class DragonBreathHelperP extends DragonHelper {
     soundEffectBreathWeapon.performTick(Minecraft.getMinecraft().player);
   }
 
-  @Deprecated
-  private void onLivingUpdateClientLegacy() {
-    if (dragon.isUsingBreathWeapon()) {
-      Vec3d origin = dragon.getAnimator().getThroatPosition();
-      final double LEGACY_Y_OFFSET = -0.4;  // adjusts to account for the different x,y,z of the legacy breath
-
-      origin = origin.addVector(0.0, LEGACY_Y_OFFSET, 0.0);
-
-      Vec3d lookDirection = dragon.getLook(1.0f);
-      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
-      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
-
-        BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
-        dragon.getBreed().spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
-      }
-    }
-
-    if (soundEffectBreathWeaponLegacy == null) {
-      soundEffectBreathWeaponLegacy = new SoundEffectBreathWeapon(getSoundController(dragon.getEntityWorld()), weaponInfoLinkLegacy);
-    }
-    soundEffectBreathWeaponLegacy.performTick(Minecraft.getMinecraft().player, dragon);
-  }
+//  @Deprecated
+//  private void onLivingUpdateClientLegacy() {
+//    if (dragon.isUsingBreathWeapon()) {
+//      Vec3d origin = dragon.getAnimator().getThroatPosition();
+//      final double LEGACY_Y_OFFSET = -0.4;  // adjusts to account for the different x,y,z of the legacy breath
+//
+//      origin = origin.addVector(0.0, LEGACY_Y_OFFSET, 0.0);
+//
+//      Vec3d lookDirection = dragon.getLook(1.0f);
+//      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
+//      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
+//
+//        BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+//        dragon.getBreed().spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
+//      }
+//    }
+//
+//    if (soundEffectBreathWeaponLegacy == null) {
+//      soundEffectBreathWeaponLegacy = new SoundEffectBreathWeapon(getSoundController(dragon.getEntityWorld()), weaponInfoLinkLegacy);
+//    }
+//    soundEffectBreathWeaponLegacy.performTick(Minecraft.getMinecraft().player, dragon);
+//  }
 
   /**
    * Get the target currently being breathed at, for this dragon:
@@ -596,18 +594,18 @@ public class DragonBreathHelperP extends DragonHelper {
     }
   }
 
-  /**
-   * Should we use the legacy breath for this dragon?
-   *
-   * @param newBreathWeaponTarget
-   * @return true for legacy
-   */
-  private boolean isLegacyBreath(BreathWeaponTarget newBreathWeaponTarget) {
-    if (newBreathWeaponTarget != null) {
-      useLegacy = newBreathWeaponTarget.getWeaponUsed() == BreathWeaponTarget.WeaponUsed.PRIMARY;
-    }
-    return useLegacy;
-  }
+//  /**
+//   * Should we use the legacy breath for this dragon?
+//   *
+//   * @param newBreathWeaponTarget
+//   * @return true for legacy
+//   */
+//  private boolean isLegacyBreath(BreathWeaponTarget newBreathWeaponTarget) {
+//    if (newBreathWeaponTarget != null) {
+//      useLegacy = newBreathWeaponTarget.getWeaponUsed() == BreathWeaponTarget.WeaponUsed.PRIMARY;
+//    }
+//    return useLegacy;
+//  }
   private static final Logger L = LogManager.getLogger();
   //  private final int DATA_WATCHER_BREATH_TARGET;
 //  private final int DATA_WATCHER_BREATH_MODE;
@@ -617,10 +615,10 @@ public class DragonBreathHelperP extends DragonHelper {
   private DataParameter<Integer> dataParamBreathWeaponMode;
   private SoundController soundController;
   private SoundEffectBreathWeaponP soundEffectBreathWeapon;
-  @Deprecated
-  private SoundEffectBreathWeapon soundEffectBreathWeaponLegacy;
+//  @Deprecated
+//  private SoundEffectBreathWeapon soundEffectBreathWeaponLegacy;
   private WeaponInfoLink weaponInfoLink = new WeaponInfoLink();
-  private WeaponInfoLinkLegacy weaponInfoLinkLegacy = new WeaponInfoLinkLegacy();
+//  private WeaponInfoLinkLegacy weaponInfoLinkLegacy = new WeaponInfoLinkLegacy();
   private BreathWeaponTarget targetBeingBreathedAt = null;  // server: the target currently being breathed at
   private BreathWeaponTarget lastBreathTargetSent = null;   // server: the last target sent to the client thru DataWatcher
   private BreathState currentBreathState = BreathState.IDLE;
@@ -634,8 +632,8 @@ public class DragonBreathHelperP extends DragonHelper {
   private BreathProjectileFactory breathProjectileFactory = null;
   private BreathNodeFactory breathNodeFactory = null;
   private DragonBreathMode breathWeaponMode = DragonBreathMode.DEFAULT;
-  @Deprecated
-  private BreathAffectedArea breathAffectedAreaFire = null;
-  private boolean useLegacy = true; //todo for debugging: was the last weapon used the primary (== legacy)
+//  @Deprecated
+//  private BreathAffectedArea breathAffectedAreaFire = null;
+//  private boolean useLegacy = true; //todo for debugging: was the last weapon used the primary (== legacy)
 
 }

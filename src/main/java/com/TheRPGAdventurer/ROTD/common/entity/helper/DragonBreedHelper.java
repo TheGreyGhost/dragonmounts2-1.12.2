@@ -49,9 +49,9 @@ public class DragonBreedHelper extends DragonHelper {
     this.dataParamNew = dataParamBreedNew;
     this.dragonBreedNew = dragonBreedNew;
 
-    entityDataManager.register(dataParamBreed, EnumDragonBreed.END.getName());
+    entityDataManager.register(dataParamBreed, EnumDragonBreed.FIRE.getName());
     dragonBreedNew.registerDataParameter(entityDataManager, dataParamBreedNew);
-    entityDataManager.register(dataParamBreed, EnumDragonBreed.END.getName());
+//    entityDataManager.register(dataParamBreed, EnumDragonBreed.END.getName());
 
     if (dragon.isServer()) {
       // initialize map to avoid future checkings
@@ -112,6 +112,8 @@ public class DragonBreedHelper extends DragonHelper {
     return EnumUtils.getEnum(EnumDragonBreed.class, breedName.toUpperCase());
   }
 
+  public DragonBreedNew getDragonBreedNew() {return dragonBreedNew;}
+
   public void setBreedType(EnumDragonBreed newType) {
     L.trace("setBreed({})", newType);
 
@@ -155,7 +157,7 @@ public class DragonBreedHelper extends DragonHelper {
     if (dragon.isEgg()) {
       // spawn breed-specific particles every other tick
       if (dragon.isClient() && dragon.ticksExisted % TICK_RATE_PARTICLES == 0) {
-        if (currentType != EnumDragonBreed.END) {
+        if (true) { //todo currentType != EnumDragonBreed.END) {
           double px = dragon.posX + (rand.nextDouble() - 0.5);
           double py = dragon.posY + (rand.nextDouble() - 0.5);
           double pz = dragon.posZ + (rand.nextDouble() - 0.5);
@@ -232,23 +234,23 @@ public class DragonBreedHelper extends DragonHelper {
     IAttributeInstance health = dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
     double base = DragonMountsConfig.BASE_HEALTH; //90d
 
-    switch (getBreedType()) {
-      case NETHER:
-        health.setBaseValue(base + 5d);
-        break;
-      case END:
-        health.setBaseValue(base + 10d);
-        break;
-      case SKELETON:
-        health.setBaseValue(base - (base < 16d ? 0d : 15d)); // Cant have 0 health!
-        break;
-      case WITHER:
-        health.setBaseValue(base - (base < 6d ? 0d : 10d)); // Cant have 0 health!
-        break;
-      default: //All Dragons without special health parameters
+//    switch (getBreedType()) {
+//      case NETHER:
+//        health.setBaseValue(base + 5d);
+//        break;
+//      case END:
+//        health.setBaseValue(base + 10d);
+//        break;
+//      case SKELETON:
+//        health.setBaseValue(base - (base < 16d ? 0d : 15d)); // Cant have 0 health!
+//        break;
+//      case WITHER:
+//        health.setBaseValue(base - (base < 6d ? 0d : 10d)); // Cant have 0 health!
+//        break;
+//      default: //All Dragons without special health parameters
         health.setBaseValue(base);
-        break;
-    }
+//        break;
+//    }
   }
   private static final Logger L = LogManager.getLogger();
   private static final int BLOCK_RANGE = 2;

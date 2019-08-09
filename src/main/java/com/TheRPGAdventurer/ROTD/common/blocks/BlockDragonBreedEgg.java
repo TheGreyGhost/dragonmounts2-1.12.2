@@ -11,6 +11,8 @@ package com.TheRPGAdventurer.ROTD.common.blocks;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
@@ -102,7 +104,7 @@ public class BlockDragonBreedEgg extends BlockDragonEgg {
       return false;
     }
 
-    EntityTameableDragon dragon = new EntityTameableDragon(worldIn);
+    EntityTameableDragon dragon = DragonFactory.getDefaultDragonFactory().createDragon(worldIn, DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed());
     dragon.setBreedType(worldIn.getBlockState(pos).getValue(BlockDragonBreedEgg.BREED));
     worldIn.setBlockToAir(pos); // Set to air AFTER setting breed type
     dragon.getLifeStageHelper().setLifeStage(DragonLifeStage.EGG);
