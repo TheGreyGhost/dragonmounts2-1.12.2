@@ -30,7 +30,39 @@
       "breathmaturitychild": 40,
       "breathmaturityearlyteen": 50,
       "breathmaturitylateteen": 60,
-      "breathmaturityadult": 20
+      "breathmaturityadult": 20,
+
+      "attackdamagebase": 10,
+      "attackdamagepercenthatchling": 10,
+      "attackdamagepercentinfant": 15,
+      "attackdamagepercentchild": 24,
+      "attackdamagepercentearlyteen": 36,
+      "attackdamagepercentlateteen": 75,
+      "attackdamagepercentadult": 100,
+
+      "healthbase": 50,               // clip to min of one!
+      "healthpercenthatchling": 0,
+      "healthpercentinfant": 0,
+      "healthpercentchild": 40,
+      "healthpercentearlyteen": 60,
+      "healthpercentlateteen": 90,
+      "healthpercentadult": 50,
+
+      "armorbase": 5,
+      "armorpercenthatchling": 10,
+      "armorpercentinfant": 20,
+      "armorpercentchild": 30,
+      "armorpercentearlyteen": 60,
+      "armorpercentlateteen": 90,
+      "armorpercentadult": 100,
+
+      "armortoughnessbase": 20,
+      "armortoughnesspercenthatchling": 50,
+      "armortoughnesspercentinfant": 10,
+      "armortoughnesspercentchild": 0,
+      "armortoughnesspercentearlyteen": 40,
+      "armortoughnesspercentlateteen": 100,
+      "armortoughnesspercentadult": 0
 
     }
   }

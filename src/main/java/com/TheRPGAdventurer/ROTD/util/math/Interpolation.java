@@ -21,7 +21,7 @@ public class Interpolation {
    * find the position of x within the array of xvalues
    * example:
    *   if xvalues is {0, 2, 4, 6, 8} and x is 2.5 then findIndex is 1 + (2.5 - 2)/(4 - 2) = 1.25
-   * @param x       the value to find
+   * @param x       the value to find. values outside the array range are clipped
    * @param xvalues the values to be searched; assumed to be valid (isValidInterpolationArray is true)
    * @return the fractional index of x within the array of xvalues; 0 - xvalues.length - 1 inclusive
    */
@@ -54,13 +54,13 @@ public class Interpolation {
 
   /**
    * Uses the fractional index to interpolate between the yvalues
-   * @param index
+   * @param index index of the desired element.  values outside the array range are clipped
    * @param yvalues
    * @return
    */
   public static double linearArray(double index, double[] yvalues) {
     if (index <= 0) return yvalues[0];
-    if (index > yvalues.length -1) return yvalues[yvalues.length - 1];
+    if (index >= yvalues.length - 1) return yvalues[yvalues.length - 1];
     int idx = (int)Math.floor(index);
     double frac = index - idx;
     return linear(yvalues[idx], yvalues[idx+1], frac);

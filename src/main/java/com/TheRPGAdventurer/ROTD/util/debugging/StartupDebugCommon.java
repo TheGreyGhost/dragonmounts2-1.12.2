@@ -76,7 +76,8 @@ public class StartupDebugCommon {
             Minecraft.getMinecraft().getResourceManager(), new ResourceLocation("dragonmounts", "testdata/testdlsv7.json"));
     Map<String, DragonVariants> allVariants = dragonVariantsReader.readVariants();
     DragonLifeStageHelper.testClass(allVariants.get("fire"), 0);
-
+    DragonLifeStageHelper.testClass(allVariants.get("fire"), 1);
+//    DragonLifeStageHelper.testClass(allVariants.get("fire"), 2);    // prints the default curves to console
   }
 
 }
