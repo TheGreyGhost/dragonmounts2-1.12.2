@@ -98,7 +98,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     }
 
     this.dataParam = dataParam;
-    dataWatcher.register(dataParam, ticksSinceCreationServer);
+    entityDataManager.register(dataParam, ticksSinceCreationServer);
 
     if (dragon.isClient()) {
       ticksSinceCreationClient = new ClientServerSynchronisedTickCount(TICKS_SINCE_CREATION_UPDATE_INTERVAL);
@@ -294,7 +294,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     L.trace("setLifeStage({})", lifeStage);
     if (dragon.isServer()) {
       ticksSinceCreationServer = lifeStage.getStartTickCount();
-      dataWatcher.set(dataParam, ticksSinceCreationServer);
+      entityDataManager.set(dataParam, ticksSinceCreationServer);
     } else {
       L.error("setLifeStage called on Client");
     }
@@ -365,10 +365,10 @@ public class DragonLifeStageHelper extends DragonHelper {
       if (!isFullyGrown() && !dragon.isGrowthPaused()) {
         ticksSinceCreationServer++;
         if (ticksSinceCreationServer % TICKS_SINCE_CREATION_UPDATE_INTERVAL == 0)
-          dataWatcher.set(dataParam, ticksSinceCreationServer);
+          entityDataManager.set(dataParam, ticksSinceCreationServer);
       }
     } else {
-      ticksSinceCreationClient.updateFromServer(dataWatcher.get(dataParam));
+      ticksSinceCreationClient.updateFromServer(entityDataManager.get(dataParam));
       if (!isFullyGrown()) ticksSinceCreationClient.tick();
     }
 
@@ -378,7 +378,7 @@ public class DragonLifeStageHelper extends DragonHelper {
   }
 
   public EntityDataManager getDataWatcher() {
-    return dataWatcher;
+    return entityDataManager;
   }
 
   @Override
@@ -588,7 +588,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     int ticksRead = nbt.getInteger(NBT_TICKS_SINCE_CREATION);
     ticksRead = DragonLifeStage.clipTickCountToValid(ticksRead);
     ticksSinceCreationServer = ticksRead;
-    dataWatcher.set(dataParam, ticksSinceCreationServer);
+    entityDataManager.set(dataParam, ticksSinceCreationServer);
   }
 
   // see codenotes - 190804-GrowthProfile and AgeProfile for explanation

@@ -1,0 +1,23 @@
+Different types of dragons:
+* added by configuration file
+* directory which contains config files, code reads in all of them, one per breed
+
+Breed:
+- name of breed
+- has a DragonVariants
+- generate dragon
+
+DragonFactory: takes breed as parameter?
+
+The various helpers no longer use Breed, they use DragonVariants in their initialiser instead
+
+DragonFactory needs to read in the DragonVariants for all breeds
+
+A dragon still needs a Breed tag for reproduction and matching, label, etc
+
+Breed should contain:
+* name
+* breed-specific information?  can't think of anything
+* VariantsTag?  or does the factory hold that?
+
+How do DataParameters work?

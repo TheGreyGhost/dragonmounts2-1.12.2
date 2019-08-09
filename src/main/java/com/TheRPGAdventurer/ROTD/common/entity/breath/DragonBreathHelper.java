@@ -68,7 +68,7 @@
 //        }
 //        dataParamBreathWeaponTarget=i_dataParamBreathWeaponTarget;
 //        dataParamBreathWeaponMode=i_dataParamBreathWeaponMode;
-//        //dataWatcher.register(dataParamBreathWeaponTarget, "");  //already registered by caller
+//        //entityDataManager.register(dataParamBreathWeaponTarget, "");  //already registered by caller
 //        breathAffectedArea=new BreathAffectedArea(new BreathWeapon(dragon));
 //        breathAffectedAreaNether=new BreathAffectedArea(new BreathWeaponNether(dragon));
 //        breathAffectedAreaIce=new BreathAffectedArea(new BreathWeaponIce(dragon));

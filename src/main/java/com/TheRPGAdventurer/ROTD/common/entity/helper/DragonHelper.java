@@ -22,7 +22,7 @@ public abstract class DragonHelper {
 
   public DragonHelper(EntityTameableDragon dragon) {
     this.dragon = dragon;
-    this.dataWatcher = dragon.getDataManager();
+    this.entityDataManager = dragon.getDataManager();
     this.rand = dragon.getRNG();
   }
 
@@ -47,12 +47,12 @@ public abstract class DragonHelper {
   // for testing only
   protected DragonHelper() {
     dragon = null;
-    dataWatcher = null;
+    entityDataManager = null;
     rand = null;
   }
 
 
   protected final EntityTameableDragon dragon;
-  protected final EntityDataManager dataWatcher;
+  protected final EntityDataManager entityDataManager;
   protected final Random rand;
 }

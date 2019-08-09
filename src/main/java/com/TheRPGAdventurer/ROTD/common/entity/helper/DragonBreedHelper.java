@@ -9,8 +9,10 @@
  */
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import net.minecraft.block.Block;
@@ -39,10 +41,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class DragonBreedHelper extends DragonHelper {
 
-  public DragonBreedHelper(EntityTameableDragon dragon, DataParameter<String> dataParam) {
+  public DragonBreedHelper(EntityTameableDragon dragon, DragonBreedNew dragonBreedNew,
+                           DataParameter<String> dataParamBreed, DataParameter<String> dataParamBreedNew) {
     super(dragon);
 
-    this.dataParam = dataParam;
+    this.dataParam = dataParamBreed;
+    this.dataParamNew = dataParamBreedNew;
+    this.dragonBreedNew = dragonBreedNew;
+
+    entityDataManager.register(dataParamBreed, EnumDragonBreed.END.getName());
+    dragonBreedNew.registerDataParameter(entityDataManager, dataParamBreedNew);
+    entityDataManager.register(dataParamBreed, EnumDragonBreed.END.getName());
 
     if (dragon.isServer()) {
       // initialize map to avoid future checkings
@@ -54,12 +63,12 @@ public class DragonBreedHelper extends DragonHelper {
       breedPoints.get(EnumDragonBreed.FIRE).set(POINTS_INITIAL);
     }
 
-    dataWatcher.register(dataParam, EnumDragonBreed.END.getName());
   }
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
     nbt.setString(NBT_BREED, getBreedType().getName());
+    dragonBreedNew.setNBT(nbt);
 
     NBTTagCompound breedPointTag = new NBTTagCompound();
     breedPoints.forEach((type, points) -> {
@@ -80,6 +89,13 @@ public class DragonBreedHelper extends DragonHelper {
     }
     setBreedType(breed);
 
+    try {
+      dragonBreedNew = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(nbt);
+    } catch (IllegalArgumentException iae) {
+      DragonMounts.loggerLimit.warn_once(iae.getMessage());
+      dragonBreedNew = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed();
+    }
+
     // read breed points
     NBTTagCompound breedPointTag = nbt.getCompoundTag(NBT_BREED_POINTS);
     breedPoints.forEach((type, points) -> {
@@ -92,7 +108,7 @@ public class DragonBreedHelper extends DragonHelper {
   }
 
   public EnumDragonBreed getBreedType() {
-    String breedName = dataWatcher.get(dataParam);
+    String breedName = entityDataManager.get(dataParam);
     return EnumUtils.getEnum(EnumDragonBreed.class, breedName.toUpperCase());
   }
 
@@ -123,7 +139,7 @@ public class DragonBreedHelper extends DragonHelper {
     dragon.setImmuneToFire(newBreed.isImmuneToDamage(DamageSource.IN_FIRE) || newBreed.isImmuneToDamage(DamageSource.ON_FIRE) || newBreed.isImmuneToDamage(DamageSource.LAVA));
 
     // update breed name
-    dataWatcher.set(dataParam, newType.getName());
+    entityDataManager.set(dataParam, newType.getName());
 
     // reset breed points
     if (dragon.isEgg()) {
@@ -246,6 +262,9 @@ public class DragonBreedHelper extends DragonHelper {
   private static final String NBT_BREED = "Breed";
   private static final String NBT_BREED_POINTS = "breedPoints";
   private final DataParameter<String> dataParam;
+  private final DataParameter<String> dataParamNew;
+  private DragonBreedNew dragonBreedNew;
+
   private final Map<EnumDragonBreed, AtomicInteger> breedPoints = new EnumMap<>(EnumDragonBreed.class);
 
 }

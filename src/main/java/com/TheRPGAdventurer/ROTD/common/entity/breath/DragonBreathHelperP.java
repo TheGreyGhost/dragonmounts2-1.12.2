@@ -171,9 +171,9 @@ public class DragonBreathHelperP extends DragonHelper {
       if (updateDataWatcher) {
         lastBreathTargetSent = target;
         if (target == null) {
-          dataWatcher.set(dataParamBreathWeaponTarget, "");
+          entityDataManager.set(dataParamBreathWeaponTarget, "");
         } else {
-          dataWatcher.set(dataParamBreathWeaponTarget, target.toEncodedString());
+          entityDataManager.set(dataParamBreathWeaponTarget, target.toEncodedString());
         }
       }
     } else {
@@ -217,7 +217,7 @@ public class DragonBreathHelperP extends DragonHelper {
    */
   public DragonBreathMode getBreathMode() {
     if (dragon.isClient()) {
-      return DragonBreathMode.createFromDataParameter(dataWatcher, dataParamBreathWeaponMode);
+      return DragonBreathMode.createFromDataParameter(entityDataManager, dataParamBreathWeaponMode);
     } else {
       return breathWeaponMode;
     }
@@ -233,7 +233,7 @@ public class DragonBreathHelperP extends DragonHelper {
   public void setBreathMode(DragonBreathMode newMode) {
     if (dragon.isServer()) {
       breathWeaponMode = newMode;
-      breathWeaponMode.writeToDataWatcher(dataWatcher, dataParamBreathWeaponMode);
+      breathWeaponMode.writeToDataWatcher(entityDataManager, dataParamBreathWeaponMode);
     } else {
       L.warn("setBreathMode is only valid on server");
     }
@@ -588,7 +588,7 @@ public class DragonBreathHelperP extends DragonHelper {
    */
   private BreathWeaponTarget getTarget() {
     if (dragon.isClient()) {
-      String targetString = dataWatcher.get(dataParamBreathWeaponTarget);
+      String targetString = entityDataManager.get(dataParamBreathWeaponTarget);
       BreathWeaponTarget target = BreathWeaponTarget.fromEncodedString(targetString);
       return target;
     } else {

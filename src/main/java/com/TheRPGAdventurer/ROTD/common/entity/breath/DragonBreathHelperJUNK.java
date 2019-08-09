@@ -73,8 +73,8 @@
 //      breathWeaponEmitter = new BreathWeaponEmitter();
 //    }
 ////        this.dataParam = dataParam;
-////        dataWatcher.register(dataParamBreathWeaponTarget, "");    already registered in EntityTameableDragon
-////        dataWatcher.register(dataParamBreathWeaponMode, "");
+////        entityDataManager.register(dataParamBreathWeaponTarget, "");    already registered in EntityTameableDragon
+////        entityDataManager.register(dataParamBreathWeaponMode, "");
 //
 //    breathAffectedArea = new BreathAffectedArea(new BreathWeapon(dragon));
 //    breathAffectedAreaNether = new BreathAffectedArea(new BreathWeaponNether(dragon));
@@ -339,7 +339,7 @@
 //  {
 //    if (dragon.isServer()) {
 //      breathWeaponMode = newMode;
-//      breathWeaponMode.writeToDataWatcher(dataWatcher, dataParamBreathWeaponMode);
+//      breathWeaponMode.writeToDataWatcher(entityDataManager, dataParamBreathWeaponMode);
 //    } else {
 //      L.warn("setBreathMode is only valid on server");
 //    }

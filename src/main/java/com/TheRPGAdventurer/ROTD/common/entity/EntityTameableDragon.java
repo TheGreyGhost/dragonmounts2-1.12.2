@@ -18,11 +18,13 @@ import com.TheRPGAdventurer.ROTD.common.entity.ai.path.PathNavigateFlying;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathHelperP;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.*;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractBase;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.*;
 import com.TheRPGAdventurer.ROTD.common.inventory.ContainerDragon;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonExtras;
@@ -107,18 +109,18 @@ public class EntityTameableDragon extends EntityTameable {
   public int roarTicks;
   public BlockPos homePos;
   public EntityTameableDragonStats dragonStats = new EntityTameableDragonStats();
-  public EntityTameableDragon(World world) {
+  public EntityTameableDragon(World world, DragonBreedNew dragonBreed, DragonVariants dragonVariants) {
     super(world);
 
     // enables walking over blocks
     stepHeight = 1;
 
     // create entity delegates
-    addHelper(new DragonBreedHelper(this, DATA_BREED));
+    addHelper(new DragonBreedHelper(this, dragonBreed, DATA_BREED, DATA_BREED_NEW));
 
     dragonPhysicalModel = getBreed().getDragonPhysicalModel();
 
-    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, getBreed().getDragonVariants()));
+    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonVariants));
     addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
     addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
     addHelper(new DragonInteractHelper(this));
@@ -2337,7 +2339,10 @@ public class EntityTameableDragon extends EntityTameable {
   private static final DataParameter<ItemStack> BANNER4 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);
   private static final DataParameter<Boolean> HAS_ADJUCATOR_STONE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
 
-/*    public boolean isGiga() {
+  private static final DataParameter<String> DATA_BREED_NEW = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.STRING);
+
+
+  /*    public boolean isGiga() {
         return getLifeStageHelper().isAdult();
     }
     public boolean isAdjudicator() {

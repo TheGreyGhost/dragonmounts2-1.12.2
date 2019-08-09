@@ -40,8 +40,8 @@ public class DragonReproductionHelper extends DragonHelper {
     this.dataParamBreeder = dataParamBreeder;
     this.dataParamReproduced = dataIndexReproCount;
 
-    dataWatcher.register(dataParamBreeder, Optional.absent());
-    dataWatcher.register(dataIndexReproCount, 0);
+    entityDataManager.register(dataParamBreeder, Optional.absent());
+    entityDataManager.register(dataIndexReproCount, 0);
   }
 
   @Override
@@ -80,12 +80,12 @@ public class DragonReproductionHelper extends DragonHelper {
   }
 
   public int getReproCount() {
-    return dataWatcher.get(dataParamReproduced);
+    return entityDataManager.get(dataParamReproduced);
   }
 
   public void setReproCount(int reproCount) {
     L.trace("setReproCount({})", reproCount);
-    dataWatcher.set(dataParamReproduced, reproCount);
+    entityDataManager.set(dataParamReproduced, reproCount);
   }
 
   public void addReproduced() {
@@ -97,12 +97,12 @@ public class DragonReproductionHelper extends DragonHelper {
   }
 
   public Optional<UUID> getBreederID() {
-    return dataWatcher.get(dataParamBreeder);
+    return entityDataManager.get(dataParamBreeder);
   }
 
   public void setBreederID(UUID breederID) {
     L.trace("setBreederUUID({})", breederID);
-    dataWatcher.set(dataParamBreeder, Optional.fromNullable(breederID));
+    entityDataManager.set(dataParamBreeder, Optional.fromNullable(breederID));
   }
 
   public EntityPlayer getBreeder() {
