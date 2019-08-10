@@ -68,7 +68,7 @@ public class DragonBreedHelper extends DragonHelper {
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
     nbt.setString(NBT_BREED, getBreedType().getName());
-    dragonBreedNew.setNBT(nbt);
+    dragonBreedNew.writeToNBT(nbt);
 
     NBTTagCompound breedPointTag = new NBTTagCompound();
     breedPoints.forEach((type, points) -> {

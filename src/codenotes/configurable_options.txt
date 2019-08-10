@@ -11,4 +11,5 @@ Questions?
  - models
  - sounds
 
-One egg only; don't use variants explicitly
+One egg only; don't use variants explicitly.
+

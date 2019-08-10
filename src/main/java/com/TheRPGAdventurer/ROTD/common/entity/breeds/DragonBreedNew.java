@@ -20,7 +20,7 @@ import java.util.Map;
  * 2) DragonBreedsRegistry.createDragonBreedNew for each breed; optionally validate the name beforehand using validateName
  * 3) When creating an entity of this breed:
  *     registerDataParameter and setDataParameter to set the entity's breed DataParameter to this breed
- *     setNBT to write the NBT tag for this breed
+ *     writeToNBT to write the NBT tag for this breed
  * 4) DragonBreedRegistry is used to retrieve the DragonBreedNew from serialised information, i.e.
  *      from internalname, from NBT, or from DataParameter
  * The registry always has a default breed in it, registered under DEFAULT_NAME (currently "default")
@@ -48,7 +48,7 @@ public class DragonBreedNew {
     entityDataManager.set(dataParameter, internalName);
   }
 
-  public void setNBT(NBTTagCompound nbt) {
+  public void writeToNBT(NBTTagCompound nbt) {
     nbt.setString(NBT_BREED_NEW, internalName);
   }
 

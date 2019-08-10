@@ -56,6 +56,10 @@ Order of refactoring:
   * Create interactive tool for configuration in-game
 
 Convert egg to a separate entity, it's not a dragon.
+Egg can have a few different states-
+Incubating, hatched, smashed.
+Hatched or smashed - eventually disappears similar to an item
+
 
 
 
