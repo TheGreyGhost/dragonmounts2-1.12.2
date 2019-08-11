@@ -66,11 +66,10 @@ public class DragonEggRenderer extends RenderLivingBase<EntityDragonEgg> {
   }
 
   @Override
-  public void doRender(EntityDragonEgg dragon, double x, double y, double z, float yaw, float partialTicks) {
+  public void doRender(EntityDragonEgg dragonEgg, double x, double y, double z, float yaw, float partialTicks) {
     // apply egg wiggle
-    DragonLifeStageHelper lifeStage = dragon.getLifeStageHelper();
-    float tickX = lifeStage.getEggWiggleX();
-    float tickZ = lifeStage.getEggWiggleZ();
+    float tickX = dragonEgg.getEggWiggleX();
+    float tickZ = dragonEgg.getEggWiggleZ();
 
     float rotX = 0;
     float rotZ = 0;
@@ -103,8 +102,8 @@ public class DragonEggRenderer extends RenderLivingBase<EntityDragonEgg> {
     vb.begin(GL_QUADS, DefaultVertexFormats.BLOCK);
 
     Block block = BlockDragonBreedEgg.DRAGON_BREED_EGG;
-    IBlockState iblockstate = block.getDefaultState().withProperty(BlockDragonBreedEgg.BREED, dragon.getBreedType());
-    BlockPos blockpos = dragon.getPosition();
+    IBlockState iblockstate = block.getDefaultState().withProperty(BlockDragonBreedEgg.BREED, EnumDragonBreed.FIRE);  //todo change later
+    BlockPos blockpos = dragonEgg.getPosition();
 
     double tx = -blockpos.getX() - 0.5;
     double ty = -blockpos.getY();
@@ -115,7 +114,7 @@ public class DragonEggRenderer extends RenderLivingBase<EntityDragonEgg> {
     IBakedModel bakedModel = brd.getModelForState(iblockstate);
 
     // render egg
-    brd.getBlockModelRenderer().renderModel(dragon.world, bakedModel, iblockstate, blockpos, vb, false);
+    brd.getBlockModelRenderer().renderModel(dragonEgg.world, bakedModel, iblockstate, blockpos, vb, false);
     vb.setTranslation(0, 0, 0);
 
     tessellator.draw();

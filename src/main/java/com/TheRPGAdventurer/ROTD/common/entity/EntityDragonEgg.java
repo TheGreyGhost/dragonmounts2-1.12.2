@@ -2,12 +2,13 @@ package com.TheRPGAdventurer.ROTD.common.entity;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
+import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
+import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -15,6 +16,7 @@ import net.minecraft.network.datasync.DataSerializer;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -37,12 +39,20 @@ public class EntityDragonEgg extends Entity {
     this.motionY = 0;
     this.motionZ = 0;
     eggState = EggState.INCUBATING;
+    if (world.isRemote) {
+      incubationTicksClient = new ClientServerSynchronisedTickCount(TICKS_SINCE_CREATION_UPDATE_INTERVAL);
+      incubationTicksClient.reset(incubationTicksServer);
+    } else {
+      incubationTicksClient = null;
+      incubationTicksServer = 0;
+    }
   }
 
   @Override
   protected void entityInit() {
     dragonBreed.registerDataParameter(this.getDataManager(), DATAPARAM_BREED);
     eggState.registerDataParameter(this.getDataManager(), DATAPARAM_EGGSTATE);
+    getDataManager().register(DATAPARAM_INCUBATIONTICKS, incubationTicksServer);
   }
 
   /**
@@ -71,6 +81,9 @@ public class EntityDragonEgg extends Entity {
         changeEggState(newEggState);
       }
     }
+    if (key.equals(DATAPARAM_INCUBATIONTICKS) && world.isRemote) {
+      incubationTicksClient.updateFromServer(this.getDataManager().get(DATAPARAM_INCUBATIONTICKS));
+    }
   }
 
   /**
@@ -80,6 +93,7 @@ public class EntityDragonEgg extends Entity {
   public void writeEntityToNBT(NBTTagCompound compound) {
     dragonBreed.writeToNBT(compound);
     eggState.writeToNBT(compound);
+    compound.setInteger(NBT_INCUBATION_TICKS, getIncubationTicks());
   }
 
   /**
@@ -94,8 +108,10 @@ public class EntityDragonEgg extends Entity {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
     EggState newEggState = EggState.getStateFromNBT(compound);
+    int incubationTicks = compound.getInteger(NBT_INCUBATION_TICKS);
     changeBreed(newBreed);
     changeEggState(newEggState);
+    setIncubationTicks(incubationTicks);
   }
 
   /**
@@ -156,7 +172,7 @@ public class EntityDragonEgg extends Entity {
     }
 
     if (eggState == EggState.HATCHED || eggState == EggState.SMASHED) {
-      ++this.age;
+      ++this.idleTicks;
     }
 
     this.handleWaterMovement();
@@ -173,9 +189,86 @@ public class EntityDragonEgg extends Entity {
       }
     }
 
-    if (!this.world.isRemote && this.age >= lifespan) {
+    if (!this.world.isRemote && this.idleTicks >= idleTicksBeforeDisappear) {
       this.setDead();
     }
+
+    updateIncubationTime();
+    updateEggAnimation();
+  }
+
+  private void updateEggAnimation() {
+    // animate egg wiggle based on the time the eggs take to hatch
+    float progress = DragonLifeStage.getStageProgressFromTickCount(getIncubationTicks());
+
+    // wait until the egg is nearly hatched
+    if (progress > EGG_WIGGLE_THRESHOLD) {
+      float wiggleChance = (progress - EGG_WIGGLE_THRESHOLD) / EGG_WIGGLE_BASE_CHANCE * (1 - EGG_WIGGLE_THRESHOLD);
+
+      if (eggWiggleX > 0) {
+        eggWiggleX--;
+      } else if (rand.nextFloat() < wiggleChance) {
+        eggWiggleX = rand.nextBoolean() ? 10 : 20;
+        if (progress > EGG_CRACK_THRESHOLD) {
+          playEggCrackEffect();
+        }
+      }
+
+      if (eggWiggleZ > 0) {
+        eggWiggleZ--;
+      } else if (rand.nextFloat() < wiggleChance) {
+        eggWiggleZ = rand.nextBoolean() ? 10 : 20;
+        if (progress > EGG_CRACK_THRESHOLD) {
+          playEggCrackEffect();
+        }
+      }
+    }
+
+    // spawn generic particles
+    double px = posX + (rand.nextDouble() - 0.3);
+    double py = posY + (rand.nextDouble() - 0.3);
+    double pz = posZ + (rand.nextDouble() - 0.3);
+    double ox = (rand.nextDouble() - 0.3) * 2;
+    double oy = (rand.nextDouble() - 0.3) * 2;
+    double oz = (rand.nextDouble() - 0.3) * 2;
+    world.spawnParticle(this.getEggParticle(), px, py, pz, ox, oy, oz);
+  }
+
+  private void updateIncubationTime() {
+    // If the egg is incubating, increase the age
+    if (!world.isRemote) {
+      if (eggState == EggState.INCUBATING) {
+        incubationTicksServer++;
+        if (incubationTicksServer % TICKS_SINCE_CREATION_UPDATE_INTERVAL == 0)
+          this.getDataManager().set(DATAPARAM_INCUBATIONTICKS, incubationTicksServer);
+      }
+    } else {
+      if (eggState == EggState.INCUBATING) incubationTicksClient.tick();
+    }
+  }
+
+  public int getIncubationTicks() {
+    if (!world.isRemote) {
+      return incubationTicksServer;
+    } else {
+      return incubationTicksClient.getCurrentTickCount();
+    }
+  }
+
+  public void setIncubationTicks(int incubationTicks) {
+    if (!world.isRemote) {
+      incubationTicksServer = incubationTicks;
+    } else {
+      incubationTicksClient.updateFromServer(incubationTicksServer);
+    }
+  }
+
+  public int getEggWiggleX() {
+    return eggWiggleX;
+  }
+
+  public int getEggWiggleZ() {
+    return eggWiggleZ;
   }
 
   /**
@@ -191,9 +284,16 @@ public class EntityDragonEgg extends Entity {
     final int LIFESPAN_HATCHED = 20 * 60;
 
     if (eggState == EggState.INCUBATING && newEggState != EggState.INCUBATING) {
-      lifespan = (newEggState == EggState.SMASHED) ? LIFESPAN_SMASHED : LIFESPAN_HATCHED;
+      idleTicksBeforeDisappear = (newEggState == EggState.SMASHED) ? LIFESPAN_SMASHED : LIFESPAN_HATCHED;
     }
     eggState = newEggState;
+  }
+
+  /**
+   * Generates some egg shell particles and a breaking sound.
+   */
+  public void playEggCrackEffect() {
+    world.playSound(null, posX, posY, posZ, ModSounds.DRAGON_HATCHING, SoundCategory.BLOCKS, +1.0F, 1.0F);
   }
 
   private void changeBreed(DragonBreedNew newDragonBreed) {
@@ -202,8 +302,8 @@ public class EntityDragonEgg extends Entity {
 
   private DragonBreedNew dragonBreed;
   private EggState eggState = EggState.INCUBATING;
-  private int age = 0;
-  private int lifespan;
+  private int idleTicks = 0;
+  private int idleTicksBeforeDisappear;
 
   public enum EggState {
     INCUBATING, HATCHED, SMASHED;
@@ -258,8 +358,19 @@ public class EntityDragonEgg extends Entity {
 
   private static final DataParameter<String> DATAPARAM_BREED = EntityDataManager.createKey(EntityDragonEgg.class, DataSerializers.STRING);
   private static final DataParameter<EggState> DATAPARAM_EGGSTATE = EntityDataManager.createKey(EntityDragonEgg.class, EGG_STATE_SERIALIZER);
+  private static final DataParameter<Integer> DATAPARAM_INCUBATIONTICKS = EntityDataManager.createKey(EntityDragonEgg.class, DataSerializers.VARINT);
+  private int eggWiggleX;
+  private int eggWiggleZ;
 
+  private static final String NBT_INCUBATION_TICKS = "IncubationTicks";
+  private static final int TICKS_SINCE_CREATION_UPDATE_INTERVAL = 100;
+  private static final float EGG_CRACK_THRESHOLD = 0.9f;
+  private static final float EGG_WIGGLE_THRESHOLD = 0.75f;
+  private static final float EGG_WIGGLE_BASE_CHANCE = 20;
+
+  // the ticks since creation is used to control the egg's hatching time.  It is only updated by the server occasionally.
+  // the client keeps a cached copy of it and uses client ticks to interpolate in the gaps.
+  // when the watcher is updated from the server, the client will tick it faster or slower to resynchronise
+  private final ClientServerSynchronisedTickCount incubationTicksClient;
+  private int incubationTicksServer;
 }
-
-
-
