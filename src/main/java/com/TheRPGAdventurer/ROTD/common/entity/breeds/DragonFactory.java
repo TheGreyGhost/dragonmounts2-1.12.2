@@ -1,5 +1,6 @@
 package com.TheRPGAdventurer.ROTD.common.entity.breeds;
 
+import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import net.minecraft.world.World;
 
@@ -19,6 +20,13 @@ public class DragonFactory {
     EntityTameableDragon newDragon = new EntityTameableDragon(world, dragonBreed, dragonBreed.getDragonVariants());
     return newDragon;
   }
+
+  public EntityDragonEgg createEgg(World world, DragonBreedNew dragonBreed) {
+    EntityDragonEgg newDragonEgg = new EntityDragonEgg(world, dragonBreed, dragonBreed.getDragonVariants());
+    return newDragonEgg;
+  }
+
+
 
   private static DragonFactory defaultDragonFactory = new DragonFactory();
 

@@ -16,6 +16,7 @@ import net.minecraft.network.datasync.DataSerializer;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -233,6 +234,12 @@ public class EntityDragonEgg extends Entity {
     double oz = (rand.nextDouble() - 0.3) * 2;
     world.spawnParticle(this.getEggParticle(), px, py, pz, ox, oy, oz);
   }
+
+
+  private EnumParticleTypes getEggParticle() {
+    return EnumParticleTypes.TOWN_AURA;
+  }
+
 
   private void updateIncubationTime() {
     // If the egg is incubating, increase the age
