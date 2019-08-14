@@ -41,14 +41,8 @@ public class RegistryEventHandler {
 
   @SubscribeEvent
   public static void registerDragonEggItem(RegistryEvent.Register<Item> event) {
-    event.getRegistry().register(ItemDragonBreedEgg.DRAGON_BREED_EGG.setRegistryName("dragon_egg"));
+    event.getRegistry().register(ItemDragonBreedEgg.DRAGON_BREED_EGG.setRegistryName("dragon_hatchable_egg"));
   }
-
-  @SubscribeEvent
-  public static void registerDragonnEggBlock(RegistryEvent.Register<Block> event) {
-    event.getRegistry().register(BlockDragonBreedEgg.DRAGON_BREED_EGG.setRegistryName("dragon_egg"));
-  }
-
 
   @SubscribeEvent
   public static void registerModels(ModelRegistryEvent event) {

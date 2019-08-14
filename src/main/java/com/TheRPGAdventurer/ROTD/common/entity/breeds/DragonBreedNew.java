@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.common.entity.breeds;
 
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedRenderer;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
+import com.google.common.collect.ImmutableList;
 import com.sun.istack.internal.NotNull;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -146,6 +147,14 @@ public class DragonBreedNew {
     public DragonBreedNew getBreed(NBTTagCompound nbt) throws IllegalArgumentException {
       String name = nbt.getString(NBT_BREED_NEW);
       return getBreed(name);
+    }
+
+    /** returns a list of all defined breeds
+     *
+     * @return
+     */
+    public ImmutableList<DragonBreedNew> getAllBreeds() {
+      return ImmutableList.copyOf(allDragonBreeds.values());
     }
 
     private Map<String, DragonBreedNew> allDragonBreeds = new HashMap<>();

@@ -37,9 +37,6 @@ import java.util.UUID;
 public class ItemDragonBreedEgg extends ItemBlock {
 
   public static ItemDragonBreedEgg DRAGON_BREED_EGG;
-  public static final Item[] ITEM_EGG = {
-          DRAGON_BREED_EGG = new ItemDragonBreedEgg()
-  };
 
   public ItemDragonBreedEgg() {
     super(BlockDragonBreedEgg.DRAGON_BREED_EGG);
@@ -189,9 +186,9 @@ public class ItemDragonBreedEgg extends ItemBlock {
    */
   public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
     if (this.isInCreativeTab(tab)) {
-      for (EntityList.EntityEggInfo entitylist$entityegginfo : EntityList.ENTITY_EGGS.values()) {
+      for (DragonBreedNew breed : DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getAllBreeds()) {
         ItemStack itemstack = new ItemStack(this, 1);
-        applyEntityIdToItemStack(itemstack, entitylist$entityegginfo.spawnedID);
+        applyBreedToItemStack(itemstack, breed);
         items.add(itemstack);
       }
     }
