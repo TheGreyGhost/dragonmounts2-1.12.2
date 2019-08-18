@@ -21,6 +21,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.event.DragonViewEvent;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.common.inits.ModKeys;
+import com.TheRPGAdventurer.ROTD.common.items.ItemDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.StartupDebugClientOnly;
 import net.minecraft.client.Minecraft;
@@ -60,6 +61,11 @@ public class ClientProxy extends CommonProxy {
 
     OBJLoader.INSTANCE.addDomain(DragonMounts.MODID);
 
+    final int DEFAULT_ITEM_SUBTYPE = 0;
+    ModelResourceLocation mrlDragonHatchableEgg = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
+    ModelLoader.setCustomModelResourceLocation(ItemDragonHatchableEgg.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, mrlDragonHatchableEgg);
+    ForgeHooksClient.registerTESRItemStack(Item.getItemFromBlock(block), meta, TEClass);
+
 //    RenderingRegistry.registerEntityRenderingHandler(HydroBreathFX.class, RenderHydroBreathFX::new);
 //    RenderingRegistry.registerEntityRenderingHandler(FlameBreathFX.class, RenderFlameBreathFX::new);
 //    RenderingRegistry.registerEntityRenderingHandler(EnderBreathFX.class, RenderEnderBreathFX::new);
@@ -69,7 +75,7 @@ public class ClientProxy extends CommonProxy {
 //    RenderingRegistry.registerEntityRenderingHandler(PoisonBreathFX.class, RenderPoisonBreathFX::new);
 //    RenderingRegistry.registerEntityRenderingHandler(AetherBreathFX.class, RenderAetherBreathFX::new);
 
-    MinecraftForge.EVENT_BUS.register(new TextureStitcherBreathFX());
+            MinecraftForge.EVENT_BUS.register(new TextureStitcherBreathFX());
 
     //Override mcmod.info - This looks cooler :)
     TextFormatting t = null, r = TextFormatting.RESET;

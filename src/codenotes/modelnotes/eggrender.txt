@@ -6,6 +6,45 @@ Item.setTileEntityItemStackRenderer
 --->net.minecraftforge.client.ForgeHooksClient.renderTileItem(p_192838_1_.getItem(), p_192838_1_.getMetadata());
 
 
+                TileEntityItemStackRenderer.instance.renderByItem(stack);
+
+    public static void renderTileItem(Item item, int metadata)
+    {
+        Class<? extends TileEntity> tileClass = tileItemMap.get(Pair.of(item, metadata));
+        if (tileClass != null)
+        {
+            TileEntitySpecialRenderer<?> r = TileEntityRendererDispatcher.instance.getRenderer(tileClass);
+            if (r != null)
+            {
+                r.render(null, 0, 0, 0, 0, -1, 0.0F);
+            }
+        }
+    }
+
+    /**
+     * @deprecated Will be removed as soon as possible, hopefully 1.9.
+     */
+ForgeHooksClient
+    @Deprecated
+    public static void registerTESRItemStack(Item item, int metadata, Class<? extends TileEntity> TileClass)
+    {
+        tileItemMap.put(Pair.of(item, metadata), TileClass);
+    }
+
+Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(Item.getItemFromBlock(block), meta, model);
+ForgeHooksClient.registerTESRItemStack(Item.getItemFromBlock(block), meta, TEClass);
+ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), meta, model);
+
+
++
+
+
+ClientRegistry.registerTileEntity(YourTileEntity.class, "name", new YourTileEntityRenderer());
+
+
+
+
+
 model.isBuiltInRenderer():
 
 true for BuiltInModel
