@@ -13,3 +13,5 @@ Questions?
 
 One egg only; don't use variants explicitly.
 
+https://www.programcreek.com/java-api-examples/?api=net.minecraftforge.client.model.obj.OBJLoader
+https://github.com/gigaherz/Enderthing/issues/14 as example

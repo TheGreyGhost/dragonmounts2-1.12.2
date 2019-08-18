@@ -4,22 +4,18 @@ package com.TheRPGAdventurer.ROTD.common.items;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
-import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -32,13 +28,12 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.UUID;
 
-public class ItemDragonBreedEgg extends ItemBlock {
+public class ItemDragonHatchableEgg extends ItemBlock {
 
-  public static ItemDragonBreedEgg DRAGON_BREED_EGG;
+  public static ItemDragonHatchableEgg DRAGON_HATCHABLE_EGG;
 
-  public ItemDragonBreedEgg() {
+  public ItemDragonHatchableEgg() {
     super(BlockDragonBreedEgg.DRAGON_BREED_EGG);
     this.setMaxDamage(0);
     this.setMaxStackSize(1);

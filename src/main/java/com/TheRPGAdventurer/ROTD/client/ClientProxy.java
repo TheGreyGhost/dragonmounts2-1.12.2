@@ -9,6 +9,7 @@
  */
 package com.TheRPGAdventurer.ROTD.client;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
@@ -26,7 +27,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.ModMetadata;
@@ -54,6 +57,8 @@ public class ClientProxy extends CommonProxy {
     // register dragon entity renderer
     DragonMountsConfig.clientPreInit();
     RenderingRegistry.registerEntityRenderingHandler(EntityTameableDragon.class, DragonRenderer::new);
+
+    OBJLoader.INSTANCE.addDomain(DragonMounts.MODID);
 
 //    RenderingRegistry.registerEntityRenderingHandler(HydroBreathFX.class, RenderHydroBreathFX::new);
 //    RenderingRegistry.registerEntityRenderingHandler(FlameBreathFX.class, RenderFlameBreathFX::new);

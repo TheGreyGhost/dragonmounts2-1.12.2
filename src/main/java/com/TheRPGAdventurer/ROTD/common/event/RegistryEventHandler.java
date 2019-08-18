@@ -6,11 +6,10 @@ import com.TheRPGAdventurer.ROTD.common.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.inits.ModBlocks;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
-import com.TheRPGAdventurer.ROTD.common.items.ItemDragonBreedEgg;
+import com.TheRPGAdventurer.ROTD.common.items.ItemDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.IHasModel;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -41,7 +40,7 @@ public class RegistryEventHandler {
 
   @SubscribeEvent
   public static void registerDragonEggItem(RegistryEvent.Register<Item> event) {
-    event.getRegistry().register(ItemDragonBreedEgg.DRAGON_BREED_EGG.setRegistryName("dragon_hatchable_egg"));
+    event.getRegistry().register(ItemDragonHatchableEgg.DRAGON_HATCHABLE_EGG.setRegistryName("dragon_hatchable_egg"));
   }
 
   @SubscribeEvent
@@ -59,7 +58,7 @@ public class RegistryEventHandler {
       }
     }
 
-    for (Item itemegg : ItemDragonBreedEgg.ITEM_EGG) {
+    for (Item itemegg : ItemDragonHatchableEgg.ITEM_EGG) {
       // register item renderer for dragon egg block variants
       ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
       Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
