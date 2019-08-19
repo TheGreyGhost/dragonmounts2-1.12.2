@@ -28,8 +28,8 @@ import java.util.Map;
 public class StartupDebugCommon {
   public static void preInitCommon() {
     if (!DragonMountsConfig.isDebug()) return;
-    testDragonVariantsReader(); //todo comment back out again when testing finished
-    testDragonLifeStageHelperTags();
+//    testDragonVariantsReader(); //todo comment back out again when testing finished
+//    testDragonLifeStageHelperTags();
   }
 
   public static void initCommon() {

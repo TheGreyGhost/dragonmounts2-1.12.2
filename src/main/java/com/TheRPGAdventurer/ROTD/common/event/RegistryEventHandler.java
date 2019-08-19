@@ -39,11 +39,6 @@ public class RegistryEventHandler {
   }
 
   @SubscribeEvent
-  public static void registerDragonEggItem(RegistryEvent.Register<Item> event) {
-    event.getRegistry().register(ItemDragonHatchableEgg.DRAGON_HATCHABLE_EGG.setRegistryName("dragon_hatchable_egg"));
-  }
-
-  @SubscribeEvent
   public static void registerModels(ModelRegistryEvent event) {
 
     for (Block block : ModBlocks.BLOCKS) {
@@ -58,25 +53,25 @@ public class RegistryEventHandler {
       }
     }
 
-    for (Item itemegg : ItemDragonHatchableEgg.ITEM_EGG) {
-      // register item renderer for dragon egg block variants
-      ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
-      Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
-      EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
-        ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
-        ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
-      });
-    }
+//    for (Item itemegg : ItemDragonHatchableEgg.ITEM_EGG) {
+//      // register item renderer for dragon egg block variants
+//      ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
+//      Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
+//      EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
+//        ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
+//        ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
+//      });
+//    }
 
-    for (Block blockegg : BlockDragonBreedEgg.BLOCK_EGG) {
-      // register item renderer for dragon egg block variants
-      ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
-      Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
-      EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
-        ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
-        ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
-      });
-    }
+//    for (Block blockegg : BlockDragonBreedEgg.BLOCK_EGG) {
+//      // register item renderer for dragon egg block variants
+//      ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
+//      Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
+//      EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
+//        ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
+//        ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
+//      });
+//    }
 
     DMUtils.getLogger().info("Models Sucessfully Registered");
   }

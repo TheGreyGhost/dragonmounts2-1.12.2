@@ -3,6 +3,7 @@ package com.TheRPGAdventurer.ROTD.common.entity;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import net.minecraft.block.material.Material;
@@ -30,7 +31,7 @@ import java.io.IOException;
 public class EntityDragonEgg extends Entity {
 
 
-  public EntityDragonEgg(World worldIn, DragonBreedNew dragonBreed, double x, double y, double z) {
+  public EntityDragonEgg(World worldIn, DragonBreedNew dragonBreed, DragonVariants dragonVariants, double x, double y, double z) {
     super(worldIn);
     this.dragonBreed = dragonBreed;
     this.setSize(0.25F, 0.25F);

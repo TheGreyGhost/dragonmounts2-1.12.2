@@ -8,11 +8,13 @@ import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
+import com.TheRPGAdventurer.ROTD.util.IHasModel;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,12 +31,11 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemDragonHatchableEgg extends ItemBlock {
-
-  public static ItemDragonHatchableEgg DRAGON_HATCHABLE_EGG;
+public class ItemDragonHatchableEgg extends Item {
 
   public ItemDragonHatchableEgg() {
-    super(BlockDragonBreedEgg.DRAGON_BREED_EGG);
+    this.setUnlocalizedName("dragon_hatchable_egg");
+    this.setRegistryName(new ResourceLocation(DragonMounts.MODID, "dragon_hatchable_egg"));
     this.setMaxDamage(0);
     this.setMaxStackSize(1);
     this.setHasSubtypes(true);
@@ -163,7 +164,7 @@ public class ItemDragonHatchableEgg extends ItemBlock {
    */
   @Nullable
   public static EntityDragonEgg spawnEgg(World worldIn, DragonBreedNew breed, double x, double y, double z) {
-    EntityDragonEgg entityDragonEgg = DragonFactory.getDefaultDragonFactory().createEgg(worldIn, breed);
+    EntityDragonEgg entityDragonEgg = DragonFactory.getDefaultDragonFactory().createEgg(worldIn, breed, x, y, z);
 
     entityDragonEgg.setLocationAndAngles(x, y, z, MathHelper.wrapDegrees(worldIn.rand.nextFloat() * 360.0F), 0.0F);
 //    dragon.getReproductionHelper().setBreeder(player);
@@ -208,6 +209,5 @@ public class ItemDragonHatchableEgg extends ItemBlock {
     NBTTagCompound nbttagcompound = stack.getTagCompound();
     return DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(nbttagcompound);
   }
-
 
 }

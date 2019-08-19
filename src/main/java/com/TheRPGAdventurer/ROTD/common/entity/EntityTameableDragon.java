@@ -219,8 +219,6 @@ public class EntityTameableDragon extends EntityTameable {
     dragonStats.readNBT(nbt);
     readDragonInventory(nbt);
     helpers.values().forEach(helper -> helper.readFromNBT(nbt));
-
-
   }
 
   /**

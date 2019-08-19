@@ -50,19 +50,19 @@ import static org.lwjgl.opengl.GL11.*;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
-public class DragonEggRenderer extends RenderLivingBase<EntityDragonEgg> {
+public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
 
   public static final String TEX_BASE = "textures/entities/dragon/";
 
-  public DragonEggRenderer(RenderManager renderManager) {
-    super(renderManager, null, 2);
+  public DragonHatchableEggRenderer(RenderManager renderManager) {
+    super(renderManager);
 
-    // create default breed renderers
-    for (EnumDragonBreed breed : EnumDragonBreed.values()) {
-      if (!breedRenderers.containsKey(breed)) {
-        breedRenderers.put(breed, new DefaultDragonBreedRenderer(this, breed));
-      }
-    }
+//    // create default breed renderers
+//    for (EnumDragonBreed breed : EnumDragonBreed.values()) {
+//      if (!breedRenderers.containsKey(breed)) {
+//        breedRenderers.put(breed, new DefaultDragonBreedRenderer(this, breed));
+//      }
+//    }
   }
 
   @Override
@@ -126,10 +126,10 @@ public class DragonEggRenderer extends RenderLivingBase<EntityDragonEgg> {
 
   @Override
   protected ResourceLocation getEntityTexture(EntityDragonEgg entityDragonEgg) {
-    return TextureMap.LOCATION_BLOCKS_TEXTURE;
+    return eggTexture;
   }
 
   private final Map<EnumDragonBreed, DefaultDragonBreedRenderer> breedRenderers = new EnumMap<>(EnumDragonBreed.class);
-
+  private static final ResourceLocation eggTexture = new ResourceLocation("minecraftbyexample:textures/entities/dragon/fire/egg.png");
 }
 
