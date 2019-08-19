@@ -7,6 +7,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
+import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.IHasModel;
 import net.minecraft.block.BlockLiquid;
@@ -40,6 +41,8 @@ public class ItemDragonHatchableEgg extends Item {
     this.setMaxStackSize(1);
     this.setHasSubtypes(true);
     this.setCreativeTab(DragonMounts.mainTab);
+
+    ModItems.ITEMS.add(this);
   }
 
   @Override
@@ -164,8 +167,7 @@ public class ItemDragonHatchableEgg extends Item {
    */
   @Nullable
   public static EntityDragonEgg spawnEgg(World worldIn, DragonBreedNew breed, double x, double y, double z) {
-    EntityDragonEgg entityDragonEgg = DragonFactory.getDefaultDragonFactory().createEgg(worldIn, breed, x, y, z);
-
+    EntityDragonEgg entityDragonEgg = DragonFactory.getDefaultDragonFactory().createEgg(worldIn, breed);
     entityDragonEgg.setLocationAndAngles(x, y, z, MathHelper.wrapDegrees(worldIn.rand.nextFloat() * 360.0F), 0.0F);
 //    dragon.getReproductionHelper().setBreeder(player);
     boolean success = worldIn.spawnEntity(entityDragonEgg);

@@ -27,20 +27,17 @@ import java.io.IOException;
 
 /**
  * Created by TGG on 10/08/2019.
+ *
+ *  *   Usage:
+ *   1) If spawning manually:
+ *     a) EntityTameableDragon(world)
+ *     b) either initialise(breed) or readEntityFromNBT(nbt)
  */
 public class EntityDragonEgg extends Entity {
 
 
-  public EntityDragonEgg(World worldIn, DragonBreedNew dragonBreed, DragonVariants dragonVariants, double x, double y, double z) {
+  public EntityDragonEgg(World worldIn) {
     super(worldIn);
-    this.dragonBreed = dragonBreed;
-    this.setSize(0.25F, 0.25F);
-    this.setPosition(x, y, z);
-    this.rotationYaw = (float) (Math.random() * 360.0D);
-    this.motionX = 0;
-    this.motionY = 0;
-    this.motionZ = 0;
-    eggState = EggState.INCUBATING;
     if (world.isRemote) {
       incubationTicksClient = new ClientServerSynchronisedTickCount(TICKS_SINCE_CREATION_UPDATE_INTERVAL);
       incubationTicksClient.reset(incubationTicksServer);
@@ -50,11 +47,24 @@ public class EntityDragonEgg extends Entity {
     }
   }
 
-  @Override
-  protected void entityInit() {
+  public void initialise(DragonBreedNew dragonBreed) {
+    this.dragonBreed = dragonBreed;
+    eggState = EggState.INCUBATING;
+
     dragonBreed.registerDataParameter(this.getDataManager(), DATAPARAM_BREED);
     eggState.registerDataParameter(this.getDataManager(), DATAPARAM_EGGSTATE);
     getDataManager().register(DATAPARAM_INCUBATIONTICKS, incubationTicksServer);
+
+    this.setSize(0.25F, 0.25F);
+    this.rotationYaw = (float) (Math.random() * 360.0D);
+    this.motionX = 0;
+    this.motionY = 0;
+    this.motionZ = 0;
+  }
+
+
+  @Override
+  protected void entityInit() {
   }
 
   /**
@@ -109,9 +119,9 @@ public class EntityDragonEgg extends Entity {
     } catch (IllegalArgumentException iae) {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
+    initialise(newBreed);
     EggState newEggState = EggState.getStateFromNBT(compound);
     int incubationTicks = compound.getInteger(NBT_INCUBATION_TICKS);
-    changeBreed(newBreed);
     changeEggState(newEggState);
     setIncubationTicks(incubationTicks);
   }

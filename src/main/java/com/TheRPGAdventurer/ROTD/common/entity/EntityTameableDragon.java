@@ -88,6 +88,12 @@ import static net.minecraft.entity.SharedMonsterAttributes.FOLLOW_RANGE;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  * @Modifier James Miller <TheRPGAdventurer.>
+ *
+ *   Usage:
+ *   1) If spawning manually:
+ *     a) EntityTameableDragon(world)
+ *     b) either initialise(breed) or readEntityFromNBT(nbt)
+ *
  */
 public class EntityTameableDragon extends EntityTameable {
   // base attributes
@@ -109,9 +115,17 @@ public class EntityTameableDragon extends EntityTameable {
   public int roarTicks;
   public BlockPos homePos;
   public EntityTameableDragonStats dragonStats = new EntityTameableDragonStats();
-  public EntityTameableDragon(World world, DragonBreedNew dragonBreed, DragonVariants dragonVariants) {
-    super(world);
 
+  public EntityTameableDragon(World world) {
+    super(world);
+  }
+
+  /** initialise the dragon to the desired breed:
+   *  * if the caller has manually constructed the entity, need to call this method
+   *  * otherwise, the vanilla constructor will create it and call readFromNBT
+   * @param dragonBreed
+   */
+  public void initialise(DragonBreedNew dragonBreed) {
     // enables walking over blocks
     stepHeight = 1;
 
@@ -120,7 +134,7 @@ public class EntityTameableDragon extends EntityTameable {
 
     dragonPhysicalModel = getBreed().getDragonPhysicalModel();
 
-    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonVariants));
+    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonBreed.getDragonVariants()));
     addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
     addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
     addHelper(new DragonInteractHelper(this));
@@ -140,7 +154,6 @@ public class EntityTameableDragon extends EntityTameable {
 
     InitializeDragonInventory();
   }
-
 
   /**
    * (abstract) Protected helper method to write subclass entity data to NBT.
@@ -189,6 +202,15 @@ public class EntityTameableDragon extends EntityTameable {
   @Override
   public void readEntityFromNBT(NBTTagCompound nbt) {
     super.readEntityFromNBT(nbt);
+
+    DragonBreedNew dragonBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed();
+    try {
+      dragonBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(nbt);
+    } catch (IllegalArgumentException iae) {
+      DragonMounts.loggerLimit.warn_once(iae.getMessage());
+    }
+    initialise(dragonBreed);
+
     //        this.setUniqueId(nbt.getUniqueId("IdAmulet")); // doesnt save uuid i double checked i/f has this bug makes dragon duplication posible, also why whitle wont work after amulet
     this.setSaddled(nbt.getBoolean(NBT_SADDLED));
     this.setChested(nbt.getBoolean(NBT_CHESTED));

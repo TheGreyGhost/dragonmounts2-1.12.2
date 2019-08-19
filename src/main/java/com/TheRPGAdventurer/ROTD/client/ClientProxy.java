@@ -65,9 +65,9 @@ public class ClientProxy extends CommonProxy {
 
     OBJLoader.INSTANCE.addDomain(DragonMounts.MODID);
 
-    ClientRegistry.registerTileEntity(TileEntityDragonHatchableEgg.class, "name", new TESRDragonHatchableEgg());
+    ClientRegistry.registerTileEntity(TileEntityDragonHatchableEgg.class, "dragonmounts:te_dragon_hatchable_egg", new TESRDragonHatchableEgg());
     final int DEFAULT_ITEM_SUBTYPE = 0;
-    ModelResourceLocation mrlDragonHatchableEgg = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
+    ModelResourceLocation mrlDragonHatchableEgg = new ModelResourceLocation("dragonmounts:models/entities/dragon/dragon_hatchable_egg.obj", "inventory");
     ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, mrlDragonHatchableEgg);
     ForgeHooksClient.registerTESRItemStack(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE,  TileEntityDragonHatchableEgg.class);
 

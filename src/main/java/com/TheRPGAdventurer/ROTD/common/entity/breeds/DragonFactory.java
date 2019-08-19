@@ -17,17 +17,16 @@ public class DragonFactory {
   public static DragonFactory getDefaultDragonFactory() {return defaultDragonFactory;}
 
   public EntityTameableDragon createDragon(World world, DragonBreedNew dragonBreed) {
-    EntityTameableDragon newDragon = new EntityTameableDragon(world, dragonBreed, dragonBreed.getDragonVariants());
+    EntityTameableDragon newDragon = new EntityTameableDragon(world);
+    newDragon.initialise(dragonBreed);
     return newDragon;
   }
 
-  public EntityDragonEgg createEgg(World world, DragonBreedNew dragonBreed, double x, double y, double z) {
-    EntityDragonEgg newDragonEgg = new EntityDragonEgg(world, dragonBreed, dragonBreed.getDragonVariants(), x, y, z);
+  public EntityDragonEgg createEgg(World world, DragonBreedNew dragonBreed) {
+    EntityDragonEgg newDragonEgg = new EntityDragonEgg(world);
+    newDragonEgg.initialise(dragonBreed);
     return newDragonEgg;
   }
 
-
-
   private static DragonFactory defaultDragonFactory = new DragonFactory();
-
 }
