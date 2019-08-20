@@ -12,6 +12,8 @@ package com.TheRPGAdventurer.ROTD.client;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
+import com.TheRPGAdventurer.ROTD.client.model.DragonHatchableEggModel;
+import com.TheRPGAdventurer.ROTD.client.model.ModelBakeEventHandlerEgg;
 import com.TheRPGAdventurer.ROTD.client.model.TEISRDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
@@ -80,6 +82,16 @@ public class ClientProxy extends CommonProxy {
 //    RenderingRegistry.registerEntityRenderingHandler(AetherBreathFX.class, RenderAetherBreathFX::new);
 
             MinecraftForge.EVENT_BUS.register(new TextureStitcherBreathFX());
+
+    // ModelBakeEvent will be used to add our ISmartItemModel to the ModelManager's registry (the
+    //  registry used to map all the ModelResourceLocations to IBlockModels).
+    // For the chessboard item, it will map from
+    // "minecraftbyexample:mbe15_item_chessboard#inventory to our SmartChessboardModel instance
+    MinecraftForge.EVENT_BUS.register(ModelBakeEventHandlerEgg.instance);
+
+    // model to be used for rendering this item
+    ModelResourceLocation itemModelResourceLocation = DragonHatchableEggModel.modelResourceLocation;
+    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, itemModelResourceLocation);
 
     //Override mcmod.info - This looks cooler :)
     TextFormatting t = null, r = TextFormatting.RESET;
