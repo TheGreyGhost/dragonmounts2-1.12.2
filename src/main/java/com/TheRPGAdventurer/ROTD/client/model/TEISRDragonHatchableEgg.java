@@ -1,10 +1,13 @@
 package com.TheRPGAdventurer.ROTD.client.model;
 
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -137,6 +140,9 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
       OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, SKY_LIGHT_VALUE * 16.0F, BLOCK_LIGHT_VALUE * 16.0F);
 
       bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX);
+      ModelResourceLocation mrl = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");  // todo refactor
+
+      IBakedModel ibm = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(mrl);
 //      addGemVertices(bufferBuilder);
       tessellator.draw();
 

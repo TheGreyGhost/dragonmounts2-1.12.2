@@ -13,7 +13,6 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
 import com.TheRPGAdventurer.ROTD.client.model.DragonHatchableEggModel;
-import com.TheRPGAdventurer.ROTD.client.model.ModelBakeEventHandlerEgg;
 import com.TheRPGAdventurer.ROTD.client.model.TEISRDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
@@ -24,19 +23,15 @@ import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.event.DragonViewEvent;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.common.inits.ModKeys;
-import com.TheRPGAdventurer.ROTD.common.items.ItemDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.StartupDebugClientOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -87,11 +82,14 @@ public class ClientProxy extends CommonProxy {
     //  registry used to map all the ModelResourceLocations to IBlockModels).
     // For the chessboard item, it will map from
     // "minecraftbyexample:mbe15_item_chessboard#inventory to our SmartChessboardModel instance
-    MinecraftForge.EVENT_BUS.register(ModelBakeEventHandlerEgg.instance);
+//    MinecraftForge.EVENT_BUS.register(ModelBakeEventHandlerEgg.instance);
 
     // model to be used for rendering this item
     ModelResourceLocation itemModelResourceLocation = DragonHatchableEggModel.modelResourceLocation;
     ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, itemModelResourceLocation);
+    final int DUMMY_ITEM_SUBTYPE = 1;
+    ModelResourceLocation objModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
+    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DUMMY_ITEM_SUBTYPE, objModelResourceLocation);
 
     //Override mcmod.info - This looks cooler :)
     TextFormatting t = null, r = TextFormatting.RESET;
