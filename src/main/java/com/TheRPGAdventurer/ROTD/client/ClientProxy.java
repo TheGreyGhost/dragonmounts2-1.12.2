@@ -12,8 +12,7 @@ package com.TheRPGAdventurer.ROTD.client;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
-import com.TheRPGAdventurer.ROTD.client.model.TESRDragonHatchableEgg;
-import com.TheRPGAdventurer.ROTD.client.model.TileEntityDragonHatchableEgg;
+import com.TheRPGAdventurer.ROTD.client.model.TEISRDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
@@ -65,12 +64,12 @@ public class ClientProxy extends CommonProxy {
 
     OBJLoader.INSTANCE.addDomain(DragonMounts.MODID);
 
-    ClientRegistry.registerTileEntity(TileEntityDragonHatchableEgg.class, "dragonmounts:te_dragon_hatchable_egg", new TESRDragonHatchableEgg());
+//    ClientRegistry.registerTileEntity(TileEntityDragonHatchableEgg.class, "dragonmounts:te_dragon_hatchable_egg", new TESRDragonHatchableEgg());
     final int DEFAULT_ITEM_SUBTYPE = 0;
-    ModelResourceLocation mrlDragonHatchableEgg = new ModelResourceLocation("dragonmounts:models/entities/dragon/dragon_hatchable_egg.obj", "inventory");
+    ModelResourceLocation mrlDragonHatchableEgg = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
     ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, mrlDragonHatchableEgg);
-    ForgeHooksClient.registerTESRItemStack(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE,  TileEntityDragonHatchableEgg.class);
-
+//    ForgeHooksClient.registerTESRItemStack(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE,  TileEntityDragonHatchableEgg.class);
+//
 //    RenderingRegistry.registerEntityRenderingHandler(HydroBreathFX.class, RenderHydroBreathFX::new);
 //    RenderingRegistry.registerEntityRenderingHandler(FlameBreathFX.class, RenderFlameBreathFX::new);
 //    RenderingRegistry.registerEntityRenderingHandler(EnderBreathFX.class, RenderEnderBreathFX::new);
@@ -121,6 +120,7 @@ public class ClientProxy extends CommonProxy {
       return 0xFFFFFF;
     }, ModItems.dragon_whistle);
 
+    ModItems.DRAGON_HATCHABLE_EGG.setTileEntityItemStackRenderer(new TEISRDragonHatchableEgg());
   }
 
   @Override

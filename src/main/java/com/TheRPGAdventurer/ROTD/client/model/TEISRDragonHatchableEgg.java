@@ -5,8 +5,10 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
@@ -16,7 +18,7 @@ import java.awt.*;
 /**
  * Renders the model of the DragonHatchable Egg - as an item
   */
-public class TESRDragonHatchableEgg extends TileEntitySpecialRenderer<TileEntityDragonHatchableEgg>
+public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
 {
 
   /**
@@ -31,13 +33,12 @@ public class TESRDragonHatchableEgg extends TileEntitySpecialRenderer<TileEntity
    * @param blockDamageProgress the progress of the block being damaged (0 - 10), if relevant.  -1 if not relevant.
    * @param alpha I'm not sure what this is used for; the name suggests alpha blending but Vanilla doesn't appear to use it
    */
+//  @Override
+//  public void render(TileEntityDragonHatchableEgg tileEntity, double relativeX, double relativeY, double relativeZ,
+//                     float partialTicks, int blockDamageProgress, float alpha) {
+
   @Override
-  public void render(TileEntityDragonHatchableEgg tileEntity, double relativeX, double relativeY, double relativeZ,
-                     float partialTicks, int blockDamageProgress, float alpha) {
-
-    if (!(tileEntity instanceof TileEntityDragonHatchableEgg)) return; // should never happen
-    TileEntityDragonHatchableEgg tileEntityDragonHatchableEgg = tileEntity;
-
+  public void renderByItem(ItemStack itemStackIn) {
     // the gem changes its appearance and animation as the player approaches.
     // When the player is a long distance away, the gem is dark, resting in the hopper, and does not rotate.
     // As the player approaches closer than 16 blocks, the gem first starts to glow brighter and to spin anti-clockwise
@@ -49,6 +50,10 @@ public class TESRDragonHatchableEgg extends TileEntitySpecialRenderer<TileEntity
     // 2) the brightness of the gem, which depends on player distance
     // 3) the distance that the gem rises above the pedestal, which depends on player distance
     // 4) the speed at which the gem is spinning, which depends on player distance.
+
+    double relativeX = 0;
+    double relativeY = 0;
+    double relativeZ = 0;
 
     final double pedestalCentreOffsetX = 0.5;
     final double pedestalCentreOffsetY = 0.8;
@@ -108,7 +113,7 @@ public class TESRDragonHatchableEgg extends TileEntitySpecialRenderer<TileEntity
 
       Tessellator tessellator = Tessellator.getInstance();
       BufferBuilder bufferBuilder = tessellator.getBuffer();
-      this.bindTexture(eggTexture);         // texture for the gem appearance
+      //this.bindTexture(eggTexture);         // texture for the gem appearance
 
       // set the key rendering flags appropriately...
       GL11.glDisable(GL11.GL_LIGHTING);     // turn off "item" lighting (face brightness depends on which direction it is facing)
@@ -139,13 +144,6 @@ public class TESRDragonHatchableEgg extends TileEntitySpecialRenderer<TileEntity
       GL11.glPopAttrib();
       GL11.glPopMatrix();
     }
-  }
-
-  // this should be true for tileentities which render globally (no render bounding box), such as beacons.
-  @Override
-  public boolean isGlobalRenderer(TileEntityDragonHatchableEgg tileEntityDragonHatchableEgg)
-  {
-    return false;
   }
 
   public ResourceLocation getEggTexture() {return eggTexture;}
