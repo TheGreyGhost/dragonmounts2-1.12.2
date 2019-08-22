@@ -4,7 +4,18 @@ import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
+import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.util.math.Interpolation;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.ModelLoader;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by TGG on 22/08/2019.
@@ -16,6 +27,10 @@ import com.TheRPGAdventurer.ROTD.util.math.Interpolation;
  */
 
 public class EggModels {
+
+  public EggModels getInstance() {return defaultInstance;}
+
+  private EggModels defaultInstance = new EggModels();
 
   /**
    * Initialise all the configuration tags used by this helper
@@ -37,6 +52,8 @@ public class EggModels {
     @Override
     public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
       DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
+
+      ModelResourceLocation
 
       double [] lifeStageAgesConfig = getLifeStageAges(dragonVariants);
       if (!Interpolation.isValidInterpolationArray(lifeStageAgesConfig)) {
@@ -63,9 +80,33 @@ public class EggModels {
     }
   }
 
+  public void setCustomModelResourceLocations(Item itemDragonHatchableEgg) {
+    for (Map.Entry<ModelResourceLocation, Integer> entry : allModelsAndMetadata.entrySet()) {
+      ModelLoader.setCustomModelResourceLocation(itemDragonHatchableEgg, entry.getValue(), entry.getKey());
+    }
+  }
 
-  private static final DragonVariantTag EGG_ITEM_MODEL_JSON = DragonVariantTag.addTag("eggmodeljson", );
-  private static final DragonVariantTag EGG_ITEM_MODEL_OBJ = DragonVariantTag.addTag("eggmodelobj", );
-  private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", );
+  public void registerTextures(TextureMap textureMap) {
+    for (ResourceLocation rl : allTextures) {
+      textureMap.registerSprite(rl);
+    }
+  }
+
+  private void addModelResourceLocation(ModelResourceLocation mrl) {
+    if (allModelsAndMetadata.containsKey(mrl)) return;
+    allModelsAndMetadata.put(mrl, nextMetadata++);
+  }
+
+  private void addTexture(ResourceLocation rl) {
+    allTextures.add(rl);
+  }
+
+  private static final DragonVariantTag EGG_ITEM_MODEL_BASE = DragonVariantTag.addTag("eggmodeljson", "dragon_hatchable_egg");
+  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "dragon_hatchable_egg.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "eggs/egg_default");
+
+  private Map<ModelResourceLocation, Integer> allModelsAndMetadata = new HashMap<>();
+  private int nextMetadata = 1;
+  private Set<ResourceLocation> allTextures = new HashSet<>();
 
 }
