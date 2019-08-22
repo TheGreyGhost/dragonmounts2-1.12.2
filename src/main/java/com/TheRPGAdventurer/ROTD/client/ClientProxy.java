@@ -12,7 +12,6 @@ package com.TheRPGAdventurer.ROTD.client;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
-import com.TheRPGAdventurer.ROTD.client.model.DragonHatchableEggModel;
 import com.TheRPGAdventurer.ROTD.client.model.TEISRDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
@@ -85,7 +84,7 @@ public class ClientProxy extends CommonProxy {
 //    MinecraftForge.EVENT_BUS.register(ModelBakeEventHandlerEgg.instance);
 
     // model to be used for rendering this item
-    ModelResourceLocation itemModelResourceLocation = DragonHatchableEggModel.modelResourceLocation;
+    ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
     ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, itemModelResourceLocation);
     final int DUMMY_ITEM_SUBTYPE = 1;
     ModelResourceLocation objModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");

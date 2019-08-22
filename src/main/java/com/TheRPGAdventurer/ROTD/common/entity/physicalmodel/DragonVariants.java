@@ -23,6 +23,8 @@ import static com.google.common.base.Preconditions.checkElementIndex;
  *    if the dragon growth profile is positive but the final size is smaller than the initial size).
  *    The use of the validator allows the error message to be grouped with other errors during parsing, rather than
  *    during execution of the code which uses the tag values.
+ *    The validator may also be used to initialise data structures within objects which use the validator (for example: create
+ *       ModelResourceLocations)
  * 2) Create a DragonVariants
  * 3) addTagAndValue() for all the tags in the config file
  * 4) call validateCollection() to apply all the registered VariantTagValidator functions on the collection
@@ -34,7 +36,8 @@ public class DragonVariants {
     BREATH_WEAPON_PRIMARY("breathweaponprimary", 0),
     BREATH_WEAPON_SECONDARY("breathweaponsecondary", 1),
     PHYSICAL_MODEL("physicalmodel", 2),
-    LIFE_STAGE("lifestage",3);
+    LIFE_STAGE("lifestage", 3),
+    EGG("lifestage", 4);
 
     /**
      * Checks if the given name has a corresponding Category
@@ -70,6 +73,9 @@ public class DragonVariants {
    * The VariantTagValidator is used to validate a group of variant tags
    * for example - to check if two incompatible tags have both been selected
    * If an incompatible combination is found, the validator may correct it or return it to defaults
+   *
+   * The validator may also initialise its internal structures in response to the calls
+   * eg create ModelResourceLocations based on tags linked to models
    */
   public interface VariantTagValidator {
     void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException;
