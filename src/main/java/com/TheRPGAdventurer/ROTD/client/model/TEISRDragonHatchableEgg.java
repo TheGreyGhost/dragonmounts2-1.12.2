@@ -54,7 +54,6 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
     // 3) the distance that the gem rises above the pedestal, which depends on player distance
     // 4) the speed at which the gem is spinning, which depends on player distance.
 
-    Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel()
 
     double relativeX = 0;
     double relativeY = 0;

@@ -149,6 +149,19 @@ public class DragonBreedNew {
       return getBreed(name);
     }
 
+    /**
+     * fetches the breed based on the DragonVariants tag supplied
+     * @param dragonVariants the dragonVariants object which was used to create this DragonBreedNew
+     * @return
+     * @throws IllegalArgumentException if no match
+     */
+    public DragonBreedNew getBreed(DragonVariants dragonVariants) {
+      for (DragonBreedNew breed : getAllBreeds()) {
+        if (breed.dragonVariants == dragonVariants) return breed;
+      }
+      throw new IllegalArgumentException("internal error: breed not found for given DragonVariants");
+    }
+
     /** returns a list of all defined breeds
      *
      * @return

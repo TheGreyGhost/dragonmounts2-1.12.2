@@ -12,6 +12,7 @@ package com.TheRPGAdventurer.ROTD.client;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
+import com.TheRPGAdventurer.ROTD.client.model.EggModels;
 import com.TheRPGAdventurer.ROTD.client.model.TEISRDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
@@ -59,9 +60,10 @@ public class ClientProxy extends CommonProxy {
     RenderingRegistry.registerEntityRenderingHandler(EntityTameableDragon.class, DragonRenderer::new);
 
     OBJLoader.INSTANCE.addDomain(DragonMounts.MODID);
+    MinecraftForge.EVENT_BUS.register(EggModels.getInstance());
 
 //    ClientRegistry.registerTileEntity(TileEntityDragonHatchableEgg.class, "dragonmounts:te_dragon_hatchable_egg", new TESRDragonHatchableEgg());
-    final int DEFAULT_ITEM_SUBTYPE = 0;
+//    final int DEFAULT_ITEM_SUBTYPE = 0;
 //    ModelResourceLocation mrlDragonHatchableEgg = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
 //    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, mrlDragonHatchableEgg);
 //    ForgeHooksClient.registerTESRItemStack(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE,  TileEntityDragonHatchableEgg.class);
@@ -75,7 +77,7 @@ public class ClientProxy extends CommonProxy {
 //    RenderingRegistry.registerEntityRenderingHandler(PoisonBreathFX.class, RenderPoisonBreathFX::new);
 //    RenderingRegistry.registerEntityRenderingHandler(AetherBreathFX.class, RenderAetherBreathFX::new);
 
-            MinecraftForge.EVENT_BUS.register(new TextureStitcherBreathFX());
+    MinecraftForge.EVENT_BUS.register(new TextureStitcherBreathFX());
 
     // ModelBakeEvent will be used to add our ISmartItemModel to the ModelManager's registry (the
     //  registry used to map all the ModelResourceLocations to IBlockModels).
@@ -83,12 +85,12 @@ public class ClientProxy extends CommonProxy {
     // "minecraftbyexample:mbe15_item_chessboard#inventory to our SmartChessboardModel instance
 //    MinecraftForge.EVENT_BUS.register(ModelBakeEventHandlerEgg.instance);
 
-    // model to be used for rendering this item
-    ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
-    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, itemModelResourceLocation);
-    final int DUMMY_ITEM_SUBTYPE = 1;
-    ModelResourceLocation objModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
-    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DUMMY_ITEM_SUBTYPE, objModelResourceLocation);
+//    // model to be used for rendering this item
+//    ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
+//    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DEFAULT_ITEM_SUBTYPE, itemModelResourceLocation);
+//    final int DUMMY_ITEM_SUBTYPE = 1;
+//    ModelResourceLocation objModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
+//    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DUMMY_ITEM_SUBTYPE, objModelResourceLocation);
 
     //Override mcmod.info - This looks cooler :)
     TextFormatting t = null, r = TextFormatting.RESET;
