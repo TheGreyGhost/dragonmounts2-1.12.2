@@ -7,11 +7,10 @@ import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
-import com.TheRPGAdventurer.ROTD.util.math.Interpolation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -51,10 +50,23 @@ public class EggModels {
     DragonVariants.addVariantTagValidator(new EggModelsValidator());
   }
 
-  public IBakedModel getModel(DragonBreedNew, EggModelState eggModelState) {
-    ModelResourceLocation mrl = 
-    Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel()
+  /** retrieve the IBakedModel for a given breed and eggModelState
+   * @param dragonBreed
+   * @param eggModelState
+   * @return  the IBakedModel, or a default IBakedModel if no proper model found
+   */
+  public IBakedModel getModel(DragonBreedNew dragonBreed, EggModelState eggModelState) {
+    ModelResourceLocation mrl = breedModels.get(new Pair<>(dragonBreed, eggModelState));
+    return Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(mrl);
+  }
 
+  /**
+   * Returns the texture sprite for the given breed
+   * @param dragonBreed
+   * @return null if not found
+   */
+  public TextureAtlasSprite getTextureAtlasSprite(DragonBreedNew dragonBreed) {
+    return breedTextures.get(dragonBreed);
   }
 
   /**
@@ -85,7 +97,7 @@ public class EggModels {
 
       str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_TEXTURE);
       ResourceLocation rl = new ResourceLocation("dragonmounts", str);
-      addTexture(rl);
+      addTexture(whichBreed, rl);
       internalState = InternalState.HAVE_VALIDATED;
     }
   }
@@ -128,13 +140,26 @@ public class EggModels {
 //    }
 //  }
 
+  /**
+   * Stitches all the item textures into the item texture sheet (TextureAtlas) so we can use them later
+   * @param event
+   */
   @SubscribeEvent
   public void stitcherEventPre(TextureStitchEvent.Pre event) {
     if (internalState == InternalState.INIT) {
       DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: texture stitch before validation");
     }
-    for (ResourceLocation rl : allTextures) {
-      event.getMap().registerSprite(rl);
+    Map<ResourceLocation, TextureAtlasSprite> addedTAS = new HashMap<>();
+    for (Map.Entry<DragonBreedNew, ResourceLocation> entry : breedTextureRLs.entrySet()) {
+      DragonBreedNew breed = entry.getKey();
+      ResourceLocation texRL = entry.getValue();
+      if (addedTAS.containsKey(texRL)) {
+        breedTextures.put(breed, addedTAS.get(texRL));
+      } else {
+        TextureAtlasSprite tas = event.getMap().registerSprite(texRL);
+        addedTAS.put(texRL, tas);
+        breedTextures.put(breed, tas);
+      }
     }
 //    ResourceLocation flameRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_fire");
 //    event.getMap().registerSprite(flameRL);
@@ -150,26 +175,29 @@ public class EggModels {
 
   private void addModelResourceLocation(DragonBreedNew dragonBreedNew, EggModelState eggModelState, ModelResourceLocation mrl) {
     Pair<DragonBreedNew, EggModelState> key = new Pair<>(dragonBreedNew,eggModelState);
-    if (modelMetadata.containsKey(key)) {
+    if (breedModels.containsKey(key)) {
       DragonMounts.loggerLimit.warn_once("Called addModelResourceLocation twice for same breed + state");
       return;
     }
-    int oldMetadata = nextMetadata;
     if (!allModelsAndMetadata.containsKey(mrl)) {
       allModelsAndMetadata.put(mrl, nextMetadata++);
     }
-    modelMetadata.put(key, oldMetadata);
+    breedModels.put(key, mrl);
   }
 
-  private void addTexture(ResourceLocation rl) {
-    allTextures.add(rl);
+  private void addTexture(DragonBreedNew breed, ResourceLocation rl) {
+    if (breedTextures.containsKey(breed)) {
+      DragonMounts.loggerLimit.warn_once("Called addModelResourceLocation twice for same breed + state");
+      return;
+    }
+    breedTextureRLs.put(breed, rl);
   }
 
 //  private static final DragonVariantTag EGG_ITEM_MODEL_BASE = DragonVariantTag.addTag("eggmodeljson", "dragon_hatchable_egg");
   private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "dragon_hatchable_egg.obj");
   private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "eggs/egg_default");
-  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelobj", "dragon_hatchable_egg_smashed.obj");
-  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelobj", "dragon_hatchable_egg_hatched.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "dragon_hatchable_egg_smashed.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "dragon_hatchable_egg_hatched.obj");
 
   // The EggModels uses the metadata for ItemHatchableEgg to register and load the various obj models, but uses NBT tag to
   //    choose which one to display.  The metadata itself is arbitrary / ignored.
@@ -177,10 +205,12 @@ public class EggModels {
   private Map<ModelResourceLocation, Integer> allModelsAndMetadata = new HashMap<>();
   private int nextMetadata = 1;
   private final int BASE_MODEL_METADATA = 0;
-  private Set<ResourceLocation> allTextures = new HashSet<>();
+  //  private Set<ResourceLocation> allTextures = new HashSet<>();
+  private Map<DragonBreedNew, ResourceLocation> breedTextureRLs = new HashMap<>();
+  private Map<DragonBreedNew, TextureAtlasSprite> breedTextures = new HashMap<>();
 
   private enum InternalState {INIT, HAVE_VALIDATED, REGISTERED_MODELS};
   private InternalState internalState = InternalState.INIT;  // just for debugging / assertion
 
-  private Map<Pair<DragonBreedNew, EggModelState>, Integer> modelMetadata = new HashMap<>();
+  private Map<Pair<DragonBreedNew, EggModelState>, ModelResourceLocation> breedModels = new HashMap<>();
 }

@@ -1,5 +1,7 @@
 package com.TheRPGAdventurer.ROTD.client.model;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -8,6 +10,9 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -54,7 +59,12 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
     // 3) the distance that the gem rises above the pedestal, which depends on player distance
     // 4) the speed at which the gem is spinning, which depends on player distance.
 
-
+    DragonBreedNew breed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed();
+    try {
+      breed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(itemStackIn.getTagCompound());
+    } catch (IllegalThreadStateException iae) {
+      DragonMounts.loggerLimit.error_once("Unknown breed in TEISRDragonHatchableEgg:" + iae.getMessage());
+    }
     double relativeX = 0;
     double relativeY = 0;
     double relativeZ = 0;
@@ -119,6 +129,45 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
       BufferBuilder bufferBuilder = tessellator.getBuffer();
       //this.bindTexture(eggTexture);         // texture for the gem appearance
 
+      TextureAtlasSprite sprite = EggModels.getInstance().getTextureAtlasSprite(breed);
+      setParticleTexture(sprite);
+      this.textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+      this.textureManager.getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
+
+      TextureManager texturemanager = this.rendererDispatcher.renderEngine;
+
+      if (texturemanager != null)
+      {
+        texturemanager.bindTexture(location);
+      }
+
+      /**
+       * Retrieve what effect layer (what texture) the particle should be rendered with. 0 for the particle sprite sheet,
+       * 1 for the main Texture atlas, and 3 for a custom texture
+       */
+      public int getFXLayer()
+      {
+        return 0;
+      }
+
+      /**
+       * Sets the texture used by the particle.
+       */
+      public void setParticleTexture(TextureAtlasSprite texture)
+      {
+        int i = this.getFXLayer();
+
+        if (i == 1)
+        {
+          this.particleTexture = texture;
+        }
+        else
+        {
+          throw new RuntimeException("Invalid call to Particle.setTex, use coordinate methods");
+        }
+      }
+
+
       // set the key rendering flags appropriately...
       GL11.glDisable(GL11.GL_LIGHTING);     // turn off "item" lighting (face brightness depends on which direction it is facing)
       GL11.glDisable(GL11.GL_BLEND);        // turn off "alpha" transparency blending
@@ -141,9 +190,11 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
       OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, SKY_LIGHT_VALUE * 16.0F, BLOCK_LIGHT_VALUE * 16.0F);
 
       bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX);
-      ModelResourceLocation mrl = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");  // todo refactor
+      IBakedModel iBakedModel = EggModels.getInstance().getModel(breed, EggModels.EggModelState.INCUBATING);
 
-      IBakedModel ibm = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(mrl);
+//      ModelResourceLocation mrl = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");  // todo refactor
+//
+//      IBakedModel ibm = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(mrl);
 //      addGemVertices(bufferBuilder);
       tessellator.draw();
 
@@ -153,7 +204,7 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
     }
   }
 
-  public ResourceLocation getEggTexture() {return eggTexture;}
-
-   private static final ResourceLocation eggTexture = new ResourceLocation("minecraftbyexample:textures/entities/dragon/fire/egg.png");
+//  public ResourceLocation getEggTexture() {return eggTexture;}
+//
+//   private static final ResourceLocation eggTexture = new ResourceLocation("minecraftbyexample:textures/entities/dragon/fire/egg.png");
 }
