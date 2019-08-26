@@ -1,5 +1,6 @@
 package com.TheRPGAdventurer.ROTD.common.entity.breath.weapons;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathAffectedBlock;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathAffectedEntity;
@@ -57,7 +58,7 @@ public class BreathWeaponNether extends BreathWeapon {
         int flammability = FireEffectsOnBlocks.processFlammability(block, world, sideToIgnite, facing);
         float thresholdForIgnition = FireEffectsOnBlocks.convertFlammabilityToHitDensityThreshold(flammability);
         float densityOfThisFace = currentHitDensity.getHitDensity(facing);
-        if (densityOfThisFace >= thresholdForIgnition && world.isAirBlock(sideToIgnite) && DragonMountsConfig.canFireBreathAffectBlocks) {
+        if (densityOfThisFace >= thresholdForIgnition && world.isAirBlock(sideToIgnite) && DragonMounts.instance.getConfig().canFireBreathAffectBlocks) {
           final double PERCENT_CHANCE_OF_IGNITION = 77.0 / 2500.0;
           FireEffectsOnBlocks.burnBlocks(sideToIgnite, rand, PERCENT_CHANCE_OF_IGNITION, world);
         }

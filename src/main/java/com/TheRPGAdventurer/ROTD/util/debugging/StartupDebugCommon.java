@@ -27,17 +27,17 @@ import java.util.Map;
  */
 public class StartupDebugCommon {
   public static void preInitCommon() {
-    if (!DragonMountsConfig.isDebug()) return;
+    if (!DragonMounts.instance.getConfig().isDebug()) return;
 //    testDragonVariantsReader(); //todo comment back out again when testing finished
 //    testDragonLifeStageHelperTags();
   }
 
   public static void initCommon() {
-    if (!DragonMountsConfig.isDebug()) return;
+    if (!DragonMounts.instance.getConfig().isDebug()) return;
   }
 
   public static void postInitCommon() {
-    if (!DragonMountsConfig.isDebug()) return;
+    if (!DragonMounts.instance.getConfig().isDebug()) return;
     MinecraftForge.EVENT_BUS.register(new DebugSpawnInhibitor());
   }
 

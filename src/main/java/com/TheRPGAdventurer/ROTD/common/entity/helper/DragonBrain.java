@@ -15,7 +15,6 @@ import com.TheRPGAdventurer.ROTD.common.entity.ai.air.EntityAIDragonFollowOwnerE
 import com.TheRPGAdventurer.ROTD.common.entity.ai.ground.*;
 import com.TheRPGAdventurer.ROTD.common.entity.ai.targeting.EntityAIRangedBreathAttack;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.util.EntityClassPredicate;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.EntityLiving;
@@ -26,6 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraftforge.oredict.OreDictionary;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import java.util.stream.Collectors;
@@ -77,8 +77,8 @@ public class DragonBrain extends DragonHelper {
     // mutex 4: special state
 
     Pair<Float, Float> ranges = dragon.getBreed().getBreathWeaponRange(dragon.getLifeStageHelper().getLifeStage());
-    float minAttackRange = ranges.getFirst();
-    float maxAttackRange = ranges.getSecond();
+    float minAttackRange = ranges.getLeft();
+    float maxAttackRange = ranges.getRight();
     EntityAIMoveToOptimalDistance moveToOptimalAttackDistance =
             new EntityAIMoveToOptimalDistance(dragon, 1, minAttackRange, (minAttackRange + maxAttackRange) / 2, maxAttackRange);
 

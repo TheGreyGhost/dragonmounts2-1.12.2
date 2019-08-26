@@ -9,6 +9,7 @@
  */
 package com.TheRPGAdventurer.ROTD.common.cmd;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
@@ -32,7 +33,7 @@ public class CommandDragon extends CommandBaseNested implements IDragonModifier 
     addCommand(new CommandDragonTame());
     addCommand(new CommandDragonUnlock());
 
-    if (DragonMountsConfig.isDebug()) {
+    if (DragonMounts.instance.getConfig().isDebug()) {
       addCommand(new CommandDragonDebug());
     }
   }

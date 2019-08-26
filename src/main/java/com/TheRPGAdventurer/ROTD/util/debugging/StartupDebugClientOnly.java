@@ -1,5 +1,6 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 
 /**
@@ -17,14 +18,14 @@ import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
  */
 public class StartupDebugClientOnly {
   public static void preInitClientOnly() {
-    if (!DragonMountsConfig.isDebug()) return;
+    if (!DragonMounts.instance.getConfig().isDebug()) return;
   }
 
   public static void initClientOnly() {
-    if (!DragonMountsConfig.isDebug()) return;
+    if (!DragonMounts.instance.getConfig().isDebug()) return;
   }
 
   public static void postInitClientOnly() {
-    if (!DragonMountsConfig.isDebug()) return;
+    if (!DragonMounts.instance.getConfig().isDebug()) return;
   }
 }

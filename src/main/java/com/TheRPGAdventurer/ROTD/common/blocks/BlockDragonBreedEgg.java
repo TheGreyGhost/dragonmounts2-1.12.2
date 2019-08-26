@@ -98,7 +98,7 @@ public class BlockDragonBreedEgg extends BlockDragonEgg {
    */
   @Override
   public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-    if (worldIn.isRemote || DragonMountsConfig.isDisableBlockOverride()) return false;
+    if (worldIn.isRemote || DragonMounts.instance.getConfig().isDisableBlockOverride()) return false;
     if (worldIn.provider.getDimensionType() == DimensionType.THE_END) {
       player.sendStatusMessage(new TextComponentTranslation(DMUtils.translateToLocal("egg.cantHatchEnd.DragonMounts")), true);
       return false;

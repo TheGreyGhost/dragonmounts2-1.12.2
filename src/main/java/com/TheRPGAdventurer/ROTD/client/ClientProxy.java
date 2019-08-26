@@ -57,7 +57,7 @@ public class ClientProxy extends CommonProxy {
   protected void preInitialisePhase1(FMLPreInitializationEvent event) {
     super.preInitialisePhase1(event);
     // register dragon entity renderer
-    DragonMountsConfig.clientPreInit();
+    DragonMounts.instance.getConfig().clientPreInit();
     RenderingRegistry.registerEntityRenderingHandler(EntityTameableDragon.class, DragonRenderer::new);
     MinecraftForge.EVENT_BUS.register(IItemColorRegistration.class);
 
@@ -128,7 +128,7 @@ public class ClientProxy extends CommonProxy {
   @Override
   public void Initialization(FMLInitializationEvent evt) {
     super.Initialization(evt);
-    if (DragonMountsConfig.isDebug()) {
+    if (DragonMounts.instance.getConfig().isDebug()) {
       MinecraftForge.EVENT_BUS.register(new GuiDragonDebug());
     }
     StartupDebugClientOnly.initClientOnly();
@@ -148,7 +148,7 @@ public class ClientProxy extends CommonProxy {
   public void PostInitialization(FMLPostInitializationEvent event) {
     super.PostInitialization(event);
 
-    if (DragonMountsConfig.isDebug()) {
+    if (DragonMounts.instance.getConfig().isDebug()) {
       MinecraftForge.EVENT_BUS.register(new GuiDragonDebug());
     }
     StartupDebugClientOnly.postInitClientOnly();

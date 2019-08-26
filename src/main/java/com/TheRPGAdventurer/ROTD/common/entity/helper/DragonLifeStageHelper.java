@@ -12,7 +12,6 @@ package com.TheRPGAdventurer.ROTD.common.entity.helper;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
@@ -34,6 +33,8 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -831,8 +832,8 @@ public class DragonLifeStageHelper extends DragonHelper {
 
     growthratePoints = getGrowthRatePoints(dragonVariants);
     Pair<double[], double []> curves = calculatePhysicalSizeCurve(dragonVariants, lifeStageAges, growthratePoints);
-    physicalSizePoints = curves.getFirst();
-    growthratePoints = curves.getSecond();
+    physicalSizePoints = curves.getLeft();
+    growthratePoints = curves.getRight();
     maximumSizeAtAnyAge = Doubles.max(physicalSizePoints);
   }
 
@@ -928,7 +929,7 @@ public class DragonLifeStageHelper extends DragonHelper {
       growthcurveNormalised[i] *= normaliseFactor;
     }
 
-    return new Pair(physicalSizePoints, growthcurveNormalised);
+    return new ImmutablePair<>(physicalSizePoints, growthcurveNormalised);
   }
 
   /**

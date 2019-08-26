@@ -41,7 +41,7 @@ public class TargetHighlighter {
 
     event.setCanceled(true);
 
-    if (!DragonMountsConfig.isOrbHighlightTarget()) {
+    if (!DragonMounts.instance.getConfig().isOrbHighlightTarget()) {
       return;
     }
 

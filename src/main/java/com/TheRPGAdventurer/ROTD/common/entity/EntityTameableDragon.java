@@ -10,7 +10,6 @@
 package com.TheRPGAdventurer.ROTD.common.entity;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
 import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.common.entity.ai.ground.EntityAIDragonSit;
@@ -24,7 +23,6 @@ import com.TheRPGAdventurer.ROTD.common.entity.helper.*;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractBase;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.*;
 import com.TheRPGAdventurer.ROTD.common.inventory.ContainerDragon;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonExtras;
@@ -40,7 +38,6 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -100,8 +97,8 @@ public class EntityTameableDragon extends EntityTameable {
   public static final double BASE_GROUND_SPEED = 0.4;
   public static final double BASE_AIR_SPEED = 0.9;
   public static final IAttribute MOVEMENT_SPEED_AIR = new RangedAttribute(null, "generic.movementSpeedAir", 0.9, 0.0, Double.MAX_VALUE).setDescription("Movement Speed Air").setShouldWatch(true);
-  public static final double BASE_DAMAGE = DragonMountsConfig.BASE_DAMAGE;
-  public static final double BASE_ARMOR = DragonMountsConfig.ARMOR;
+  public static final double BASE_DAMAGE = DragonMounts.instance.getConfig().BASE_DAMAGE;
+  public static final double BASE_ARMOR = DragonMounts.instance.getConfig().ARMOR;
   public static final double BASE_TOUGHNESS = 30.0D;
   public static final float RESISTANCE = 10.0f;
   public static final double BASE_FOLLOW_RANGE = 70;
@@ -787,7 +784,7 @@ public class EntityTameableDragon extends EntityTameable {
         this.setUnHovered(true);
       }
     }
-    if (this.ticksExisted % (DragonMountsConfig.hungerDecrement) == 1) {
+    if (this.ticksExisted % (DragonMounts.instance.getConfig().hungerDecrement) == 1) {
       if (this.getHunger() > 0) {
         this.setHunger(this.getHunger() - 1);
       }
@@ -982,7 +979,7 @@ public class EntityTameableDragon extends EntityTameable {
     this.setBoosting(this.getDistance(getOwner()) > 80);
     return this.getNavigator().tryMoveToXYZ(
             target.getX() + radius * Math.cos(directionInt * this.ticksExisted * 0.5 * speed / radius + offset),
-            DragonMountsConfig.maxFLightHeight + target.getY(),
+            DragonMounts.instance.getConfig().maxFlightHeight + target.getY(),
             target.getZ() + radius * Math.sin(directionInt * this.ticksExisted * 0.5 * speed / radius + offset),
             speed * moveSpeedMultiplier);
 
@@ -1003,7 +1000,7 @@ public class EntityTameableDragon extends EntityTameable {
 //
 //        return true;
     this.setBoosting(this.getDistance(getOwner()) > 180); // todo fix the rotation
-    return this.getNavigator().tryMoveToXYZ(midPoint.getX() + 10 * Math.cos(1 * this.ticksExisted * 0.5 * 1 / 10 + 4), DragonMountsConfig.maxFLightHeight + midPoint.getY(), midPoint.getZ() + 10 * Math.sin(1 * this.ticksExisted * 0.5 * 1 / 10 + 4), 1);
+    return this.getNavigator().tryMoveToXYZ(midPoint.getX() + 10 * Math.cos(1 * this.ticksExisted * 0.5 * 1 / 10 + 4), DragonMounts.instance.getConfig().maxFlightHeight + midPoint.getY(), midPoint.getZ() + 10 * Math.sin(1 * this.ticksExisted * 0.5 * 1 / 10 + 4), 1);
 
   }
 
@@ -1154,7 +1151,7 @@ public class EntityTameableDragon extends EntityTameable {
 
     ItemStack itemstack = player.getHeldItem(hand);
 
-    if (itemstack.getItem() == Items.BUCKET && !player.capabilities.isCreativeMode && !this.isChild() && DragonMountsConfig.canMilk) {
+    if (itemstack.getItem() == Items.BUCKET && !player.capabilities.isCreativeMode && !this.isChild() && DragonMounts.instance.getConfig().canMilk) {
       player.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
       itemstack.shrink(1);
 
@@ -3595,7 +3592,7 @@ public class EntityTameableDragon extends EntityTameable {
 //  public boolean circleTarget2(BlockPos target, float height, float radius, float speed, boolean direction, float offset, float moveSpeedMultiplier) {
 //    int directionInt=direction ? 1 : -1;
 //    this.setBoosting(this.getDistance(getOwner()) > 50);
-//    return this.getNavigator().tryMoveToXYZ(target.getX() + radius * Math.cos(directionInt * this.ticksExisted * 0.5 * speed / radius + offset), DragonMountsConfig.maxFLightHeight + target.getY(), target.getZ() + radius * Math.sin(directionInt * this.ticksExisted * 0.5 * speed / radius + offset), speed * moveSpeedMultiplier);
+//    return this.getNavigator().tryMoveToXYZ(target.getX() + radius * Math.cos(directionInt * this.ticksExisted * 0.5 * speed / radius + offset), DragonMountsConfig.maxFlightHeight + target.getY(), target.getZ() + radius * Math.sin(directionInt * this.ticksExisted * 0.5 * speed / radius + offset), speed * moveSpeedMultiplier);
 //
 //  }
 //

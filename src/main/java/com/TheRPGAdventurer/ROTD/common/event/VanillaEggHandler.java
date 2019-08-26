@@ -1,5 +1,6 @@
 package com.TheRPGAdventurer.ROTD.common.event;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
@@ -29,7 +30,7 @@ public class VanillaEggHandler {
     BlockPos pos = evt.getPos();
     if (world.getBlockState(pos).getBlock() != Blocks.DRAGON_EGG) return; //ignore all other blocks
     if (world.isRemote) return; //do nothing on client world
-    if (DragonMountsConfig.isDisableBlockOverride()) return; //do nothing if config is set
+    if (DragonMounts.instance.getConfig().isDisableBlockOverride()) return; //do nothing if config is set
     if (world.provider.getDimensionType() == DimensionType.THE_END) {
       evt.getEntityPlayer().sendStatusMessage(new TextComponentTranslation(DMUtils.translateToLocal("egg.cantHatchEnd.DragonMounts")), true);
       return;  //cant hatch in the end

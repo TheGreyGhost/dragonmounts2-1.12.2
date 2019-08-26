@@ -15,7 +15,6 @@ import com.TheRPGAdventurer.ROTD.common.entity.breath.weapons.BreathWeaponFireP;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.weapons.BreathWeaponP;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
@@ -31,6 +30,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -386,7 +387,7 @@ public abstract class DragonBreed {
         break;
       }
     }
-    return new Pair<Float, Float>(minAttackRange, maxAttackRange);
+    return new ImmutablePair<Float, Float>(minAttackRange, maxAttackRange);
   }
   private final String skin;
   private final int color;

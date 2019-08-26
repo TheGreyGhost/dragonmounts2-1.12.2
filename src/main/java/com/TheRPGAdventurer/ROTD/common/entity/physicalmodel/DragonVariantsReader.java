@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.util.Minify;
 import com.google.common.io.CharStreams;
 import com.google.gson.*;
@@ -114,6 +115,14 @@ public class DragonVariantsReader {
    * @throws JsonSyntaxException
    */
   private Map<String, DragonVariants> deserialiseAllBreeds(Reader input) throws JsonSyntaxException {
+
+    // ensure that the validators are also called for the default breed; otherwise resources aren't registered for the default breed..
+    try {
+      DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed().getDragonVariants().validateCollection();
+    } catch (DragonVariantsException dve) {
+      dragonVariantsErrors.addError(dve);
+    }
+
     Map<String, DragonVariants> retval = new HashMap<>();
     JsonParser parser = new JsonParser();
     JsonElement entireFile = parser.parse(input);
@@ -122,9 +131,17 @@ public class DragonVariantsReader {
     for (Map.Entry<String, JsonElement> entryForBreed : obj.entrySet()) {
       currentBreed = entryForBreed.getKey();
       JsonObject breedVariantData = entryForBreed.getValue().getAsJsonObject();
+
       DragonVariants dragonVariants = deserializeAllTagsForOneBreed(breedVariantData);
-      retval.put(currentBreed, dragonVariants);
+      try {
+        retval.put(currentBreed, dragonVariants);
+        DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().createDragonBreedNew(currentBreed, dragonVariants);
+        dragonVariants.validateCollection();
+      } catch (IllegalArgumentException iae) {
+        dragonVariantsErrors.addError(iae);
+      }
     }
+
     return retval;
   }
 
@@ -150,13 +167,6 @@ public class DragonVariantsReader {
         dragonVariantsErrors.addError(iae);
       }
     }
-
-    try {
-      dragonVariants.validateCollection();
-    } catch (DragonVariantsException dve) {
-      dragonVariantsErrors.addError(dve);
-    }
-
     return dragonVariants;
   }
 

@@ -24,6 +24,7 @@ import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.ilexiconn.llibrary.server.network.NetworkWrapper;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -82,12 +83,15 @@ public class DragonMounts {
 
   @EventHandler
   public void PreInitialization(FMLPreInitializationEvent event) {
+    config = new DragonMountsConfig(new Configuration(event.getSuggestedConfigurationFile()));
+
     proxy.PreInitialization(event);
     metadata = event.getModMetadata();
   }
 
   @EventHandler
   public void Initialization(FMLInitializationEvent event) {
+    NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
     proxy.Initialization(event);
   }
 

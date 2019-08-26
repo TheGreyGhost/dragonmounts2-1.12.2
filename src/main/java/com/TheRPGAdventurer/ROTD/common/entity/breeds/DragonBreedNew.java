@@ -59,9 +59,9 @@ public class DragonBreedNew {
    * @throws IllegalArgumentException
    */
   public static void validateName(@NotNull String internalName) throws IllegalArgumentException {
-    if (internalName.length() < 4) throw new IllegalArgumentException("internal name too short (< 4)");
-    if (internalName.length() > 12) throw new IllegalArgumentException("internal name too long (> 12)");
-    if (!internalName.matches("[a-zA-Z0-9]+")) throw new IllegalArgumentException("internal name must contain only letters and/or digits");
+    if (internalName.length() < 4) throw new IllegalArgumentException("internal name too short (< 4):" + internalName);
+    if (internalName.length() > 12) throw new IllegalArgumentException("internal name too long (> 12)" + internalName);
+    if (!internalName.matches("[a-zA-Z0-9]+")) throw new IllegalArgumentException("internal name must contain only letters and/or digits:" + internalName);
   }
 
   DragonBreedNew(String internalName, DragonVariants dragonVariants) throws IllegalArgumentException {

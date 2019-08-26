@@ -1,5 +1,6 @@
 package com.TheRPGAdventurer.ROTD.common.entity.breath.weapons;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathAffectedBlock;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathAffectedEntity;
@@ -66,7 +67,7 @@ public class BreathWeaponFire extends BreathWeapon {
         int flammability = FireEffectsOnBlocks.processFlammability(block, world, sideToIgnite, facing);
         float thresholdForIgnition = FireEffectsOnBlocks.convertFlammabilityToHitDensityThreshold(flammability);
         float densityOfThisFace = currentHitDensity.getHitDensity(facing);
-        if (densityOfThisFace >= thresholdForIgnition && world.isAirBlock(sideToIgnite) && thresholdForIgnition != 0 && DragonMountsConfig.canFireBreathAffectBlocks) {
+        if (densityOfThisFace >= thresholdForIgnition && world.isAirBlock(sideToIgnite) && thresholdForIgnition != 0 && DragonMounts.instance.getConfig().canFireBreathAffectBlocks) {
           final float MIN_PITCH = 0.8F;
           final float MAX_PITCH = 1.2F;
           final float VOLUME = 1.0F;

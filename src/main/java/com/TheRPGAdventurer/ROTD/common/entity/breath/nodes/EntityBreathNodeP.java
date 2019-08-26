@@ -4,13 +4,13 @@ package com.TheRPGAdventurer.ROTD.common.entity.breath.nodes;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathMode;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.IEntityParticle;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.util.EntityMoveAndResizeHelper;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;

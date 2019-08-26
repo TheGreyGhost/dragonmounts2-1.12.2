@@ -2,7 +2,6 @@ package com.TheRPGAdventurer.ROTD.client.model;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
@@ -17,6 +16,8 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,7 +57,7 @@ public class EggModels {
    * @return  the IBakedModel, or a default IBakedModel if no proper model found
    */
   public IBakedModel getModel(DragonBreedNew dragonBreed, EggModelState eggModelState) {
-    ModelResourceLocation mrl = breedModels.get(new Pair<>(dragonBreed, eggModelState));
+    ModelResourceLocation mrl = breedModels.get(new ImmutablePair<>(dragonBreed, eggModelState));
     return Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(mrl);
   }
 
@@ -90,6 +91,7 @@ public class EggModels {
       if (internalState != InternalState.INIT && internalState != InternalState.HAVE_VALIDATED) {
         DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: validation after Model registration");
       }
+      internalState = InternalState.HAVE_VALIDATED;
       DragonBreedNew whichBreed =  DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(dragonVariants);
       DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
 
@@ -108,7 +110,6 @@ public class EggModels {
       str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_TEXTURE);
       ResourceLocation rl = new ResourceLocation("dragonmounts", str);
       addTexture(whichBreed, rl);
-      internalState = InternalState.HAVE_VALIDATED;
     }
   }
 
@@ -184,7 +185,7 @@ public class EggModels {
   }
 
   private void addModelResourceLocation(DragonBreedNew dragonBreedNew, EggModelState eggModelState, ModelResourceLocation mrl) {
-    Pair<DragonBreedNew, EggModelState> key = new Pair<>(dragonBreedNew,eggModelState);
+    Pair<DragonBreedNew, EggModelState> key = new ImmutablePair<>(dragonBreedNew,eggModelState);
     if (breedModels.containsKey(key)) {
       DragonMounts.loggerLimit.warn_once("Called addModelResourceLocation twice for same breed + state");
       return;

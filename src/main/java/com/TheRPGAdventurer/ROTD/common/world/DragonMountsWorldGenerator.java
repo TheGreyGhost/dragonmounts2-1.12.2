@@ -64,45 +64,48 @@ public class DragonMountsWorldGenerator implements IWorldGenerator {
     boolean isMesa = BiomeDictionary.hasType(world.getBiome(height), Type.MESA);
     boolean isOcean = BiomeDictionary.hasType(world.getBiome(height), Type.OCEAN);
 
-    if (DragonMountsConfig.canSpawnSurfaceDragonNest && !world.isRemote) {
-      if (isOcean && random.nextInt((DragonMountsConfig.OceanNestRarity)) == 1) {
+    DragonMountsConfig dragonMountsConfig = DragonMounts.instance.getConfig();
+    if (dragonMountsConfig.canSpawnSurfaceDragonNest && !world.isRemote) {
+      if (isOcean && random.nextInt((dragonMountsConfig.OceanNestRarity)) == 1) {
 
         loadStructure(new BlockPos(height.getX(), height.getY() + 10, height.getZ()), world, random.nextBoolean() ? "aether" : "moonlight", LootTableList.CHESTS_WOODLAND_MANSION, true, random);
 
-      } else if (isSnowy && random.nextInt((DragonMountsConfig.IceNestRarity)) == 1 && canSpawnHere(world, height, 7)) {
+      } else if (isSnowy && random.nextInt((dragonMountsConfig.IceNestRarity)) == 1 && canSpawnHere(world, height, 7)) {
 
         loadStructure(new BlockPos(height.getX(), height.getY() - 2, height.getZ()), world, "ice", LootTableList.CHESTS_STRONGHOLD_CROSSING, true, random);
 
-      } else if (isJungle && random.nextInt((DragonMountsConfig.JungleNestRarity)) == 1) {
+      } else if (isJungle && random.nextInt((dragonMountsConfig.JungleNestRarity)) == 1) {
         loadStructure(height, world, "forest1", LootTableList.CHESTS_STRONGHOLD_LIBRARY, true, random);
 
-      } else if (isDesert && random.nextInt((DragonMountsConfig.SunlightNestRarity)) == 1 && canSpawnHere(world, height, 22)) {
+      } else if (isDesert && random.nextInt((dragonMountsConfig.SunlightNestRarity)) == 1 && canSpawnHere(world, height, 22)) {
 
         loadStructure(new BlockPos(height.getX(), height.getY() - 10, height.getZ()), world, "sunlight", LootTableList.CHESTS_DESERT_PYRAMID, true, random);
 
-      } else if (isMesa && random.nextInt((DragonMountsConfig.TerraNestRarity)) == 1 && canSpawnHere(world, height, 4)) {
+      } else if (isMesa && random.nextInt((dragonMountsConfig.TerraNestRarity)) == 1 && canSpawnHere(world, height, 4)) {
         loadStructure(new BlockPos(height.getX(), height.getY() - 2, height.getZ()), world, "terra", LootTableList.CHESTS_NETHER_BRIDGE, true, random);
 
-      } else if ((isSwamp) && random.nextInt((DragonMountsConfig.WaterNestRarity)) == 1 && canSpawnWaterHere(world, height, 4)) {
+      } else if ((isSwamp) && random.nextInt((dragonMountsConfig.WaterNestRarity)) == 1 && canSpawnWaterHere(world, height, 4)) {
         loadStructure(new BlockPos(height.getX(), height.getY() - 4, height.getZ()), world, "water3", LootTableList.CHESTS_DESERT_PYRAMID, true, random);
 
-      } else if ((isPlains || isForest) && random.nextInt((DragonMountsConfig.ForestNestRarity)) == 1 && canSpawnHere(world, height, 4)) {
+      } else if ((isPlains || isForest) && random.nextInt((dragonMountsConfig.ForestNestRarity)) == 1 && canSpawnHere(world, height, 4)) {
         loadStructure(new BlockPos(height.getX(), height.getY() - 2, height.getZ()), world, "forest2", LootTableList.CHESTS_DESERT_PYRAMID, true, random);
 
-      } else if (isMountainOrBeach && random.nextInt(DragonMountsConfig.FireNestRarity) == 1 && canSpawnHere(world, height, 4)) {
+      } else if (isMountainOrBeach && random.nextInt(dragonMountsConfig.FireNestRarity) == 1 && canSpawnHere(world, height, 4)) {
         loadStructure(new BlockPos(height.getX(), height.getY() - 2, height.getZ()), world, "fire", LootTableList.CHESTS_SIMPLE_DUNGEON, true, random);
       }
     }
   }
 
   public void generateNestAtNether(World world, Random random, int chunkX, int chunkZ) {
-    if (DragonMountsConfig.canSpawnNetherNest && !world.isRemote) {
+    DragonMountsConfig dragonMountsConfig = DragonMounts.instance.getConfig();
+
+    if (dragonMountsConfig.canSpawnNetherNest && !world.isRemote) {
       WorldServer worldserver = (WorldServer) world;
 
-      int x = (chunkX * DragonMountsConfig.netherNestRarerityInX) + random.nextInt(DragonMountsConfig.netherNestRarerityInX);
-      int z = (chunkZ * DragonMountsConfig.netherNestRarerityInZ) + random.nextInt(DragonMountsConfig.netherNestRarerityInZ);
+      int x = (chunkX * dragonMountsConfig.netherNestRarerityInX) + random.nextInt(dragonMountsConfig.netherNestRarerityInX);
+      int z = (chunkZ * dragonMountsConfig.netherNestRarerityInZ) + random.nextInt(dragonMountsConfig.netherNestRarerityInZ);
 
-      if (random.nextInt(DragonMountsConfig.netherNestRarity) == 1) {
+      if (random.nextInt(dragonMountsConfig.netherNestRarity) == 1) {
         BlockPos pos = getNetherHeight(world, new BlockPos(x, 0, z));
 
         if (pos != null && canSpawnNetherHere(world, pos, 6)) {
@@ -113,15 +116,17 @@ public class DragonMountsWorldGenerator implements IWorldGenerator {
   }
 
   public void generateZombieAtNether(World world, Random random, int chunkX, int chunkZ) {
-    if (DragonMountsConfig.canSpawnNetherNest && !world.isRemote) {
+    DragonMountsConfig dragonMountsConfig = DragonMounts.instance.getConfig();
+
+    if (dragonMountsConfig.canSpawnNetherNest && !world.isRemote) {
       WorldServer worldserver = (WorldServer) world;
 
-      int x = (chunkX * DragonMountsConfig.zombieNestRarerityInX) + random.nextInt(DragonMountsConfig.zombieNestRarerityInX);
-      int z = (chunkZ * DragonMountsConfig.zombieNestRarerityInZ) + random.nextInt(DragonMountsConfig.zombieNestRarerityInZ);
+      int x = (chunkX * dragonMountsConfig.zombieNestRarerityInX) + random.nextInt(dragonMountsConfig.zombieNestRarerityInX);
+      int z = (chunkZ * dragonMountsConfig.zombieNestRarerityInZ) + random.nextInt(dragonMountsConfig.zombieNestRarerityInZ);
       for (int y = 85; y >= 5; y--) {
 
         boolean solidGround = world.getBlockState(new BlockPos(x, y, z)).isBlockNormalCube();
-        if (solidGround && random.nextInt(DragonMountsConfig.zombieNestRarity) == 1) {
+        if (solidGround && random.nextInt(dragonMountsConfig.zombieNestRarity) == 1) {
           boolean place = true;
 
           for (int Y = 0; Y < 3; Y++) {
@@ -160,8 +165,9 @@ public class DragonMountsWorldGenerator implements IWorldGenerator {
   public void generateNestAtEnd(World world, Random random, int chunkX, int chunkZ) {
     WorldServer worldserver = (WorldServer) world;
     MinecraftServer minecraftserver = world.getMinecraftServer();
+    DragonMountsConfig dragonMountsConfig = DragonMounts.instance.getConfig();
 
-    if (DragonMountsConfig.canSpawnEndNest && random.nextInt(DragonMountsConfig.EnchantNestRarity) == 1) {
+    if (dragonMountsConfig.canSpawnEndNest && random.nextInt(dragonMountsConfig.EnchantNestRarity) == 1) {
       int x = (chunkX * 16) + random.nextInt(16);
       int z = (chunkZ * 16) + random.nextInt(16);
       BlockPos height = getHeight(world, new BlockPos(x, 0, z));
@@ -315,9 +321,10 @@ public class DragonMountsWorldGenerator implements IWorldGenerator {
   }
 
   private boolean isDimensionBlacklisted(int id) {
-    boolean useBlackOrWhiteLists = DragonMountsConfig.useDimensionBlackList;
-    int[] blacklistedArray = DragonMountsConfig.dragonBlacklistedDimensions;
-    int[] whitelistedArray = DragonMountsConfig.dragonWhitelistedDimensions;
+    DragonMountsConfig dragonMountsConfig = DragonMounts.instance.getConfig();
+    boolean useBlackOrWhiteLists = dragonMountsConfig.useDimensionBlackList;
+    int[] blacklistedArray = dragonMountsConfig.dragonBlacklistedDimensions;
+    int[] whitelistedArray = dragonMountsConfig.dragonWhitelistedDimensions;
     int[] array = useBlackOrWhiteLists ? blacklistedArray : whitelistedArray;
     List<Integer> dimList = new ArrayList<Integer>();
     for (int dimension : array) {

@@ -9,6 +9,7 @@
  */
 package com.TheRPGAdventurer.ROTD.common.entity.interact;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
@@ -90,7 +91,7 @@ public class DragonInteract extends DragonInteractBase {
           }
 
           // heal
-          if (DragonMountsConfig.hungerDecrement == 0) {
+          if (DragonMounts.instance.getConfig().hungerDecrement == 0) {
             eatEvent(player);
             dragon.heal(50);
             return true;

@@ -7,7 +7,6 @@ import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.EntityBreathNodeP;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.weapons.BreathWeapon;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.weapons.BreathWeaponP;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
@@ -17,6 +16,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 

@@ -16,11 +16,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.io.File;
 import java.util.List;
 
 public class DragonMountsConfig {
@@ -28,112 +26,111 @@ public class DragonMountsConfig {
   public static final String CATEGORY_MAIN = "main";
   public static final String CATEGORY_WORLDGEN = "worldGen";
   public static final String CATEGORY_CLIENTDM2 = "clientDM2";
-  public static boolean shouldChangeBreedViaHabitatOrBlock = true;
-  public static boolean canDragonDespawn = true;
-  public static boolean canMilk = true;
-  public static boolean canIceBreathBePermanent = false;
-  public static boolean canFireBreathAffectBlocks = true;
-  public static boolean useCommandingPlayer = false;
-  public static boolean allowOtherPlayerControl = true;
-  public static boolean allowBreeding = true;
-  public static boolean canSpawnSurfaceDragonNest = true;
-  public static boolean canSpawnUnderGroundNest = true;
-  public static boolean canSpawnNetherNest = true;
-  public static boolean canSpawnEndNest = true;
-  public static double ARMOR = 8F;
-  public static double BASE_DAMAGE = 5.0F;
-  public static double BASE_HEALTH = 90.0d;
-  public static int REG_FACTOR = 75;
-  public static int hungerDecrement = 3000;
+  public boolean shouldChangeBreedViaHabitatOrBlock = true;
+  public boolean canDragonDespawn = true;
+  public boolean canMilk = true;
+  public boolean canIceBreathBePermanent = false;
+  public boolean canFireBreathAffectBlocks = true;
+  public boolean useCommandingPlayer = false;
+  public boolean allowOtherPlayerControl = true;
+  public boolean allowBreeding = true;
+  public boolean canSpawnSurfaceDragonNest = true;
+  public boolean canSpawnUnderGroundNest = true;
+  public boolean canSpawnNetherNest = true;
+  public boolean canSpawnEndNest = true;
+  public double ARMOR = 8F;
+  public double BASE_DAMAGE = 5.0F;
+  public double BASE_HEALTH = 90.0d;
+  public int REG_FACTOR = 75;
+  public int hungerDecrement = 3000;
   // chances
-  public static int FireNestRarity = 50;
+  public int FireNestRarity = 50;
   //	public static int ZombieNestRarity1  = 180;
-  public static int TerraNestRarity = 180;
-  public static int ForestNestRarity = 180;
-  public static int SunlightNestRarity = 60;
-  public static int OceanNestRarity = 4000;
-  public static int EnchantNestRarity = 300;
-  public static int JungleNestRarity = 700;
-  public static int WaterNestRarity = 150;
-  public static int IceNestRarity = 200;
-  public static int netherNestRarity = 200;
-  public static int netherNestRarerityInX = 16;
-  public static int netherNestRarerityInZ = 16;
-  public static int zombieNestRarity = 500;
-  public static int zombieNestRarerityInX = 28;
-  public static int zombieNestRarerityInZ = 28;
-  public static double ThirdPersonZoom = 8;
-  public static int dragonFollowOwnerFlyingHeight = 50;
-  public static int dragonanderFromHomeDist = 50;
-  public static double maxFLightHeight = 20;
-  public static int[] dragonBlacklistedDimensions = new int[]{1, -1};
-  public static int[] dragonWhitelistedDimensions = new int[]{0};
-  public static int minimumDistance = 16;
-  public static boolean useDimensionBlackList = true;
+  public int TerraNestRarity = 180;
+  public int ForestNestRarity = 180;
+  public int SunlightNestRarity = 60;
+  public int OceanNestRarity = 4000;
+  public int EnchantNestRarity = 300;
+  public int JungleNestRarity = 700;
+  public int WaterNestRarity = 150;
+  public int IceNestRarity = 200;
+  public int netherNestRarity = 200;
+  public int netherNestRarerityInX = 16;
+  public int netherNestRarerityInZ = 16;
+  public int zombieNestRarity = 500;
+  public int zombieNestRarerityInX = 28;
+  public int zombieNestRarerityInZ = 28;
+  public double thirdPersonZoom = 8;
+  public int dragonFollowOwnerFlyingHeight = 50;
+  public int dragonWanderFromHomeDist = 50;
+  public double maxFlightHeight = 20;
+  public int[] dragonBlacklistedDimensions = new int[]{1, -1};
+  public int[] dragonWhitelistedDimensions = new int[]{0};
+  public int minimumDistance = 16;
+  public boolean useDimensionBlackList = true;
 
-  public static void PreInit() {
-    File configFile = new File(Loader.instance().getConfigDir(), DragonMounts.MODID + ".cfg");
-    config = new Configuration(configFile);
+  public DragonMountsConfig(Configuration i_config) {
+    config = i_config;
     syncFromFiles();
   }
 
-  public static void clientPreInit() {
+  public void clientPreInit() {
     MinecraftForge.EVENT_BUS.register(new ConfigEventHandler());
   }
 
-  public static void syncFromFiles() {
+  public void syncFromFiles() {
     syncconfigs(true, true);
   }
 
-  public static void syncFromGui() {
+  public void syncFromGui() {
     syncconfigs(false, true);
   }
 
-  public static void syncFromFields() {
+  public void syncFromFields() {
     syncconfigs(false, false);
   }
   // can be caused by static instantiation of classes especially Items Blocks and similar
 
-  public static Configuration getConfig() {
+  public Configuration getConfig() {
     return config;
   }
 
-  public static boolean isDebug() {
+  public boolean isDebug() {
     verifyLoaded();
     return debug;
   }
 
-  public static boolean isDisableBlockOverride() {
+  public boolean isDisableBlockOverride() {
     verifyLoaded();
     return disableBlockOverride;
   }
 
-  public static boolean isOrbTargetAutoLock() {
+  public boolean isOrbTargetAutoLock() {
     verifyLoaded();
     return true;
   } //todo update later if dragon orb gets reintroduced
 
-  public static boolean isOrbHighlightTarget() {
+  public boolean isOrbHighlightTarget() {
     verifyLoaded();
     return true;
   }
 
-  public static boolean isPrototypeBreathweapons() {
+  public boolean isPrototypeBreathweapons() {
     verifyLoaded();
     return isDebug() && prototypeBreathWeapons;
   } // turn off prototype breathweapons if not debugging
 
-  public static boolean doBreathweaponsAffectBlocks() {
+  public boolean doBreathweaponsAffectBlocks() {
     verifyLoaded();
     return true;
   } // todo implement later
 
-  public static boolean isOrbHolderImmune() {
+  public boolean isOrbHolderImmune() {
     verifyLoaded();
     return true;
   } //todo implement later
 
-  public static class ConfigEventHandler {
+  public class ConfigEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onEvent(ConfigChangedEvent.OnConfigChangedEvent event) {
@@ -143,14 +140,14 @@ public class DragonMountsConfig {
     }
   }
 
-  private static void verifyLoaded() {
+  private void verifyLoaded() {
     if (configHasLoaded) return;
 
     DragonMounts.loggerLimit.error_once(
             "One or more DragonMountsConfig properties were accessed before loading the configuration");
   }
 
-  private static void syncconfigs(boolean loadFromConfigFile, boolean readFromConfig) {
+  private void syncconfigs(boolean loadFromConfigFile, boolean readFromConfig) {
     if (loadFromConfigFile)
       config.load();
 
@@ -240,19 +237,19 @@ public class DragonMountsConfig {
     allowBreeding = prop.getBoolean();
     propOrder.add(prop.getName());
 
-    prop = config.get(CATEGORY_CLIENTDM2, "Max Flight Height", maxFLightHeight);
+    prop = config.get(CATEGORY_CLIENTDM2, "Max Flight Height", maxFlightHeight);
     prop.setComment("Max flight for dragons circling players on a whistle");
-    maxFLightHeight = prop.getDouble();
+    maxFlightHeight = prop.getDouble();
     propOrder.add(prop.getName());
 
-    prop = config.get(CATEGORY_CLIENTDM2, "Third Person Zoom BACK", ThirdPersonZoom);
+    prop = config.get(CATEGORY_CLIENTDM2, "Third Person Zoom BACK", thirdPersonZoom);
     prop.setComment("Zoom out for third person 2 while riding the the dragon and dragon carriages DO NOT EXXAGERATE IF YOU DONT WANT CORRUPTED WORLDS");
-    ThirdPersonZoom = prop.getDouble();
+    thirdPersonZoom = prop.getDouble();
     propOrder.add(prop.getName());
 
-    prop = config.get(CATEGORY_CLIENTDM2, "Wander From HomeDist", dragonanderFromHomeDist);
+    prop = config.get(CATEGORY_CLIENTDM2, "Wander From HomeDist", dragonWanderFromHomeDist);
     prop.setComment("Wander From HomeDist");
-    dragonanderFromHomeDist = prop.getInt();
+    dragonWanderFromHomeDist = prop.getInt();
     propOrder.add(prop.getName());
 
 		/*
@@ -366,9 +363,9 @@ public class DragonMountsConfig {
   }
   private static Configuration config;
   // config properties
-  private static boolean disableBlockOverride = false;
-  private static boolean debug = false;
-  private static boolean prototypeBreathWeapons = false;
-  private static boolean configHasLoaded = false; // used to detect code which tries to access a property before the config has been loaded
+  private boolean disableBlockOverride = false;
+  private boolean debug = false;
+  private boolean prototypeBreathWeapons = false;
+  private boolean configHasLoaded = false; // used to detect code which tries to access a property before the config has been loaded
 
 }

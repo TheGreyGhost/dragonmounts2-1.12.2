@@ -3,7 +3,6 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon.breathweaponFX;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathMode;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.IEntityParticle;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.DebugBreathFXSettings;
@@ -14,6 +13,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -170,11 +171,11 @@ public class BreathFX extends Particle implements IEntityParticle {
       if (desiredDX < 0) {
         collidedZone = new AxisAlignedBB(entityAABB.minX + (desiredDX - dx), entityAABB.minY, entityAABB.minZ,
                 entityAABB.minX, entityAABB.maxY, entityAABB.maxZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.WEST, collidedZone));
+        collisions.add(new ImmutablePair<>(EnumFacing.WEST, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.maxX, entityAABB.minY, entityAABB.minZ,
                 entityAABB.maxX + (desiredDX - dx), entityAABB.maxY, entityAABB.maxZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.EAST, collidedZone));
+        collisions.add(new ImmutablePair(EnumFacing.EAST, collidedZone));
       }
     }
 
@@ -184,11 +185,11 @@ public class BreathFX extends Particle implements IEntityParticle {
       if (desiredDY < 0) {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY + (desiredDY - dy), entityAABB.minZ,
                 entityAABB.maxX, entityAABB.minY, entityAABB.maxZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.DOWN, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.DOWN, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.maxY, entityAABB.minZ,
                 entityAABB.maxX, entityAABB.maxY + (desiredDY - dy), entityAABB.maxZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.UP, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.UP, collidedZone));
       }
     }
 
@@ -198,11 +199,11 @@ public class BreathFX extends Particle implements IEntityParticle {
       if (desiredDZ < 0) {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY, entityAABB.minZ + (desiredDZ - dz),
                 entityAABB.maxX, entityAABB.maxY, entityAABB.minZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.NORTH, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.NORTH, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY, entityAABB.maxZ,
                 entityAABB.maxX, entityAABB.maxY, entityAABB.maxZ + (desiredDZ - dz));
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.SOUTH, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.SOUTH, collidedZone));
       }
     }
     world.profiler.endSection();
@@ -249,7 +250,7 @@ public class BreathFX extends Particle implements IEntityParticle {
   @Override
   public boolean isInWater() {
     for (Pair<EnumFacing, AxisAlignedBB> collision : collisions) {
-      if (world.isMaterialInBB(collision.getSecond(), Material.WATER)) {
+      if (world.isMaterialInBB(collision.getRight(), Material.WATER)) {
         return true;
       }
     }
@@ -259,7 +260,7 @@ public class BreathFX extends Particle implements IEntityParticle {
   @Override
   public boolean isInLava() {
     for (Pair<EnumFacing, AxisAlignedBB> collision : collisions) {
-      if (world.isMaterialInBB(collision.getSecond(), Material.LAVA)) {
+      if (world.isMaterialInBB(collision.getRight(), Material.LAVA)) {
         return true;
       }
     }

@@ -23,6 +23,7 @@ public class DragonViewEvent {
     EntityPlayer player = Minecraft.getMinecraft().player;
     int currentView = DragonMounts.proxy.getDragon3rdPersonView();
 
+    DragonMountsConfig dragonMountsConfig = DragonMounts.instance.getConfig();
     if (player.getRidingEntity() instanceof EntityTameableDragon) {
       EntityTameableDragon dragon = (EntityTameableDragon) player.getRidingEntity();
       if (Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
@@ -31,21 +32,21 @@ public class DragonViewEvent {
 
       if (Minecraft.getMinecraft().gameSettings.thirdPersonView == 1) {
         if (currentView == 0) {
-          GlStateManager.translate(0F, -1.3F * dragon.getAgeScale(), -DragonMountsConfig.ThirdPersonZoom * dragon.getAgeScale());
+          GlStateManager.translate(0F, -1.3F * dragon.getAgeScale(), -dragonMountsConfig.thirdPersonZoom * dragon.getAgeScale());
         } else if (currentView == 1) {
-          GlStateManager.translate(-4.7F, -0.08F * dragon.getAgeScale(), -DragonMountsConfig.ThirdPersonZoom * dragon.getAgeScale());
+          GlStateManager.translate(-4.7F, -0.08F * dragon.getAgeScale(), -dragonMountsConfig.thirdPersonZoom * dragon.getAgeScale());
         } else if (currentView == 2) {
-          GlStateManager.translate(4.7F, -0.08F * dragon.getAgeScale(), -DragonMountsConfig.ThirdPersonZoom * dragon.getAgeScale());
+          GlStateManager.translate(4.7F, -0.08F * dragon.getAgeScale(), -dragonMountsConfig.thirdPersonZoom * dragon.getAgeScale());
         }
       }
 
       if (Minecraft.getMinecraft().gameSettings.thirdPersonView == 2) {
         if (currentView == 0) {
-          GlStateManager.translate(0F, -1.3F * dragon.getAgeScale(), DragonMountsConfig.ThirdPersonZoom * dragon.getAgeScale());
+          GlStateManager.translate(0F, -1.3F * dragon.getAgeScale(), dragonMountsConfig.thirdPersonZoom * dragon.getAgeScale());
         } else if (currentView == 1) {
-          GlStateManager.translate(-4.7F, -0.08F * dragon.getAgeScale(), DragonMountsConfig.ThirdPersonZoom * dragon.getAgeScale());
+          GlStateManager.translate(-4.7F, -0.08F * dragon.getAgeScale(), dragonMountsConfig.thirdPersonZoom * dragon.getAgeScale());
         } else if (currentView == 2) {
-          GlStateManager.translate(4.7F, -0.08F * dragon.getAgeScale(), DragonMountsConfig.ThirdPersonZoom * dragon.getAgeScale());
+          GlStateManager.translate(4.7F, -0.08F * dragon.getAgeScale(), dragonMountsConfig.thirdPersonZoom * dragon.getAgeScale());
         }
       }
     }

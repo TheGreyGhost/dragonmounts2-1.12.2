@@ -232,7 +232,7 @@ public class DragonBreedHelper extends DragonHelper {
   public void getBreedHealth() {
 
     IAttributeInstance health = dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
-    double base = DragonMountsConfig.BASE_HEALTH; //90d
+    double base = DragonMounts.instance.getConfig().BASE_HEALTH; //90d
 
 //    switch (getBreedType()) {
 //      case NETHER:

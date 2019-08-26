@@ -1,6 +1,5 @@
 package com.TheRPGAdventurer.ROTD.util.debugging;
 
-import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Pair;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -10,6 +9,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class CentrepointCrosshairRenderer {
    */
   public static void addCentrepointToRenderWorld(double x, double y, double z, Color colour) {
     if (pointsToRenderNextFrameWorld.size() < MAX_POINTS) {
-      pointsToRenderNextFrameWorld.add(new Pair(new Vec3d(x, y, z), colour));
+      pointsToRenderNextFrameWorld.add(new ImmutablePair(new Vec3d(x, y, z), colour));
     }
   }
 
@@ -68,7 +69,7 @@ public class CentrepointCrosshairRenderer {
    */
   public static void addCentrepointToRenderScene(double x, double y, double z, Color colour) {
     if (pointsToRenderNextFrameScene.size() < MAX_POINTS) {
-      pointsToRenderNextFrameScene.add(new Pair(new Vec3d(x, y, z), colour));
+      pointsToRenderNextFrameScene.add(new ImmutablePair(new Vec3d(x, y, z), colour));
     }
   }
 
@@ -80,12 +81,12 @@ public class CentrepointCrosshairRenderer {
   @SubscribeEvent(priority = EventPriority.HIGHEST)
   public void centrepointCrosshairRenderer(DrawBlockHighlightEvent event) {
     for (Pair<Vec3d, Color> cpc : pointsToRenderNextFrameWorld) {
-      draw3DCrosshair(cpc.getFirst(), cpc.getSecond(), event.getPlayer(), event.getPartialTicks(), true);
+      draw3DCrosshair(cpc.getLeft(), cpc.getRight(), event.getPlayer(), event.getPartialTicks(), true);
     }
     pointsToRenderNextFrameWorld.clear();
 
     for (Pair<Vec3d, Color> cpc : pointsToRenderNextFrameScene) {
-      draw3DCrosshair(cpc.getFirst(), cpc.getSecond(), event.getPlayer(), event.getPartialTicks(), false);
+      draw3DCrosshair(cpc.getLeft(), cpc.getRight(), event.getPlayer(), event.getPartialTicks(), false);
     }
     pointsToRenderNextFrameScene.clear();
 

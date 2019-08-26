@@ -4,6 +4,8 @@ import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -120,10 +122,10 @@ public class EntityMoveAndResizeHelper {
       AxisAlignedBB collidedZone;
       if (desiredDX < 0) {
         collidedZone = new AxisAlignedBB(entityAABB.minX + (desiredDX - dx), entityAABB.minY, entityAABB.minZ, entityAABB.minX, entityAABB.maxY, entityAABB.maxZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.WEST, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.WEST, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.maxX, entityAABB.minY, entityAABB.minZ, entityAABB.maxX + (desiredDX - dx), entityAABB.maxY, entityAABB.maxZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.EAST, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.EAST, collidedZone));
       }
     }
 
@@ -132,10 +134,10 @@ public class EntityMoveAndResizeHelper {
       AxisAlignedBB collidedZone;
       if (desiredDY < 0) {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY + (desiredDY - dy), entityAABB.minZ, entityAABB.maxX, entityAABB.minY, entityAABB.maxZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.DOWN, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.DOWN, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.maxY, entityAABB.minZ, entityAABB.maxX, entityAABB.maxY + (desiredDY - dy), entityAABB.maxZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.UP, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.UP, collidedZone));
       }
     }
 
@@ -144,10 +146,10 @@ public class EntityMoveAndResizeHelper {
       AxisAlignedBB collidedZone;
       if (desiredDZ < 0) {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY, entityAABB.minZ + (desiredDZ - dz), entityAABB.maxX, entityAABB.maxY, entityAABB.minZ);
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.NORTH, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.NORTH, collidedZone));
       } else {
         collidedZone = new AxisAlignedBB(entityAABB.minX, entityAABB.minY, entityAABB.maxZ, entityAABB.maxX, entityAABB.maxY, entityAABB.maxZ + (desiredDZ - dz));
-        collisions.add(new Pair<EnumFacing, AxisAlignedBB>(EnumFacing.SOUTH, collidedZone));
+        collisions.add(new ImmutablePair<EnumFacing, AxisAlignedBB>(EnumFacing.SOUTH, collidedZone));
       }
     }
     entity.world.profiler.endSection();

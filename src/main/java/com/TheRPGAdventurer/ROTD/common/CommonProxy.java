@@ -75,7 +75,6 @@ abstract public class CommonProxy {
     network.registerMessage(MessageDragonTargetHandlerServer.class, MessageDragonTarget.class, DOT_DISCRIMINATOR_ID, Side.SERVER);
     EntityPropertiesHandler.INSTANCE.registerProperties(MiscPlayerProperties.class);
     GameRegistry.registerWorldGenerator(new DragonMountsWorldGenerator(), 0);
-    NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 //    initDamageSources();
     RegistryEventHandler.initRegistries();
 
@@ -84,7 +83,7 @@ abstract public class CommonProxy {
 
   public void PostInitialization(FMLPostInitializationEvent event) {
     registerEntities();
-    if (DragonMountsConfig.isDebug()) {
+    if (DragonMounts.instance.getConfig().isDebug()) {
       StartupDebugCommon.postInitCommon();
     }
   }
@@ -126,7 +125,7 @@ abstract public class CommonProxy {
   }
 
   protected void preInitialisePhase1(FMLPreInitializationEvent event) {
-    DragonMountsConfig.PreInit();
+//    DragonMountsConfig.PreInit();
     StartupDebugCommon.preInitCommon();
     DragonLifeStageHelper.registerConfigurationTags();
   }
@@ -135,9 +134,9 @@ abstract public class CommonProxy {
     DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
             Minecraft.getMinecraft().getResourceManager(), new ResourceLocation("dragonmounts:dragonvariants.json"));
     Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readVariants();
-    for (Map.Entry<String, DragonVariants> entry : allBreedsDragonVariants.entrySet()) {
-      DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().createDragonBreedNew(entry.getKey(), entry.getValue());
-    }
+//    for (Map.Entry<String, DragonVariants> entry : allBreedsDragonVariants.entrySet()) {
+//      DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().createDragonBreedNew(entry.getKey(), entry.getValue());
+//    }
   }
 
   private final int ENTITY_TRACKING_RANGE = 80;

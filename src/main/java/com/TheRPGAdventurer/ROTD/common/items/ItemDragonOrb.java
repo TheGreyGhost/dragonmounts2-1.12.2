@@ -26,7 +26,7 @@ public class ItemDragonOrb extends Item implements IHasModel {
     this.setRegistryName(new ResourceLocation(DragonMounts.MODID, "dragon_orb"));
     this.setMaxStackSize(MAXIMUM_NUMBER_OF_ORBS);
 
-    if (DragonMountsConfig.isPrototypeBreathweapons()) {
+    if (DragonMounts.instance.getConfig().isPrototypeBreathweapons()) {
       this.setCreativeTab(DragonMounts.mainTab);
       ModItems.ITEMS.add(this);
     }

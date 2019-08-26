@@ -1,5 +1,6 @@
 package com.TheRPGAdventurer.ROTD.common.entity.breath.weapons;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathAffectedBlock;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathAffectedEntity;
@@ -57,14 +58,14 @@ public class BreathWeaponIce extends BreathWeapon {
 
     Random rand = new Random();
     BlockPos sideToIgnite = blockPos.offset(EnumFacing.UP);
-    if (DragonMountsConfig.canIceBreathBePermanent) {
+    if (DragonMounts.instance.getConfig().canIceBreathBePermanent) {
       world.setBlockState(sideToIgnite, Blocks.SNOW_LAYER.getDefaultState());
     } else if ((world.getBlockState(blockPos).getBlock() == Blocks.WATER || world.getBlockState(blockPos).getBlock() == Blocks.FLOWING_WATER)
             && world.getBlockState(blockPos.up()).getBlock() == Blocks.AIR) {
-      if (DragonMountsConfig.canIceBreathBePermanent) {
+      if (DragonMounts.instance.getConfig().canIceBreathBePermanent) {
 //                world.mayPlace(Blocks.ICE, blockPos, false, EnumFacing.DOWN, null);
         world.setBlockState(blockPos, Blocks.ICE.getDefaultState(), 1);
-      } else if (!DragonMountsConfig.canIceBreathBePermanent) {
+      } else if (!DragonMounts.instance.getConfig().canIceBreathBePermanent) {
 //                world.mayPlace(Blocks.FROSTED_ICE, blockPos, false, EnumFacing.DOWN, null);
         world.setBlockState(blockPos, Blocks.FROSTED_ICE.getDefaultState(), 1);
       }
