@@ -3,48 +3,33 @@ package com.TheRPGAdventurer.ROTD.client.model;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
+import java.util.*;
 
 /**
  * Renders the model of the DragonHatchable Egg - as an item
   */
 public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
 {
-
-  /**
-   * render the tile entity - called every frame while the tileentity is in view of the player
-   * @param tileEntity the associated tile entity
-   * @param relativeX the x distance from the player's eye to the tileentity
-   * @param relativeY the y distance from the player's eye to the tileentity
-   * @param relativeZ the z distance from the player's eye to the tileentity
-   * @param partialTicks the fraction of a tick that this frame is being rendered at - used to interpolate frames between
-   *                     ticks, to make animations smoother.  For example - if the frame rate is steady at 80 frames per second,
-   *                     this method will be called four times per tick, with partialTicks spaced 0.25 apart, (eg) 0, 0.25, 0.5, 0.75
-   * @param blockDamageProgress the progress of the block being damaged (0 - 10), if relevant.  -1 if not relevant.
-   * @param alpha I'm not sure what this is used for; the name suggests alpha blending but Vanilla doesn't appear to use it
-   */
-//  @Override
-//  public void render(TileEntityDragonHatchableEgg tileEntity, double relativeX, double relativeY, double relativeZ,
-//                     float partialTicks, int blockDamageProgress, float alpha) {
-
   @Override
   public void renderByItem(ItemStack itemStackIn) {
     // the gem changes its appearance and animation as the player approaches.
@@ -69,37 +54,42 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
     double relativeY = 0;
     double relativeZ = 0;
 
-    final double pedestalCentreOffsetX = 0.5;
-    final double pedestalCentreOffsetY = 0.8;
-    final double pedestalCentreOffsetZ = 0.5;
-    Vec3d playerEye = new Vec3d(0.0, 0.0, 0.0);
-    Vec3d pedestalCentre = new Vec3d(relativeX + pedestalCentreOffsetX, relativeY + pedestalCentreOffsetY, relativeZ + pedestalCentreOffsetZ);
-    double playerDistance = playerEye.distanceTo(pedestalCentre);
+//    final double pedestalCentreOffsetX = 0.5;
+//    final double pedestalCentreOffsetY = 0.8;
+//    final double pedestalCentreOffsetZ = 0.5;
+//    Vec3d playerEye = new Vec3d(0.0, 0.0, 0.0);
+//    Vec3d pedestalCentre = new Vec3d(relativeX + pedestalCentreOffsetX, relativeY + pedestalCentreOffsetY, relativeZ + pedestalCentreOffsetZ);
+//    double playerDistance = playerEye.distanceTo(pedestalCentre);
+//
+//    final double DISTANCE_FOR_MIN_SPIN = 8.0;
+//    final double DISTANCE_FOR_MAX_SPIN = 4.0;
+//    final double DISTANCE_FOR_MIN_GLOW = 16.0;
+//    final double DISTANCE_FOR_MAX_GLOW = 4.0;
+//    final double DISTANCE_FOR_MIN_LEVITATE = 4.0;
+//    final double DISTANCE_FOR_MAX_LEVITATE = 2.0;
+//
+//    final double MIN_LEVITATE_HEIGHT = 0.0;
+//    final double MAX_LEVITATE_HEIGHT = 0.5;
+//    double gemCentreOffsetX = pedestalCentreOffsetX;
+//    double gemCentreOffsetY = pedestalCentreOffsetY + MathX.interpolate(playerDistance, DISTANCE_FOR_MIN_LEVITATE, DISTANCE_FOR_MAX_LEVITATE,
+//            MIN_LEVITATE_HEIGHT, MAX_LEVITATE_HEIGHT);
+//    double gemCentreOffsetZ = pedestalCentreOffsetZ;
 
-    final double DISTANCE_FOR_MIN_SPIN = 8.0;
-    final double DISTANCE_FOR_MAX_SPIN = 4.0;
-    final double DISTANCE_FOR_MIN_GLOW = 16.0;
-    final double DISTANCE_FOR_MAX_GLOW = 4.0;
-    final double DISTANCE_FOR_MIN_LEVITATE = 4.0;
-    final double DISTANCE_FOR_MAX_LEVITATE = 2.0;
+//    final double MIN_GLOW = 0.0;
+//    final double MAX_GLOW = 1.0;
+////    double glowMultiplier = MathX.interpolate(playerDistance, DISTANCE_FOR_MIN_GLOW, DISTANCE_FOR_MAX_GLOW,
+////            MIN_GLOW, MAX_GLOW);
+//    double glowMultiplier = (MAX_GLOW +_MI)
+//
+//    GlStateManager.enableDepth();
+//    GlStateManager.depthFunc(515);
+//    GlStateManager.depthMask(true);
 
-    final double MIN_LEVITATE_HEIGHT = 0.0;
-    final double MAX_LEVITATE_HEIGHT = 0.5;
-    double gemCentreOffsetX = pedestalCentreOffsetX;
-    double gemCentreOffsetY = pedestalCentreOffsetY + MathX.interpolate(playerDistance, DISTANCE_FOR_MIN_LEVITATE, DISTANCE_FOR_MAX_LEVITATE,
-            MIN_LEVITATE_HEIGHT, MAX_LEVITATE_HEIGHT);
-    double gemCentreOffsetZ = pedestalCentreOffsetZ;
-
-    final double MIN_GLOW = 0.0;
-    final double MAX_GLOW = 1.0;
-    double glowMultiplier = MathX.interpolate(playerDistance, DISTANCE_FOR_MIN_GLOW, DISTANCE_FOR_MAX_GLOW,
-            MIN_GLOW, MAX_GLOW);
-
-    final double MIN_REV_PER_SEC = 0.0;
-    final double MAX_REV_PER_SEC = 0.5;
-    double revsPerSecond = MathX.interpolate(playerDistance, DISTANCE_FOR_MIN_SPIN, DISTANCE_FOR_MAX_SPIN,
-            MIN_REV_PER_SEC, MAX_REV_PER_SEC);
-    double angularPositionInDegrees = 0.0;  //tileEntityDragonHatchableEgg.getNextAngularPosition(revsPerSecond);
+//    final double MIN_REV_PER_SEC = 0.0;
+//    final double MAX_REV_PER_SEC = 0.5;
+//    double revsPerSecond = MathX.interpolate(playerDistance, DISTANCE_FOR_MIN_SPIN, DISTANCE_FOR_MAX_SPIN,
+//            MIN_REV_PER_SEC, MAX_REV_PER_SEC);
+//    double angularPositionInDegrees = 0.0;  //tileEntityDragonHatchableEgg.getNextAngularPosition(revsPerSecond);
 
     try {
       // save the transformation matrix and the rendering attributes, so that we can restore them after rendering.  This
@@ -116,62 +106,28 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
       // render exactly over the top of the TileEntity's block.
       // In this example, the zero point of our model needs to be in the middle of the block, not at the [x,y,z] of the block, so we need to
       // add an extra offset as well, i.e. [gemCentreOffsetX, gemCentreOffsetY, gemCentreOffsetZ]
-      GlStateManager.translate(relativeX + gemCentreOffsetX, relativeY + gemCentreOffsetY, relativeZ + gemCentreOffsetZ);
+      GlStateManager.translate(relativeX, relativeY, relativeZ);
 
-      GlStateManager.rotate((float)angularPositionInDegrees, 0, 1, 0);   // rotate around the vertical axis
+//      GlStateManager.rotate((float)angularPositionInDegrees, 0, 1, 0);   // rotate around the vertical axis
 
-      final double GEM_HEIGHT = 0.5;        // desired render height of the gem
-      final double MODEL_HEIGHT = 1.0;      // actual height of the gem in the vertexTable
-      final double SCALE_FACTOR = GEM_HEIGHT / MODEL_HEIGHT;
-      GlStateManager.scale(SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
+//      final double GEM_HEIGHT = 0.5;        // desired render height of the gem
+//      final double MODEL_HEIGHT = 1.0;      // actual height of the gem in the vertexTable
+//      final double SCALE_FACTOR = GEM_HEIGHT / MODEL_HEIGHT;
+//      GlStateManager.scale(SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
 
       Tessellator tessellator = Tessellator.getInstance();
       BufferBuilder bufferBuilder = tessellator.getBuffer();
       //this.bindTexture(eggTexture);         // texture for the gem appearance
 
-      TextureAtlasSprite sprite = EggModels.getInstance().getTextureAtlasSprite(breed);
-      setParticleTexture(sprite);
-      this.textureManager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-      this.textureManager.getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
-
-      TextureManager texturemanager = this.rendererDispatcher.renderEngine;
-
-      if (texturemanager != null)
-      {
-        texturemanager.bindTexture(location);
+      ResourceLocation resourceLocation = EggModels.getInstance().getTexture(breed);
+      if (resourceLocation != null) {
+        Minecraft.getMinecraft().getTextureManager().bindTexture(resourceLocation);
       }
 
-      /**
-       * Retrieve what effect layer (what texture) the particle should be rendered with. 0 for the particle sprite sheet,
-       * 1 for the main Texture atlas, and 3 for a custom texture
-       */
-      public int getFXLayer()
-      {
-        return 0;
-      }
-
-      /**
-       * Sets the texture used by the particle.
-       */
-      public void setParticleTexture(TextureAtlasSprite texture)
-      {
-        int i = this.getFXLayer();
-
-        if (i == 1)
-        {
-          this.particleTexture = texture;
-        }
-        else
-        {
-          throw new RuntimeException("Invalid call to Particle.setTex, use coordinate methods");
-        }
-      }
-
-
-      // set the key rendering flags appropriately...
-      GL11.glDisable(GL11.GL_LIGHTING);     // turn off "item" lighting (face brightness depends on which direction it is facing)
-      GL11.glDisable(GL11.GL_BLEND);        // turn off "alpha" transparency blending
-      GL11.glDepthMask(true);               // gem is hidden behind other objects
+//      // set the key rendering flags appropriately...
+//      GL11.glDisable(GL11.GL_LIGHTING);     // turn off "item" lighting (face brightness depends on which direction it is facing)
+//      GL11.glDisable(GL11.GL_BLEND);        // turn off "alpha" transparency blending
+//      GL11.glDepthMask(true);               // gem is hidden behind other objects
 
       // set the rendering colour as the gem base colour
       Color fullBrightnessColor = Color.WHITE;//  tileEntityDragonHatchableEgg.getGemColour();
@@ -183,20 +139,26 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
       }
       GlStateManager.color(red, green, blue);     // change the rendering colour
 
-        // change the "multitexturing" lighting value (default value is the brightness of the tile entity's block)
-        // - this will make the gem "glow" brighter than the surroundings if it is dark.
-      final int SKY_LIGHT_VALUE = (int)(15 * glowMultiplier);
-      final int BLOCK_LIGHT_VALUE = 0;
-      OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, SKY_LIGHT_VALUE * 16.0F, BLOCK_LIGHT_VALUE * 16.0F);
+//        // change the "multitexturing" lighting value (default value is the brightness of the tile entity's block)
+//        // - this will make the gem "glow" brighter than the surroundings if it is dark.
+//      final int SKY_LIGHT_VALUE = (int)(15 * glowMultiplier);
+//      final int BLOCK_LIGHT_VALUE = 0;
+//      OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, SKY_LIGHT_VALUE * 16.0F, BLOCK_LIGHT_VALUE * 16.0F);
 
-      bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX);
+      bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
       IBakedModel iBakedModel = EggModels.getInstance().getModel(breed, EggModels.EggModelState.INCUBATING);
+      int auxColour = -1;  // not sure what this is (from Vanilla RenderItem)
+      for (EnumFacing enumfacing : EnumFacing.values()) {
+        this.renderQuads(bufferBuilder, iBakedModel.getQuads((IBlockState)null, enumfacing, 0L), auxColour);
+      }
+      this.renderQuads(bufferBuilder, iBakedModel.getQuads((IBlockState)null, (EnumFacing)null, 0L), auxColour);
+      tessellator.draw();
 
 //      ModelResourceLocation mrl = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");  // todo refactor
 //
 //      IBakedModel ibm = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(mrl);
 //      addGemVertices(bufferBuilder);
-      tessellator.draw();
+//      tessellator.draw();
 
     } finally {
       GL11.glPopAttrib();
@@ -207,4 +169,21 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
 //  public ResourceLocation getEggTexture() {return eggTexture;}
 //
 //   private static final ResourceLocation eggTexture = new ResourceLocation("minecraftbyexample:textures/entities/dragon/fire/egg.png");
+
+  /**
+   * Copied from RenderItem, removing the tint index stuff
+   * @param renderer
+   * @param quads
+   * @param colour
+   */
+  private void renderQuads(BufferBuilder renderer, java.util.List<BakedQuad> quads, int colour)
+  {
+    int i = 0;
+    for (int j = quads.size(); i < j; ++i) {
+      BakedQuad bakedquad = quads.get(i);
+      net.minecraftforge.client.model.pipeline.LightUtil.renderQuadColor(renderer, bakedquad, colour);
+    }
+  }
+
+
 }

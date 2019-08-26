@@ -11,16 +11,23 @@ package com.TheRPGAdventurer.ROTD.common;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
+import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.cmd.CommandDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsReader;
+import com.TheRPGAdventurer.ROTD.common.event.EntityMountEventHandler;
+import com.TheRPGAdventurer.ROTD.common.event.RegistryEventHandler;
 import com.TheRPGAdventurer.ROTD.common.event.VanillaEggHandler;
 import com.TheRPGAdventurer.ROTD.common.items.entity.ImmuneEntityItem;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonTarget;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonTargetHandlerServer;
+import com.TheRPGAdventurer.ROTD.common.world.DragonMountsWorldGenerator;
+import com.TheRPGAdventurer.ROTD.util.MiscPlayerProperties;
 import com.TheRPGAdventurer.ROTD.util.debugging.StartupDebugCommon;
+import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.item.Item;
@@ -31,6 +38,7 @@ import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.server.FMLServerHandler;
 
@@ -50,20 +58,26 @@ abstract public class CommonProxy {
     return this.network;
   }
 
+  /**
+   * Split into phase 1 and phase 2 to allow the client to do tasks before the common (eg DragonVariantsTags registrations)
+   * @param event
+   */
   public void PreInitialization(FMLPreInitializationEvent event) {
-    DragonMountsConfig.PreInit();
-    StartupDebugCommon.preInitCommon();
-    DragonLifeStageHelper.registerConfigurationTags();
-    DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
-            Minecraft.getMinecraft().getResourceManager(), new ResourceLocation("dragonmounts:dragonvariants.json"));
-    Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readVariants();
+    preInitialisePhase1(event);
+    preInitialisePhase2(event);
   }
 
   @SuppressWarnings("deprecation")
   public void Initialization(FMLInitializationEvent evt) {
     MinecraftForge.EVENT_BUS.register(new VanillaEggHandler());
+    MinecraftForge.EVENT_BUS.register(new EntityMountEventHandler());
     network = NetworkRegistry.INSTANCE.newSimpleChannel("DragonControls");
     network.registerMessage(MessageDragonTargetHandlerServer.class, MessageDragonTarget.class, DOT_DISCRIMINATOR_ID, Side.SERVER);
+    EntityPropertiesHandler.INSTANCE.registerProperties(MiscPlayerProperties.class);
+    GameRegistry.registerWorldGenerator(new DragonMountsWorldGenerator(), 0);
+    NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
+//    initDamageSources();
+    RegistryEventHandler.initRegistries();
 
     StartupDebugCommon.initCommon();
   }
@@ -82,9 +96,6 @@ abstract public class CommonProxy {
   }
 
   public void ServerStopped(FMLServerStoppedEvent evt) {
-  }
-
-  public void render() {
   }
 
   public int getDragon3rdPersonView() {
@@ -112,13 +123,26 @@ abstract public class CommonProxy {
 //            3, DragonMounts.instance, 32, 5, true);
 
     //        GameRegistry.registerTileEntity(TileEntityDragonShulker.class, new ResourceLocation(DragonMounts.MODID, "dragon_shulker"));
-
   }
+
+  protected void preInitialisePhase1(FMLPreInitializationEvent event) {
+    DragonMountsConfig.PreInit();
+    StartupDebugCommon.preInitCommon();
+    DragonLifeStageHelper.registerConfigurationTags();
+  }
+
+  protected void preInitialisePhase2(FMLPreInitializationEvent event) {
+    DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
+            Minecraft.getMinecraft().getResourceManager(), new ResourceLocation("dragonmounts:dragonvariants.json"));
+    Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readVariants();
+    for (Map.Entry<String, DragonVariants> entry : allBreedsDragonVariants.entrySet()) {
+      DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().createDragonBreedNew(entry.getKey(), entry.getValue());
+    }
+  }
+
   private final int ENTITY_TRACKING_RANGE = 80;
   private final int ENTITY_UPDATE_FREQ = 3; // 3
   private final int ENTITY_ID = 1;
   private final boolean ENTITY_SEND_VELO_UPDATES = true;
   private SimpleNetworkWrapper network;
-
-
 }

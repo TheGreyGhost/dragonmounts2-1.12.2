@@ -21,6 +21,7 @@ import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.common.CommonProxy;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.event.DragonViewEvent;
+import com.TheRPGAdventurer.ROTD.common.event.IItemColorRegistration;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
 import com.TheRPGAdventurer.ROTD.common.inits.ModKeys;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
@@ -53,14 +54,17 @@ import java.util.Arrays;
 public class ClientProxy extends CommonProxy {
 
   @Override
-  public void PreInitialization(FMLPreInitializationEvent event) {
-    super.PreInitialization(event);
+  protected void preInitialisePhase1(FMLPreInitializationEvent event) {
+    super.preInitialisePhase1(event);
     // register dragon entity renderer
     DragonMountsConfig.clientPreInit();
     RenderingRegistry.registerEntityRenderingHandler(EntityTameableDragon.class, DragonRenderer::new);
+    MinecraftForge.EVENT_BUS.register(IItemColorRegistration.class);
 
     OBJLoader.INSTANCE.addDomain(DragonMounts.MODID);
     MinecraftForge.EVENT_BUS.register(EggModels.getInstance());
+
+    EggModels.getInstance().registerConfigurationTags();
 
 //    ClientRegistry.registerTileEntity(TileEntityDragonHatchableEgg.class, "dragonmounts:te_dragon_hatchable_egg", new TESRDragonHatchableEgg());
 //    final int DEFAULT_ITEM_SUBTYPE = 0;
@@ -117,6 +121,11 @@ public class ClientProxy extends CommonProxy {
   }
 
   @Override
+  protected void preInitialisePhase2(FMLPreInitializationEvent event) {
+    super.preInitialisePhase2(event);
+  }
+
+  @Override
   public void Initialization(FMLInitializationEvent evt) {
     super.Initialization(evt);
     if (DragonMountsConfig.isDebug()) {
@@ -132,6 +141,7 @@ public class ClientProxy extends CommonProxy {
     }, ModItems.dragon_whistle);
 
     ModItems.DRAGON_HATCHABLE_EGG.setTileEntityItemStackRenderer(new TEISRDragonHatchableEgg());
+    ModKeys.init();
   }
 
   @Override
@@ -154,12 +164,6 @@ public class ClientProxy extends CommonProxy {
     MinecraftForge.EVENT_BUS.register(new DragonViewEvent());
 //    MinecraftForge.EVENT_BUS.register(ImmuneEntityItem.EventHandler.instance);
 
-  }
-
-  @SideOnly(Side.CLIENT)
-  @Override
-  public void render() {
-    ModKeys.init();
   }
 
   public int getDragon3rdPersonView() {

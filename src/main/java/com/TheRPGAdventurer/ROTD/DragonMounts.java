@@ -12,7 +12,7 @@ package com.TheRPGAdventurer.ROTD;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.CommonProxy;
-import com.TheRPGAdventurer.ROTD.common.event.EventLiving;
+import com.TheRPGAdventurer.ROTD.common.event.EntityMountEventHandler;
 import com.TheRPGAdventurer.ROTD.common.event.IItemColorRegistration;
 import com.TheRPGAdventurer.ROTD.common.event.RegistryEventHandler;
 import com.TheRPGAdventurer.ROTD.common.inventory.tabs.CreativeTab;
@@ -23,7 +23,6 @@ import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.LoggerLimit;
 import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.ilexiconn.llibrary.server.network.NetworkWrapper;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -83,10 +82,6 @@ public class DragonMounts {
 
   @EventHandler
   public void PreInitialization(FMLPreInitializationEvent event) {
-    MinecraftForge.EVENT_BUS.register(new EventLiving());
-    if (FMLCommonHandler.instance().getSide() == Side.CLIENT) {
-      MinecraftForge.EVENT_BUS.register(IItemColorRegistration.class);
-    }
     proxy.PreInitialization(event);
     metadata = event.getModMetadata();
   }
@@ -94,12 +89,6 @@ public class DragonMounts {
   @EventHandler
   public void Initialization(FMLInitializationEvent event) {
     proxy.Initialization(event);
-    proxy.render();
-    EntityPropertiesHandler.INSTANCE.registerProperties(MiscPlayerProperties.class);
-    GameRegistry.registerWorldGenerator(new DragonMountsWorldGenerator(), 0);
-    NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
-//    initDamageSources();
-    RegistryEventHandler.initRegistries();
   }
 
   @EventHandler

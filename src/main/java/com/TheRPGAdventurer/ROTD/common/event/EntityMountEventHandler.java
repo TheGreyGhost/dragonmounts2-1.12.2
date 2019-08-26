@@ -5,7 +5,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class EventLiving {
+public class EntityMountEventHandler {
 
   @SubscribeEvent
   public void onEntityMount(EntityMountEvent event) {

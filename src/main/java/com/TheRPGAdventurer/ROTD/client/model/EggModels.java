@@ -65,9 +65,19 @@ public class EggModels {
    * @param dragonBreed
    * @return null if not found
    */
-  public TextureAtlasSprite getTextureAtlasSprite(DragonBreedNew dragonBreed) {
-    return breedTextures.get(dragonBreed);
+  public ResourceLocation getTexture(DragonBreedNew dragonBreed) {
+    return breedTextureRLs.get(dragonBreed);
   }
+
+
+//  /**
+//   * Returns the texture sprite for the given breed
+//   * @param dragonBreed
+//   * @return null if not found
+//   */
+//  public TextureAtlasSprite getTextureAtlasSprite(DragonBreedNew dragonBreed) {
+//    return breedTextures.get(dragonBreed);
+//  }
 
   /**
    * Validates the following aspects of the tags:
@@ -146,21 +156,21 @@ public class EggModels {
    */
   @SubscribeEvent
   public void stitcherEventPre(TextureStitchEvent.Pre event) {
-    if (internalState == InternalState.INIT) {
-      DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: texture stitch before validation");
-    }
-    Map<ResourceLocation, TextureAtlasSprite> addedTAS = new HashMap<>();
-    for (Map.Entry<DragonBreedNew, ResourceLocation> entry : breedTextureRLs.entrySet()) {
-      DragonBreedNew breed = entry.getKey();
-      ResourceLocation texRL = entry.getValue();
-      if (addedTAS.containsKey(texRL)) {
-        breedTextures.put(breed, addedTAS.get(texRL));
-      } else {
-        TextureAtlasSprite tas = event.getMap().registerSprite(texRL);
-        addedTAS.put(texRL, tas);
-        breedTextures.put(breed, tas);
-      }
-    }
+//    if (internalState == InternalState.INIT) {
+//      DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: texture stitch before validation");
+//    }
+//    Map<ResourceLocation, TextureAtlasSprite> addedTAS = new HashMap<>();
+//    for (Map.Entry<DragonBreedNew, ResourceLocation> entry : breedTextureRLs.entrySet()) {
+//      DragonBreedNew breed = entry.getKey();
+//      ResourceLocation texRL = entry.getValue();
+//      if (addedTAS.containsKey(texRL)) {
+//        breedTextures.put(breed, addedTAS.get(texRL));
+//      } else {
+//        TextureAtlasSprite tas = event.getMap().registerSprite(texRL);
+//        addedTAS.put(texRL, tas);
+//        breedTextures.put(breed, tas);
+//      }
+//    }
 //    ResourceLocation flameRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_fire");
 //    event.getMap().registerSprite(flameRL);
 //    ResourceLocation iceRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_ice");
@@ -186,7 +196,7 @@ public class EggModels {
   }
 
   private void addTexture(DragonBreedNew breed, ResourceLocation rl) {
-    if (breedTextures.containsKey(breed)) {
+    if (breedTextureRLs.containsKey(breed)) {
       DragonMounts.loggerLimit.warn_once("Called addModelResourceLocation twice for same breed + state");
       return;
     }
@@ -207,7 +217,7 @@ public class EggModels {
   private final int BASE_MODEL_METADATA = 0;
   //  private Set<ResourceLocation> allTextures = new HashSet<>();
   private Map<DragonBreedNew, ResourceLocation> breedTextureRLs = new HashMap<>();
-  private Map<DragonBreedNew, TextureAtlasSprite> breedTextures = new HashMap<>();
+//  private Map<DragonBreedNew, TextureAtlasSprite> breedTextures = new HashMap<>();
 
   private enum InternalState {INIT, HAVE_VALIDATED, REGISTERED_MODELS};
   private InternalState internalState = InternalState.INIT;  // just for debugging / assertion
