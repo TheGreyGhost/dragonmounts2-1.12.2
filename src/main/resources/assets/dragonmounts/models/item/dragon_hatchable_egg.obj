@@ -1,6 +1,8 @@
 # Blender v2.69 (sub 0) OBJ File: 'dragon_egg.blend'
 # www.blender.org
 o dragon_egg
+# mtllib dragon_hatchable_egg.mtl
+# usemtl eggshell
 v 0.187500 0.000000 -0.187500
 v 0.187500 0.000000 0.187500
 v -0.187500 0.000000 0.187500
@@ -119,7 +121,6 @@ vt 0.062500 0.062500
 vt 0.187500 0.187500
 vt 0.250000 0.250000
 vt 0.375000 0.375000
-s off
 f 1/1 2/2 4/3
 f 5/1 8/3 6/2
 f 1/4 5/5 2/6
