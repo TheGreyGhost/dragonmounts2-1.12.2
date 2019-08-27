@@ -206,7 +206,7 @@ public class EggModels {
 
 //  private static final DragonVariantTag EGG_ITEM_MODEL_BASE = DragonVariantTag.addTag("eggmodeljson", "dragon_hatchable_egg");
   private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "dragon_hatchable_egg.obj");
-  private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "eggs/egg_default");
+  private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "textures/items/eggs/egg_default.png");
   private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "dragon_hatchable_egg_smashed.obj");
   private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "dragon_hatchable_egg_hatched.obj");
 
