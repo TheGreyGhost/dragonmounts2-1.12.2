@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -60,24 +61,16 @@ public class WavefrontObject {
     tessellator.draw();
   }
 
-  private void generateVertexCache() {
-    int vertexDataSize = DefaultVertexFormats.POSITION_TEX_NORMAL.getIntegerSize() * vertices.size();
-    BufferBuilder bufferBuilder = new BufferBuilder(vertexDataSize);
-    bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX_NORMAL);
-    tessellateAll(bufferBuilder);
-    bufferBuilder.finishDrawing();
-    vertexCache = bufferBuilder.getByteBuffer();
-  }
-
   /**
    * Adds the quads to the buffer (doesn't start or end tesselating)
    * @param bufferBuilder
    */
   public void tessellateAll(BufferBuilder bufferBuilder)  {
     try {
-    if (vertexCache == null) {
-      generateVertexCache();
-    }
+      if (vertexCache == null) {
+        generateVertexCache();
+      }
+      bufferBuilder.addVertexData(vertexCache);
     } catch (IndexOutOfBoundsException ioobe) {
       DragonMounts.loggerLimit.error_once("Error rendering WavefrontObject:" + ioobe.getMessage());
     }
@@ -88,9 +81,13 @@ public class WavefrontObject {
    * @param bufferBuilder
    */
   public void tessellateAllUncached(BufferBuilder bufferBuilder)  {
+    try {
       for (GroupObject groupObject : groupObjects) {
         groupObject.render(bufferBuilder);
       }
+    } catch (IndexOutOfBoundsException ioobe) {
+      DragonMounts.loggerLimit.error_once("Error rendering WavefrontObject:" + ioobe.getMessage());
+    }
   }
   /**
    * Returns a default model that can be used if the desired model wasn't found
@@ -134,7 +131,18 @@ public class WavefrontObject {
   private String fileName;
   private static WavefrontObject defaultFallBack;
 
-  private ByteBuffer vertexCache;
+  private int [] vertexCache;
+
+  private void generateVertexCache() {
+    int vertexDataSize = DefaultVertexFormats.POSITION_TEX_NORMAL.getIntegerSize() * vertices.size();
+    BufferBuilder bufferBuilder = new BufferBuilder(vertexDataSize);
+    bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX_NORMAL);
+    tessellateAllUncached(bufferBuilder);
+    bufferBuilder.finishDrawing();
+    IntBuffer rawVertexData = bufferBuilder.getByteBuffer().asIntBuffer();
+    vertexCache = new int[rawVertexData.remaining()];
+    rawVertexData.get(vertexCache);
+  }
 
   /***
    * Verifies that the given line from the model file is a valid vertex
