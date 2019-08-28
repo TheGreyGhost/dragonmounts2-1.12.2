@@ -6,6 +6,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.util.vector.Vector3f;
 
+import java.awt.geom.FlatteningPathIterator;
+
 public class Face {
   public Vertex[] vertices;
   public Vertex[] vertexNormals;
@@ -18,23 +20,23 @@ public class Face {
     addFaceForRender(bufferBuilder, 0.0005F);
   }
 
-  private void storeVertexData(int[] faceDataOut, int storeIndex, int vertexIndex, Vector3f position, int shadeColor, TextureAtlasSprite sprite, BlockFaceUV faceUV) {
-    int i = storeIndex * 7;
-    faceDataOut[i] = Float.floatToRawIntBits(position.x);
-    faceDataOut[i + 1] = Float.floatToRawIntBits(position.y);
-    faceDataOut[i + 2] = Float.floatToRawIntBits(position.z);
-    faceDataOut[i + 3] = shadeColor;
-    faceDataOut[i + 4] = Float.floatToRawIntBits(sprite.getInterpolatedU((double) faceUV.getVertexU(vertexIndex) * .999 + faceUV.getVertexU((vertexIndex + 2) % 4) * .001));
-    faceDataOut[i + 4 + 1] = Float.floatToRawIntBits(sprite.getInterpolatedV((double) faceUV.getVertexV(vertexIndex) * .999 + faceUV.getVertexV((vertexIndex + 2) % 4) * .001));
-
-//    bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
-//    bufferbuilder.pos(-0.5D, -0.25D, 0.0D).tex(0.0D, 1.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
-//    bufferbuilder.pos(0.5D, -0.25D, 0.0D).tex(1.0D, 1.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
-//    bufferbuilder.pos(0.5D, 0.75D, 0.0D).tex(1.0D, 0.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
-//    bufferbuilder.pos(-0.5D, 0.75D, 0.0D).tex(0.0D, 0.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
-//    tessellator.draw();
+//  private void storeVertexData(int[] faceDataOut, int storeIndex, Vertex vertex, TextureCoordinate textureCoordinate, Vertex vertexNormal) {
+//    int i = storeIndex * 7;
+//    faceDataOut[i] = Float.floatToRawIntBits(vertex.x);
+//    faceDataOut[i + 1] = Float.floatToRawIntBits(vertex.y);
+//    faceDataOut[i + 2] = Float.floatToRawIntBits(vertex.z);
+//    faceDataOut[i + 4] = Float.floatToRawIntBits(textureCoordinate.u);
+//    faceDataOut[i + 4 + 1] = Float.floatToRawIntBits(textureCoordinate.v);
+//    faceDataOut[i+ 6] = Float.
 //
-  }
+////    bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
+////    bufferbuilder.pos(-0.5D, -0.25D, 0.0D).tex(0.0D, 1.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
+////    bufferbuilder.pos(0.5D, -0.25D, 0.0D).tex(1.0D, 1.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
+////    bufferbuilder.pos(0.5D, 0.75D, 0.0D).tex(1.0D, 0.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
+////    bufferbuilder.pos(-0.5D, 0.75D, 0.0D).tex(0.0D, 0.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
+////    tessellator.draw();
+////
+//  }
 
   /**
    * Tesselate the face.  Nudge the texture by the given amount (prevents visual artefacts)
