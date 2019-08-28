@@ -62,9 +62,13 @@ public class WavefrontObject {
    * Adds the quads to the buffer (doesn't start or end tesselating)
    * @param bufferBuilder
    */
-  public void tessellateAll(BufferBuilder bufferBuilder) {
-    for (GroupObject groupObject : groupObjects) {
-      groupObject.render(bufferBuilder);
+  public void tessellateAll(BufferBuilder bufferBuilder)  {
+    try {
+      for (GroupObject groupObject : groupObjects) {
+        groupObject.render(bufferBuilder);
+      }
+    } catch (IndexOutOfBoundsException ioobe) {
+      DragonMounts.loggerLimit.error_once("Error rendering WavefrontObject:" + ioobe.getMessage());
     }
   }
 

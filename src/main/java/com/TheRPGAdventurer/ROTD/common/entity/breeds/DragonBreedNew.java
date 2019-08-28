@@ -145,6 +145,9 @@ public class DragonBreedNew {
      * @throws IllegalArgumentException if the nbt doesn't contain the tag or the tag isn't a valid breed
      */
     public DragonBreedNew getBreed(NBTTagCompound nbt) throws IllegalArgumentException {
+      if (nbt == null) {
+        throw new IllegalArgumentException();
+      }
       String name = nbt.getString(NBT_BREED_NEW);
       return getBreed(name);
     }

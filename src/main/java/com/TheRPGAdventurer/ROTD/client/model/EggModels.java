@@ -55,7 +55,11 @@ public class EggModels {
    * @return  the WavefrontObject, or a default Object if no proper model found
    */
   public WavefrontObject getModel(DragonBreedNew dragonBreed, EggModelState eggModelState) {
-    WavefrontObject wavefrontObject = breedModelOBJs.get(new ImmutablePair<>(dragonBreed, eggModelState));
+    ResourceLocation rl = breedModelRLs.get(new ImmutablePair<>(dragonBreed, eggModelState));
+    WavefrontObject wavefrontObject = null;
+    if (rl != null) {
+      wavefrontObject = breedModelOBJs.get(rl);
+    }
     if (wavefrontObject == null) {
       wavefrontObject = WavefrontObject.getDefaultFallback();
     }
@@ -96,40 +100,40 @@ public class EggModels {
       DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
 
       String str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL);
-      ModelResourceLocation mrl = new ModelResourceLocation("dragonmounts:" + str, "inventory");
-      addModelResourceLocation(whichBreed, EggModelState.INCUBATING, mrl);
+      ResourceLocation rl = new ResourceLocation("dragonmounts", str);
+      addResourceLocation(whichBreed, EggModelState.INCUBATING, rl);
 
       str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_HATCHED);
-      mrl = new ModelResourceLocation("dragonmounts:" + str, "inventory");
-      addModelResourceLocation(whichBreed, EggModelState.HATCHED, mrl);
+      rl = new ResourceLocation("dragonmounts", str);
+      addResourceLocation(whichBreed, EggModelState.HATCHED, rl);
 
       str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_SMASHED);
-      mrl = new ModelResourceLocation("dragonmounts:" + str, "inventory");
-      addModelResourceLocation(whichBreed, EggModelState.SMASHED, mrl);
+      rl = new ResourceLocation("dragonmounts", str);
+      addResourceLocation(whichBreed, EggModelState.SMASHED, rl);
 
       str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_TEXTURE);
-      ResourceLocation rl = new ResourceLocation("dragonmounts", str);
-      addTexture(whichBreed, rl);
+      ResourceLocation trl = new ResourceLocation("dragonmounts", str);
+      addTexture(whichBreed, trl);
     }
   }
 
 
   @SubscribeEvent
   public void registerModels(ModelRegistryEvent event) {
-    setCustomModelResourceLocations(ModItems.DRAGON_HATCHABLE_EGG);
-//    ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(item.getRegistryName(), id));
+    setCustomResourceLocations(ModItems.DRAGON_HATCHABLE_EGG);
+//    ModelLoader.setCustomResourceLocation(item, meta, new ResourceLocation(item.getRegistryName(), id));
 //
-//    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, BASE_MODEL_METADATA, itemModelResourceLocation);
+//    ModelLoader.setCustomResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, BASE_MODEL_METADATA, itemResourceLocation);
 //
-//    for (Map.Entry<ModelResourceLocation, Integer> entry : allMode)
+//    for (Map.Entry<ResourceLocation, Integer> entry : allMode)
 //
 //      // model to be used for rendering this item
-//      ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
+//      ResourceLocation itemResourceLocation = new ResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
 //
 //    BASE_MODEL_METADATA
 //    final int DUMMY_ITEM_SUBTYPE = 1;
-//    ModelResourceLocation objModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
-//    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DUMMY_ITEM_SUBTYPE, objModelResourceLocation);
+//    ResourceLocation objResourceLocation = new ResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
+//    ModelLoader.setCustomResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DUMMY_ITEM_SUBTYPE, objResourceLocation);
   }
 
   /**
@@ -138,23 +142,23 @@ public class EggModels {
    */
   @SubscribeEvent
   public void onModelBakeEvent(ModelBakeEvent event) {
-    for (ModelResourceLocation mrl : ImmutableSet.copyOf(breedModelRLs.values())) {
+    for (ResourceLocation rl : ImmutableSet.copyOf(breedModelRLs.values())) {
       try {
-        WavefrontObject model = new WavefrontObject(mrl);
-        breedModelOBJs.put(mrl, model);
-      } catch (ModelFormatException e) {
-        DragonMounts.logger.warn(String.format("Exception loading model %s : ", mrl, e.getMessage()));
+        WavefrontObject model = new WavefrontObject(rl);
+        breedModelOBJs.put(rl, model);
+      } catch (Exception e) {
+        DragonMounts.logger.warn(String.format("Exception loading model %s : ", rl, e.getMessage()));
       }
     }
   }
 
-  public void setCustomModelResourceLocations(Item itemDragonHatchableEgg) {
+  public void setCustomResourceLocations(Item itemDragonHatchableEgg) {
     if (internalState == InternalState.INIT) {
       DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: missing validation");
     }
     internalState = InternalState.REGISTERED_MODELS;
-    ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
-    ModelLoader.setCustomModelResourceLocation(itemDragonHatchableEgg, BASE_MODEL_METADATA, itemModelResourceLocation);
+    ModelResourceLocation itemResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
+    ModelLoader.setCustomModelResourceLocation(itemDragonHatchableEgg, BASE_MODEL_METADATA, itemResourceLocation);
   }
 
 //  public void registerTextures(TextureMap textureMap) {
@@ -196,28 +200,28 @@ public class EggModels {
 //    event.getMap().registerSprite(forestGasCloudRL);
   }
 
-  private void addModelResourceLocation(DragonBreedNew dragonBreedNew, EggModelState eggModelState, ModelResourceLocation mrl) {
+  private void addResourceLocation(DragonBreedNew dragonBreedNew, EggModelState eggModelState, ResourceLocation rl) {
     Pair<DragonBreedNew, EggModelState> key = new ImmutablePair<>(dragonBreedNew,eggModelState);
     if (breedModelRLs.containsKey(key)) {
-      DragonMounts.loggerLimit.warn_once("Called addModelResourceLocation twice for same breed + state");
+      DragonMounts.loggerLimit.warn_once("Called addResourceLocation twice for same breed + state");
       return;
     }
-    breedModelRLs.put(key, mrl);
+    breedModelRLs.put(key, rl);
   }
 
   private void addTexture(DragonBreedNew breed, ResourceLocation rl) {
     if (breedTextureRLs.containsKey(breed)) {
-      DragonMounts.loggerLimit.warn_once("Called addModelResourceLocation twice for same breed + state");
+      DragonMounts.loggerLimit.warn_once("Called addResourceLocation twice for same breed + state");
       return;
     }
     breedTextureRLs.put(breed, rl);
   }
 
 //  private static final DragonVariantTag EGG_ITEM_MODEL_BASE = DragonVariantTag.addTag("eggmodeljson", "dragon_hatchable_egg");
-  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "dragon_hatchable_egg.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg.obj");
   private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "textures/items/eggs/egg_default.png");
-  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "dragon_hatchable_egg_smashed.obj");
-  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "dragon_hatchable_egg_hatched.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "models/item/dragon_hatchable_egg_smashed.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "models/item/dragon_hatchable_egg_hatched.obj");
 
   private final int BASE_MODEL_METADATA = 0;
   private Map<DragonBreedNew, ResourceLocation> breedTextureRLs = new HashMap<>();
@@ -225,6 +229,6 @@ public class EggModels {
   private enum InternalState {INIT, HAVE_VALIDATED, REGISTERED_MODELS};
   private InternalState internalState = InternalState.INIT;  // just for debugging / assertion
 
-  private Map<Pair<DragonBreedNew, EggModelState>, ModelResourceLocation> breedModelRLs = new HashMap<>();
-  private Map<ModelResourceLocation, WavefrontObject> breedModelOBJs = new HashMap<>();
+  private Map<Pair<DragonBreedNew, EggModelState>, ResourceLocation> breedModelRLs = new HashMap<>();
+  private Map<ResourceLocation, WavefrontObject> breedModelOBJs = new HashMap<>();
 }

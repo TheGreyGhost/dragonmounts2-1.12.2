@@ -48,9 +48,23 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
     DragonBreedNew breed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed();
     try {
       breed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(itemStackIn.getTagCompound());
-    } catch (IllegalThreadStateException iae) {
+    } catch (IllegalArgumentException iae) {
       DragonMounts.loggerLimit.error_once("Unknown breed in TEISRDragonHatchableEgg:" + iae.getMessage());
     }
+
+    // vanilla item are expected to extend from [0,0,0] to [1,1,1]
+    //  the item renderer called has therefore applied
+    //    GlStateManager.translate(-0.5F, -0.5F, -0.5F)
+    //  to centre it around [0,0,0]
+    // the eggmodel (similar to entities) extends from [-0.5, 0, -0.5] to [0.5, 1, 0.5] hence the appropriate translation
+    //  would have been
+    //    GlStateManager.translate(0F, -0.5F, 0F)
+    //  so we need to correct to that by translating
+    //    GlStateManager.translate(0.5F, 0, 0.5F)
+    final double ITEM_ORIGIN_CORRECTION_X = 0.5;
+    final double ITEM_ORIGIN_CORRECTION_Y = 0.0;
+    final double ITEM_ORIGIN_CORRECTION_Z = 0.5;
+
     double relativeX = 0;
     double relativeY = 0;
     double relativeZ = 0;
@@ -107,6 +121,7 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
       // render exactly over the top of the TileEntity's block.
       // In this example, the zero point of our model needs to be in the middle of the block, not at the [x,y,z] of the block, so we need to
       // add an extra offset as well, i.e. [gemCentreOffsetX, gemCentreOffsetY, gemCentreOffsetZ]
+      GlStateManager.translate(ITEM_ORIGIN_CORRECTION_X, ITEM_ORIGIN_CORRECTION_Y, ITEM_ORIGIN_CORRECTION_Z);
       GlStateManager.translate(relativeX, relativeY, relativeZ);
 
 //      GlStateManager.rotate((float)angularPositionInDegrees, 0, 1, 0);   // rotate around the vertical axis

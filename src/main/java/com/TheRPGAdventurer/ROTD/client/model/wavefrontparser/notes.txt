@@ -1,3 +1,65 @@
 The wavefront (obj model) parser code has been ported from a previous forge version.
 
+It assumes the model is textured and uses triangles
+
 Why not use the inbuilt OBJloader?  Because it appears to be hard-coded to use textures from the Item sheet (TextureAtlasSprites) and I couldn't figure out how to make it work properly with swappable textures.
+
+
+Items expect their model to have coordinates [x,y,z] all 0-->1 and is then translated before rendering by -0.5, -0.5, -0.5
+
+The EggModels expects the model to have its origin at [0, 0, 0], which means that the model should be occupy the extent:
+[-0.5, 0, -0.5] to [0.5, 1.0, 0.5]
+
+
+
+[14:33:23] [main/INFO] [minecraft/GuiNewChat]: [CHAT]                    "display" JSON section printed to console...
+[14:34:08] [main/INFO] [STDOUT]: [itemtransformhelper.MenuItemCameraTransforms:alterField:171]: 
+"display": {
+    "firstperson_righthand": {
+        "rotation": [ 0, 35, 0 ],
+        "translation": [ 0.00, 2.50, 0.00 ],
+        "scale": [ 0.40, 0.40, 0.40 ]
+    },
+    "firstperson_lefthand": {
+        "rotation": [ 0, 325, 0 ],
+        "translation": [ 0.00, 2.50, 0.00 ],
+        "scale": [ 0.40, 0.40, 0.40 ]
+    },
+    "gui": {
+        "rotation": [ -150, -45, 180 ],
+        "translation": [ -0.00, 0.00, 0.00 ],
+        "scale": [ 0.62, 0.62, 0.63 ]
+    },
+    "fixed": {
+        "rotation": [ 0, 0, 0 ],
+        "translation": [ 0.00, 0.00, 0.00 ],
+        "scale": [ 0.65, 0.65, 0.35 ]
+    },
+    "head": {
+        "rotation": [ 0, 0, 0 ],
+        "translation": [ 0.00, 0.00, 0.00 ],
+        "scale": [ 1.00, 1.00, 1.00 ]
+    },
+    "head": {
+        "rotation": [ 0, 0, 0 ],
+        "translation": [ 0.00, 14.50, 0.00 ],
+        "scale": [ 1.00, 1.00, 1.00 ]
+    },
+    "thirdperson_righthand": {
+        "rotation": [ 15, 55, 0 ],
+        "translation": [ 0.00, 2.75, 2.75 ],
+        "scale": [ 0.37, 0.37, 0.37 ]
+    },
+    "thirdperson_lefthand": {
+        "rotation": [ 15, 55, 0 ],
+        "translation": [ 0.00, 2.75, 2.75 ],
+        "scale": [ 0.37, 0.37, 0.37 ]
+    },
+    "ground": {
+        "rotation": [ 0, 0, 0 ],
+        "translation": [ 0.00, 3.00, 0.00 ],
+        "scale": [ 0.25, 0.25, 0.25 ]
+    }
+}
+
+

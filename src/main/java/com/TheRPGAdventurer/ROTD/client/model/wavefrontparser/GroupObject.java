@@ -26,7 +26,7 @@ public class GroupObject {
     this.glDrawingMode = glDrawingMode;
   }
 
-  public void render(BufferBuilder bufferBuilder) {
+  public void render(BufferBuilder bufferBuilder) throws IndexOutOfBoundsException{
     if (faces.size() > 0) {
       for (Face face : faces) {
         face.addFaceForRender(bufferBuilder);
