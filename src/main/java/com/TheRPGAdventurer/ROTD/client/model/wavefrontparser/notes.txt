@@ -1,0 +1,3 @@
+The wavefront (obj model) parser code has been ported from a previous forge version.
+
+Why not use the inbuilt OBJloader?  Because it appears to be hard-coded to use textures from the Item sheet (TextureAtlasSprites) and I couldn't figure out how to make it work properly with swappable textures.

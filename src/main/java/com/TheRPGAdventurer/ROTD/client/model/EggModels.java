@@ -1,17 +1,18 @@
 package com.TheRPGAdventurer.ROTD.client.model;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.client.model.wavefrontparser.ModelFormatException;
+import com.TheRPGAdventurer.ROTD.client.model.wavefrontparser.WavefrontObject;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.IBakedModel;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -19,10 +20,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by TGG on 22/08/2019.
@@ -51,14 +49,17 @@ public class EggModels {
     DragonVariants.addVariantTagValidator(new EggModelsValidator());
   }
 
-  /** retrieve the IBakedModel for a given breed and eggModelState
+  /** retrieve the WavefrontObject for a given breed and eggModelState
    * @param dragonBreed
    * @param eggModelState
-   * @return  the IBakedModel, or a default IBakedModel if no proper model found
+   * @return  the WavefrontObject, or a default Object if no proper model found
    */
-  public IBakedModel getModel(DragonBreedNew dragonBreed, EggModelState eggModelState) {
-    ModelResourceLocation mrl = breedModels.get(new ImmutablePair<>(dragonBreed, eggModelState));
-    return Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(mrl);
+  public WavefrontObject getModel(DragonBreedNew dragonBreed, EggModelState eggModelState) {
+    WavefrontObject wavefrontObject = breedModelOBJs.get(new ImmutablePair<>(dragonBreed, eggModelState));
+    if (wavefrontObject == null) {
+      wavefrontObject = WavefrontObject.getDefaultFallback();
+    }
+    return wavefrontObject;
   }
 
   /**
@@ -69,7 +70,6 @@ public class EggModels {
   public ResourceLocation getTexture(DragonBreedNew dragonBreed) {
     return breedTextureRLs.get(dragonBreed);
   }
-
 
 //  /**
 //   * Returns the texture sprite for the given breed
@@ -132,6 +132,22 @@ public class EggModels {
 //    ModelLoader.setCustomModelResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DUMMY_ITEM_SUBTYPE, objModelResourceLocation);
   }
 
+  /**
+   * This event is a convenient time to load the egg models
+   * @param event
+   */
+  @SubscribeEvent
+  public void onModelBakeEvent(ModelBakeEvent event) {
+    for (ModelResourceLocation mrl : ImmutableSet.copyOf(breedModelRLs.values())) {
+      try {
+        WavefrontObject model = new WavefrontObject(mrl);
+        breedModelOBJs.put(mrl, model);
+      } catch (ModelFormatException e) {
+        DragonMounts.logger.warn(String.format("Exception loading model %s : ", mrl, e.getMessage()));
+      }
+    }
+  }
+
   public void setCustomModelResourceLocations(Item itemDragonHatchableEgg) {
     if (internalState == InternalState.INIT) {
       DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: missing validation");
@@ -139,10 +155,6 @@ public class EggModels {
     internalState = InternalState.REGISTERED_MODELS;
     ModelResourceLocation itemModelResourceLocation = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
     ModelLoader.setCustomModelResourceLocation(itemDragonHatchableEgg, BASE_MODEL_METADATA, itemModelResourceLocation);
-
-    for (Map.Entry<ModelResourceLocation, Integer> entry : allModelsAndMetadata.entrySet()) {
-      ModelLoader.setCustomModelResourceLocation(itemDragonHatchableEgg, entry.getValue(), entry.getKey());
-    }
   }
 
 //  public void registerTextures(TextureMap textureMap) {
@@ -186,14 +198,11 @@ public class EggModels {
 
   private void addModelResourceLocation(DragonBreedNew dragonBreedNew, EggModelState eggModelState, ModelResourceLocation mrl) {
     Pair<DragonBreedNew, EggModelState> key = new ImmutablePair<>(dragonBreedNew,eggModelState);
-    if (breedModels.containsKey(key)) {
+    if (breedModelRLs.containsKey(key)) {
       DragonMounts.loggerLimit.warn_once("Called addModelResourceLocation twice for same breed + state");
       return;
     }
-    if (!allModelsAndMetadata.containsKey(mrl)) {
-      allModelsAndMetadata.put(mrl, nextMetadata++);
-    }
-    breedModels.put(key, mrl);
+    breedModelRLs.put(key, mrl);
   }
 
   private void addTexture(DragonBreedNew breed, ResourceLocation rl) {
@@ -210,18 +219,12 @@ public class EggModels {
   private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "dragon_hatchable_egg_smashed.obj");
   private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "dragon_hatchable_egg_hatched.obj");
 
-  // The EggModels uses the metadata for ItemHatchableEgg to register and load the various obj models, but uses NBT tag to
-  //    choose which one to display.  The metadata itself is arbitrary / ignored.
-
-  private Map<ModelResourceLocation, Integer> allModelsAndMetadata = new HashMap<>();
-  private int nextMetadata = 1;
   private final int BASE_MODEL_METADATA = 0;
-  //  private Set<ResourceLocation> allTextures = new HashSet<>();
   private Map<DragonBreedNew, ResourceLocation> breedTextureRLs = new HashMap<>();
-//  private Map<DragonBreedNew, TextureAtlasSprite> breedTextures = new HashMap<>();
 
   private enum InternalState {INIT, HAVE_VALIDATED, REGISTERED_MODELS};
   private InternalState internalState = InternalState.INIT;  // just for debugging / assertion
 
-  private Map<Pair<DragonBreedNew, EggModelState>, ModelResourceLocation> breedModels = new HashMap<>();
+  private Map<Pair<DragonBreedNew, EggModelState>, ModelResourceLocation> breedModelRLs = new HashMap<>();
+  private Map<ModelResourceLocation, WavefrontObject> breedModelOBJs = new HashMap<>();
 }

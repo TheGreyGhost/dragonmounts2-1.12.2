@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.client.model;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.client.model.wavefrontparser.WavefrontObject;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.block.state.IBlockState;
@@ -145,13 +146,9 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
 //      final int BLOCK_LIGHT_VALUE = 0;
 //      OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, SKY_LIGHT_VALUE * 16.0F, BLOCK_LIGHT_VALUE * 16.0F);
 
-      bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
-      IBakedModel iBakedModel = EggModels.getInstance().getModel(breed, EggModels.EggModelState.INCUBATING);
-      int auxColour = -1;  // not sure what this is (from Vanilla RenderItem)
-      for (EnumFacing enumfacing : EnumFacing.values()) {
-        this.renderQuads(bufferBuilder, iBakedModel.getQuads((IBlockState)null, enumfacing, 0L), auxColour);
-      }
-      this.renderQuads(bufferBuilder, iBakedModel.getQuads((IBlockState)null, (EnumFacing)null, 0L), auxColour);
+      bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX_NORMAL);
+      WavefrontObject wavefrontObject = EggModels.getInstance().getModel(breed, EggModels.EggModelState.INCUBATING);
+      wavefrontObject.tessellateAll(bufferBuilder);
       tessellator.draw();
 
 //      ModelResourceLocation mrl = new ModelResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");  // todo refactor
