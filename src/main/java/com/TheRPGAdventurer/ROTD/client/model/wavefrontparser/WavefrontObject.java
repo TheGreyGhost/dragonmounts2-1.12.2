@@ -31,6 +31,21 @@ import java.util.regex.Pattern;
  * <p>
  * Wavefront Object importer
  * Based heavily off of the specifications found at http://en.wikipedia.org/wiki/Wavefront_.obj_file
+ *
+ * Typical usage:
+ * 1) Generate a WavefrontObject using a ResourceLocation or an InputStream.  It may fail if the file is not found or is wrong
+ * 2a) renderAll() to render the object (sets up the tessellator itself)
+ * or
+ * 2b) tesselateAll to draw the vertices directly to the bufferBuilder.  You must set up the tessellator and bufferbuilder in the caller.
+ *    (see renderAll method)
+ *
+ * Note that renderAll() or tesselateAll() may fail if the file faces are invalid (eg vertex numbers incorrect)
+ * 3) If model generation has failed, you can getDefaultFallback() to give you a default model to render
+ *
+ *  The obj file must meet the following requirements:
+ *  1) faces must be triangles, not quads
+ *  2) must contain texture information
+ *  3) only very simple features are supported; just vertices, texture coordinates, normal coordinates.
  */
 public class WavefrontObject {
 

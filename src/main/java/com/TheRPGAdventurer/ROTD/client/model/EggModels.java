@@ -75,15 +75,6 @@ public class EggModels {
     return breedTextureRLs.get(dragonBreed);
   }
 
-//  /**
-//   * Returns the texture sprite for the given breed
-//   * @param dragonBreed
-//   * @return null if not found
-//   */
-//  public TextureAtlasSprite getTextureAtlasSprite(DragonBreedNew dragonBreed) {
-//    return breedTextures.get(dragonBreed);
-//  }
-
   /**
    * Validates the following aspects of the tags:
    * - none-
@@ -121,19 +112,6 @@ public class EggModels {
   @SubscribeEvent
   public void registerModels(ModelRegistryEvent event) {
     setCustomResourceLocations(ModItems.DRAGON_HATCHABLE_EGG);
-//    ModelLoader.setCustomResourceLocation(item, meta, new ResourceLocation(item.getRegistryName(), id));
-//
-//    ModelLoader.setCustomResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, BASE_MODEL_METADATA, itemResourceLocation);
-//
-//    for (Map.Entry<ResourceLocation, Integer> entry : allMode)
-//
-//      // model to be used for rendering this item
-//      ResourceLocation itemResourceLocation = new ResourceLocation("dragonmounts:dragon_hatchable_egg", "inventory");
-//
-//    BASE_MODEL_METADATA
-//    final int DUMMY_ITEM_SUBTYPE = 1;
-//    ResourceLocation objResourceLocation = new ResourceLocation("dragonmounts:dragon_hatchable_egg.obj", "inventory");
-//    ModelLoader.setCustomResourceLocation(ModItems.DRAGON_HATCHABLE_EGG, DUMMY_ITEM_SUBTYPE, objResourceLocation);
   }
 
   /**
@@ -161,45 +139,6 @@ public class EggModels {
     ModelLoader.setCustomModelResourceLocation(itemDragonHatchableEgg, BASE_MODEL_METADATA, itemResourceLocation);
   }
 
-//  public void registerTextures(TextureMap textureMap) {
-//    for (ResourceLocation rl : allTextures) {
-//      textureMap.registerSprite(rl);
-//    }
-//  }
-
-  /**
-   * Stitches all the item textures into the item texture sheet (TextureAtlas) so we can use them later
-   * @param event
-   */
-  @SubscribeEvent
-  public void stitcherEventPre(TextureStitchEvent.Pre event) {
-//    if (internalState == InternalState.INIT) {
-//      DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: texture stitch before validation");
-//    }
-//    Map<ResourceLocation, TextureAtlasSprite> addedTAS = new HashMap<>();
-//    for (Map.Entry<DragonBreedNew, ResourceLocation> entry : breedTextureRLs.entrySet()) {
-//      DragonBreedNew breed = entry.getKey();
-//      ResourceLocation texRL = entry.getValue();
-//      if (addedTAS.containsKey(texRL)) {
-//        breedTextures.put(breed, addedTAS.get(texRL));
-//      } else {
-//        TextureAtlasSprite tas = event.getMap().registerSprite(texRL);
-//        addedTAS.put(texRL, tas);
-//        breedTextures.put(breed, tas);
-//      }
-//    }
-//    ResourceLocation flameRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_fire");
-//    event.getMap().registerSprite(flameRL);
-//    ResourceLocation iceRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_ice");
-//    event.getMap().registerSprite(iceRL);
-//    ResourceLocation waterRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_water");
-//    event.getMap().registerSprite(waterRL);
-//    ResourceLocation airRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_air");
-//    event.getMap().registerSprite(airRL);
-//    ResourceLocation forestGasCloudRL = new ResourceLocation("dragonmounts:entities/breathweapon/breath_forest");
-//    event.getMap().registerSprite(forestGasCloudRL);
-  }
-
   private void addResourceLocation(DragonBreedNew dragonBreedNew, EggModelState eggModelState, ResourceLocation rl) {
     Pair<DragonBreedNew, EggModelState> key = new ImmutablePair<>(dragonBreedNew,eggModelState);
     if (breedModelRLs.containsKey(key)) {
@@ -217,7 +156,6 @@ public class EggModels {
     breedTextureRLs.put(breed, rl);
   }
 
-//  private static final DragonVariantTag EGG_ITEM_MODEL_BASE = DragonVariantTag.addTag("eggmodeljson", "dragon_hatchable_egg");
   private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg.obj");
   private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "textures/items/eggs/egg_default.png");
   private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "models/item/dragon_hatchable_egg_smashed.obj");

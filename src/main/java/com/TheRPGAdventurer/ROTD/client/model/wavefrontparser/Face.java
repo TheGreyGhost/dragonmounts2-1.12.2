@@ -13,30 +13,10 @@ public class Face {
   public Vertex[] vertexNormals;
   public Vertex faceNormal;
   public TextureCoordinate[] textureCoordinates;
-  // just a default to prevent Crashes
-  private static TextureCoordinate[] DEFAULT_TEXTURE_COORDINATES = {new TextureCoordinate(0, 0), new TextureCoordinate(0, 1), new TextureCoordinate(1, 0)};
 
   public void addFaceForRender(BufferBuilder bufferBuilder) throws IndexOutOfBoundsException {
     addFaceForRender(bufferBuilder, 0.0005F);
   }
-
-//  private void storeVertexData(int[] faceDataOut, int storeIndex, Vertex vertex, TextureCoordinate textureCoordinate, Vertex vertexNormal) {
-//    int i = storeIndex * 7;
-//    faceDataOut[i] = Float.floatToRawIntBits(vertex.x);
-//    faceDataOut[i + 1] = Float.floatToRawIntBits(vertex.y);
-//    faceDataOut[i + 2] = Float.floatToRawIntBits(vertex.z);
-//    faceDataOut[i + 4] = Float.floatToRawIntBits(textureCoordinate.u);
-//    faceDataOut[i + 4 + 1] = Float.floatToRawIntBits(textureCoordinate.v);
-//    faceDataOut[i+ 6] = Float.
-//
-////    bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
-////    bufferbuilder.pos(-0.5D, -0.25D, 0.0D).tex(0.0D, 1.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
-////    bufferbuilder.pos(0.5D, -0.25D, 0.0D).tex(1.0D, 1.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
-////    bufferbuilder.pos(0.5D, 0.75D, 0.0D).tex(1.0D, 0.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
-////    bufferbuilder.pos(-0.5D, 0.75D, 0.0D).tex(0.0D, 0.0D).normal(0.0F, 1.0F, 0.0F).endVertex();
-////    tessellator.draw();
-////
-//  }
 
   /**
    * Tesselate the face.  Nudge the texture by the given amount (prevents visual artefacts)
