@@ -184,7 +184,7 @@ public class ItemDragonHatchableEgg extends Item {
    */
   public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
     if (this.isInCreativeTab(tab)) {
-      for (DragonBreedNew breed : DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getAllBreeds()) {
+      for (DragonBreedNew breed : DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getAllNonDefaultBreeds()) {
         ItemStack itemstack = new ItemStack(this, 1);
         applyBreedToItemStack(itemstack, breed);
         items.add(itemstack);

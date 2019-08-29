@@ -1,7 +1,6 @@
 package com.TheRPGAdventurer.ROTD.client.model;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.client.model.wavefrontparser.ModelFormatException;
 import com.TheRPGAdventurer.ROTD.client.model.wavefrontparser.WavefrontObject;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
@@ -9,12 +8,12 @@ import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -66,13 +65,23 @@ public class EggModels {
     return wavefrontObject;
   }
 
+//  /**
+//   * Returns the resource location for the given breed &
+//   * @param dragonBreed
+//   * @return null if not found
+//   */
+//  public ResourceLocation getTexture(DragonBreedNew dragonBreed) {
+//    return breedTextureRLs.get(dragonBreed);
+//  }
+
   /**
-   * Returns the texture sprite for the given breed
+   * returns the animated texture for the given breed & egg state
    * @param dragonBreed
-   * @return null if not found
+   * @param eggModelState
+   * @return the animated texture, or null if not found
    */
-  public ResourceLocation getTexture(DragonBreedNew dragonBreed) {
-    return breedTextureRLs.get(dragonBreed);
+  public AnimatedTexture getAnimatedTexture(DragonBreedNew dragonBreed, EggModelState eggModelState) {
+    return breedAnimatedTextures.get(new ImmutablePair<>(dragonBreed, eggModelState));
   }
 
   /**
@@ -104,10 +113,17 @@ public class EggModels {
 
       str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_TEXTURE);
       ResourceLocation trl = new ResourceLocation("dragonmounts", str);
-      addTexture(whichBreed, trl);
+      addTexture(whichBreed, EggModelState.INCUBATING, trl);
+
+      str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_SMASHED_TEXTURE);
+      trl = new ResourceLocation("dragonmounts", str);
+      addTexture(whichBreed, EggModelState.SMASHED, trl);
+
+      str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_HATCHED_TEXTURE);
+      trl = new ResourceLocation("dragonmounts", str);
+      addTexture(whichBreed, EggModelState.HATCHED, trl);
     }
   }
-
 
   @SubscribeEvent
   public void registerModels(ModelRegistryEvent event) {
@@ -115,7 +131,7 @@ public class EggModels {
   }
 
   /**
-   * This event is a convenient time to load the egg models
+   * This event is a convenient time to load the egg models and textures
    * @param event
    */
   @SubscribeEvent
@@ -125,9 +141,25 @@ public class EggModels {
         WavefrontObject model = new WavefrontObject(rl);
         breedModelOBJs.put(rl, model);
       } catch (Exception e) {
-        DragonMounts.logger.warn(String.format("Exception loading model %s : ", rl, e.getMessage()));
+        DragonMounts.logger.warn(String.format("Exception loading model %s : %s", rl, e.getCause()));
       }
     }
+
+    for (Map.Entry<Pair<DragonBreedNew, EggModelState>, ResourceLocation> entry : breedTextureRLs.entrySet()) {
+      try {
+        DragonBreedNew breed = entry.getKey().getLeft();
+        AnimatedTexture animatedTexture = new AnimatedTexture(entry.getValue());
+        long ticksPerFrame = (long)breed.getDragonVariants().getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_ANIMATION_TICKS_PER_FRAME);
+        boolean noInterpolation = (boolean)breed.getDragonVariants().getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_ANIMATION_NO_INTERPOLATION);
+        animatedTexture.setAnimation((int)ticksPerFrame, !noInterpolation);
+        animatedTexture.load(Minecraft.getMinecraft().getResourceManager());
+        breedAnimatedTextures.put(entry.getKey(), animatedTexture);
+      } catch (Exception e) {
+        DragonMounts.logger.warn(String.format("Exception loading resource %s for breed %s: %s",
+                                               entry.getValue(), entry.getKey().getLeft().getInternalName(), e.getCause()));
+      }
+    }
+
   }
 
   public void setCustomResourceLocations(Item itemDragonHatchableEgg) {
@@ -148,21 +180,27 @@ public class EggModels {
     breedModelRLs.put(key, rl);
   }
 
-  private void addTexture(DragonBreedNew breed, ResourceLocation rl) {
+  private void addTexture(DragonBreedNew breed, EggModelState eggModelState, ResourceLocation rl) {
     if (breedTextureRLs.containsKey(breed)) {
       DragonMounts.loggerLimit.warn_once("Called addResourceLocation twice for same breed + state");
       return;
     }
-    breedTextureRLs.put(breed, rl);
+    breedTextureRLs.put(new ImmutablePair<>(breed, eggModelState), rl);
   }
 
   private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg.obj");
-  private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "textures/items/eggs/egg_default.png");
   private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "models/item/dragon_hatchable_egg_smashed.obj");
   private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "models/item/dragon_hatchable_egg_hatched.obj");
 
+  private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "textures/items/eggs/egg_default.png");
+  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED_TEXTURE = DragonVariantTag.addTag("eggmodelsmashedtexture", "egg_smashed_default.png");
+  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED_TEXTURE = DragonVariantTag.addTag("eggmodelhatchedtexture", "egg_hatched_default.png");
+  private static final DragonVariantTag EGG_ITEM_ANIMATION_TICKS_PER_FRAME = DragonVariantTag.addTag("egganimationticksperframe", 8, 1, 1000);
+  private static final DragonVariantTag EGG_ITEM_ANIMATION_NO_INTERPOLATION = DragonVariantTag.addTag("egganimationnointerpolation");
+
   private final int BASE_MODEL_METADATA = 0;
-  private Map<DragonBreedNew, ResourceLocation> breedTextureRLs = new HashMap<>();
+  private Map<Pair<DragonBreedNew, EggModelState>, ResourceLocation> breedTextureRLs = new HashMap<>();
+  private Map<Pair<DragonBreedNew, EggModelState>, AnimatedTexture> breedAnimatedTextures = new HashMap<>();
 
   private enum InternalState {INIT, HAVE_VALIDATED, REGISTERED_MODELS};
   private InternalState internalState = InternalState.INIT;  // just for debugging / assertion

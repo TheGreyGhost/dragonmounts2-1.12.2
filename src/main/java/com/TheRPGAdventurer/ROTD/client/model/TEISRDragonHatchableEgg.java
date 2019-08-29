@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.client.model;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.model.wavefrontparser.WavefrontObject;
+import com.TheRPGAdventurer.ROTD.client.other.ClientTickCounter;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.block.state.IBlockState;
@@ -66,9 +67,12 @@ public class TEISRDragonHatchableEgg extends TileEntityItemStackRenderer
       Tessellator tessellator = Tessellator.getInstance();
       BufferBuilder bufferBuilder = tessellator.getBuffer();
 
-      ResourceLocation resourceLocation = EggModels.getInstance().getTexture(breed);
-      if (resourceLocation != null) {
-        Minecraft.getMinecraft().getTextureManager().bindTexture(resourceLocation);
+      AnimatedTexture animatedTexture = EggModels.getInstance().getAnimatedTexture(breed, EggModels.EggModelState.INCUBATING);
+      if (animatedTexture != null) {
+        animatedTexture.updateAnimation(ClientTickCounter.getTicksSinceStart());
+        animatedTexture.bindTexture();
+      } else {
+        AnimatedTexture.bindMissingTexture();
       }
 
       bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX_NORMAL);

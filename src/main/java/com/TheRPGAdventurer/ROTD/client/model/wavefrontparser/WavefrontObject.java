@@ -127,10 +127,10 @@ public class WavefrontObject {
 
   private static final String defaultCube =
           "g cube\n" +
-                  "v 0.0 0.0 0.0\nv 0.0 0.0 1.0\nv 0.0 1.0 0.0\nv 0.0 1.0 1.0\nv 1.0 0.0 0.0\nv 1.0 0.0 1.0\nv 1.0 1.0 0.0\nv 1.0 1.0 1.0\n" +
-                  "vt 0.0 0.0\nvt 1.0 0.0\nvt 0.0 1.0\nvt 1.0 1.0\n" +
-                  "f 1/2 7/3 5/1\nf 1/2 3/4 7/3\nf 1/1 4/4 3/3\nf 1/1 2/2 4/4\nf 3/3 8/2 7/4\nf 3/3 4/1 8/2\n" +
-                  "f 5/2 7/4 8/3\nf 5/2 8/3 6/1\nf 1/1 5/2 6/4\nf 1/1 6/4 2/3\nf 2/1 6/2 8/4\nf 2/1 8/4 4/3\n";
+          "v 0.0 0.0 0.0\nv 0.0 0.0 1.0\nv 0.0 1.0 0.0\nv 0.0 1.0 1.0\nv 1.0 0.0 0.0\nv 1.0 0.0 1.0\nv 1.0 1.0 0.0\nv 1.0 1.0 1.0\n" +
+          "vt 0.0 0.0\nvt 1.0 0.0\nvt 0.0 1.0\nvt 1.0 1.0\n" +
+          "f 1/2 7/3 5/1\nf 1/2 3/4 7/3\nf 1/1 4/4 3/3\nf 1/1 2/2 4/4\nf 3/3 8/2 7/4\nf 3/3 4/1 8/2\n" +
+          "f 5/2 7/4 8/3\nf 5/2 8/3 6/1\nf 1/1 5/2 6/4\nf 1/1 6/4 2/3\nf 2/1 6/2 8/4\nf 2/1 8/4 4/3\n";
   private static Pattern vertexPattern = Pattern.compile("(v( (\\-){0,1}\\d+\\.\\d+){3,4} *\\n)|(v( (\\-){0,1}\\d+\\.\\d+){3,4} *$)");
   private static Pattern vertexNormalPattern = Pattern.compile("(vn( (\\-){0,1}\\d+\\.\\d+){3,4} *\\n)|(vn( (\\-){0,1}\\d+\\.\\d+){3,4} *$)");
   private static Pattern textureCoordinatePattern = Pattern.compile("(vt( (\\-){0,1}\\d+\\.\\d+){2,3} *\\n)|(vt( (\\-){0,1}\\d+\\.\\d+){2,3} *$)");

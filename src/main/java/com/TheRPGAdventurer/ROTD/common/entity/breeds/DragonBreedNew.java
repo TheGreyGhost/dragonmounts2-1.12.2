@@ -9,7 +9,9 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.text.translation.I18n;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -171,6 +173,15 @@ public class DragonBreedNew {
      */
     public ImmutableList<DragonBreedNew> getAllBreeds() {
       return ImmutableList.copyOf(allDragonBreeds.values());
+    }
+
+    /** returns a list of all defined breeds not including the default breed
+     * @return
+     */
+    public ImmutableList<DragonBreedNew> getAllNonDefaultBreeds() {
+      List<DragonBreedNew> filtered = new ArrayList<>(allDragonBreeds.values());
+      filtered.remove(getDefaultBreed());
+      return ImmutableList.copyOf(filtered);
     }
 
     private Map<String, DragonBreedNew> allDragonBreeds = new HashMap<>();

@@ -14,6 +14,7 @@ import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
 import com.TheRPGAdventurer.ROTD.client.model.EggModels;
 import com.TheRPGAdventurer.ROTD.client.model.TEISRDragonHatchableEgg;
+import com.TheRPGAdventurer.ROTD.client.other.ClientTickCounter;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
@@ -60,6 +61,7 @@ public class ClientProxy extends CommonProxy {
     DragonMounts.instance.getConfig().clientPreInit();
     RenderingRegistry.registerEntityRenderingHandler(EntityTameableDragon.class, DragonRenderer::new);
     MinecraftForge.EVENT_BUS.register(IItemColorRegistration.class);
+    MinecraftForge.EVENT_BUS.register(ClientTickCounter.class);
 
     OBJLoader.INSTANCE.addDomain(DragonMounts.MODID);
     MinecraftForge.EVENT_BUS.register(EggModels.getInstance());
