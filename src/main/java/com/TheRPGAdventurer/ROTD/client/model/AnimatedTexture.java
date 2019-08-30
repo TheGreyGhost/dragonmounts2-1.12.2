@@ -80,7 +80,7 @@ public class AnimatedTexture {
 
       currentFrame = new DynamicTexture(frameWidth, frameHeight);
     } catch (Exception e) {
-      String cause = e.getMessage();
+      String cause = e.toString();
       DragonMounts.loggerLimit.warn_once(String.format("Error while loading texture %s: %s", textureRL, cause));
     }
     initialised = true;

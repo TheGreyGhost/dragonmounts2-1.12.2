@@ -141,7 +141,7 @@ public class EggModels {
         WavefrontObject model = new WavefrontObject(rl);
         breedModelOBJs.put(rl, model);
       } catch (Exception e) {
-        DragonMounts.logger.warn(String.format("Exception loading model %s : %s", rl, e.getCause()));
+        DragonMounts.logger.warn(String.format("Exception loading model %s : %s", rl, e.toString()));
       }
     }
 
@@ -188,7 +188,8 @@ public class EggModels {
     breedTextureRLs.put(new ImmutablePair<>(breed, eggModelState), rl);
   }
 
-  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg.obj");
+//  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg_test.obj");
   private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "models/item/dragon_hatchable_egg_smashed.obj");
   private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "models/item/dragon_hatchable_egg_hatched.obj");
 
