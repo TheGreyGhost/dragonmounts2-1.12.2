@@ -27,7 +27,7 @@ import java.util.*;
  * Usage:
  * 1) Create the EggModels()
  * 2) Call MinecraftForge.EVENT_BUS.register in preInitialisation
- * 3) During initial setup, call eggModels.registerConfigurationTags() to register all the tags that are
+ * 3) During initial setup (preinit), call eggModels.registerConfigurationTags() to register all the tags that are
  *    used to configure egg models, and to set up the variant tag validation
  */
 

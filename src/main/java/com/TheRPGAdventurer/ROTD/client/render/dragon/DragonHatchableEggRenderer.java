@@ -52,17 +52,8 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
 
-  public static final String TEX_BASE = "textures/entities/dragon/";
-
   public DragonHatchableEggRenderer(RenderManager renderManager) {
     super(renderManager);
-
-//    // create default breed renderers
-//    for (EnumDragonBreed breed : EnumDragonBreed.values()) {
-//      if (!breedRenderers.containsKey(breed)) {
-//        breedRenderers.put(breed, new DefaultDragonBreedRenderer(this, breed));
-//      }
-//    }
   }
 
   @Override

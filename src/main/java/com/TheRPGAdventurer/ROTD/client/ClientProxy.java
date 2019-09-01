@@ -17,9 +17,11 @@ import com.TheRPGAdventurer.ROTD.client.model.TEISRDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.client.other.ClientTickCounter;
 import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonHatchableEggRenderer;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
 import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.common.CommonProxy;
+import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.event.DragonViewEvent;
 import com.TheRPGAdventurer.ROTD.common.event.IItemColorRegistration;
@@ -60,6 +62,7 @@ public class ClientProxy extends CommonProxy {
     // register dragon entity renderer
     DragonMounts.instance.getConfig().clientPreInit();
     RenderingRegistry.registerEntityRenderingHandler(EntityTameableDragon.class, DragonRenderer::new);
+    RenderingRegistry.registerEntityRenderingHandler(EntityDragonEgg.class, DragonHatchableEggRenderer::new);
     MinecraftForge.EVENT_BUS.register(IItemColorRegistration.class);
     MinecraftForge.EVENT_BUS.register(ClientTickCounter.class);
 

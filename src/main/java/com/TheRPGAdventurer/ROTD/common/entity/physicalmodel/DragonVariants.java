@@ -133,6 +133,16 @@ public class DragonVariants {
     return allAppliedTags.get(category.getIdx()).getOrDefault(tag, tag.getDefaultValue());
   }
 
+  /**
+   * Does the config file contain this tag?
+   * @param category
+   * @param tag
+   * @return true if the tag has been explicitly applied; false if using the default.
+   */
+  public boolean tagIsExplictlyApplied(Category category, DragonVariantTag tag) {
+    return allAppliedTags.get(category.getIdx()).containsValue(tag);
+  }
+
   /** remove one or more tags (set back to default)
    */
   public void removeTag(Category category, DragonVariantTag tagToRemove) {
