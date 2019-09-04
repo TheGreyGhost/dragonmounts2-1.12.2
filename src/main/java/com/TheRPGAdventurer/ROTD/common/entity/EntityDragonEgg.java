@@ -7,6 +7,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
+import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
@@ -20,11 +21,13 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by TGG on 10/08/2019.
@@ -181,11 +184,10 @@ public class EntityDragonEgg extends Entity {
     double initialMotionY = this.motionY;
     double initialMotionZ = this.motionZ;
 
-    if (!this.hasNoGravity()) {
+    if (userConfiguredParameters.levitateFlag) {
+      applyLevitation();
+    } else if (!this.hasNoGravity()) {
       this.motionY -= 0.04;
-      if (userConfiguredParameters.levitateFlag) {
-        applyLevitation();
-      }
     }
 
     if (this.world.isRemote) {
@@ -247,7 +249,9 @@ public class EntityDragonEgg extends Entity {
       this.setDead();
     }
 
-    updateIncubationTime();
+    if (eggState == EggState.INCUBATING) {
+      updateIncubationTime();
+    }
     updateEggAnimation();
   }
 
@@ -297,7 +301,7 @@ public class EntityDragonEgg extends Entity {
 
     public static EggState getStateFromDataParam(EntityDataManager entityDataManager, DataParameter<EggState> dataParameter) {
       try {
-        EggState newEggState = entityDataManager.get(DATAPARAM_EGGSTATE);
+        EggState newEggState = entityDataManager.get(dataParameter);
         return newEggState;
       } catch (Exception e) {
         return SMASHED;
@@ -346,10 +350,44 @@ public class EntityDragonEgg extends Entity {
     //todo spawn the dragon here!
   }
 
+  // levitate to a given target height by manipulating motionY:
+  // if we're below the target height, levitate upwards; if above the target height, levitate downwards.
+  // once we get close to the target height, the levitation speed smoothly tapers off to zero
+  // if the egg has other motion already (eg due to falling or being hit), decay it exponentially.
   private void applyLevitation() {
-    //todo
+
+    final float MINECRAFT_BASE_GRAVITY = 0.04F;
+    final float RELATIVE_GRAVITY_STRENGTH = 0.25F;
+    int incubationTicks = getIncubationTicks();
+    if (incubationTicks < userConfiguredParameters.eggLevitateStartTicks) {
+      motionY -= MINECRAFT_BASE_GRAVITY * RELATIVE_GRAVITY_STRENGTH;
+      return;
+    }
+    float levitateDuration = userConfiguredParameters.eggIncubationCompleteTicks - userConfiguredParameters.eggLevitateStartTicks;
+    float levitateTimeFraction =  (incubationTicks - userConfiguredParameters.eggLevitateStartTicks) / levitateDuration;
+
+    double targetHeight = userConfiguredParameters.eggLevitateHeightMetres * levitateTimeFraction;
+    double currentHeight = currentHeightAboveBlock(targetHeight);
+
+    final double MAX_SPEED = 0.01;
+    final double DISTANCE_FOR_MAX_SPEED = 0.10;
+    final double SPEED_SMOOTHING_FACTOR = 0.90;
+    double levitationSpeed =  MAX_SPEED * (targetHeight - currentHeight)/ DISTANCE_FOR_MAX_SPEED;
+    levitationSpeed = MathX.clamp(levitationSpeed, -MAX_SPEED, MAX_SPEED);
+
+    motionY = SPEED_SMOOTHING_FACTOR * motionY + (1 - SPEED_SMOOTHING_FACTOR) * levitationSpeed;
   }
 
+  private double currentHeightAboveBlock(double targetHeight) {
+    double searchDY = -(targetHeight + 0.5);
+    AxisAlignedBB eggAABB = this.getCollisionBoundingBox().expand(0, searchDY, 0);
+    List<AxisAlignedBB> collidingBoxes = this.world.getCollisionBoxes(null, eggAABB);
+
+    for (AxisAlignedBB aabb : collidingBoxes) {
+      searchDY = aabb.calculateYOffset(eggAABB, searchDY);
+    }
+    return -searchDY;
+  }
 
   private void updateEggAnimation() {
     // wiggle, crack and particle are handled here
@@ -357,6 +395,11 @@ public class EntityDragonEgg extends Entity {
 
     // animate egg wiggle based on the time the eggs take to hatch
 
+    if (eggState != EggState.INCUBATING) {
+      eggWiggleX = 0;
+      eggWiggleZ = 0;
+      return;
+    }
 
     int incubationTicks = getIncubationTicks();
     boolean doIndependentCrackCheck = true;
