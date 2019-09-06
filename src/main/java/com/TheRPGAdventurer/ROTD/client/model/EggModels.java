@@ -188,13 +188,14 @@ public class EggModels {
     breedTextureRLs.put(new ImmutablePair<>(breed, eggModelState), rl);
   }
 
-  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg.obj");
-  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "models/item/dragon_hatchable_egg_smashed.obj");
-  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "models/item/dragon_hatchable_egg_hatched.obj");
+//  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/egg_incubating.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "models/item/egg_smashed.obj");
+  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "models/item/egg_hatched.obj");
 
   private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "textures/items/eggs/egg_default.png");
-  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED_TEXTURE = DragonVariantTag.addTag("eggmodelsmashedtexture", "egg_smashed_default.png");
-  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED_TEXTURE = DragonVariantTag.addTag("eggmodelhatchedtexture", "egg_hatched_default.png");
+  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED_TEXTURE = DragonVariantTag.addTag("eggmodelsmashedtexture", "textures/items/eggs/egg_smashed_default.png");
+  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED_TEXTURE = DragonVariantTag.addTag("eggmodelhatchedtexture", "textures/items/eggs/egg_hatched_default.png");
   private static final DragonVariantTag EGG_ITEM_ANIMATION_TICKS_PER_FRAME = DragonVariantTag.addTag("egganimationticksperframe", 8, 1, 1000);
   private static final DragonVariantTag EGG_ITEM_ANIMATION_NO_INTERPOLATION = DragonVariantTag.addTag("egganimationnointerpolation");
 

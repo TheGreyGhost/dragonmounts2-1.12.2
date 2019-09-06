@@ -84,7 +84,7 @@ public class DragonLifeStageHelper extends DragonHelper {
   /**
    * Initialise all the configuration tags used by this helper
    */
-  public void registerConfigurationTags()
+  public static void registerConfigurationTags()
   {
     // dummy method for the tags themselves -the initialisation is all done in static initialisers
     DragonVariants.addVariantTagValidator(new DragonLifeStageValidator());
