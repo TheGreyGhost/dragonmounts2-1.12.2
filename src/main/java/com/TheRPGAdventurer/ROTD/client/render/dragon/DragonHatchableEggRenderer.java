@@ -9,12 +9,15 @@
  */
 package com.TheRPGAdventurer.ROTD.client.render.dragon;
 
+import com.TheRPGAdventurer.ROTD.client.model.AnimatedTexture;
+import com.TheRPGAdventurer.ROTD.client.model.EggModels;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModelMode;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DefaultDragonBreedRenderer;
 import com.TheRPGAdventurer.ROTD.common.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
@@ -46,7 +49,7 @@ import java.util.Map;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
- * Generic renderer for all dragons.
+ * renderer for EntityDragonEgg
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
@@ -58,6 +61,9 @@ public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
 
   @Override
   public void doRender(EntityDragonEgg dragonEgg, double x, double y, double z, float yaw, float partialTicks) {
+
+    EntityDragonEgg.UserConfiguredParameters userConfiguredParameters = dragonEgg.getUserConfiguredParameters();
+
     // apply egg wiggle
     float tickX = dragonEgg.getEggWiggleX();
     float tickZ = dragonEgg.getEggWiggleZ();
@@ -85,39 +91,17 @@ public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
     GlStateManager.rotate(rotZ, 0, 0, 1);
     GlStateManager.disableLighting();
 
-    bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-    // prepare egg rendering
-    Tessellator tessellator = Tessellator.getInstance();
-    BufferBuilder vb = tessellator.getBuffer();
-    vb.begin(GL_QUADS, DefaultVertexFormats.BLOCK);
 
-    Block block = BlockDragonBreedEgg.DRAGON_BREED_EGG;
-    IBlockState iblockstate = block.getDefaultState().withProperty(BlockDragonBreedEgg.BREED, EnumDragonBreed.FIRE);  //todo change later
-    BlockPos blockpos = dragonEgg.getPosition();
 
-    double tx = -blockpos.getX() - 0.5;
-    double ty = -blockpos.getY();
-    double tz = -blockpos.getZ() - 0.5;
-    vb.setTranslation(tx, ty, tz);
-
-    BlockRendererDispatcher brd = Minecraft.getMinecraft().getBlockRendererDispatcher();
-    IBakedModel bakedModel = brd.getModelForState(iblockstate);
-
-    // render egg
-    brd.getBlockModelRenderer().renderModel(dragonEgg.world, bakedModel, iblockstate, blockpos, vb, false);
-    vb.setTranslation(0, 0, 0);
-
-    tessellator.draw();
-
-    // restore GL state
-    GlStateManager.enableLighting();
-    GlStateManager.popMatrix();
   }
 
   @Override
   protected ResourceLocation getEntityTexture(EntityDragonEgg entityDragonEgg) {
-    return eggTexture;
+    DragonBreedNew breed = entityDragonEgg.getDragonBreed();
+    EggModels.EggModelState eggModelState = entityDragonEgg.getEggState().getEggModelState();
+    ResourceLocation rl = EggModels.getInstance().getTexture(breed, eggModelState);
+    return rl;
   }
 
   private final Map<EnumDragonBreed, DefaultDragonBreedRenderer> breedRenderers = new EnumMap<>(EnumDragonBreed.class);

@@ -65,14 +65,14 @@ public class EggModels {
     return wavefrontObject;
   }
 
-//  /**
-//   * Returns the resource location for the given breed &
-//   * @param dragonBreed
-//   * @return null if not found
-//   */
-//  public ResourceLocation getTexture(DragonBreedNew dragonBreed) {
-//    return breedTextureRLs.get(dragonBreed);
-//  }
+  /**
+   * Returns the resource location for the given breed &
+   * @param dragonBreed
+   * @return null if not found
+   */
+  public ResourceLocation getTexture(DragonBreedNew dragonBreed, EggModelState eggModelState) {
+    return breedTextureRLs.get(new ImmutablePair<>(dragonBreed, eggModelState));
+  }
 
   /**
    * returns the animated texture for the given breed & egg state

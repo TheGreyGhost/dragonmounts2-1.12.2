@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.common.entity;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.client.model.EggModels;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
@@ -281,8 +282,7 @@ public class EntityDragonEgg extends Entity {
 
   /**
    * Returns true if other Entities should be prevented from moving through this Entity.
-   */
-  @Override
+   */  @Override
   public boolean canBeCollidedWith() {
     return eggState == EggState.INCUBATING;
   }
@@ -294,10 +294,20 @@ public class EntityDragonEgg extends Entity {
    */
   public UserConfiguredParameters getUserConfiguredParameters() {return userConfiguredParameters;}
 
-  public enum EggState {
-    INCUBATING, HATCHED, SMASHED;
+  public DragonBreedNew getDragonBreed() {
+    return dragonBreed;
+  }
 
-    private static final String NBT_EGGSTATE = "EggState";
+  public EggState getEggState() {
+    return eggState;
+  }
+
+  public enum EggState {
+    INCUBATING(EggModels.EggModelState.INCUBATING),
+    HATCHED(EggModels.EggModelState.HATCHED),
+    SMASHED(EggModels.EggModelState.SMASHED);
+
+    EggState(EggModels.EggModelState eggModelState) {this.eggModelState = eggModelState;}
 
     public static EggState getStateFromDataParam(EntityDataManager entityDataManager, DataParameter<EggState> dataParameter) {
       try {
@@ -325,6 +335,11 @@ public class EntityDragonEgg extends Entity {
     public void writeToNBT(NBTTagCompound nbt) {
       nbt.setInteger(NBT_EGGSTATE, this.ordinal());
     }
+
+    public EggModels.EggModelState getEggModelState() {return  eggModelState;}
+
+    private static final String NBT_EGGSTATE = "EggState";
+    private EggModels.EggModelState eggModelState;
   }
 
   public static final DataSerializer<EggState> EGG_STATE_SERIALIZER = new DataSerializer<EggState>() {
@@ -516,11 +531,6 @@ public class EntityDragonEgg extends Entity {
     }
   }
 
-
-  private EnumParticleTypes getEggParticle() {
-    return EnumParticleTypes.TOWN_AURA;
-  }
-
   private void updateIncubationTime() {
     // If the egg is incubating, increase the age
     if (!world.isRemote) {
@@ -567,7 +577,7 @@ public class EntityDragonEgg extends Entity {
   private static final DragonVariantTag EGG_SPIN_REVS_PER_SECOND = DragonVariantTag.addTag("spinspeedrevspersec", 1.0, -3.0, 3.0);
 
   // cluster the userConfiguredParameters together to make it easier for the renderer to access
-  private class UserConfiguredParameters {
+  public class UserConfiguredParameters {
     public float eggSizeMeters;
     public int eggIncubationCompleteTicks;  // duration of incubation in ticks
     public int eggWiggleStartTicks;
@@ -599,12 +609,13 @@ public class EntityDragonEgg extends Entity {
   // the client keeps a cached copy of it and uses client ticks to interpolate in the gaps.
   // when the watcher is updated from the server, the client will tick it faster or slower to resynchronise
   private final ClientServerSynchronisedTickCount incubationTicksClient;
+  private int incubationTicksServer;
+
   private DragonBreedNew dragonBreed;
   private EggState eggState = EggState.INCUBATING;
   private int idleTicks = 0;
   private int idleTicksBeforeDisappear;
   private int eggWiggleX;
   private int eggWiggleZ;
-  private int incubationTicksServer;
 
 }
