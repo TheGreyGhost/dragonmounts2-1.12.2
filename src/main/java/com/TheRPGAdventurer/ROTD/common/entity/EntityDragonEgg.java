@@ -25,7 +25,10 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
 import java.util.List;
@@ -272,12 +275,12 @@ public class EntityDragonEgg extends Entity {
     }
   }
 
-  public int getEggWiggleX() {
-    return eggWiggleX;
+  public int getEggWiggleXtickTimer() {
+    return eggWiggleXtickTimer;
   }
 
-  public int getEggWiggleZ() {
-    return eggWiggleZ;
+  public int getEggWiggleZtickTimer() {
+    return eggWiggleZtickTimer;
   }
 
   /**
@@ -300,6 +303,34 @@ public class EntityDragonEgg extends Entity {
 
   public EggState getEggState() {
     return eggState;
+  }
+
+  /**
+   * If the egg is glowing, add blocklight
+   * @return
+   */
+  @Override
+  @SideOnly(Side.CLIENT)
+  public int getBrightnessForRender()
+  {
+    int baseLight = super.getBrightnessForRender();
+
+    int incubationTicks = getIncubationTicks();
+    if (!userConfiguredParameters.glowFlag || incubationTicks < userConfiguredParameters.eggGlowStartTicks) {
+      return baseLight;
+    }
+
+    int baseSkyLight = baseLight & (0xf << 20);
+    int baseBlockLight = baseLight & (0xf << 4);
+
+    float glowFraction =  (incubationTicks - userConfiguredParameters.eggGlowStartTicks) /
+                            (userConfiguredParameters.eggIncubationCompleteTicks - userConfiguredParameters.eggGlowStartTicks);
+    final float MIN_GLOW = 0;
+    final float MAX_GLOW = 0x0f;
+    int glowBlockLight = Math.round(MathX.lerp(MIN_GLOW, MAX_GLOW, glowFraction));
+    if (glowBlockLight < baseBlockLight) return baseLight;
+
+    return baseSkyLight | (glowBlockLight << 4);
   }
 
   public enum EggState {
@@ -404,6 +435,8 @@ public class EntityDragonEgg extends Entity {
     return -searchDY;
   }
 
+  public static final int WIGGLE_DURATION_TICKS = 20;
+
   private void updateEggAnimation() {
     // wiggle, crack and particle are handled here
     // if both wiggle and crack are applied, synchronise the cracking to the wiggling
@@ -411,8 +444,8 @@ public class EntityDragonEgg extends Entity {
     // animate egg wiggle based on the time the eggs take to hatch
 
     if (eggState != EggState.INCUBATING) {
-      eggWiggleX = 0;
-      eggWiggleZ = 0;
+      eggWiggleXtickTimer = 0;
+      eggWiggleZtickTimer = 0;
       return;
     }
 
@@ -427,17 +460,17 @@ public class EntityDragonEgg extends Entity {
         float wiggleDuration = (userConfiguredParameters.eggIncubationCompleteTicks - userConfiguredParameters.eggWiggleStartTicks);
         float wiggleChance = WIGGLE_BASE_CHANCE * (incubationTicks - userConfiguredParameters.eggWiggleStartTicks) / wiggleDuration;
 
-        if (eggWiggleX > 0) {
-          eggWiggleX--;
+        if (eggWiggleXtickTimer > 0) {
+          eggWiggleXtickTimer -= 1/WIGGLE_DURATION_TICKS;
         } else if (rand.nextFloat() < wiggleChance) {
-          eggWiggleX = rand.nextBoolean() ? 10 : 20;
+          eggWiggleXtickTimer = rand.nextBoolean() ? WIGGLE_DURATION_TICKS / 2 : WIGGLE_DURATION_TICKS;
           playEggCrackEffect(incubationTicks, false);
         }
 
-        if (eggWiggleZ > 0) {
-          eggWiggleZ--;
+        if (eggWiggleZtickTimer > 0) {
+          eggWiggleZtickTimer -= 1/WIGGLE_DURATION_TICKS;
         } else if (rand.nextFloat() < wiggleChance) {
-          eggWiggleZ = rand.nextBoolean() ? 10 : 20;
+          eggWiggleZtickTimer = rand.nextBoolean() ? WIGGLE_DURATION_TICKS / 2 : WIGGLE_DURATION_TICKS;
           playEggCrackEffect(incubationTicks, false);
         }
       }
@@ -615,7 +648,7 @@ public class EntityDragonEgg extends Entity {
   private EggState eggState = EggState.INCUBATING;
   private int idleTicks = 0;
   private int idleTicksBeforeDisappear;
-  private int eggWiggleX;
-  private int eggWiggleZ;
+  private int eggWiggleXtickTimer;
+  private int eggWiggleZtickTimer;
 
 }

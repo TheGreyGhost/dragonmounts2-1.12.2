@@ -11,42 +11,23 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon;
 
 import com.TheRPGAdventurer.ROTD.client.model.AnimatedTexture;
 import com.TheRPGAdventurer.ROTD.client.model.EggModels;
-import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
-import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModelMode;
+import com.TheRPGAdventurer.ROTD.client.model.wavefrontparser.WavefrontObject;
+import com.TheRPGAdventurer.ROTD.client.other.ClientTickCounter;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DefaultDragonBreedRenderer;
-import com.TheRPGAdventurer.ROTD.common.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
-import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
-import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
-import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBanner;
+import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderLiving;
-import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * renderer for EntityDragonEgg
@@ -65,35 +46,64 @@ public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
     EntityDragonEgg.UserConfiguredParameters userConfiguredParameters = dragonEgg.getUserConfiguredParameters();
 
     // apply egg wiggle
-    float tickX = dragonEgg.getEggWiggleX();
-    float tickZ = dragonEgg.getEggWiggleZ();
+    float tickX = dragonEgg.getEggWiggleXtickTimer() - partialTicks;
+    float tickZ = dragonEgg.getEggWiggleZtickTimer() - partialTicks;
 
     float rotX = 0;
     float rotZ = 0;
 
+    final float WIGGLE_PERIOD_TICKS = 4;
+    final float WIGGLE_AMPLITUDE_DEGREES = 8;
+
     if (tickX > 0) {
-      rotX = (float) Math.sin(tickX - partialTicks) * 8;
+      float wiggleCycleRadians = 2*(float)Math.PI*tickX/ WIGGLE_PERIOD_TICKS;
+      rotX = WIGGLE_AMPLITUDE_DEGREES * (float)Math.sin(wiggleCycleRadians) * tickX / EntityDragonEgg.WIGGLE_DURATION_TICKS;
     }
     if (tickZ > 0) {
-      rotZ = (float) Math.sin(tickZ - partialTicks) * 8;
+      float wiggleCycleRadians = 2*(float)Math.PI*tickZ/ WIGGLE_PERIOD_TICKS;
+      rotZ = WIGGLE_AMPLITUDE_DEGREES * (float)Math.sin(wiggleCycleRadians) * tickZ / EntityDragonEgg.WIGGLE_DURATION_TICKS;
     }
 
-/*		// Aether Egg Levitate
-        float l = (float) (0.1 * Math.cos(dragon.ticksExisted / (Math.PI * 6.89)) + 0.307);
-        boolean lev = false;
-        if (dragon.getBreedType() == EnumDragonBreed.AETHER) lev = true;
-*/
+    float rotY = 0;
+    double incubationTicks = dragonEgg.getIncubationTicks() + partialTicks;
+    if (userConfiguredParameters.spinFlag && incubationTicks >= userConfiguredParameters.eggSpinStartTicks) {
+      double spinTimeFraction = (incubationTicks - userConfiguredParameters.eggGlowStartTicks) /
+                                (userConfiguredParameters.eggIncubationCompleteTicks - userConfiguredParameters.eggGlowStartTicks);
+      final double INITIAL_SPIN_SPEED = 0;
+      double spinSpeedDPS = MathX.lerp(INITIAL_SPIN_SPEED, userConfiguredParameters.eggSpinMaxSpeedDegPerSecond, spinTimeFraction);
+      // for a spin speed which linearly increases over time, the angular distance is the integral from t=0 to now which
+      //   is half the current spin speed times the duration
+      final double TICKS_PER_SECOND = 20;
+      double degrees = 0.5 * spinSpeedDPS * (incubationTicks - userConfiguredParameters.eggGlowStartTicks) / TICKS_PER_SECOND;
+      rotY = (float)(degrees % 360);
+    }
 
-    // prepare GL states
-    GlStateManager.pushMatrix();
-    GlStateManager.translate(x, y /*+ (lev ? l : 0)*/, z);
-    GlStateManager.rotate(rotX, 1, 0, 0);
-    GlStateManager.rotate(rotZ, 0, 0, 1);
-    GlStateManager.disableLighting();
+    try {
+      GlStateManager.pushMatrix();
 
+      GlStateManager.translate(x, y, z);
+      GlStateManager.rotate(rotY, 0, 1, 0);
+      GlStateManager.rotate(rotX, 1, 0, 0);
+      GlStateManager.rotate(rotZ, 0, 0, 1);
 
+      AnimatedTexture animatedTexture = EggModels.getInstance().getAnimatedTexture(dragonEgg.getDragonBreed(), dragonEgg.getEggState().getEggModelState());
+      if (animatedTexture != null) {
+        animatedTexture.updateAnimation(ClientTickCounter.getTicksSinceStart());
+        animatedTexture.bindTexture();
+      } else {
+        AnimatedTexture.bindMissingTexture();
+      }
 
+      Tessellator tessellator = Tessellator.getInstance();
+      BufferBuilder bufferBuilder = tessellator.getBuffer();
+      bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX_NORMAL);
+      WavefrontObject wavefrontObject = EggModels.getInstance().getModel(dragonEgg.getDragonBreed(), dragonEgg.getEggState().getEggModelState());;
+      wavefrontObject.tessellateAll(bufferBuilder);
+      tessellator.draw();
 
+    } finally {
+      GlStateManager.popMatrix();
+    }
   }
 
   @Override
@@ -103,8 +113,5 @@ public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
     ResourceLocation rl = EggModels.getInstance().getTexture(breed, eggModelState);
     return rl;
   }
-
-  private final Map<EnumDragonBreed, DefaultDragonBreedRenderer> breedRenderers = new EnumMap<>(EnumDragonBreed.class);
-  private static final ResourceLocation eggTexture = new ResourceLocation("minecraftbyexample:textures/entities/dragon/fire/egg.png");
 }
 
