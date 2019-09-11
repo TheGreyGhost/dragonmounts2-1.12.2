@@ -8,6 +8,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
+import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -57,6 +58,7 @@ public class EntityDragonEgg extends Entity {
   public static void registerConfigurationTags() {
     // tags are initialised in static member variables
     DragonVariants.addVariantTagValidator(new EntityEggValidator());
+    DataSerializers.registerSerializer(EGG_STATE_SERIALIZER);
   }
 
   public void initialise(DragonBreedNew dragonBreed) {
@@ -65,18 +67,18 @@ public class EntityDragonEgg extends Entity {
 
     final int TICKS_PER_MINECRAFT_DAY = 20 * 60 * 20;  // 20 ticks/sec * 60 sec/min * 20 min per minecraft day
     DragonVariants dragonVariants = dragonBreed.getDragonVariants();
-    userConfiguredParameters.eggSizeMeters = (float)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_SIZE_METRES);
+    userConfiguredParameters.eggSizeMeters = (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_SIZE_METRES);
 
     int eggIncubationTicks = (int)(TICKS_PER_MINECRAFT_DAY * (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_INCUBATION_DAYS));
     userConfiguredParameters.eggIncubationCompleteTicks = eggIncubationTicks;
-    userConfiguredParameters.eggWiggleStartTicks = (int)(eggIncubationTicks * (float)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_WIGGLE_START_FRACTION));
-    userConfiguredParameters.eggCrackStartTicks = (int)(eggIncubationTicks * (float)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_CRACK_START_FRACTION));
-    userConfiguredParameters.eggGlowStartTicks = (int)(eggIncubationTicks * (float)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_GLOW_START_FRACTION));
-    userConfiguredParameters.eggLevitateStartTicks = (int)(eggIncubationTicks * (float)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_LEVITATE_START_FRACTION));
-    userConfiguredParameters.eggSpinStartTicks = (int)(eggIncubationTicks * (float)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_SPIN_START_FRACTION));
+    userConfiguredParameters.eggWiggleStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_WIGGLE_START_FRACTION));
+    userConfiguredParameters.eggCrackStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_CRACK_START_FRACTION));
+    userConfiguredParameters.eggGlowStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_GLOW_START_FRACTION));
+    userConfiguredParameters.eggLevitateStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_LEVITATE_START_FRACTION));
+    userConfiguredParameters.eggSpinStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_SPIN_START_FRACTION));
 
-    userConfiguredParameters.eggLevitateHeightMetres = (float)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_LEVITATE_HEIGHT_METRES);
-    userConfiguredParameters.eggSpinMaxSpeedDegPerSecond = 360.0F * (float)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_SPIN_REVS_PER_SECOND);
+    userConfiguredParameters.eggLevitateHeightMetres = (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_LEVITATE_HEIGHT_METRES);
+    userConfiguredParameters.eggSpinMaxSpeedDegPerSecond = 360.0F * (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_SPIN_REVS_PER_SECOND);
 
     userConfiguredParameters.wiggleFlag = (boolean)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_WIGGLE);
     userConfiguredParameters.crackFlag = (boolean)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_CRACKING);
@@ -94,7 +96,7 @@ public class EntityDragonEgg extends Entity {
     eggState.registerDataParameter(this.getDataManager(), DATAPARAM_EGGSTATE);
     getDataManager().register(DATAPARAM_INCUBATIONTICKS, incubationTicksServer);
 
-    this.setSize(userConfiguredParameters.eggSizeMeters, userConfiguredParameters.eggSizeMeters);
+    this.setSize((float)userConfiguredParameters.eggSizeMeters, (float)userConfiguredParameters.eggSizeMeters);
     this.rotationYaw = (float) (Math.random() * 360.0D);
     this.motionX = 0;
     this.motionY = 0;
@@ -231,10 +233,6 @@ public class EntityDragonEgg extends Entity {
       this.motionY *= -BOUNCE_RECOIL_FACTOR;
     }
 
-    if (eggState == EggState.HATCHED || eggState == EggState.SMASHED) {
-      ++this.idleTicks;
-    }
-
     this.handleWaterMovement();
 
     if (!this.world.isRemote) {
@@ -249,8 +247,11 @@ public class EntityDragonEgg extends Entity {
       }
     }
 
-    if (!this.world.isRemote && this.idleTicks >= idleTicksBeforeDisappear) {
-      this.setDead();
+    if (eggState == EggState.HATCHED || eggState == EggState.SMASHED) {
+      ++this.idleTicks;
+      if (!this.world.isRemote && this.idleTicks >= idleTicksBeforeDisappear) {
+        this.setDead();
+      }
     }
 
     if (eggState == EggState.INCUBATING) {
@@ -260,6 +261,10 @@ public class EntityDragonEgg extends Entity {
   }
 
   public int getIncubationTicks() {
+    if (DebugSettings.existsDebugParameter("forcedageticks")) {
+      return (int) DebugSettings.getDebugParameter("forcedageticks");
+    }
+
     if (!world.isRemote) {
       return incubationTicksServer;
     } else {
@@ -611,15 +616,15 @@ public class EntityDragonEgg extends Entity {
 
   // cluster the userConfiguredParameters together to make it easier for the renderer to access
   public class UserConfiguredParameters {
-    public float eggSizeMeters;
+    public double eggSizeMeters;
     public int eggIncubationCompleteTicks;  // duration of incubation in ticks
     public int eggWiggleStartTicks;
     public int eggCrackStartTicks;
     public int eggGlowStartTicks;
     public int eggLevitateStartTicks;
-    public float eggLevitateHeightMetres;
+    public double eggLevitateHeightMetres;
     public int eggSpinStartTicks;
-    public float eggSpinMaxSpeedDegPerSecond;
+    public double eggSpinMaxSpeedDegPerSecond;
 
     public boolean wiggleFlag;
     public boolean crackFlag;

@@ -13,6 +13,7 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.cmd.CommandDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
@@ -128,6 +129,7 @@ abstract public class CommonProxy {
 //    DragonMountsConfig.PreInit();
     StartupDebugCommon.preInitCommon();
     DragonLifeStageHelper.registerConfigurationTags();
+    EntityDragonEgg.registerConfigurationTags();
   }
 
   protected void preInitialisePhase2(FMLPreInitializationEvent event) {
