@@ -97,6 +97,9 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
       }).start();
     }));
 
+    addCommand(new CommandDragonLambda("printDefaultVariantsFile", dragon -> {
+    }));
+
     addCommand(new CommandDragonLambda("testStages", dragon -> {
       new Thread(() -> {
         try {

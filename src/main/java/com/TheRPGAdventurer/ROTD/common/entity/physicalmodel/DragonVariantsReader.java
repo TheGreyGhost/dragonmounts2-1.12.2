@@ -3,6 +3,8 @@ package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.util.Minify;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharStreams;
 import com.google.gson.*;
 import net.minecraft.client.resources.IResource;
@@ -12,9 +14,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by TGG on 14/07/2019.
@@ -63,6 +63,118 @@ public class DragonVariantsReader {
     }
 
     return new HashMap<>();  // just return empty if we had trouble.
+  }
+
+  /**
+   * Convert the given DragonVariants into JSON
+   * @param dragonVariants
+   * @return the JSON output
+   */
+  public static String outputAsJSON(DragonVariants dragonVariants, boolean includeComments) {
+    Map<DragonVariants.Category, ImmutableMap<DragonVariantTag, Object>> allTags = new HashMap<>();
+    for (DragonVariants.Category category : DragonVariants.Category.values()) {
+      allTags.put(category, dragonVariants.getAllAppliedTagsForCategory(category));
+    }
+
+    StringBuilder json = new StringBuilder();
+    json.append("{");
+    json.append("\"breedinternalname\": \"");
+      json.append(dragonVariants.getBreedInternalName());
+      json.append("\",\n");
+    boolean isFirst = true;
+    for (Map.Entry<DragonVariants.Category, ImmutableMap<DragonVariantTag, Object>> entry : allTags.entrySet() ) {
+      if (!entry.getValue().isEmpty()) {
+        if (!isFirst) {
+          json.append(",\n");
+          isFirst = false;
+        }
+        outputCategoryAsJSON(json, entry.getKey(), entry.getValue(), includeComments);
+      }
+    }
+
+    json.append("\n}");
+    return json.toString();
+  }
+
+  private static void outputCategoryAsJSON(StringBuilder json,
+                                           DragonVariants.Category category,  ImmutableMap<DragonVariantTag, Object> tags, boolean includeComments) {
+    json.append("\"");
+      json.append(category.getTextName());
+    json.append("\": {\n");
+    if (includeComments) {
+      json.append("\\* ");
+      json.append(category.getComment());
+      json.append(" *\\");
+    }
+    boolean isFirst = true;
+    for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
+      if (!(entry.getValue() instanceof Boolean)) { // save the flags for later
+        if (!isFirst) {
+          json.append(",\n");
+          isFirst = false;
+        }
+        outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), includeComments);
+      }
+    }
+    boolean atLeastOneFlag = false;
+    for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
+      if ((entry.getValue() instanceof Boolean)) { // save the flags for later
+        if (!isFirst) {
+          json.append(",\n");
+          isFirst = false;
+        }
+        if (!atLeastOneFlag) {
+          atLeastOneFlag = true;
+          json.append("\"flags\": [\n");
+        }
+        outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), includeComments);
+      }
+    }
+    json.append("\n");
+    if (atLeastOneFlag) {
+      json.append("]\n");
+    }
+    json.append("}");
+  }
+
+  /**
+   * Output a DragonVariants JSON which contains all the possible tag options
+   * @return the JSON output
+   */
+  public static String outputAllTagsAsJSON(boolean includeComments) {
+    DragonVariants dragonVariants = new DragonVariants("example");
+    ImmutableSet<DragonVariantTag> allDefinedTags = DragonVariantTag.getAllDragonVariantTags();
+    for (DragonVariantTag tag : allDefinedTags) {
+      for (DragonVariants.Category category : tag.getExpectedCategories()) {
+        dragonVariants.addTagAndValue(category, tag, tag.getDefaultValue());
+      }
+    }
+    return outputAsJSON(dragonVariants, includeComments);
+  }
+
+  /** write the tag suitable for json reader
+   * @param json
+   */
+  public static void outputSingleTagAsJSON(StringBuilder json, DragonVariantTag tag, Object value, boolean includeComments) {
+    json.append("\"");
+    json.append(tag.getTextname());
+    json.append("\"");
+    if (value instanceof Boolean) {
+    } else if (value instanceof String) {
+      json.append(": \"");
+      json.append(value);
+      json.append("\"");
+    } else if (value instanceof Number) {
+      json.append(": ");
+      json.append(value);
+    } else {
+      throw new IllegalArgumentException("Unexpected object type");
+    }
+    if (includeComments) {
+      json.append("\\* ");
+      json.append(tag.getComment());
+      json.append(" *\\");
+    }
   }
 
 //  // old - search all domains

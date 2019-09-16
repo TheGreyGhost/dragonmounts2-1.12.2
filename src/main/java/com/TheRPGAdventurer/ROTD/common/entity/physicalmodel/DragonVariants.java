@@ -1,5 +1,7 @@
 package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkElementIndex;
@@ -35,32 +37,25 @@ public class DragonVariants {
   public enum Category {
     BREATH_WEAPON_PRIMARY("breathweaponprimary", 0, "This section is used to configure the primary breath weapon"),
     BREATH_WEAPON_SECONDARY("breathweaponsecondary", 1, "This section is used to configure the secondary breath weapon"),
-    PHYSICAL_MODEL("physicalmodel", 2,
-    * The age of the dragon affects the following aspects:
-            * 1) PhysicalSize (metres) - for the base dragon, this is the height of the top of the back
-    * 2) PhysicalMaturity (0->100%) - the physical abilities of the dragon such as being able to fly,
-    * 3) EmotionalMaturity (0->100%) - the behaviour of the dragon eg sticking close to parent, running away from mobs
-    * 4) BreathWeaponMaturity (0->100%) - the strength of the breath weapon
-    * 5) AttackDamageMultiplier (0->100%) - physical attack damage
-    * 6) HealthMultiplier (0->100%) - health
-    * 7) ArmourMultiplier (0->100%) - armour
-    * 8) ArmourToughnessMultiplier (0->100%) - armour toughness
-
-    * lifeStageAges is the age corresponding to each ageLabel, in minecraft days
-    * breathMaturityPoints, physicalMaturityPoints, emotionalMaturityPoints are the corresponding curve points, to be
-    *    linearly interpolated
-    * growthratePoints is the growth rate curve points which are then integrated to give the physical size
-    * physicalSizePoints is the integral of the growth rate
-    */
-
-
-
-            "This section is used to configure the physical appearance of the dragon as well as its physical traits such as health and armour.  " +
-            "The properties are scaled with the age of the dragon"
-
+    PHYSICAL_MODEL("physicalmodel", 2, "Physical characteristics of the dragon model"),
+    LIFE_STAGE("lifestage", 3,
+          "The physical attributes of the dragon change with its age.  The dragon follows development stages similar to a human:\n" +
+          "HATCHLING (newly born), INFANT, CHILD, EARLY TEEN, LATE TEEN, ADULT\n" +
+          "The age corresponding to stage is given by the ageXXXXX tags.\n" +
+          "The age of the dragon affects the following physical aspects:\n" +
+          " 1) PhysicalSize (metres) - for the base dragon, this is the height of the top of the back\n" +
+          " 2) PhysicalMaturity (0->100%) - the physical abilities of the dragon such as being able to fly,\n" +
+          " 3) EmotionalMaturity (0->100%) - the behaviour of the dragon eg sticking close to parent, running away from mobs\n" +
+          " 4) BreathWeaponMaturity (0->100%) - the strength of the breath weapon\n" +
+          " 5) AttackDamageMultiplier (0->100%) - physical attack damage\n" +
+          " 6) HealthMultiplier (0->100%) - health\n" +
+          " 7) ArmourMultiplier (0->100%) - armour\n" +
+          " 8) ArmourToughnessMultiplier (0->100%) - armour toughness\n" +
+          " For each of these, the shape of the curve is given by corresponding tags, linearly interpolated.\n" +
+          " e.g. if ageinfant is 1.0 days, healthpercentinfant = 20.0, agechild is 2.0 days, and healthpercentchild = 50.0,\n" +
+          "   then healthpercent at 1.5 days of age is 35.0\n"
     ),
-    LIFE_STAGE("lifestage", 3),
-    EGG("lifestage", 4);
+    EGG("egg", 4, "This section is used to configure the dragon's egg");
 
     /**
      * Checks if the given name has a corresponding Category
@@ -80,6 +75,7 @@ public class DragonVariants {
     public String getTextName() {
       return textName;
     }
+    public String getComment() {return comment;}
 
     public int getIdx() {
       return idx;
@@ -113,7 +109,7 @@ public class DragonVariants {
     variantTagValidators.add(variantTagValidator);
   }
 
-  public DragonVariants() {
+  public DragonVariants(String breedInternalName) {
     int categoryCount = Category.values().length;
     allAppliedTags = new ArrayList<>(categoryCount);
     for (int i = 0; i < categoryCount; ++i) {
@@ -123,6 +119,7 @@ public class DragonVariants {
       checkElementIndex(category.getIdx(), categoryCount);
       allAppliedTags.set(category.getIdx(), new HashMap<>());
     }
+    this.breedInternalName = breedInternalName;
   }
 
   public void addTagAndValue(Category category, DragonVariantTag tag, Object tagValue) throws IllegalArgumentException {
@@ -184,7 +181,16 @@ public class DragonVariants {
       allAppliedTags.get(category.getIdx()).remove(dragonVariantTag);
   }
 
+  public String getBreedInternalName() {
+    return breedInternalName;
+  }
+
+  public ImmutableMap<DragonVariantTag, Object> getAllAppliedTagsForCategory(Category category) {
+    return ImmutableMap.copyOf(allAppliedTags.get(category.getIdx()));
+  }
+
   private ArrayList<HashMap<DragonVariantTag, Object>> allAppliedTags;
+  private String breedInternalName;
 
   private static Set<VariantTagValidator> variantTagValidators = new HashSet<>();
 }

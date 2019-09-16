@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants.Category;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Created by TGG on 14/07/2019.
@@ -113,6 +115,10 @@ public class DragonVariantTag {
 
   public String getComment() {return comment;}
 
+  public ArrayList<Category> getExpectedCategories() {
+    return expectedCategories;
+  }
+
   /**
    * Convert the given input value to the suitable type for this tag
    *
@@ -152,6 +158,14 @@ public class DragonVariantTag {
     return numberValue;
   }
 
+  /**
+   * Return a list of all the defined DragonVariantTags
+   * @return
+   */
+  public static ImmutableSet<DragonVariantTag> getAllDragonVariantTags() {
+    return ImmutableSet.copyOf(allTagNames.values());
+  }
+
   private static DragonVariantTag addTag(String textname, Object defaultValue, Optional<Comparable> minValue, Optional<Comparable> maxValue, String comment)
   {
     if (allTagNames.containsKey(textname)) {
@@ -178,5 +192,6 @@ public class DragonVariantTag {
   private final Optional<Comparable> minValue;
   private final Optional<Comparable> maxValue;
   private final String comment; // a comment for the config file
+
   private ArrayList<Category> expectedCategories = new ArrayList<>(); // which categories do we expect to find this tag in?
 }
