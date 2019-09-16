@@ -26,6 +26,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -338,6 +339,10 @@ public class EntityDragonEgg extends Entity {
     return eggWiggleZtickTimer;
   }
 
+  public float getRenderScale() {
+    return width;
+  }
+
   /**
    * Returns true if other Entities should be prevented from moving through this Entity.
    */  @Override
@@ -537,15 +542,20 @@ public class EntityDragonEgg extends Entity {
       playEggCrackEffect(incubationTicks, true);
     }
 
-    // spawn generic particles
-    double px = posX + (rand.nextDouble() - 0.3);
-    double py = posY + (rand.nextDouble() - 0.3);
-    double pz = posZ + (rand.nextDouble() - 0.3);
-    double ox = (rand.nextDouble() - 0.3) * 2;
-    double oy = (rand.nextDouble() - 0.3) * 2;
-    double oz = (rand.nextDouble() - 0.3) * 2;
+    // spawn  particles: random position around the egg, with an initial velocity whose origin is the entity 0,0,0
     if (userConfiguredParameters.enumParticleType != null) {
-      world.spawnParticle(userConfiguredParameters.enumParticleType, px, py, pz, ox, oy, oz);
+      final double MIN_PARTICLE_SPAWN_RADIUS = userConfiguredParameters.eggSizeMeters * 0.4;
+      final double MAX_PARTICLE_SPAWN_RADIUS = MIN_PARTICLE_SPAWN_RADIUS + 0.3;
+      final double MIN_PARTICLE_SPAWN_SPEED = 0.2;
+      final double MAX_PARTICLE_SPAWN_SPEED = 2.0;
+      double spawnRadius = MathX.lerp(MIN_PARTICLE_SPAWN_RADIUS, MAX_PARTICLE_SPAWN_RADIUS, rand.nextDouble());
+      double spawnSpeed = MathX.lerp(MIN_PARTICLE_SPAWN_SPEED, MAX_PARTICLE_SPAWN_SPEED, rand.nextDouble());
+
+      Vec3d spawnPosition = MathX.randomSphericalCoordinate(spawnRadius);
+      Vec3d spawnVelocity = spawnPosition.normalize().scale(spawnSpeed);
+      world.spawnParticle(userConfiguredParameters.enumParticleType,
+              posX + spawnPosition.x, posY + height / 2.0 + spawnPosition.y, posZ + spawnPosition.z,
+              spawnVelocity.x, spawnVelocity.y, spawnVelocity.z);
     }
   }
 
@@ -649,7 +659,7 @@ public class EntityDragonEgg extends Entity {
     dragonBreed = newDragonBreed;
   }
 
-  private static final DragonVariantTag EGG_SIZE_METRES = DragonVariantTag.addTag("eggsizemetres", 0.25, 0.05, 2.0);
+  private static final DragonVariantTag EGG_SIZE_METRES = DragonVariantTag.addTag("eggsizemetres", 0.5, 0.05, 2.0);
   private static final DragonVariantTag EGG_INCUBATION_DAYS = DragonVariantTag.addTag("incubationdurationdays", 1.0, 0.1, 10.0);
   private static final DragonVariantTag EGG_WIGGLE = DragonVariantTag.addTag("wiggle");
   private static final DragonVariantTag EGG_GLOW = DragonVariantTag.addTag("glow");

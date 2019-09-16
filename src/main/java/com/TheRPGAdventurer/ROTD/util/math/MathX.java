@@ -451,6 +451,19 @@ public class MathX {
     return new Vec3d(source.x * multiplier, source.y * multiplier, source.z * multiplier);
   }
 
+  /**
+   * Generate a random (evenly-spaced) point on the surface of the sphere with the given radius
+   * @param radius
+   * @return
+   */
+  public static Vec3d randomSphericalCoordinate(double radius) {
+    double theta = random.nextDouble() * 2.0 * Math.PI;
+    double phi = random.nextDouble() * 2.0 * Math.PI;
+    double dx = radius * Math.cos(theta) * Math.sin(phi);
+    double dy = radius * Math.sin(theta) * Math.sin(phi);
+    double dz = radius * Math.cos(phi);
+    return new Vec3d(dx, dy, dz);
+  }
 
   /**
    * You no take constructor!
@@ -458,4 +471,5 @@ public class MathX {
   private MathX() {
   }
 
+  private static  Random random = new Random();
 }

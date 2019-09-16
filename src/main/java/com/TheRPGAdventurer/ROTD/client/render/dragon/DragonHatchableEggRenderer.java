@@ -85,6 +85,8 @@ public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
       GlStateManager.rotate(rotY, 0, 1, 0);
       GlStateManager.rotate(rotX, 1, 0, 0);
       GlStateManager.rotate(rotZ, 0, 0, 1);
+      float renderScale = dragonEgg.getRenderScale();
+      GlStateManager.scale(renderScale, renderScale, renderScale);
 
       AnimatedTexture animatedTexture = EggModels.getInstance().getAnimatedTexture(dragonEgg.getDragonBreed(), dragonEgg.getEggState().getEggModelState());
       if (animatedTexture != null) {
