@@ -10,19 +10,15 @@
 package com.TheRPGAdventurer.ROTD.common;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
-import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.cmd.CommandDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsReader;
 import com.TheRPGAdventurer.ROTD.common.event.EntityMountEventHandler;
 import com.TheRPGAdventurer.ROTD.common.event.RegistryEventHandler;
 import com.TheRPGAdventurer.ROTD.common.event.VanillaEggHandler;
-import com.TheRPGAdventurer.ROTD.common.items.entity.ImmuneEntityItem;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonTarget;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonTargetHandlerServer;
 import com.TheRPGAdventurer.ROTD.common.world.DragonMountsWorldGenerator;
@@ -41,7 +37,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.server.FMLServerHandler;
 
 import java.io.File;
 import java.util.Map;
@@ -116,8 +111,11 @@ abstract public class CommonProxy {
   abstract public File getDataDirectory();
 
   private void registerEntities() {
+    EntityRegistry.registerModEntity(new ResourceLocation(DragonMounts.MODID, "dragon_hatchable_egg"), EntityDragonEgg.class, "DragonMount",
+            DRAGON_HATCHABLE_EGG_ENTITY_ID, DragonMounts.instance, DRAGON_HATCHABLE_EGG_ENTITY_TRACKING_RANGE, ENTITY_UPDATE_FREQ,
+            ENTITY_SEND_VELO_UPDATES);
     EntityRegistry.registerModEntity(new ResourceLocation(DragonMounts.MODID, "dragon"), EntityTameableDragon.class, "DragonMount",
-            ENTITY_ID, DragonMounts.instance, ENTITY_TRACKING_RANGE, ENTITY_UPDATE_FREQ,
+            DRAGON_ENTITY_ID, DragonMounts.instance, DRAGON_ENTITY_TRACKING_RANGE, ENTITY_UPDATE_FREQ,
             ENTITY_SEND_VELO_UPDATES);
 //    EntityRegistry.registerModEntity(new ResourceLocation(DragonMounts.MODID, "indestructible"), ImmuneEntityItem.class, "Indestructible Item",
 //            3, DragonMounts.instance, 32, 5, true);
@@ -141,9 +139,12 @@ abstract public class CommonProxy {
 //    }
   }
 
-  private final int ENTITY_TRACKING_RANGE = 80;
+  private final int DRAGON_ENTITY_TRACKING_RANGE = 80;
   private final int ENTITY_UPDATE_FREQ = 3; // 3
-  private final int ENTITY_ID = 1;
+  private final int DRAGON_ENTITY_ID = 1;
+  private final int DRAGON_HATCHABLE_EGG_ENTITY_ID = 2;
+  private final int DRAGON_HATCHABLE_EGG_ENTITY_TRACKING_RANGE = 20;
+
   private final boolean ENTITY_SEND_VELO_UPDATES = true;
   private SimpleNetworkWrapper network;
 }

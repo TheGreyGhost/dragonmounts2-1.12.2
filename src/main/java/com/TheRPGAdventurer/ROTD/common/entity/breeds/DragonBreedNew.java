@@ -43,8 +43,8 @@ public class DragonBreedNew {
     return I18n.translateToLocal("dragon." + internalName);
   }
 
-  public void registerDataParameter(EntityDataManager entityDataManager, DataParameter<String> dataParameter) {
-    entityDataManager.register(dataParameter, internalName);
+  public static void registerDataParameter(EntityDataManager entityDataManager, DataParameter<String> dataParameter) {
+    entityDataManager.register(dataParameter, "");  // just a default
   }
 
   public void setDataParameter(EntityDataManager entityDataManager, DataParameter<String> dataParameter) {

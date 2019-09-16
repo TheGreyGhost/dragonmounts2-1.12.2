@@ -37,11 +37,23 @@ import java.util.List;
 /**
  * Created by TGG on 10/08/2019.
  *
- *  *   Usage:
- *   1) If spawning manually:
- *     a) EntityTameableDragon(world)
- *     b) either initialise(breed) or readEntityFromNBT(nbt)
+ *  Usage:
+ *   1) call EntityDragonEgg.registerConfigurationTags() during commonproxy.preInitialisePhase to ensure that the configuration tags are properly registered
+ *   2) To spawn a new entity:
+ *     a) EntityDragonEgg(world, dragonBreed)
+ *     b) worldIn.spawnEntity(myEntity);
+ *
+ *  The usual mechanics for vanilla entity spawing are followed:
+ *  After the user has spawned a new ENtity on the server, the packet to the client will call:
+ *  1) myEntityClient = new MyEntity(world) will be called
+ *  2) myEntityClient notifyDataManagerChange will be called for all DataParameters
+
+ *  For reloading of an existing entity from disk:
+ *  1) myEntityServer = new MyEntity(world) will be called
+ *  2) myEntityServer.readEntityFromNBT will be called
+ *     The client creation then occurs as above.
  */
+
 public class EntityDragonEgg extends Entity {
 
   public EntityDragonEgg(World worldIn) {
@@ -53,18 +65,25 @@ public class EntityDragonEgg extends Entity {
       incubationTicksClient = null;
       incubationTicksServer = 0;
     }
+    this.rotationYaw = (float) (Math.random() * 360.0D);
+    this.motionX = 0;
+    this.motionY = 0;
+    this.motionZ = 0;
+  }
+
+  public EntityDragonEgg(World worldIn, DragonBreedNew dragonBreed) {
+    this(worldIn);
+    initialiseConfigurableParameters(dragonBreed);
+    serverInitialiseState(dragonBreed, EggState.INCUBATING, 0);
   }
 
   public static void registerConfigurationTags() {
-    // tags are initialised in static member variables
+    // the tags themselves are initialised in static member variables
     DragonVariants.addVariantTagValidator(new EntityEggValidator());
     DataSerializers.registerSerializer(EGG_STATE_SERIALIZER);
   }
 
-  public void initialise(DragonBreedNew dragonBreed) {
-    this.dragonBreed = dragonBreed;
-    eggState = EggState.INCUBATING;
-
+  private void initialiseConfigurableParameters(DragonBreedNew dragonBreed) {
     final int TICKS_PER_MINECRAFT_DAY = 20 * 60 * 20;  // 20 ticks/sec * 60 sec/min * 20 min per minecraft day
     DragonVariants dragonVariants = dragonBreed.getDragonVariants();
     userConfiguredParameters.eggSizeMeters = (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_SIZE_METRES);
@@ -91,20 +110,29 @@ public class EntityDragonEgg extends Entity {
     if ((boolean)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_NO_PARTICLES)) {
       userConfiguredParameters.enumParticleType = null;
     }
+  }
 
-    dragonBreed.registerDataParameter(this.getDataManager(), DATAPARAM_BREED);
-    eggState.registerDataParameter(this.getDataManager(), DATAPARAM_EGGSTATE);
-    getDataManager().register(DATAPARAM_INCUBATIONTICKS, incubationTicksServer);
+  private void serverInitialiseState(DragonBreedNew dragonBreed, EggState eggState, int incubationTicksServer) {
+    commonInitialiseState(dragonBreed, eggState, incubationTicksServer);
+    dragonBreed.setDataParameter(this.getDataManager(), DATAPARAM_BREED);
+    eggState.setDataParameter(this.getDataManager(), DATAPARAM_EGGSTATE);
+    getDataManager().set(DATAPARAM_INCUBATIONTICKS, incubationTicksServer);
+  }
 
+  private void commonInitialiseState(DragonBreedNew dragonBreed, EggState eggState, int incubationTicksServer) {
+    this.dragonBreed = dragonBreed;
+    this.eggState = eggState;
+    this.incubationTicksServer = incubationTicksServer;
     this.setSize((float)userConfiguredParameters.eggSizeMeters, (float)userConfiguredParameters.eggSizeMeters);
-    this.rotationYaw = (float) (Math.random() * 360.0D);
-    this.motionX = 0;
-    this.motionY = 0;
-    this.motionZ = 0;
+    fullyInitialised = true;
   }
 
   @Override
   protected void entityInit() {
+    // super.entityInit();
+    DragonBreedNew.registerDataParameter(this.getDataManager(), DATAPARAM_BREED);
+    EggState.registerDataParameter(this.getDataManager(), DATAPARAM_EGGSTATE);
+    getDataManager().register(DATAPARAM_INCUBATIONTICKS, 0); // just a default
   }
 
   /**
@@ -127,18 +155,35 @@ public class EntityDragonEgg extends Entity {
   public void notifyDataManagerChange(DataParameter<?> key) {
     if (key.equals(DATAPARAM_BREED)) {
       DragonBreedNew newBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(this.getDataManager(), DATAPARAM_BREED);
-      if (newBreed != dragonBreed) {
+      if (!fullyInitialised) {
+        clientInitDragonBreed = newBreed;
+      } else if (newBreed != dragonBreed) {
         changeBreed(newBreed);
       }
     }
     if (key.equals(DATAPARAM_EGGSTATE)) {
       EggState newEggState = EggState.getStateFromDataParam(this.getDataManager(), DATAPARAM_EGGSTATE);
-      if (newEggState != eggState) {
+      if (!fullyInitialised) {
+        clientInitEggState = newEggState;
+      } else if (newEggState != eggState) {
         changeEggState(newEggState);
       }
     }
     if (key.equals(DATAPARAM_INCUBATIONTICKS) && world.isRemote) {
-      incubationTicksClient.updateFromServer(this.getDataManager().get(DATAPARAM_INCUBATIONTICKS));
+      int tickCount = this.getDataManager().get(DATAPARAM_INCUBATIONTICKS);
+      if (!fullyInitialised) {
+        clientInitIncubationTicks = (tickCount < 0 ? 0 : tickCount); // just in case of unexpected value...
+      } else {
+        incubationTicksClient.updateFromServer(tickCount);
+      }
+    }
+    if (!fullyInitialised) clientCheckForAllDataParametersReceived();
+  }
+
+  private void clientCheckForAllDataParametersReceived() {
+    if (clientInitDragonBreed != null && clientInitEggState != null && clientInitIncubationTicks != UNINITIALISED_TICKS_VALUE) {
+      initialiseConfigurableParameters(clientInitDragonBreed);
+      commonInitialiseState(clientInitDragonBreed, clientInitEggState, clientInitIncubationTicks);
     }
   }
 
@@ -163,11 +208,11 @@ public class EntityDragonEgg extends Entity {
     } catch (IllegalArgumentException iae) {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
-    initialise(newBreed);
     EggState newEggState = EggState.getStateFromNBT(compound);
     int incubationTicks = compound.getInteger(NBT_INCUBATION_TICKS);
-    changeEggState(newEggState);
-    setIncubationTicks(incubationTicks);
+
+    initialiseConfigurableParameters(newBreed);
+    serverInitialiseState(newBreed, newEggState, incubationTicks);
   }
 
   /**
@@ -176,6 +221,11 @@ public class EntityDragonEgg extends Entity {
   @Override
   public void onUpdate() {
     super.onUpdate();
+
+    if (!fullyInitialised) {
+      DragonMounts.loggerLimit.error_once("EntityDragonEgg.onUpdate() called before entity has been fully initialised");
+      return;
+    }
 
     if (getIncubationTicks() >= userConfiguredParameters.eggIncubationCompleteTicks) {
       hatchEgg();
@@ -221,7 +271,7 @@ public class EntityDragonEgg extends Entity {
     if (this.onGround) {
       BlockPos underPos = new BlockPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ));
       net.minecraft.block.state.IBlockState underState = this.world.getBlockState(underPos);
-      frictionFactor = underState.getBlock().getSlipperiness(underState, this.world, underPos, this) * 0.98F;
+      frictionFactor = underState.getBlock().getSlipperiness(underState, this.world, underPos, this) * DEFAULT_FRICTION_FACTOR;
     }
 
     this.motionX *= frictionFactor;
@@ -364,8 +414,11 @@ public class EntityDragonEgg extends Entity {
       }
     }
 
-    public void registerDataParameter(EntityDataManager entityDataManager, DataParameter<EggState> dataParameter) {
-      entityDataManager.register(dataParameter, this);
+    public static void registerDataParameter(EntityDataManager entityDataManager, DataParameter<EggState> dataParameter) {
+      entityDataManager.register(dataParameter, INCUBATING); // just a default
+    }
+    public void setDataParameter(EntityDataManager entityDataManager, DataParameter<EggState> dataParameter) {
+      entityDataManager.set(dataParameter, this);
     }
 
     public void writeToNBT(NBTTagCompound nbt) {
@@ -647,13 +700,20 @@ public class EntityDragonEgg extends Entity {
   // the client keeps a cached copy of it and uses client ticks to interpolate in the gaps.
   // when the watcher is updated from the server, the client will tick it faster or slower to resynchronise
   private final ClientServerSynchronisedTickCount incubationTicksClient;
-  private int incubationTicksServer;
+  private int incubationTicksServer = 0;
+  private DragonBreedNew dragonBreed = null;
+  private EggState eggState = null;
 
-  private DragonBreedNew dragonBreed;
-  private EggState eggState = EggState.INCUBATING;
+  private int UNINITIALISED_TICKS_VALUE = -1;
+  private DragonBreedNew clientInitDragonBreed = null;
+  private EggState clientInitEggState = null;
+  private int clientInitIncubationTicks = UNINITIALISED_TICKS_VALUE;
+
   private int idleTicks = 0;
   private int idleTicksBeforeDisappear;
   private int eggWiggleXtickTimer;
   private int eggWiggleZtickTimer;
+
+  private boolean fullyInitialised = false;
 
 }

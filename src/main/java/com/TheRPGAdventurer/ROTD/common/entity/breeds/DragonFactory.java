@@ -23,8 +23,7 @@ public class DragonFactory {
   }
 
   public EntityDragonEgg createEgg(World world, DragonBreedNew dragonBreed) {
-    EntityDragonEgg newDragonEgg = new EntityDragonEgg(world);
-    newDragonEgg.initialise(dragonBreed);
+    EntityDragonEgg newDragonEgg = new EntityDragonEgg(world, dragonBreed);
     return newDragonEgg;
   }
 

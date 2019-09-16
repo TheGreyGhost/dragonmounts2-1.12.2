@@ -1,0 +1,18 @@
+
+The creation of an entity occurs in the following stages:
+
+For spawning of a new entity:
+1) Call the constructor- could be MyEntity(World) but also MyEntity(World, x, y, z) or MyEntity(World, other custom parameters)
+  a) set your x,y,z, etc in the constructor
+  b) myEntity.entityInit() will be called; register your DataParameters with EntityDataManager in here
+
+2) Call worldIn.spawnEntity(myEntity);
+3) vanilla will then setup a tracker which will send the DataParameters to the client.
+Then on the client:
+4) myEntityClient = new MyEntity(world) will be called
+5) myEntityClient notifyDataManagerChange will be called for all DataParameters
+
+For reloading of an existing entity from disk:
+1) myEntityServer = new MyEntity(world) will be called
+2) myEntityServer.readEntityFromNBT will be called
+the client then follows as above.
