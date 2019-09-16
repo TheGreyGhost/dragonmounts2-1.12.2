@@ -607,7 +607,7 @@ public class DragonLifeStageHelper extends DragonHelper {
   private static final double TICKS_PER_MINECRAFT_DAY = REAL_LIFE_MINUTES_PER_MINECRAFT_DAY * 60.0 * TICKS_PER_SECOND;
   private static final double MAX_AGE = Integer.MAX_VALUE / TICKS_PER_MINECRAFT_DAY;
 
-  private static final DragonVariantTag AGE_INFANT = DragonVariantTag.addTag("ageinfant", AGE_HUMAN_INFANT * H2D, 0, MAX_AGE);
+  private static final DragonVariantTag AGE_INFANT = DragonVariantTag.addTag("ageinfant", AGE_HUMAN_INFANT * H2D, 0, MAX_AGE, "");
   private static final DragonVariantTag AGE_CHILD = DragonVariantTag.addTag("agechild", AGE_HUMAN_CHILD * H2D, 0, MAX_AGE);
   private static final DragonVariantTag AGE_EARLY_TEEN = DragonVariantTag.addTag("ageearlyteen", AGE_HUMAN_EARLY_TEEN * H2D, 0, MAX_AGE);
   private static final DragonVariantTag AGE_LATE_TEEN = DragonVariantTag.addTag("agelateteen", AGE_HUMAN_LATE_TEEN * H2D, 0, MAX_AGE);

@@ -33,9 +33,32 @@ import static com.google.common.base.Preconditions.checkElementIndex;
 public class DragonVariants {
 
   public enum Category {
-    BREATH_WEAPON_PRIMARY("breathweaponprimary", 0),
-    BREATH_WEAPON_SECONDARY("breathweaponsecondary", 1),
-    PHYSICAL_MODEL("physicalmodel", 2),
+    BREATH_WEAPON_PRIMARY("breathweaponprimary", 0, "This section is used to configure the primary breath weapon"),
+    BREATH_WEAPON_SECONDARY("breathweaponsecondary", 1, "This section is used to configure the secondary breath weapon"),
+    PHYSICAL_MODEL("physicalmodel", 2,
+    * The age of the dragon affects the following aspects:
+            * 1) PhysicalSize (metres) - for the base dragon, this is the height of the top of the back
+    * 2) PhysicalMaturity (0->100%) - the physical abilities of the dragon such as being able to fly,
+    * 3) EmotionalMaturity (0->100%) - the behaviour of the dragon eg sticking close to parent, running away from mobs
+    * 4) BreathWeaponMaturity (0->100%) - the strength of the breath weapon
+    * 5) AttackDamageMultiplier (0->100%) - physical attack damage
+    * 6) HealthMultiplier (0->100%) - health
+    * 7) ArmourMultiplier (0->100%) - armour
+    * 8) ArmourToughnessMultiplier (0->100%) - armour toughness
+
+    * lifeStageAges is the age corresponding to each ageLabel, in minecraft days
+    * breathMaturityPoints, physicalMaturityPoints, emotionalMaturityPoints are the corresponding curve points, to be
+    *    linearly interpolated
+    * growthratePoints is the growth rate curve points which are then integrated to give the physical size
+    * physicalSizePoints is the integral of the growth rate
+    */
+
+
+
+            "This section is used to configure the physical appearance of the dragon as well as its physical traits such as health and armour.  " +
+            "The properties are scaled with the age of the dragon"
+
+    ),
     LIFE_STAGE("lifestage", 3),
     EGG("lifestage", 4);
 
@@ -63,9 +86,11 @@ public class DragonVariants {
     }
     private String textName;
     private int idx;
-    Category(String textName, int idx) {
+    private String comment;
+    Category(String textName, int idx, String comment) {
       this.textName = textName;
       this.idx = idx;
+      this.comment = comment;
     }
   }
 

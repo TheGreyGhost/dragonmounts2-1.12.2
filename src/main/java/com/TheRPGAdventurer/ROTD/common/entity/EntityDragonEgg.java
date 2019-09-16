@@ -5,6 +5,7 @@ import com.TheRPGAdventurer.ROTD.client.model.EggModels;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants.Category;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
@@ -553,8 +554,12 @@ public class EntityDragonEgg extends Entity {
 
       Vec3d spawnPosition = MathX.randomSphericalCoordinate(spawnRadius);
       Vec3d spawnVelocity = spawnPosition.normalize().scale(spawnSpeed);
+
+      Vec3d eggCentre = new Vec3d(posX, posY + height / 2.0, posZ);
+      spawnPosition = spawnPosition.add(eggCentre);
+
       world.spawnParticle(userConfiguredParameters.enumParticleType,
-              posX + spawnPosition.x, posY + height / 2.0 + spawnPosition.y, posZ + spawnPosition.z,
+              spawnPosition.x, spawnPosition.y, spawnPosition.z,
               spawnVelocity.x, spawnVelocity.y, spawnVelocity.z);
     }
   }
@@ -659,23 +664,39 @@ public class EntityDragonEgg extends Entity {
     dragonBreed = newDragonBreed;
   }
 
-  private static final DragonVariantTag EGG_SIZE_METRES = DragonVariantTag.addTag("eggsizemetres", 0.5, 0.05, 2.0);
-  private static final DragonVariantTag EGG_INCUBATION_DAYS = DragonVariantTag.addTag("incubationdurationdays", 1.0, 0.1, 10.0);
-  private static final DragonVariantTag EGG_WIGGLE = DragonVariantTag.addTag("wiggle");
-  private static final DragonVariantTag EGG_GLOW = DragonVariantTag.addTag("glow");
-  private static final DragonVariantTag EGG_LEVITATE = DragonVariantTag.addTag("levitate");
-  private static final DragonVariantTag EGG_SPIN = DragonVariantTag.addTag("spin");
-  private static final DragonVariantTag EGG_CRACKING = DragonVariantTag.addTag("cracking");
-  private static final DragonVariantTag EGG_PARTICLES_NAME = DragonVariantTag.addTag("eggparticlesname", "townaura");
-  private static final DragonVariantTag EGG_NO_PARTICLES = DragonVariantTag.addTag("noparticles");
+  private static final DragonVariantTag EGG_SIZE_METRES = DragonVariantTag.addTag("eggsizemetres", 0.5, 0.05, 2.0,
+          "the size (width and height) of the egg in metres").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_INCUBATION_DAYS = DragonVariantTag.addTag("incubationdurationdays", 1.0, 0.1, 10.0,
+          "the number of days that the egg will incubate until it hatches").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_WIGGLE = DragonVariantTag.addTag("wiggle",
+          "should the egg wiggle when it gets near to hatching?").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_GLOW = DragonVariantTag.addTag("glow",
+          "should the egg glow when it gets near to hatching?").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_LEVITATE = DragonVariantTag.addTag("levitate",
+          "should the egg levitate when it gets near to hatching?").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_SPIN = DragonVariantTag.addTag("spin",
+          "should the egg spin when it gets near to hatching?").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_CRACKING = DragonVariantTag.addTag("cracking",
+          "should the egg make cracking sounds when it gets near to hatching?").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_PARTICLES_NAME = DragonVariantTag.addTag("eggparticlesname", "townaura",
+          "what particle effect does the egg produce while incubating? as per the /particle command").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_NO_PARTICLES = DragonVariantTag.addTag("noparticles",
+          "if this flag is present, don't produce any particles while incubating").addCategory(Category.EGG);
 
-  private static final DragonVariantTag EGG_WIGGLE_START_FRACTION = DragonVariantTag.addTag("eggwigglestart", 0.75, 0.0, 1.0);
-  private static final DragonVariantTag EGG_CRACK_START_FRACTION = DragonVariantTag.addTag("eggcrackstart", 0.9, 0.0, 1.0);
-  private static final DragonVariantTag EGG_GLOW_START_FRACTION = DragonVariantTag.addTag("eggglowstart", 0.5, 0.0, 1.0);
-  private static final DragonVariantTag EGG_LEVITATE_START_FRACTION = DragonVariantTag.addTag("egglevitatestart", 0.5, 0.0, 1.0);
-  private static final DragonVariantTag EGG_SPIN_START_FRACTION = DragonVariantTag.addTag("eggspinstart", 0.5, 0.0, 1.0);
-  private static final DragonVariantTag EGG_LEVITATE_HEIGHT_METRES = DragonVariantTag.addTag("levitateheightmetres", 0.5, 0.0, 3.0);
-  private static final DragonVariantTag EGG_SPIN_REVS_PER_SECOND = DragonVariantTag.addTag("spinspeedrevspersec", 1.0, -3.0, 3.0);
+  private static final DragonVariantTag EGG_WIGGLE_START_FRACTION = DragonVariantTag.addTag("eggwigglestart", 0.75, 0.0, 1.0,
+          "when does the incubating egg start wiggling, as a fraction of the incubation time (0 -> 1)").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_CRACK_START_FRACTION = DragonVariantTag.addTag("eggcrackstart", 0.9, 0.0, 1.0,
+          "when does the incubating egg start making cracking sounds, as a fraction of the incubation time (0 -> 1)").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_GLOW_START_FRACTION = DragonVariantTag.addTag("eggglowstart", 0.5, 0.0, 1.0,
+          "when does the incubating egg start glowing, as a fraction of the incubation time (0 -> 1)").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_LEVITATE_START_FRACTION = DragonVariantTag.addTag("egglevitatestart", 0.5, 0.0, 1.0,
+          "when does the incubating egg start levitating, as a fraction of the incubation time (0 -> 1)").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_SPIN_START_FRACTION = DragonVariantTag.addTag("eggspinstart", 0.5, 0.0, 1.0,
+          "when does the incubating egg start spinning, as a fraction of the incubation time (0 -> 1)").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_LEVITATE_HEIGHT_METRES = DragonVariantTag.addTag("levitateheightmetres", 0.5, 0.0, 3.0,
+          "what's the maximum levitation height of the incubating egg").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_SPIN_REVS_PER_SECOND = DragonVariantTag.addTag("spinspeedrevspersec", 1.0, -3.0, 3.0,
+          "how fast does the incubating egg spin, in revolutions per second?  (negative = anticlockwise)").addCategory(Category.EGG);
 
   // cluster the userConfiguredParameters together to make it easier for the renderer to access
   public class UserConfiguredParameters {

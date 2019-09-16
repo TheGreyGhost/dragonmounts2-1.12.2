@@ -2,8 +2,10 @@ package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants.Category;
 
 /**
  * Created by TGG on 14/07/2019.
@@ -28,6 +30,8 @@ import java.util.Optional;
  *     Double
  *     String, Long and Double must have a default value
  *     Long and Double can have optional minimum and maximum  (Inclusive i.e. [min = 3, max = 6] -> 3, 4, 5, 6 ok)
+ *     The Comment is intended to be human-readable to help people configure the parameters correctly
+ *
  * 2) The tag parser uses the following methods:
  *     getTagFromName() to find the tag corresponding to a string
  *     convertValue() to convert a tag value to the format expected by the tag
@@ -53,28 +57,38 @@ public class DragonVariantTag {
 
 */
 
-  public static DragonVariantTag addTag(String textname) {
-    return addTag(textname, false, Optional.empty(), Optional.empty());
+  public static DragonVariantTag addTag(String textname, String comment) {
+    return addTag(textname, false, Optional.empty(), Optional.empty(), comment);
   }
 
-  public static DragonVariantTag addTag(String textname, String defaultValue) {
-    return addTag(textname, defaultValue, Optional.empty(), Optional.empty());
+  public static DragonVariantTag addTag(String textname, String defaultValue, String comment) {
+    return addTag(textname, defaultValue, Optional.empty(), Optional.empty(), comment);
   }
 
-  public static DragonVariantTag addTag(String textname, long defaultValue) {
-    return addTag(textname, defaultValue, Optional.empty(), Optional.empty());
+  public static DragonVariantTag addTag(String textname, long defaultValue, String comment) {
+    return addTag(textname, defaultValue, Optional.empty(), Optional.empty(), comment);
   }
 
-  public static DragonVariantTag addTag(String textname, double defaultValue) {
-    return addTag(textname, defaultValue, Optional.empty(), Optional.empty());
+  public static DragonVariantTag addTag(String textname, double defaultValue, String comment) {
+    return addTag(textname, defaultValue, Optional.empty(), Optional.empty(), comment);
   }
 
-  public static DragonVariantTag addTag(String textname, long defaultValue, long minValue, long maxValue) {
-    return addTag(textname, defaultValue, Optional.of(minValue), Optional.of(maxValue));
+  public static DragonVariantTag addTag(String textname, long defaultValue, long minValue, long maxValue, String comment) {
+    return addTag(textname, defaultValue, Optional.of(minValue), Optional.of(maxValue), comment);
   }
 
-  public static DragonVariantTag addTag(String textname, double defaultValue, double minValue, double maxValue) {
-    return addTag(textname, defaultValue, Optional.of(minValue), Optional.of(maxValue));
+  public static DragonVariantTag addTag(String textname, double defaultValue, double minValue, double maxValue, String comment) {
+    return addTag(textname, defaultValue, Optional.of(minValue), Optional.of(maxValue), comment);
+  }
+
+  /**
+   * Adds this category as an expected place to find this tag
+   * @param category
+   * @return returns the same tag to allow chaining
+   */
+  public DragonVariantTag addCategory(Category category) {
+    expectedCategories.add(category);
+    return null;
   }
 
   /**
@@ -96,6 +110,8 @@ public class DragonVariantTag {
   public Object getDefaultValue() {
     return defaultValue;
   }
+
+  public String getComment() {return comment;}
 
   /**
    * Convert the given input value to the suitable type for this tag
@@ -136,22 +152,24 @@ public class DragonVariantTag {
     return numberValue;
   }
 
-  private static DragonVariantTag addTag(String textname, Object defaultValue, Optional<Comparable> minValue, Optional<Comparable> maxValue)
+  private static DragonVariantTag addTag(String textname, Object defaultValue, Optional<Comparable> minValue, Optional<Comparable> maxValue, String comment)
   {
     if (allTagNames.containsKey(textname)) {
       DragonMounts.loggerLimit.warn_once("DragonVariantTag already contains:"+textname);
       return allTagNames.get(textname);
     }
-    DragonVariantTag newTag = new DragonVariantTag(textname, defaultValue, minValue, maxValue);
+    DragonVariantTag newTag = new DragonVariantTag(textname, defaultValue, minValue, maxValue, comment);
     allTagNames.put(textname, newTag);
     return newTag;
   }
 
-  private DragonVariantTag(String textname, Object defaultValue, Optional<Comparable> minValue, Optional<Comparable> maxValue) {
+  private DragonVariantTag(String textname, Object defaultValue, Optional<Comparable> minValue, Optional<Comparable> maxValue, String comment) {
     this.textname = textname;
     this.defaultValue = defaultValue;
     this.minValue = minValue;
     this.maxValue = maxValue;
+    this.comment = comment;
+    this.expectedCategories = expectedCategories;
   }
 
   static private HashMap<String, DragonVariantTag> allTagNames = new HashMap<>();
@@ -159,4 +177,6 @@ public class DragonVariantTag {
   private final Object defaultValue;
   private final Optional<Comparable> minValue;
   private final Optional<Comparable> maxValue;
+  private final String comment; // a comment for the config file
+  private ArrayList<Category> expectedCategories = new ArrayList<>(); // which categories do we expect to find this tag in?
 }
