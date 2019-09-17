@@ -1,7 +1,7 @@
 // value too high
 {
   "breedinternalname": "fire8",
-  "physicalmodel": {
-    "maxpassengers": 20
+  "lifestage": {
+    "sizeadult": 50
   }
 }

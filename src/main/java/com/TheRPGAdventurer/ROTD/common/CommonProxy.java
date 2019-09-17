@@ -10,6 +10,7 @@
 package com.TheRPGAdventurer.ROTD.common;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.client.model.EggModels;
 import com.TheRPGAdventurer.ROTD.common.cmd.CommandDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
@@ -127,7 +128,6 @@ abstract public class CommonProxy {
 
   protected void preInitialisePhase1(FMLPreInitializationEvent event) {
 //    DragonMountsConfig.PreInit();
-    StartupDebugCommon.preInitCommon();
     DragonLifeStageHelper.registerConfigurationTags();
     EntityDragonEgg.registerConfigurationTags();
   }
@@ -151,7 +151,11 @@ abstract public class CommonProxy {
                                   + ":\n" + dve.getMessage());
       }
     }
+
+    StartupDebugCommon.preInitCommon();
   }
+
+  abstract public boolean isDedicatedServer();
 
   private final int DRAGON_ENTITY_TRACKING_RANGE = 80;
   private final int ENTITY_UPDATE_FREQ = 3; // 3

@@ -60,7 +60,6 @@ public class DragonVariantsReader {
     dragonVariantsErrors.clear();
 
     Map<String, DragonVariants> allBreedVariants = new HashMap<>();
-
     try {
       List<String> allFilenames = DMUtils.listAssetsFolderContents(configFilesFolder);
       for (String filename : allFilenames) {
@@ -75,7 +74,7 @@ public class DragonVariantsReader {
       DragonMounts.logger.warn("A problem occurred trying to read the list of config files from folder " + resourceLocation + ":\n" + e.getMessage());
     }
 
-    return new HashMap<>();  // just return empty if we had trouble.
+    return allBreedVariants;  //return empty if we had trouble
   }
 
   /**
@@ -150,8 +149,8 @@ public class DragonVariantsReader {
       if (!entry.getValue().isEmpty()) {
         if (!isFirst) {
           json.append(",\n");
-          isFirst = false;
         }
+        isFirst = false;
         outputCategoryAsJSON(json, entry.getKey(), entry.getValue(), includeComments);
       }
     }
@@ -175,8 +174,8 @@ public class DragonVariantsReader {
       if (!(entry.getValue() instanceof Boolean)) { // save the flags for later
         if (!isFirst) {
           json.append(",\n");
-          isFirst = false;
         }
+        isFirst = false;
         outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), includeComments);
       }
     }
@@ -185,8 +184,8 @@ public class DragonVariantsReader {
       if ((entry.getValue() instanceof Boolean)) { // save the flags for later
         if (!isFirst) {
           json.append(",\n");
-          isFirst = false;
         }
+        isFirst = false;
         if (!atLeastOneFlag) {
           atLeastOneFlag = true;
           json.append("\"");
@@ -237,9 +236,9 @@ public class DragonVariantsReader {
       throw new IllegalArgumentException("Unexpected object type");
     }
     if (includeComments) {
-      json.append("\\* ");
+      json.append("/* ");
       json.append(tag.getComment());
-      json.append(" *\\");
+      json.append(" */");
     }
   }
 
@@ -281,6 +280,10 @@ public class DragonVariantsReader {
       dragonVariantsErrors.addError("Didn't find the required field " + BREED_INTERNAL_NAME_JSON);
       return null;
     }
+    if (!breedInternalNameJSON.isJsonPrimitive() || !breedInternalNameJSON.getAsJsonPrimitive().isString()) {
+      dragonVariantsErrors.addError("The required field " + BREED_INTERNAL_NAME_JSON + " has the wrong type (should be a String).");
+      return null;
+    }
 
     DragonVariants dragonVariants = new DragonVariants(breedInternalNameJSON.getAsString());
 
@@ -314,6 +317,11 @@ public class DragonVariantsReader {
       } else {
         try {
           deserialiseTagWithValue(dragonVariants, category, tagName, entry.getValue());
+        } catch (DragonVariantTagNotFoundException dvtnfe) {
+          // if we're in a dedicated server, ignore this error
+          if (!DragonVariantTagNotFoundException.shouldIgnore()) {
+            dragonVariantsErrors.addError(dvtnfe);
+          }
         } catch (IllegalArgumentException iae) {
           dragonVariantsErrors.addError(iae);
         }
@@ -335,9 +343,14 @@ public class DragonVariantsReader {
       JsonElement element = flagIterator.next();
       try {
         if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
-          dragonVariantsErrors.addError("problem with tag " + category + ":flags");
+          dragonVariantsErrors.addError("problem with tag " + category.getTextName() + ":flags - not correctly formatted");
         } else {
           deserialiseFlagTag(dragonVariants, category, element.getAsJsonPrimitive().getAsString());
+        }
+      } catch (DragonVariantTagNotFoundException dvtnfe) {
+        // if we're in a dedicated server, ignore this error
+        if (!DragonVariantTagNotFoundException.shouldIgnore()) {
+          dragonVariantsErrors.addError(dvtnfe);
         }
       } catch (IllegalArgumentException iae) {
         dragonVariantsErrors.addError(iae);
@@ -359,7 +372,7 @@ public class DragonVariantsReader {
         throw new IllegalArgumentException("value has an unexpected type");
       }
     } catch (Exception e) {
-      throw new IllegalArgumentException("problem with tag " + category + ":" + tagName + "-" + e.getMessage());
+      throw new IllegalArgumentException("problem with tag " + category.getTextName() + ":" + tagName + "-" + e.getMessage());
     }
   }
 

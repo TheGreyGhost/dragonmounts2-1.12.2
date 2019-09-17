@@ -99,9 +99,9 @@ public class DragonVariantTag {
    * @param nameToFind the text name to be looked for
    * @return the corresponding tag, or throw IllegalArgumentException if not found
    */
-  static public DragonVariantTag getTagFromName(String nameToFind) throws IllegalArgumentException {
+  static public DragonVariantTag getTagFromName(String nameToFind) throws DragonVariantTagNotFoundException {
     DragonVariantTag retval = allTagNames.get(nameToFind);
-    if (retval == null) throw new IllegalArgumentException("Tag not valid:" + nameToFind);
+    if (retval == null) throw new DragonVariantTagNotFoundException("Unknown tag:" + nameToFind);
     return retval;
   }
 

@@ -1,7 +1,7 @@
 // value too low
 {
   "breedinternalname": "fire7",
-  "physicalmodel": {
-    "maxpassengers": -1
+  "egg": {
+    "eggsizemetres": -1
   }
 }

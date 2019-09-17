@@ -1,12 +1,12 @@
-// unknown flag
+// flag incorrect format
 {
-  "breedinternalname": "fire5",
+  "breedinternalname": "fire11",
   "egg": {
     "eggsizemetres": 1.0,
     "flags": [
       "wiggle",
       "glow",
-      "spew"
+      23
     ]
   }
 }

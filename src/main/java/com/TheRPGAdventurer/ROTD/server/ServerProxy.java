@@ -10,8 +10,12 @@ import java.io.File;
  */
 public class ServerProxy extends CommonProxy {
 
+  @Override
   public File getDataDirectory() {
     return FMLServerHandler.instance().getSavesDirectory();
   }
+
+  @Override
+  public boolean isDedicatedServer() {return true;}
 
 }

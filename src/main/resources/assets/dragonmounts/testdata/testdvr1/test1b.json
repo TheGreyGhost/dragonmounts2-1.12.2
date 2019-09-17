@@ -2,7 +2,7 @@
 {
   "breedinternalname": "ice",
   "egg": {
-    "eggsizemetres": 20,
+    "eggsizemetres": 1.0,
     "flags": [
       "wiggle",
       "glow"

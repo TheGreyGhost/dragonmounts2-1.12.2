@@ -128,6 +128,7 @@ public class ClientProxy extends CommonProxy {
   @Override
   protected void preInitialisePhase2(FMLPreInitializationEvent event) {
     super.preInitialisePhase2(event);
+    StartupDebugClientOnly.preInitClientOnly();
   }
 
   @Override
@@ -188,5 +189,9 @@ public class ClientProxy extends CommonProxy {
   public File getDataDirectory() {
     return Minecraft.getMinecraft().mcDataDir;
   }
+
+  @Override
+  public boolean isDedicatedServer() {return false;}
+
   private int thirdPersonViewDragon = 0;
 }
