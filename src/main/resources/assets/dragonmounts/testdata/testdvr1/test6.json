@@ -1,8 +1,8 @@
 // incorrect tag type
 {
   "breedinternalname": "fire6",
-  "breathweaponprimary": {
-    "particlefactory": ["one", "two"]
+  "lifestage": {
+    "sizeadult": ["one", "two"]
   },
   "physicalmodel": {
     "numberofnecksegments": 8,

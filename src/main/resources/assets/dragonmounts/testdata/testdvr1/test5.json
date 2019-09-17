@@ -1,11 +1,12 @@
 // unknown flag
 {
   "breedinternalname": "fire5",
-  "physicalmodel": {
-    "numberoftailsegments": 20,
+  "egg": {
+    "eggsizemetres": 20,
     "flags": [
-      "twinridgeplates",
-      "incorrectflag"
+      "wiggle",
+      "glow",
+      "spew"
     ]
   }
 }
