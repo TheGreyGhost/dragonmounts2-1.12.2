@@ -2,6 +2,9 @@
   "fire": {
     "breathweaponprimary": {
       "particlefactory": "fire",       // which particle factory is to be used
+      /*test1   */
+      /* test2
+         test2b */
       "particleresourcelocation": "dragonmounts:entities/breathweapon/breath_fire",  // assets/dragonmounts/textures
       "nodespeed": 1.2,         // blocks per tick
       "nodediameter": 2.0,         // blocks

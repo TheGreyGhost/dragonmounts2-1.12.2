@@ -1,0 +1,11 @@
+// should all parse correctly to match this structure
+{
+  "breedinternalname": "ice",
+  "physicalmodel": {
+    "numberoftailsegments": 20,
+    "flags": [
+      "twinridgeplates",
+      "tailspike"
+    ]
+  }
+}

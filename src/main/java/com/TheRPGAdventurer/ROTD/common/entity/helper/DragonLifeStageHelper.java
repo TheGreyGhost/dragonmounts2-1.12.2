@@ -154,7 +154,7 @@ public class DragonLifeStageHelper extends DragonHelper {
         break;
       }
       case 2: {  // output the default curves
-        DragonVariants dvDefault = new DragonVariants();
+        DragonVariants dvDefault = new DragonVariants("test");
         DragonLifeStageHelper testDefault = new DragonLifeStageHelper(dvDefault);
         DragonMounts.logger.info("Age AgeLabel physicalmaturity breathmaturity emotionalmaturity physicalsize");
 
@@ -178,7 +178,6 @@ public class DragonLifeStageHelper extends DragonHelper {
     }
 
   }
-
 
   /** get the physical maturity of the dragon at its current age
    * @return  physical maturity, from 0 % to 100.0 %
@@ -1031,7 +1030,10 @@ public class DragonLifeStageHelper extends DragonHelper {
         throw new DragonVariantsException(dragonVariantsErrors);
       }
     }
+    @Override
+    public void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException {
+      // do nothing - no resources to initialise
+    }
   }
-
 
 }

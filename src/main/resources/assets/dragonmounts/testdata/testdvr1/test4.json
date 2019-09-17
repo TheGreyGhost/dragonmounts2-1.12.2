@@ -1,0 +1,17 @@
+// unknown tag name
+{
+  "breedinternalname": "fire4",
+  "breathweaponprimary": {
+    "particlefactory": "fire",       // which particle factory is to be used
+    "badtagname": 1.0         // basic intensity is 1.0; higher intensity causes more damage / effects
+  },
+  "breathweaponsecondary": {
+    "particlefactory": "fire"       // which particle factory is to be used
+  },
+  "physicalmodel": {
+    "numberofnecksegments": 8,
+    "numberofwingfingers": 3,
+    "numberoftailsegments": 10,
+    "maxpassengers": 3
+  }
+}

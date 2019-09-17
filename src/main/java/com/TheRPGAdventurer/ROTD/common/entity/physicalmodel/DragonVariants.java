@@ -30,7 +30,8 @@ import static com.google.common.base.Preconditions.checkElementIndex;
  * 2) Create a DragonVariants
  * 3) addTagAndValue() for all the tags in the config file
  * 4) call validateCollection() to apply all the registered VariantTagValidator functions on the collection
- * 5) call getValueOrDefault() to retrieve the value of a VariantTag
+ * 5) call initialiseResourcesForCollection() to initalise the resources required by the tags in this collection (eg ModelResources)
+ * 6) call getValueOrDefault() to retrieve the value of a VariantTag
  */
 public class DragonVariants {
 
@@ -91,15 +92,16 @@ public class DragonVariants {
   }
 
   /**
-   * The VariantTagValidator is used to validate a group of variant tags
+   * The VariantTagValidator is used to validate a group of variant tags and initialise respective resources
    * for example - to check if two incompatible tags have both been selected
    * If an incompatible combination is found, the validator may correct it or return it to defaults
-   *
-   * The validator may also initialise its internal structures in response to the calls
+   * This checking is performed by validateVariantTags()
+   * The VariantTagValidator may also initialise resources in response to a call to initialiseResources()
    * eg create ModelResourceLocations based on tags linked to models
    */
   public interface VariantTagValidator {
     void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException;
+    void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException;
   }
 
   /**
@@ -123,13 +125,19 @@ public class DragonVariants {
   }
 
   public void addTagAndValue(Category category, DragonVariantTag tag, Object tagValue) throws IllegalArgumentException {
+    if (!tag.getExpectedCategories().contains(category)) {
+      throw new IllegalArgumentException(
+              "Tag " + tag.getTextname() + " was found in unexpected category " + category.getTextName()
+              + ".  Valid categories for this tag are: " + tag.getExpectedCategoriesAsText(", ")
+              );
+    }
     Object convertedValue = tag.convertValue(tagValue);
     allAppliedTags.get(category.getIdx()).put(tag, convertedValue);
   }
 
   /**
    * Check the collection of tags for validity according to the registered VariantTagValidators
-   * @throws IllegalArgumentException if errors found
+   * @throws DragonVariantsException if errors found
    */
   public void validateCollection() throws DragonVariantsException
   {
@@ -138,12 +146,31 @@ public class DragonVariants {
     for (VariantTagValidator variantTagValidator : variantTagValidators) {
       try {
         variantTagValidator.validateVariantTags(this);
-      } catch (DragonVariantsException dve) {
-        dragonVariantsErrors.addError(dve);
+      } catch (IllegalArgumentException iae) {
+        dragonVariantsErrors.addError(iae);
       }
     }
     if (dragonVariantsErrors.hasErrors()) throw new DragonVariantsException(dragonVariantsErrors);
   }
+
+  /**
+   * Initialise all resources in the collection of tags according to the registered VariantTagValidators
+   * @throws DragonVariantsException if a problem occurred
+   */
+  public void initialiseResourcesForCollection() throws DragonVariantsException
+  {
+    DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
+
+    for (VariantTagValidator variantTagValidator : variantTagValidators) {
+      try {
+        variantTagValidator.initaliseResources(this);
+      } catch (IllegalArgumentException iae) {
+        dragonVariantsErrors.addError(iae);
+      }
+    }
+    if (dragonVariantsErrors.hasErrors()) throw new DragonVariantsException(dragonVariantsErrors);
+  }
+
 
   /**
    * Gets the value of a particular tag applied to this dragon, or the default value if the tag hasn't been applied

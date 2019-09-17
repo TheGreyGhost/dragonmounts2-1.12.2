@@ -13,8 +13,10 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.cmd.CommandDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsReader;
 import com.TheRPGAdventurer.ROTD.common.event.EntityMountEventHandler;
 import com.TheRPGAdventurer.ROTD.common.event.RegistryEventHandler;
@@ -130,13 +132,25 @@ abstract public class CommonProxy {
     EntityDragonEgg.registerConfigurationTags();
   }
 
+  // read the dragon variants information for all breed config files, create the respective breeds, and initialise any corresponding resources
   protected void preInitialisePhase2(FMLPreInitializationEvent event) {
-    DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
-            Minecraft.getMinecraft().getResourceManager(), new ResourceLocation("dragonmounts:dragonvariants.json"));
-    Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readVariants();
-//    for (Map.Entry<String, DragonVariants> entry : allBreedsDragonVariants.entrySet()) {
-//      DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().createDragonBreedNew(entry.getKey(), entry.getValue());
-//    }
+    DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(Minecraft.getMinecraft().getResourceManager(), "variants");
+    Map<String, DragonVariants> allBreedsDragonVariants = dragonVariantsReader.readAllVariants();
+    try {
+      DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed().getDragonVariants().initialiseResourcesForCollection();
+    } catch (DragonVariantsException dve) {
+      DragonMounts.logger.error("One or more errors occurred while initialising the default breed resources- indicates an internal program error.  Msg:\n" + dve.getMessage());
+    }
+
+    for (Map.Entry<String, DragonVariants> entry : allBreedsDragonVariants.entrySet()) {
+      try {
+        DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().createDragonBreedNew(entry.getKey(), entry.getValue());
+        entry.getValue().initialiseResourcesForCollection();
+      } catch (DragonVariantsException dve) {
+        DragonMounts.logger.error("One or more errors occurred while initialising the resources for breed " + entry.getKey()
+                                  + ":\n" + dve.getMessage());
+      }
+    }
   }
 
   private final int DRAGON_ENTITY_TRACKING_RANGE = 80;

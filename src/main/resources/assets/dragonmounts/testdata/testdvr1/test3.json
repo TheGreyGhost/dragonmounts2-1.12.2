@@ -1,0 +1,10 @@
+// invalid category
+{
+  "breedinternalname": "fire3",
+  "breathweaponprimary": {
+    "nodeintensity": 1.0         // basic intensity is 1.0; higher intensity causes more damage / effects
+  },
+  "badcategory": {
+    "particlefactory": "fire"       // which particle factory is to be used
+  }
+}

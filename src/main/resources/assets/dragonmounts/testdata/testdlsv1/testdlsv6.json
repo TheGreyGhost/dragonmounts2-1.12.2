@@ -1,0 +1,13 @@
+// test profiles
+{
+  "breedinternalname": "testdlsv6",
+  "lifestage": {
+    "growthratehatchling": -100.0,
+    "growthrateinfant": -100.0,
+    "growthratechild": 100.0,
+    "growthrateearlyteen": 100.0,
+    "growthratelateteen": 100.0,
+    "sizehatchling": 1,
+    "sizeadult": 5
+  }
+}

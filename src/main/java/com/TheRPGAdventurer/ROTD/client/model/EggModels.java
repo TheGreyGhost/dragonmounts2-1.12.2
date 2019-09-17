@@ -91,13 +91,12 @@ public class EggModels {
    */
   public class EggModelsValidator implements DragonVariants.VariantTagValidator {
     @Override
-    public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
-      if (internalState != InternalState.INIT && internalState != InternalState.HAVE_VALIDATED) {
-        DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: validation after Model registration");
+    public void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException {
+      if (internalState != InternalState.INIT && internalState != InternalState.HAVE_INITIALISED_RESOURCES) {
+        DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: initaliseResources after Model registration");
       }
-      internalState = InternalState.HAVE_VALIDATED;
+      internalState = InternalState.HAVE_INITIALISED_RESOURCES;
       DragonBreedNew whichBreed =  DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(dragonVariants);
-      DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
 
       String str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL);
       ResourceLocation rl = new ResourceLocation("dragonmounts", str);
@@ -122,6 +121,10 @@ public class EggModels {
       str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_HATCHED_TEXTURE);
       trl = new ResourceLocation("dragonmounts", str);
       addTexture(whichBreed, EggModelState.HATCHED, trl);
+    }
+    @Override
+    public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
+      // do nothing - no particular validation required
     }
   }
 
@@ -210,7 +213,7 @@ public class EggModels {
   private Map<Pair<DragonBreedNew, EggModelState>, ResourceLocation> breedTextureRLs = new HashMap<>();
   private Map<Pair<DragonBreedNew, EggModelState>, AnimatedTexture> breedAnimatedTextures = new HashMap<>();
 
-  private enum InternalState {INIT, HAVE_VALIDATED, REGISTERED_MODELS};
+  private enum InternalState {INIT, HAVE_INITIALISED_RESOURCES, REGISTERED_MODELS};
   private InternalState internalState = InternalState.INIT;  // just for debugging / assertion
 
   private Map<Pair<DragonBreedNew, EggModelState>, ResourceLocation> breedModelRLs = new HashMap<>();

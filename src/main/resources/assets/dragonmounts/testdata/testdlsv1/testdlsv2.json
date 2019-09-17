@@ -1,0 +1,11 @@
+// test validation ages not ascending: expect error
+{
+  "breedinternalname": "testdlsv2",
+  "lifestage": {
+    "ageinfant": 1,
+    "agechild": 3,
+    "ageearlyteen": 6,
+    "agelateteen": 5,
+    "ageadult": 15
+ }
+}

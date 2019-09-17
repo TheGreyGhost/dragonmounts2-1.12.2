@@ -7,10 +7,17 @@ import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -183,5 +190,34 @@ public class DMUtils {
     }
     return random;
   }
+
+  /** list all the files in a particular resource location
+   *  Looks in assets/dragonmounts/{pathToFolder} and returns a list of all the filenames it finds
+   * **/
+  public static List<String> listAssetsFolderContents(String pathToFolder) throws IOException {
+    final int MAX_LINES = 1000;       // just an arbitrary limit to stop silliness
+    final int MAX_LINE_LENGTH = 1000; // just an arbitrary limit to stop silliness
+    List<String> retval = new ArrayList<>();
+    InputStream stream = DragonMounts.class.getClassLoader().getResourceAsStream("assets/"+ DragonMounts.MODID + "/" + pathToFolder);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+
+    int linecount = 0;
+    while (reader.ready()) {
+      String nextLine = reader.readLine();
+      if (++linecount > MAX_LINES) {
+        throw new IOException("Folder " + pathToFolder + " contained too many entries (more than " + MAX_LINES + ")");
+      }
+      if (nextLine.length() > MAX_LINE_LENGTH) {
+        throw new IOException("One of the filenames (" + nextLine.substring(0, 20) + "...) in folder " + pathToFolder
+                + " was too long (more than " + MAX_LINE_LENGTH + " characters)");
+      }
+
+      retval.add(nextLine);
+    }
+    return retval;
+  }
+
+
+
   private static Logger logger;
 }

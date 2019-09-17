@@ -1,0 +1,15 @@
+// should all parse correctly to match this structure
+{
+  "breedinternalname": "fire",
+  "lifestage": {
+    "particlefactory": "fire",       // which particle factory is to be used
+    "particleresourcelocation": "dragonmounts:entities/breathweapon/breath_fire",  // stored in assets/dragonmounts/textures
+    "nodespeed": 1.2,         // blocks per tick
+    "nodediameter": 2.0,         // blocks
+    "nodelifetime": 40,          // lifetime in ticks
+    "nodeintensity": 1.0         // basic intensity is 1.0; higher intensity causes more damage / effects
+  },
+  "egg": {
+    "particlefactory": "fire"       // which particle factory is to be used
+  }
+}

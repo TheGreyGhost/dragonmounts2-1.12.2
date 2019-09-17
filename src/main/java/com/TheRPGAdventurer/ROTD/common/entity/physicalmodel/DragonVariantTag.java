@@ -90,7 +90,7 @@ public class DragonVariantTag {
    */
   public DragonVariantTag addCategory(Category category) {
     expectedCategories.add(category);
-    return null;
+    return this;
   }
 
   /**
@@ -117,6 +117,21 @@ public class DragonVariantTag {
 
   public ArrayList<Category> getExpectedCategories() {
     return expectedCategories;
+  }
+
+  /**
+   * List all the category names expected for this tag
+   * @return a concatenated list of all expected category names with the separator between the entries
+   */
+  public String getExpectedCategoriesAsText(String separator) {
+    StringBuilder stringBuilder = new StringBuilder();
+    boolean first = true;
+    for (Category category : getExpectedCategories()) {
+      if (!first) stringBuilder.append(separator);
+      stringBuilder.append(category.getTextName());
+      first = false;
+    }
+    return stringBuilder.toString();
   }
 
   /**

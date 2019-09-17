@@ -401,7 +401,7 @@ public abstract class DragonBreed {
     this.skin = skin;
     this.color = color;
     this.dragonPhysicalModel = new DragonPhysicalModel();
-    this.dragonVariants = new DragonVariants();    // todo: just for now, fix up later
+    this.dragonVariants = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed().getDragonVariants();    // todo: just for now, fix up later
 
     // ignore suffocation damage
     setImmunity(DamageSource.DROWN);

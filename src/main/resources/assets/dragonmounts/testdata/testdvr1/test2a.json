@@ -1,0 +1,14 @@
+// breedinternalname missing
+{
+  "dummy": 36,
+  "breathweaponprimary": {
+    "particlefactory": "fire"
+  },
+  "physicalmodel": {
+    "numberoftailsegments": 20,
+    "flags": [
+      "twinridgeplates",
+      "tailspike"
+    ]
+  }
+}

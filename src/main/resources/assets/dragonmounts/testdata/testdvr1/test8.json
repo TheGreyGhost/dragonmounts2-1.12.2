@@ -1,0 +1,7 @@
+// value too high
+{
+  "breedinternalname": "fire8",
+  "physicalmodel": {
+    "maxpassengers": 20
+  }
+}

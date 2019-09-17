@@ -590,7 +590,6 @@ public class EntityDragonEgg extends Entity {
   public static class EntityEggValidator implements DragonVariants.VariantTagValidator {
     @Override
     public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
-//      DragonBreedNew whichBreed =  DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(dragonVariants);
       DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
       String particleName = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_PARTICLES_NAME);
       EnumParticleTypes particleType = EnumParticleTypes.getByName(particleName);
@@ -634,6 +633,10 @@ public class EntityDragonEgg extends Entity {
       if (dragonVariantsErrors.hasErrors()) {
         throw new DragonVariantsException(dragonVariantsErrors);
       }
+    }
+    @Override
+    public void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException {
+      // do nothing - no resources to initialise
     }
   }
 

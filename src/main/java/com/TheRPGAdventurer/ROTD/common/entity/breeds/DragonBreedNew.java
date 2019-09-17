@@ -84,7 +84,7 @@ public class DragonBreedNew {
     }
 
     public DragonBreedsRegistry() {
-      createDragonBreedNew(DEFAULT_NAME, new DragonVariants());
+      createDragonBreedNew(DEFAULT_NAME, new DragonVariants(DEFAULT_NAME));
     }
 
     /**

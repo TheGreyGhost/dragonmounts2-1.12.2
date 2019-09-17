@@ -1,0 +1,11 @@
+// unknown flag
+{
+  "breedinternalname": "fire5",
+  "physicalmodel": {
+    "numberoftailsegments": 20,
+    "flags": [
+      "twinridgeplates",
+      "incorrectflag"
+    ]
+  }
+}
