@@ -607,127 +607,127 @@ public class DragonLifeStageHelper extends DragonHelper {
   private static final double TICKS_PER_MINECRAFT_DAY = REAL_LIFE_MINUTES_PER_MINECRAFT_DAY * 60.0 * TICKS_PER_SECOND;
   private static final double MAX_AGE = Integer.MAX_VALUE / TICKS_PER_MINECRAFT_DAY;
 
-  private static final DragonVariantTag AGE_INFANT = DragonVariantTag.addTag("ageinfant", AGE_HUMAN_INFANT * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_INFANT = DragonVariantTag.addTag("age1infant", AGE_HUMAN_INFANT * H2D, 0, MAX_AGE,
           "in minecraft days").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag AGE_CHILD = DragonVariantTag.addTag("agechild", AGE_HUMAN_CHILD * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_CHILD = DragonVariantTag.addTag("age2child", AGE_HUMAN_CHILD * H2D, 0, MAX_AGE,
           "in minecraft days").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag AGE_EARLY_TEEN = DragonVariantTag.addTag("ageearlyteen", AGE_HUMAN_EARLY_TEEN * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_EARLY_TEEN = DragonVariantTag.addTag("age3earlyteen", AGE_HUMAN_EARLY_TEEN * H2D, 0, MAX_AGE,
           "in minecraft days").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag AGE_LATE_TEEN = DragonVariantTag.addTag("agelateteen", AGE_HUMAN_LATE_TEEN * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_LATE_TEEN = DragonVariantTag.addTag("age4lateteen", AGE_HUMAN_LATE_TEEN * H2D, 0, MAX_AGE,
           "in minecraft days").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag AGE_ADULT = DragonVariantTag.addTag("ageadult", AGE_HUMAN_ADULT * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_ADULT = DragonVariantTag.addTag("age5adult", AGE_HUMAN_ADULT * H2D, 0, MAX_AGE,
           "in minecraft days").addCategory(Category.LIFE_STAGE);
 
   // see 190804-GrowthProfile and AgeProfile for explanation
   private static final double SIZE_MIN = 0.01;  // size is in metres to the top of the dragon's back
   private static final double SIZE_MAX = 10.0;
 
-  private static final DragonVariantTag GROWTHRATE_HATCHLING = DragonVariantTag.addTag("growthratehatchling", 10.0, -1000, 1000,
+  private static final DragonVariantTag GROWTHRATE_HATCHLING = DragonVariantTag.addTag("growthrate0hatchling", 10.0, -1000, 1000,
           "relative growth rate while a hatchling").addCategory(Category.LIFE_STAGE);   // relative growth rate
-  private static final DragonVariantTag GROWTHRATE_INFANT = DragonVariantTag.addTag("growthrateinfant",  10.0, -1000, 1000,
+  private static final DragonVariantTag GROWTHRATE_INFANT = DragonVariantTag.addTag("growthrate1infant",  10.0, -1000, 1000,
           "relative growth rate while an infant").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag GROWTHRATE_CHILD = DragonVariantTag.addTag("growthratechild",  100.0, -1000, 1000,
+  private static final DragonVariantTag GROWTHRATE_CHILD = DragonVariantTag.addTag("growthrate2child",  100.0, -1000, 1000,
           "relative growth rate while a child").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag GROWTHRATE_EARLY_TEEN = DragonVariantTag.addTag("growthrateearlyteen", 100.0, -1000, 1000,
+  private static final DragonVariantTag GROWTHRATE_EARLY_TEEN = DragonVariantTag.addTag("growthrate3earlyteen", 100.0, -1000, 1000,
           "relative growth rate while an early teen").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag GROWTHRATE_LATE_TEEN = DragonVariantTag.addTag("growthratelateteen", 400.0, -1000, 1000,
+  private static final DragonVariantTag GROWTHRATE_LATE_TEEN = DragonVariantTag.addTag("growthrate4lateteen", 400.0, -1000, 1000,
           "relative growth rate while a late teen").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag SIZE_HATCHLING = DragonVariantTag.addTag("sizehatchling", 0.1, SIZE_MIN, SIZE_MAX,
+  private static final DragonVariantTag SIZE_HATCHLING = DragonVariantTag.addTag("size0hatchling", 0.1, SIZE_MIN, SIZE_MAX,
           "height of the hatchling's back, in metres").addCategory(Category.LIFE_STAGE);  // height of back in m
-  private static final DragonVariantTag SIZE_ADULT = DragonVariantTag.addTag("sizeadult", 2.0, SIZE_MIN, SIZE_MAX,
+  private static final DragonVariantTag SIZE_ADULT = DragonVariantTag.addTag("size5adult", 2.0, SIZE_MIN, SIZE_MAX,
           "height of the adult's back, in metres").addCategory(Category.LIFE_STAGE);          // height of back in m
 
   // physical maturity = for physical abilities such as flying; 0% (hatchling) - 100% (adult)
-  private static final DragonVariantTag PHYSICALMATURITY_INFANT = DragonVariantTag.addTag("physicalmaturityinfant", 10.0, 0, 100,
+  private static final DragonVariantTag PHYSICALMATURITY_INFANT = DragonVariantTag.addTag("physicalmaturity1infant", 10.0, 0, 100,
           "relative physical maturity of the infant (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag PHYSICALMATURITY_CHILD = DragonVariantTag.addTag("physicalmaturitychild", 30.0, 0, 100,
+  private static final DragonVariantTag PHYSICALMATURITY_CHILD = DragonVariantTag.addTag("physicalmaturity2child", 30.0, 0, 100,
           "relative physical maturity of the child (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag PHYSICALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("physicalmaturityearlyteen", 50.0, 0, 100,
+  private static final DragonVariantTag PHYSICALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("physicalmaturity3earlyteen", 50.0, 0, 100,
           "relative physical maturity of the early teen (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag PHYSICALMATURITY_LATE_TEEN = DragonVariantTag.addTag("physicalmaturitylateteen", 80.0, 0, 100,
+  private static final DragonVariantTag PHYSICALMATURITY_LATE_TEEN = DragonVariantTag.addTag("physicalmaturity4lateteen", 80.0, 0, 100,
           "relative physical maturity of the late teen (0 -> 100)").addCategory(Category.LIFE_STAGE);
 
   // emotional maturity = for behaviour such as seeking out parents, danger aversion, etc
-  private static final DragonVariantTag EMOTIONALMATURITY_INFANT = DragonVariantTag.addTag("emotionalmaturityinfant", 0.0, 0, 100,
+  private static final DragonVariantTag EMOTIONALMATURITY_INFANT = DragonVariantTag.addTag("emotionalmaturity1infant", 0.0, 0, 100,
           "relative emotional maturity (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag EMOTIONALMATURITY_CHILD = DragonVariantTag.addTag("emotionalmaturitychild", 30.0, 0, 100,
+  private static final DragonVariantTag EMOTIONALMATURITY_CHILD = DragonVariantTag.addTag("emotionalmaturity2child", 30.0, 0, 100,
           "relative emotional maturity (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag EMOTIONALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("emotionalmaturityearlyteen", 30.0, 0, 100,
+  private static final DragonVariantTag EMOTIONALMATURITY_EARLY_TEEN = DragonVariantTag.addTag("emotionalmaturity3earlyteen", 30.0, 0, 100,
           "relative emotional maturity (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag EMOTIONALMATURITY_LATE_TEEN = DragonVariantTag.addTag("emotionalmaturitylateteen", 75.0, 0, 100,
+  private static final DragonVariantTag EMOTIONALMATURITY_LATE_TEEN = DragonVariantTag.addTag("emotionalmaturity4lateteen", 75.0, 0, 100,
           "relative emotional maturity of the late teen (0 -> 100)").addCategory(Category.LIFE_STAGE);
 
   // breathweapon maturity 0% - 100%
-  private static final DragonVariantTag BREATHMATURITY_HATCHLING = DragonVariantTag.addTag("breathmaturityhatchling", 0.0, 0, 100,
+  private static final DragonVariantTag BREATHMATURITY_HATCHLING = DragonVariantTag.addTag("breathmaturity0hatchling", 0.0, 0, 100,
           "relative breathweapon maturity (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag BREATHMATURITY_INFANT = DragonVariantTag.addTag("breathmaturityinfant", 0.0, 0, 100,
+  private static final DragonVariantTag BREATHMATURITY_INFANT = DragonVariantTag.addTag("breathmaturity1infant", 0.0, 0, 100,
           "relative breathweapon maturity (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag BREATHMATURITY_CHILD = DragonVariantTag.addTag("breathmaturitychild", 0.0, 0, 100,
+  private static final DragonVariantTag BREATHMATURITY_CHILD = DragonVariantTag.addTag("breathmaturity2child", 0.0, 0, 100,
           "relative breathweapon maturity (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag BREATHMATURITY_EARLY_TEEN = DragonVariantTag.addTag("breathmaturityearlyteen", 25.0, 0, 100,
+  private static final DragonVariantTag BREATHMATURITY_EARLY_TEEN = DragonVariantTag.addTag("breathmaturity3earlyteen", 25.0, 0, 100,
           "relative breathweapon maturity (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag BREATHMATURITY_LATE_TEEN = DragonVariantTag.addTag("breathmaturitylateteen", 75.0, 0, 100,
+  private static final DragonVariantTag BREATHMATURITY_LATE_TEEN = DragonVariantTag.addTag("breathmaturity4lateteen", 75.0, 0, 100,
           "relative breathweapon maturity of the late teen (0 -> 100)").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag BREATHMATURITY_ADULT = DragonVariantTag.addTag("breathmaturityadult", 100.0, 0, 100,
+  private static final DragonVariantTag BREATHMATURITY_ADULT = DragonVariantTag.addTag("breathmaturity5adult", 100.0, 0, 100,
           "relative breathweapon maturity of the adult (0 -> 100)").addCategory(Category.LIFE_STAGE);
 
   // attack damage multiplier 0% - 100% * ATTACKDAMAGEBASE
-  private static final DragonVariantTag ATTACKDAMAGEPERCENT_HATCHLING = DragonVariantTag.addTag("attackdamagepercenthatchling", 0.0, 0, 100,
+  private static final DragonVariantTag ATTACKDAMAGEPERCENT_HATCHLING = DragonVariantTag.addTag("attackdamagepercent0hatchling", 0.0, 0, 100,
           "hatchling's relative attack damage (0 -> 100). Is multipied by attackdamagebase / 100 to give actual damage").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ATTACKDAMAGEPERCENT_INFANT = DragonVariantTag.addTag("attackdamagepercentinfant", 0.0, 0, 100,
+  private static final DragonVariantTag ATTACKDAMAGEPERCENT_INFANT = DragonVariantTag.addTag("attackdamagepercent1infant", 0.0, 0, 100,
           "infant's relative attack damage (0 -> 100). Is multipied by attackdamagebase / 100 to give actual damage").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ATTACKDAMAGEPERCENT_CHILD = DragonVariantTag.addTag("attackdamagepercentchild", 10.0, 0, 100,
+  private static final DragonVariantTag ATTACKDAMAGEPERCENT_CHILD = DragonVariantTag.addTag("attackdamagepercent2child", 10.0, 0, 100,
           "child's relative attack damage (0 -> 100). Is multipied by attackdamagebase / 100 to give actual damage").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ATTACKDAMAGEPERCENT_EARLY_TEEN = DragonVariantTag.addTag("attackdamagepercentearlyteen", 40.0, 0, 100,
+  private static final DragonVariantTag ATTACKDAMAGEPERCENT_EARLY_TEEN = DragonVariantTag.addTag("attackdamagepercent3earlyteen", 40.0, 0, 100,
           "early teen's relative attack damage (0 -> 100). Is multipied by attackdamagebase / 100 to give actual damage").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ATTACKDAMAGEPERCENT_LATE_TEEN = DragonVariantTag.addTag("attackdamagepercentlateteen", 90.0, 0, 100,
+  private static final DragonVariantTag ATTACKDAMAGEPERCENT_LATE_TEEN = DragonVariantTag.addTag("attackdamagepercent4lateteen", 90.0, 0, 100,
           "late teen's relative attack damage (0 -> 100). Is multipied by attackdamagebase / 100 to give actual damage").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ATTACKDAMAGEPERCENT_ADULT = DragonVariantTag.addTag("attackdamagepercentadult", 100.0, 0, 100,
+  private static final DragonVariantTag ATTACKDAMAGEPERCENT_ADULT = DragonVariantTag.addTag("attackdamagepercent5adult", 100.0, 0, 100,
           "adult's relative attack damage (0 -> 100). Is multipied by attackdamagebase / 100 to give actual damage").addCategory(Category.LIFE_STAGE);
 
   // health multiplier 0% - 100% * HEALTHBASE
-  private static final DragonVariantTag HEALTHPERCENT_HATCHLING = DragonVariantTag.addTag("healthpercenthatchling", 1.0, 0, 100,
+  private static final DragonVariantTag HEALTHPERCENT_HATCHLING = DragonVariantTag.addTag("healthpercent0hatchling", 1.0, 0, 100,
           "hatchling's relative health (0 -> 100). Is multipied by healthbase / 100 to give actual health").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag HEALTHPERCENT_INFANT = DragonVariantTag.addTag("healthpercentinfant", 1.0, 0, 100,
+  private static final DragonVariantTag HEALTHPERCENT_INFANT = DragonVariantTag.addTag("healthpercent1infant", 1.0, 0, 100,
           "infant's relative health (0 -> 100). Is multipied by healthbase / 100 to give actual health").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag HEALTHPERCENT_CHILD = DragonVariantTag.addTag("healthpercentchild", 20.0, 0, 100,
+  private static final DragonVariantTag HEALTHPERCENT_CHILD = DragonVariantTag.addTag("healthpercent2child", 20.0, 0, 100,
           "child's relative health (0 -> 100). Is multipied by healthbase / 100 to give actual health").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag HEALTHPERCENT_EARLY_TEEN = DragonVariantTag.addTag("healthpercentearlyteen", 50.0, 0, 100,
+  private static final DragonVariantTag HEALTHPERCENT_EARLY_TEEN = DragonVariantTag.addTag("healthpercent3earlyteen", 50.0, 0, 100,
           "early teen's relative health (0 -> 100). Is multipied by healthbase / 100 to give actual health").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag HEALTHPERCENT_LATE_TEEN = DragonVariantTag.addTag("healthpercentlateteen", 75.0, 0, 100,
+  private static final DragonVariantTag HEALTHPERCENT_LATE_TEEN = DragonVariantTag.addTag("healthpercent4lateteen", 75.0, 0, 100,
           "late teen's relative health (0 -> 100). Is multipied by healthbase / 100 to give actual health").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag HEALTHPERCENT_ADULT = DragonVariantTag.addTag("healthpercentadult", 100.0, 0, 100,
+  private static final DragonVariantTag HEALTHPERCENT_ADULT = DragonVariantTag.addTag("healthpercent5adult", 100.0, 0, 100,
           "adult's relative health (0 -> 100). Is multipied by healthbase / 100 to give actual health").addCategory(Category.LIFE_STAGE);
 
   // armour multiplier 0% - 100% * ARMOURBASE
-  private static final DragonVariantTag ARMOURPERCENT_HATCHLING = DragonVariantTag.addTag("armorpercenthatchling", 0.0, 0, 100,
+  private static final DragonVariantTag ARMOURPERCENT_HATCHLING = DragonVariantTag.addTag("armorpercent0hatchling", 0.0, 0, 100,
           "hatchling's relative armour (0 -> 100). Is multipied by armorbase / 100 to give actual armor").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURPERCENT_INFANT = DragonVariantTag.addTag("armorpercentinfant", 0.0, 0, 100,
+  private static final DragonVariantTag ARMOURPERCENT_INFANT = DragonVariantTag.addTag("armorpercent1infant", 0.0, 0, 100,
           "infant's relative armour (0 -> 100). Is multipied by armorbase / 100 to give actual armor").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURPERCENT_CHILD = DragonVariantTag.addTag("armorpercentchild", 10.0, 0, 100,
+  private static final DragonVariantTag ARMOURPERCENT_CHILD = DragonVariantTag.addTag("armorpercent2child", 10.0, 0, 100,
           "child's relative armour (0 -> 100). Is multipied by armorbase / 100 to give actual armor").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURPERCENT_EARLY_TEEN = DragonVariantTag.addTag("armorpercentearlyteen", 20.0, 0, 100,
+  private static final DragonVariantTag ARMOURPERCENT_EARLY_TEEN = DragonVariantTag.addTag("armorpercent3earlyteen", 20.0, 0, 100,
           "early teen's relative armour (0 -> 100). Is multipied by armorbase / 100 to give actual armor").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURPERCENT_LATE_TEEN = DragonVariantTag.addTag("armorpercentlateteen", 40.0, 0, 100,
+  private static final DragonVariantTag ARMOURPERCENT_LATE_TEEN = DragonVariantTag.addTag("armorpercent4lateteen", 40.0, 0, 100,
           "late teen's relative armour (0 -> 100). Is multipied by armorbase / 100 to give actual armor").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURPERCENT_ADULT = DragonVariantTag.addTag("armorpercentadult", 100.0, 0, 100,
+  private static final DragonVariantTag ARMOURPERCENT_ADULT = DragonVariantTag.addTag("armorpercent5adult", 100.0, 0, 100,
           "adult's relative armour (0 -> 100). Is multipied by armorbase / 100 to give actual armor").addCategory(Category.LIFE_STAGE);
 
   // armour toughness multiplier 0% - 100% * ARMOURTOUGHNESSBASE
-  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_HATCHLING = DragonVariantTag.addTag("armortoughnesspercenthatchling", 0.0, 0, 100,
+  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_HATCHLING = DragonVariantTag.addTag("armortoughnesspercent0hatchling", 0.0, 0, 100,
           "hatchling's relative armour toughness (0 -> 100). Is multipied by armortoughnessbase / 100 to give actual toughness")
           .addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_INFANT = DragonVariantTag.addTag("armortoughnesspercentinfant", 0.0, 0, 100,
+  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_INFANT = DragonVariantTag.addTag("armortoughnesspercent1infant", 0.0, 0, 100,
           "infant's relative armour toughness (0 -> 100). Is multipied by armortoughnessbase / 100 to give actual toughness").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_CHILD = DragonVariantTag.addTag("armortoughnesspercentchild", 0.0, 0, 100,
+  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_CHILD = DragonVariantTag.addTag("armortoughnesspercent2child", 0.0, 0, 100,
           "child's relative armour toughness (0 -> 100). Is multipied by armortoughnessbase / 100 to give actual toughness").addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_EARLY_TEEN = DragonVariantTag.addTag("armortoughnesspercentearlyteen", 0.0, 0, 100,
+  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_EARLY_TEEN = DragonVariantTag.addTag("armortoughnesspercent3earlyteen", 0.0, 0, 100,
           "early teen's relative armour toughness (0 -> 100). Is multipied by armortoughnessbase / 100 to give actual toughness")
           .addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_LATE_TEEN = DragonVariantTag.addTag("armortoughnesspercentlateteen", 20.0, 0, 100,
+  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_LATE_TEEN = DragonVariantTag.addTag("armortoughnesspercent4lateteen", 20.0, 0, 100,
           "late teen's relative armour toughness (0 -> 100). Is multipied by armortoughnessbase / 100 to give actual toughness")
           .addCategory(Category.LIFE_STAGE);
-  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_ADULT = DragonVariantTag.addTag("armortoughnesspercentadult", 100.0, 0, 100,
+  private static final DragonVariantTag ARMOURTOUGHNESSPERCENT_ADULT = DragonVariantTag.addTag("armortoughnesspercent5adult", 100.0, 0, 100,
           "adult's relative armour toughness (0 -> 100). Is multipied by armortoughnessbase / 100 to give actual toughness").addCategory(Category.LIFE_STAGE);
 
   private static final double ATTACKDAMAGE_MIN = 0.0;

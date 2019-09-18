@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 
 import java.util.*;
 
@@ -212,8 +213,8 @@ public class DragonVariants {
     return breedInternalName;
   }
 
-  public ImmutableMap<DragonVariantTag, Object> getAllAppliedTagsForCategory(Category category) {
-    return ImmutableMap.copyOf(allAppliedTags.get(category.getIdx()));
+  public ImmutableSortedMap<DragonVariantTag, Object> getAllAppliedTagsForCategory(Category category) {
+    return ImmutableSortedMap.copyOf(allAppliedTags.get(category.getIdx()));
   }
 
   private ArrayList<HashMap<DragonVariantTag, Object>> allAppliedTags;

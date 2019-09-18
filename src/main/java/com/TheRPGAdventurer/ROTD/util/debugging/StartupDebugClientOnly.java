@@ -38,11 +38,8 @@ public class StartupDebugClientOnly {
   }
 
   public static void testDragonVariantsReader() {
-//    String testfiles[] = {"testdata/test1.json", "testdata/test2.json", "testdata/test3.json", "testdata/test4.json",
-//            "testdata/test5.json", "testdata/test6.json", "testdata/test7.json", "testdata/test8.json"};
     final String TEST_FOLDER = "testdata/testdvr1";
 
-//    for (String filename : testfiles) {
     DragonMounts.logger.info("DragonVariantsReader Test1" + TEST_FOLDER);
     DragonVariantsReader dragonVariantsReader = new DragonVariantsReader(
             Minecraft.getMinecraft().getResourceManager(), TEST_FOLDER);
@@ -52,7 +49,11 @@ public class StartupDebugClientOnly {
       String json = DragonVariantsReader.outputAsJSON(dragonVariants, true);
       System.out.print(json);
     }
-//    }
+
+    String json = DragonVariantsReader.outputAllTagsAsJSON(true);
+    System.out.print(json);
+    json = DragonVariantsReader.outputAllTagsAsJSON(false);
+    System.out.print(json);
   }
 
   public static void testDragonLifeStageHelperTags() {

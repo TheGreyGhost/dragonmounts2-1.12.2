@@ -39,7 +39,7 @@ import com.google.common.collect.ImmutableSet;
  *     convertValue() to convert a tag value to the format expected by the tag
  *     getDefaultValue() - for use if the tag doesn't exist in the config file
  */
-public class DragonVariantTag {
+public class DragonVariantTag implements Comparable<DragonVariantTag> {
 
   /*
   NUMBER_OF_NECK_SEGMENTS("numberofnecksegments", 7, 4, 12),
@@ -209,4 +209,9 @@ public class DragonVariantTag {
   private final String comment; // a comment for the config file
 
   private ArrayList<Category> expectedCategories = new ArrayList<>(); // which categories do we expect to find this tag in?
+
+  @Override
+  public int compareTo(DragonVariantTag other) {
+    return this.textname.compareTo(other.textname);
+  }
 }

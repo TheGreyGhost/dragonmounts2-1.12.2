@@ -6,6 +6,7 @@ import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.Minify;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.io.CharStreams;
 import com.google.gson.*;
 import net.minecraft.client.resources.IResource;
@@ -133,73 +134,84 @@ public class DragonVariantsReader {
    * @return the JSON output
    */
   public static String outputAsJSON(DragonVariants dragonVariants, boolean includeComments) {
-    Map<DragonVariants.Category, ImmutableMap<DragonVariantTag, Object>> allTags = new HashMap<>();
+    SortedMap<DragonVariants.Category, ImmutableSortedMap<DragonVariantTag, Object>> allTags = new TreeMap<>();
     for (DragonVariants.Category category : DragonVariants.Category.values()) {
       allTags.put(category, dragonVariants.getAllAppliedTagsForCategory(category));
     }
 
     StringBuilder json = new StringBuilder();
-    json.append("{\"");
+    json.append("{\n  \"");
     json.append(BREED_INTERNAL_NAME_JSON);
     json.append("\": \"");
       json.append(dragonVariants.getBreedInternalName());
       json.append("\",\n");
-    boolean isFirst = true;
-    for (Map.Entry<DragonVariants.Category, ImmutableMap<DragonVariantTag, Object>> entry : allTags.entrySet() ) {
+
+    int nonEmptyCategoryCount = 0;
+    for (SortedMap.Entry<DragonVariants.Category, ImmutableSortedMap<DragonVariantTag, Object>> entry : allTags.entrySet() ) {
       if (!entry.getValue().isEmpty()) {
-        if (!isFirst) {
-          json.append(",\n");
-        }
-        isFirst = false;
-        outputCategoryAsJSON(json, entry.getKey(), entry.getValue(), includeComments);
+        ++nonEmptyCategoryCount;
       }
     }
 
-    json.append("\n}");
+    int line = 0;
+    for (SortedMap.Entry<DragonVariants.Category, ImmutableSortedMap<DragonVariantTag, Object>> entry : allTags.entrySet() ) {
+      if (!entry.getValue().isEmpty()) {
+        boolean lastCategory = (++line) == nonEmptyCategoryCount;
+        outputCategoryAsJSON(json, entry.getKey(), entry.getValue(), lastCategory, includeComments);
+      }
+    }
+
+    json.append("}\n");
     return json.toString();
   }
 
   private static void outputCategoryAsJSON(StringBuilder json,
-                                           DragonVariants.Category category,  ImmutableMap<DragonVariantTag, Object> tags, boolean includeComments) {
-    json.append("\"");
-      json.append(category.getTextName());
+                                           DragonVariants.Category category,  ImmutableMap<DragonVariantTag, Object> tags,
+                                           boolean lastCategory,
+                                           boolean includeComments) {
+    json.append("  \"");
+    json.append(category.getTextName());
     json.append("\": {\n");
-    if (includeComments) {
-      json.append("\\* ");
-      json.append(category.getComment());
-      json.append(" *\\");
+    if (includeComments && category.getComment().length() > 0) {
+      addComment(json, category.getComment(), "    // ", "    // ");
+      json.append("\n");
     }
-    boolean isFirst = true;
+
+    int flagCount = 0;
+    int nonFlagLineCount = 0;
     for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
-      if (!(entry.getValue() instanceof Boolean)) { // save the flags for later
-        if (!isFirst) {
-          json.append(",\n");
-        }
-        isFirst = false;
-        outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), includeComments);
+      if (entry.getValue() instanceof Boolean) {
+        ++flagCount;
+      } else {
+        ++nonFlagLineCount;
       }
     }
-    boolean atLeastOneFlag = false;
+
+    int line = 0;
+    for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
+      if (!(entry.getValue() instanceof Boolean)) { // save the flags for later
+        boolean lastLine = (++line) == nonFlagLineCount;
+        outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), lastLine, includeComments);
+      }
+    }
+
+    line = 0;
     for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
       if ((entry.getValue() instanceof Boolean)) { // save the flags for later
-        if (!isFirst) {
-          json.append(",\n");
-        }
-        isFirst = false;
-        if (!atLeastOneFlag) {
-          atLeastOneFlag = true;
-          json.append("\"");
+        boolean lastLine = (++line) == flagCount;
+        if (line == 1) {
+          json.append("    \"");
           json.append(FLAGS_JSON);
           json.append("\": [\n");
         }
-        outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), includeComments);
+        outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), lastLine, includeComments);
       }
     }
-    json.append("\n");
-    if (atLeastOneFlag) {
-      json.append("]\n");
+    if (flagCount > 0) {
+      json.append("    ]\n");
     }
-    json.append("}");
+    json.append("  }");
+    json.append(lastCategory ? "\n" : ",\n");
   }
 
   /**
@@ -220,8 +232,11 @@ public class DragonVariantsReader {
   /** write the tag suitable for json reader
    * @param json
    */
-  public static void outputSingleTagAsJSON(StringBuilder json, DragonVariantTag tag, Object value, boolean includeComments) {
-    json.append("\"");
+  public static void outputSingleTagAsJSON(StringBuilder json, DragonVariantTag tag, Object value, boolean lastLine, boolean includeComments) {
+    if (value instanceof Boolean) {
+      json.append("  ");
+    }
+    json.append("    \"");
     json.append(tag.getTextname());
     json.append("\"");
     if (value instanceof Boolean) {
@@ -235,10 +250,29 @@ public class DragonVariantsReader {
     } else {
       throw new IllegalArgumentException("Unexpected object type");
     }
+    if (!lastLine) {
+      json.append(",");
+    }
     if (includeComments) {
-      json.append("/* ");
-      json.append(tag.getComment());
-      json.append(" */");
+      addComment(json, tag.getComment(), "   // ", "      // ");
+    }
+    json.append("\n");
+  }
+
+  /**
+   * Add the comment to the string; use // marks.
+   * Splits at each newline
+   * Adds linePrefix before the //  - allows for indentation
+   * @param stringBuilder
+   * @param comment
+   */
+  private static void addComment(StringBuilder stringBuilder, String comment, String firstlinePrefix, String subsequentLinesPrefix) {
+    String[] strParts = comment.split("\\r?\\n|\\r");
+    boolean firstLine = true;
+    for (String line : strParts) {
+      stringBuilder.append(firstLine ? firstlinePrefix : ("\n" + subsequentLinesPrefix));
+      stringBuilder.append(line);
+      firstLine = false;
     }
   }
 
