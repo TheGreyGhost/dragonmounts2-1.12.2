@@ -143,76 +143,59 @@ public class DragonBreedHelper extends DragonHelper {
     // update breed name
     entityDataManager.set(dataParam, newType.getName());
 
-    // reset breed points
-    if (dragon.isEgg()) {
-      breedPoints.values().forEach(points -> points.set(0));
-      breedPoints.get(newType).set(POINTS_INITIAL);
-    }
+//    // reset breed points
+//    if (dragon.isEgg()) {
+//      breedPoints.values().forEach(points -> points.set(0));
+//      breedPoints.get(newType).set(POINTS_INITIAL);
+//    }
   }
 
   @Override
   public void onLivingUpdate() {
     EnumDragonBreed currentType = getBreedType();
 
-    if (dragon.isEgg()) {
-      // spawn breed-specific particles every other tick
-      if (dragon.isClient() && dragon.ticksExisted % TICK_RATE_PARTICLES == 0) {
-        if (true) { //todo currentType != EnumDragonBreed.END) {
-          double px = dragon.posX + (rand.nextDouble() - 0.5);
-          double py = dragon.posY + (rand.nextDouble() - 0.5);
-          double pz = dragon.posZ + (rand.nextDouble() - 0.5);
-          DragonBreed current = currentType.getBreed();
-          dragon.world.spawnParticle(EnumParticleTypes.REDSTONE, px, py + 1, pz,
-                  current.getColorR(), current.getColorG(), current.getColorB());
+    // update egg breed every second on the server
+    if (dragon.getBreed().canChangeBreed() && dragon.isServer() && dragon.ticksExisted % TICK_RATE_BLOCK == 0) {
+      BlockPos eggPos = dragon.getPosition();
+
+      // scan surrounding for breed-loving blocks
+      BlockPos eggPosFrom = eggPos.add(BLOCK_RANGE, BLOCK_RANGE, BLOCK_RANGE);
+      BlockPos eggPosTo = eggPos.add(-BLOCK_RANGE, -BLOCK_RANGE, -BLOCK_RANGE);
+
+      BlockPos.getAllInBoxMutable(eggPosFrom, eggPosTo).forEach(blockPos -> {
+        Block block = dragon.world.getBlockState(blockPos).getBlock();
+        breedPoints.entrySet().stream()
+                .filter(breed -> (breed.getKey().getBreed().isHabitatBlock(block)))
+                .forEach(breed -> breed.getValue().addAndGet(POINTS_BLOCK));
+      });
+
+      // check biome
+      Biome biome = dragon.world.getBiome(eggPos);
+
+      breedPoints.keySet().forEach(breed -> {
+        // check for biomes
+        if (breed.getBreed().isHabitatBiome(biome)) {
+          breedPoints.get(breed).addAndGet(POINTS_BIOME);
         }
-      }
 
-      // update egg breed every second on the server
-      if (dragon.getBreed().canChangeBreed() && dragon.isServer() && dragon.ticksExisted % TICK_RATE_BLOCK == 0) {
-        BlockPos eggPos = dragon.getPosition();
-
-        // scan surrounding for breed-loving blocks
-        BlockPos eggPosFrom = eggPos.add(BLOCK_RANGE, BLOCK_RANGE, BLOCK_RANGE);
-        BlockPos eggPosTo = eggPos.add(-BLOCK_RANGE, -BLOCK_RANGE, -BLOCK_RANGE);
-
-        BlockPos.getAllInBoxMutable(eggPosFrom, eggPosTo).forEach(blockPos -> {
-          Block block = dragon.world.getBlockState(blockPos).getBlock();
-          breedPoints.entrySet().stream()
-                  .filter(breed -> (breed.getKey().getBreed().isHabitatBlock(block)))
-                  .forEach(breed -> breed.getValue().addAndGet(POINTS_BLOCK));
-        });
-
-        // check biome
-        Biome biome = dragon.world.getBiome(eggPos);
-
-        breedPoints.keySet().forEach(breed -> {
-          // check for biomes
-          if (breed.getBreed().isHabitatBiome(biome)) {
-            breedPoints.get(breed).addAndGet(POINTS_BIOME);
-          }
-
-          // extra points for good environments
-          if (breed.getBreed().isHabitatEnvironment(dragon)) {
-            breedPoints.get(breed).addAndGet(POINTS_ENV);
-          }
-        });
-
-        // update most dominant breed
-        EnumDragonBreed newType = breedPoints.entrySet().stream()
-                .max((breed1, breed2) -> Integer.compare(
-                        breed1.getValue().get(),
-                        breed2.getValue().get()))
-                .get().getKey();
-
-        if (newType != currentType) {
-          setBreedType(newType);
-
+        // extra points for good environments
+        if (breed.getBreed().isHabitatEnvironment(dragon)) {
+          breedPoints.get(breed).addAndGet(POINTS_ENV);
         }
+      });
+
+      // update most dominant breed
+      EnumDragonBreed newType = breedPoints.entrySet().stream()
+              .max((breed1, breed2) -> Integer.compare(
+                      breed1.getValue().get(),
+                      breed2.getValue().get()))
+              .get().getKey();
+
+      if (newType != currentType) {
+        setBreedType(newType);
+
       }
     }
-
-    currentType.getBreed().onUpdate(dragon);
-    getBreedHealth();
   }
 
   @Override

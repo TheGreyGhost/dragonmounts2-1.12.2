@@ -1,7 +1,5 @@
 package com.TheRPGAdventurer.ROTD.common.entity.breeds;
 
-import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.common.blocks.BlockDragonBreedEgg;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import net.minecraft.block.properties.PropertyEnum;
@@ -81,31 +79,31 @@ public enum EnumDragonBreed implements IStringSerializable {
     return EnumDragonBreed.META_MAPPING.get(type);
   }
 
-  public static IBlockState getBlockstateFromMeta(BlockDragonBreedEgg blockDragonBreedEgg, int metaValue) {
-    EnumDragonBreed breed = FIRE;  // default if unknown breed
-    if (META_MAPPING.containsValue(metaValue)) {
-      breed = EnumDragonBreed.META_MAPPING.inverse().get(metaValue);
-    } else {
-      DragonMounts.loggerLimit.error_once("Invalid meta given to EnumDragonBreed::getBlockstateFromMeta=" + metaValue);
-    }
-
-    return blockDragonBreedEgg.getDefaultState().withProperty(BREED, breed);
-  }
+//  public static IBlockState getBlockstateFromMeta(BlockDragonBreedEgg blockDragonBreedEgg, int metaValue) {
+//    EnumDragonBreed breed = FIRE;  // default if unknown breed
+//    if (META_MAPPING.containsValue(metaValue)) {
+//      breed = EnumDragonBreed.META_MAPPING.inverse().get(metaValue);
+//    } else {
+//      DragonMounts.loggerLimit.error_once("Invalid meta given to EnumDragonBreed::getBlockstateFromMeta=" + metaValue);
+//    }
+//
+//    return blockDragonBreedEgg.getDefaultState().withProperty(BREED, breed);
+//  }
 
   public DragonBreed getBreed() {
     return breed;
   }
 
-  // generate an ItemStack egg for this breed
-  public ItemStack createEggItemStack() {
-    final int AMOUNT = 1;
-    return new ItemStack(BlockDragonBreedEgg.DRAGON_BREED_EGG, AMOUNT, meta);
-  }
-
-  // generate an IBlockState for this breed
-  public IBlockState getBlockState() {
-    return getBlockstateFromMeta(BlockDragonBreedEgg.DRAGON_BREED_EGG, meta);
-  }
+//  // generate an ItemStack egg for this breed
+//  public ItemStack createEggItemStack() {
+//    final int AMOUNT = 1;
+//    return new ItemStack(BlockDragonBreedEgg.DRAGON_BREED_EGG, AMOUNT, meta);
+//  }
+//
+//  // generate an IBlockState for this breed
+//  public IBlockState getBlockState() {
+//    return getBlockstateFromMeta(BlockDragonBreedEgg.DRAGON_BREED_EGG, meta);
+//  }
 
   @Override
   public String getName() {

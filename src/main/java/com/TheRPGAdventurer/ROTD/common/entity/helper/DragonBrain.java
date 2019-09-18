@@ -67,10 +67,6 @@ public class DragonBrain extends DragonHelper {
     // clear existing tasks
     //     clearTasks();
 
-    // eggs don't have any tasks
-    if (dragon.isEgg()) {
-      return;
-    }
     //--------------------------------------------------------
     // mutex 1: movement
     // mutex 2: looking

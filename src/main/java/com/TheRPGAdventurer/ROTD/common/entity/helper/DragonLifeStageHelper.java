@@ -334,31 +334,6 @@ public class DragonLifeStageHelper extends DragonHelper {
     return maximumSizeAtAnyAge;
   }
 
-  /**
-   * Transforms the dragon to an egg (item form)
-   */
-  public void transformToEgg() {
-    if (dragon.getHealth() <= 0) {
-      // no can do
-      return;
-    }
-
-    L.debug("transforming to egg");
-
-    float volume = 3;
-    float pitch = 1;
-    dragon.playSound(SoundEvents.ENTITY_ENDERMEN_TELEPORT, volume, pitch);
-
-    if (dragon.isSaddled()) {
-      dragon.dropItem(Items.SADDLE, 1);
-    }
-
-    final float OFFSET_POSITION = 0.0F;
-    dragon.entityDropItem(dragon.getBreedType().createEggItemStack(), OFFSET_POSITION);
-
-    dragon.setDead();
-  }
-
   @Override
   public void onLivingUpdate() {
     // if the dragon is not an adult pr paused, update its growth ticks

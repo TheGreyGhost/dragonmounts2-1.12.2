@@ -27,9 +27,9 @@ import java.io.UncheckedIOException;
 public class CommandDragonDebug extends CommandBaseNested implements IDragonModifier {
 
   public CommandDragonDebug() {
-    addCommand(new CommandDragonLambda("toItem", dragon -> {
-      dragon.getLifeStageHelper().transformToEgg();
-    }));
+//    addCommand(new CommandDragonLambda("toItem", dragon -> {
+//      dragon.getLifeStageHelper().transformToEgg();
+//    }));
 
     addCommand(new CommandDragonLambda("dumpNBT", dragon -> {
       File dumpFile = new File(Minecraft.getMinecraft().mcDataDir,

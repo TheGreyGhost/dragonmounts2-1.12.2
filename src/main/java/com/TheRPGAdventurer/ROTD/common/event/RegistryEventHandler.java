@@ -2,20 +2,14 @@ package com.TheRPGAdventurer.ROTD.common.event;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
-import com.TheRPGAdventurer.ROTD.common.blocks.BlockDragonBreedEgg;
-import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.inits.ModBlocks;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
-import com.TheRPGAdventurer.ROTD.common.items.ItemDragonHatchableEgg;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.IHasModel;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -52,26 +46,6 @@ public class RegistryEventHandler {
         ((IHasModel) item).RegisterModels();
       }
     }
-
-//    for (Item itemegg : ItemDragonHatchableEgg.ITEM_EGG) {
-//      // register item renderer for dragon egg block variants
-//      ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
-//      Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
-//      EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
-//        ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
-//        ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
-//      });
-//    }
-
-//    for (Block blockegg : BlockDragonBreedEgg.BLOCK_EGG) {
-//      // register item renderer for dragon egg block variants
-//      ResourceLocation eggModelItemLoc = new ResourceLocation(DragonMounts.MODID, "dragon_egg");
-//      Item itemBlockDragonEgg = Item.REGISTRY.getObject(eggModelItemLoc);
-//      EnumDragonBreed.getAllBreedMetas().forEach((breed, meta) -> {
-//        ModelResourceLocation eggModelLoc = new ModelResourceLocation(DragonMounts.MODID + ":dragon_egg", "breed=" + breed.getName());
-//        ModelLoader.setCustomModelResourceLocation(itemBlockDragonEgg, meta, eggModelLoc);
-//      });
-//    }
 
     DMUtils.getLogger().info("Models Sucessfully Registered");
   }

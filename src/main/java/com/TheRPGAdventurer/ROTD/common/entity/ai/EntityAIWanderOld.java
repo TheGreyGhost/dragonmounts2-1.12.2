@@ -16,18 +16,15 @@ public class EntityAIWanderOld extends EntityAIDragonBase {
    */
   @Override
   public boolean shouldExecute() {
-    if (this.dragon.isEgg()) return false;
-    else if (this.dragon.getRNG().nextInt(120) != 0) return false;
-    else {
-      Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.dragon, 10, 7);
+    if (this.dragon.getRNG().nextInt(120) != 0) return false;
+    Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.dragon, 10, 7);
 
-      if (vec3d == null) return false;
-      else {
-        this.xPosition = vec3d.x;
-        this.yPosition = vec3d.y;
-        this.zPosition = vec3d.z;
-        return true;
-      }
+    if (vec3d == null) return false;
+    else {
+      this.xPosition = vec3d.x;
+      this.yPosition = vec3d.y;
+      this.zPosition = vec3d.z;
+      return true;
     }
   }
 

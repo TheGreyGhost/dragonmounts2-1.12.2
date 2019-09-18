@@ -161,9 +161,7 @@ public class DragonAnimator {
    * Updates the animation state. Called on every tick.
    */
   public void tickingUpdate() {
-    if (!dragon.isEgg()) {
-      setOnGround(!dragon.isFlying());
-    }
+    setOnGround(!dragon.isFlying());
 
     if (DebugSettings.isAnimationFrozen()) {
       return;

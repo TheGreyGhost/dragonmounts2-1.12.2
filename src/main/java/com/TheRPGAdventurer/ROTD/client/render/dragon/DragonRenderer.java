@@ -12,26 +12,18 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModelMode;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DefaultDragonBreedRenderer;
-import com.TheRPGAdventurer.ROTD.common.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBanner;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
@@ -162,11 +154,7 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
     mainModel = breedModel;
     renderName(dragon, x, y, z);
 
-    if (dragon.isEgg()) {
-      renderEgg(dragon, x, y, z, yaw, partialTicks);
-    } else {
-      super.doRender(dragon, x, y, z, yaw, partialTicks);
-    }
+    super.doRender(dragon, x, y, z, yaw, partialTicks);
   }
 
   public void renderBanner(ResourceLocation resourceLocation, ModelBanner bannerModel) {
@@ -221,64 +209,64 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
     }
   }
 
-  protected void renderEgg(EntityTameableDragon dragon, double x, double y, double z, float pitch, float partialTicks) {
-    // apply egg wiggle
-    DragonLifeStageHelper lifeStage = dragon.getLifeStageHelper();
-    float tickX = lifeStage.getEggWiggleX();
-    float tickZ = lifeStage.getEggWiggleZ();
-
-    float rotX = 0;
-    float rotZ = 0;
-
-    if (tickX > 0) {
-      rotX = (float) Math.sin(tickX - partialTicks) * 8;
-    }
-    if (tickZ > 0) {
-      rotZ = (float) Math.sin(tickZ - partialTicks) * 8;
-    }
-        
-/*		// Aether Egg Levitate
-        float l = (float) (0.1 * Math.cos(dragon.ticksExisted / (Math.PI * 6.89)) + 0.307);
-        boolean lev = false;
-        if (dragon.getBreedType() == EnumDragonBreed.AETHER) lev = true;
-*/
-
-    // prepare GL states
-    GlStateManager.pushMatrix();
-    GlStateManager.translate(x, y /*+ (lev ? l : 0)*/, z);
-    GlStateManager.rotate(rotX, 1, 0, 0);
-    GlStateManager.rotate(rotZ, 0, 0, 1);
-    GlStateManager.disableLighting();
-
-    bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
-    // prepare egg rendering
-    Tessellator tessellator = Tessellator.getInstance();
-    BufferBuilder vb = tessellator.getBuffer();
-    vb.begin(GL_QUADS, DefaultVertexFormats.BLOCK);
-
-    Block block = BlockDragonBreedEgg.DRAGON_BREED_EGG;
-    IBlockState iblockstate = block.getDefaultState().withProperty(BlockDragonBreedEgg.BREED, dragon.getBreedType());
-    BlockPos blockpos = dragon.getPosition();
-
-    double tx = -blockpos.getX() - 0.5;
-    double ty = -blockpos.getY();
-    double tz = -blockpos.getZ() - 0.5;
-    vb.setTranslation(tx, ty, tz);
-
-    BlockRendererDispatcher brd = Minecraft.getMinecraft().getBlockRendererDispatcher();
-    IBakedModel bakedModel = brd.getModelForState(iblockstate);
-
-    // render egg
-    brd.getBlockModelRenderer().renderModel(dragon.world, bakedModel, iblockstate, blockpos, vb, false);
-    vb.setTranslation(0, 0, 0);
-
-    tessellator.draw();
-
-    // restore GL state
-    GlStateManager.enableLighting();
-    GlStateManager.popMatrix();
-  }
+//  protected void renderEgg(EntityTameableDragon dragon, double x, double y, double z, float pitch, float partialTicks) {
+//    // apply egg wiggle
+//    DragonLifeStageHelper lifeStage = dragon.getLifeStageHelper();
+//    float tickX = lifeStage.getEggWiggleX();
+//    float tickZ = lifeStage.getEggWiggleZ();
+//
+//    float rotX = 0;
+//    float rotZ = 0;
+//
+//    if (tickX > 0) {
+//      rotX = (float) Math.sin(tickX - partialTicks) * 8;
+//    }
+//    if (tickZ > 0) {
+//      rotZ = (float) Math.sin(tickZ - partialTicks) * 8;
+//    }
+//
+///*		// Aether Egg Levitate
+//        float l = (float) (0.1 * Math.cos(dragon.ticksExisted / (Math.PI * 6.89)) + 0.307);
+//        boolean lev = false;
+//        if (dragon.getBreedType() == EnumDragonBreed.AETHER) lev = true;
+//*/
+//
+//    // prepare GL states
+//    GlStateManager.pushMatrix();
+//    GlStateManager.translate(x, y /*+ (lev ? l : 0)*/, z);
+//    GlStateManager.rotate(rotX, 1, 0, 0);
+//    GlStateManager.rotate(rotZ, 0, 0, 1);
+//    GlStateManager.disableLighting();
+//
+//    bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+//
+//    // prepare egg rendering
+//    Tessellator tessellator = Tessellator.getInstance();
+//    BufferBuilder vb = tessellator.getBuffer();
+//    vb.begin(GL_QUADS, DefaultVertexFormats.BLOCK);
+//
+//    Block block = BlockDragonBreedEgg.DRAGON_BREED_EGG;
+//    IBlockState iblockstate = block.getDefaultState().withProperty(BlockDragonBreedEgg.BREED, dragon.getBreedType());
+//    BlockPos blockpos = dragon.getPosition();
+//
+//    double tx = -blockpos.getX() - 0.5;
+//    double ty = -blockpos.getY();
+//    double tz = -blockpos.getZ() - 0.5;
+//    vb.setTranslation(tx, ty, tz);
+//
+//    BlockRendererDispatcher brd = Minecraft.getMinecraft().getBlockRendererDispatcher();
+//    IBakedModel bakedModel = brd.getModelForState(iblockstate);
+//
+//    // render egg
+//    brd.getBlockModelRenderer().renderModel(dragon.world, bakedModel, iblockstate, blockpos, vb, false);
+//    vb.setTranslation(0, 0, 0);
+//
+//    tessellator.draw();
+//
+//    // restore GL state
+//    GlStateManager.enableLighting();
+//    GlStateManager.popMatrix();
+//  }
 
   @Override
   protected void applyRotations(EntityTameableDragon dragon, float par2, float par3, float par4) {

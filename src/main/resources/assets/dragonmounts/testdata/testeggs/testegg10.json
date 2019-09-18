@@ -1,0 +1,8 @@
+// speed-based particles instead of colour
+{
+  "breedinternalname": "testegg10",
+  "egg": {
+    "particlesspawntype": "speed",
+    "particlesname": "flame"
+  }
+}

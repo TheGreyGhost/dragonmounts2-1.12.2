@@ -60,6 +60,8 @@ Egg can have a few different states-
 Incubating, hatched, smashed.
 Hatched or smashed - eventually disappears similar to an item
 
+18-9-2019 egg is done
+next: refactor dragon back to a base, starting with the entity and then the model
 
 
 

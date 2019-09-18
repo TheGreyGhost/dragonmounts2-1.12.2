@@ -39,18 +39,8 @@ public class DragonInteract extends DragonInteractBase {
 
   @Override
   public boolean interact(EntityPlayer player, ItemStack item) {
-    if (dragon.isServer() && !dragon.isEgg()) {
+    if (dragon.isServer()) {
       if (isAllowed(player)) {
-
-                /*
-                 * Turning it to block
-                 */
-        if (dragon.isEgg() && player.isSneaking()) {
-          dragon.world.playSound(player, dragon.getPosition(), SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, SoundCategory.PLAYERS, 1, 1);
-          dragon.world.setBlockState(dragon.getPosition(), dragon.getBreedType().getBlockState());
-          dragon.setDead();
-        }
-
                 /*
                  * Riding
                  */

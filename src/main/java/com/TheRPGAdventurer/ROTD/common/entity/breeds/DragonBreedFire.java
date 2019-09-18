@@ -122,7 +122,7 @@ public class DragonBreedFire extends DragonBreed {
   }
 
   private void doParticles(EntityTameableDragon dragon) {
-    if (!dragon.isEgg() && !dragon.isBaby()) {
+    if (!dragon.isBaby()) {
       float s = dragon.getAgeScale() * 1.2f;
       for (double x1 = 0; x1 < s + 1; ++x1) {
         double x = dragon.posX + (rand.nextDouble() - 0.5) * (dragon.width - 0.65) * s;

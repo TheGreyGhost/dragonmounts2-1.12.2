@@ -2,7 +2,6 @@
 {
   "breedinternalname": "testegg8",
   "egg": {
-    "particlesname": "happyVillager",
     "size": 2.0,
     "spinspeed": 1.0,
     "spinstarttime": 0.5,

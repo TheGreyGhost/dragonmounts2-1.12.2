@@ -437,7 +437,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   public boolean canFly() {
     // eggs can't fly
-    return !isEgg() && !isBaby();
+    return !isBaby();
   }
 
   public boolean isGrowthPaused() {
@@ -682,7 +682,7 @@ public class EntityTameableDragon extends EntityTameable {
     if (DebugSettings.isAnimationFrozen()) {
       return;
     }
-    if (getRNG().nextInt(800) == 1 && !isEgg()) roar();
+    if (getRNG().nextInt(800) == 1) roar();
     super.onEntityUpdate();
   }
 
@@ -837,7 +837,7 @@ public class EntityTameableDragon extends EntityTameable {
     }
 
     Random rand = new Random();
-    if (this.getBreed().getSneezeParticle() != null && rand.nextInt(750) == 1 && !this.isUsingBreathWeapon() && !isBaby() && !isEgg()) {
+    if (this.getBreed().getSneezeParticle() != null && rand.nextInt(750) == 1 && !this.isUsingBreathWeapon() && !isBaby()) {
       double throatPosX = (this.getAnimator().getThroatPosition().x);
       double throatPosY = (this.getAnimator().getThroatPosition().z);
       double throatPosZ = (this.getAnimator().getThroatPosition().y + 1.7);
@@ -899,7 +899,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   public void onDeath(DamageSource src) {
     super.onDeath(src);
-    if (dragonInv != null && !this.world.isRemote && !isEgg() && !isTamed()) {
+    if (dragonInv != null && !this.world.isRemote && !isTamed()) {
       for (int i = 0; i < dragonInv.getSizeInventory(); ++i) {
         ItemStack itemstack = dragonInv.getStackInSlot(i);
         if (!itemstack.isEmpty()) {
@@ -1016,7 +1016,7 @@ public class EntityTameableDragon extends EntityTameable {
    * Returns the sound this mob makes while it's alive.
    */
   public SoundEvent getLivingSound() {
-    if (isEgg() || isUsingBreathWeapon()) return null;
+    if (isUsingBreathWeapon()) return null;
     else return getBreed().getLivingSound(this);
   }
 
@@ -1025,8 +1025,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public SoundEvent getHurtSound(DamageSource src) {
-    if (isEgg()) return ModSounds.DRAGON_HATCHING;
-    else return getBreed().getHurtSound();
+    return getBreed().getHurtSound();
   }
 
   public SoundEvent getWingsSound() {
@@ -1050,7 +1049,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   public void playLivingSound() {
     SoundEvent sound = getLivingSound();
-    if (sound == null && !isEgg() && isUsingBreathWeapon()) {
+    if (sound == null || isUsingBreathWeapon()) {
       return;
     }
 
@@ -1082,8 +1081,8 @@ public class EntityTameableDragon extends EntityTameable {
    * Plays step sound at given x, y, z for the entity
    */
   public void playStepSound(BlockPos entityPos, Block block) {
-    // no sounds for eggs or underwater action
-    if (isEgg() || isInWater() || isOverWater()) return;
+    // no sounds for  underwater action
+    if (isInWater() || isOverWater()) return;
 
     if (isFlying() || isSitting()) return;
 
@@ -1140,14 +1139,6 @@ public class EntityTameableDragon extends EntityTameable {
   @Override
   public boolean processInteract(EntityPlayer player, EnumHand hand) {
     ItemStack item = player.getHeldItem(hand);
-        /*
-         * Turning it to block
-         */
-    if (isEgg() && player.isSneaking()) {
-      world.playSound(player, getPosition(), SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, SoundCategory.PLAYERS, 1, 1);
-      world.setBlockState(getPosition(), getBreedType().getBlockState());
-      setDead();
-    }
 
     ItemStack itemstack = player.getHeldItem(hand);
 
@@ -1212,12 +1203,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public float getEyeHeight() {
-    float eyeHeight;
-    if (isEgg()) {
-      eyeHeight = 1.3f;
-    } else {
-      eyeHeight = dragonPhysicalModel.getEyeHeightWC(getAgeScale(), isSitting());
-    }
+    float eyeHeight = dragonPhysicalModel.getEyeHeightWC(getAgeScale(), isSitting());
     return eyeHeight;
   }
 
@@ -1274,7 +1260,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public boolean canBePushed() {
-    return super.canBePushed() && isEgg();
+    return super.canBePushed();
   }
 
   /**
@@ -1628,11 +1614,6 @@ public class EntityTameableDragon extends EntityTameable {
       }
     }
 
-    // don't drown as egg
-    if (src == DamageSource.DROWN && isEgg()) {
-      return true;
-    }
-
     return getBreed().isImmuneToDamage(src);
   }
 
@@ -1732,10 +1713,6 @@ public class EntityTameableDragon extends EntityTameable {
    */
   public float getAgeScale() {
     return getLifeStageHelper().getAgeScale();
-  }
-
-  public boolean isEgg() {
-    return getLifeStageHelper().isEgg();
   }
 
   public boolean isBaby() {
@@ -2031,7 +2008,7 @@ public class EntityTameableDragon extends EntityTameable {
       return false;
     }
 
-    if (!world.isRemote && source.getTrueSource() != null && this.getRNG().nextInt(4) == 0 && !isEgg()) {
+    if (!world.isRemote && source.getTrueSource() != null && this.getRNG().nextInt(4) == 0) {
       this.roar();
     }
 
@@ -2161,10 +2138,9 @@ public class EntityTameableDragon extends EntityTameable {
     rotationYaw = prevRotationYaw;
     rotationYawHead = prevRotationYawHead;
 
-    if (isEgg()) setDead();
-    else if (deathTime >= getMaxDeathTime()) setDead(); // actually delete entity after the time is up
+    if (deathTime >= getMaxDeathTime()) setDead(); // actually delete entity after the time is up
 
-    if (isClient() && !isEgg() && deathTime < getMaxDeathTime() - 20)
+    if (isClient() && deathTime < getMaxDeathTime() - 20)
       spawnBodyParticles(EnumParticleTypes.CLOUD, 4);
 
     deathTime++;
@@ -2175,8 +2151,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   protected SoundEvent getDeathSound() {
-    if (this.isEgg()) return ModSounds.DRAGON_HATCHED;
-    else return this.getBreed().getDeathSound();
+    return this.getBreed().getDeathSound();
   }
 
   /**

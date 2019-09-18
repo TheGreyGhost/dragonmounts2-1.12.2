@@ -1,0 +1,7 @@
+// blue particles instead of reddish
+{
+  "breedinternalname": "testegg9",
+  "egg": {
+    "particlesspawncolor": "0,0,255"
+  }
+}

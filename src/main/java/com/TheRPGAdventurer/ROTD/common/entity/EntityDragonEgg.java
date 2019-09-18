@@ -113,6 +113,24 @@ public class EntityDragonEgg extends Entity {
     if ((boolean)dragonVariants.getValueOrDefault(Category.EGG, EGG_NO_PARTICLES)) {
       userConfiguredParameters.enumParticleType = null;
     }
+    userConfiguredParameters.particleSpawnParameterIsColour = "color".matches((String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_PARTICLES_SPEED_OR_COLOUR));
+    userConfiguredParameters.particleSpawnRGB = parseRGB((String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_PARTICLES_RGB));
+  }
+
+  // parses the given text fragment into an int RGB
+  // expects "r,g,b" eg "255,13,26"
+  private static int parseRGB(String textRGB) throws IllegalArgumentException {
+    String[] parts = textRGB.split(",");
+    if (parts.length != 3) {
+      throw new IllegalArgumentException("Expected R,G,B where eg R= 0 to 255; instead found " + textRGB);
+    }
+    int red = Integer.parseInt(parts[0]);
+    int green = Integer.parseInt(parts[1]);
+    int blue = Integer.parseInt(parts[2]);
+    if (red < 0 || red > 255 || blue < 0 || blue > 255 || green < 0 || green > 255) {
+      throw new IllegalArgumentException("R, G, B must each be 0 to 255");
+    }
+    return (red << 16) | (green << 8) | blue;
   }
 
   private void serverInitialiseState(DragonBreedNew dragonBreed, EggState eggState, int incubationTicksServer) {
@@ -571,9 +589,16 @@ public class EntityDragonEgg extends Entity {
       Vec3d eggCentre = new Vec3d(posX, posY + height / 2.0, posZ);
       spawnPosition = spawnPosition.add(eggCentre);
 
-      world.spawnParticle(userConfiguredParameters.enumParticleType,
-              spawnPosition.x, spawnPosition.y, spawnPosition.z,
-              spawnVelocity.x, spawnVelocity.y, spawnVelocity.z);
+      if (userConfiguredParameters.particleSpawnParameterIsColour) {
+        int rgb = userConfiguredParameters.particleSpawnRGB;
+        world.spawnParticle(userConfiguredParameters.enumParticleType,
+                spawnPosition.x, spawnPosition.y, spawnPosition.z,
+                (rgb >> 16) & 0xff, (rgb >> 8) & 0xff, rgb & 0xff);
+      } else {
+        world.spawnParticle(userConfiguredParameters.enumParticleType,
+                spawnPosition.x, spawnPosition.y, spawnPosition.z,
+                spawnVelocity.x, spawnVelocity.y, spawnVelocity.z);
+      }
     }
   }
 
@@ -638,9 +663,29 @@ public class EntityDragonEgg extends Entity {
         dragonVariantsErrors.addError("spinstarttime and/or spinspeed are defined but spin flag is not defined");
       }
 
-      if (dragonVariants.tagIsExplictlyApplied(DragonVariants.Category.EGG, EGG_PARTICLES_NAME) &&
-              dragonVariants.tagIsExplictlyApplied(DragonVariants.Category.EGG, EGG_NO_PARTICLES)) {
-        dragonVariantsErrors.addError("particlesname is defined but noparticles flag is also defined");
+      if (dragonVariants.tagIsExplictlyApplied(DragonVariants.Category.EGG, EGG_NO_PARTICLES) &&
+          (dragonVariants.tagIsExplictlyApplied(DragonVariants.Category.EGG, EGG_PARTICLES_NAME) ||
+           dragonVariants.tagIsExplictlyApplied(DragonVariants.Category.EGG, EGG_PARTICLES_SPEED_OR_COLOUR) ||
+           dragonVariants.tagIsExplictlyApplied(DragonVariants.Category.EGG, EGG_PARTICLES_RGB)
+          )) {
+        dragonVariantsErrors.addError("noparticles flag is defined, but at least one of particlesname, particlesspawntype, or particlesspawncolor are also defined");
+      }
+
+      if (!"color".matches((String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_PARTICLES_SPEED_OR_COLOUR)) &&
+                      dragonVariants.tagIsExplictlyApplied(DragonVariants.Category.EGG, EGG_PARTICLES_RGB)
+         ) {
+        dragonVariantsErrors.addError("particlesspawncolor is defined but particlesspawntype is not set to \"color\".");
+      }
+
+      String spawnType = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_PARTICLES_SPEED_OR_COLOUR);
+      if (!"speed".matches(spawnType) && !"color".matches(spawnType)) {
+        dragonVariantsErrors.addError("particlesspawntype must be \"color\" or \"speed\"");
+      }
+
+      try {
+        int rgb = parseRGB((String)dragonVariants.getValueOrDefault(Category.EGG, EGG_PARTICLES_RGB));
+      } catch (IllegalArgumentException iae) {
+        dragonVariantsErrors.addError(iae);
       }
 
       if (dragonVariantsErrors.hasErrors()) {
@@ -694,10 +739,15 @@ public class EntityDragonEgg extends Entity {
           "should the egg spin when it gets near to hatching?").addCategory(Category.EGG);
   private static final DragonVariantTag EGG_CRACKING = DragonVariantTag.addTag("crackingsounds",
           "should the egg make cracking sounds when it gets near to hatching?").addCategory(Category.EGG);
-  private static final DragonVariantTag EGG_PARTICLES_NAME = DragonVariantTag.addTag("particlesname", "townaura",
+
+  private static final DragonVariantTag EGG_PARTICLES_NAME = DragonVariantTag.addTag("particlesname", "reddust",
           "what particle effect does the egg produce while incubating? as per the /particle command").addCategory(Category.EGG);
   private static final DragonVariantTag EGG_NO_PARTICLES = DragonVariantTag.addTag("noparticles",
           "if this flag is present, don't produce any particles while incubating").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_PARTICLES_SPEED_OR_COLOUR =  DragonVariantTag.addTag("particlesspawntype", "color",
+          "when spawning particles, provide \"color\" or \"speed\" (depends on particle type)").addCategory(Category.EGG);
+  private static final DragonVariantTag EGG_PARTICLES_RGB =  DragonVariantTag.addTag("particlesspawncolor", "150,11,15",
+          "when spawning colored particle types, what colour? format: \"Red, Green, Blue\" eg \"255,0,128\"").addCategory(Category.EGG);
 
   private static final DragonVariantTag EGG_WIGGLE_START_FRACTION = DragonVariantTag.addTag("wigglestarttime", 0.75, 0.0, 1.0,
           "when does the incubating egg start wiggling, as a fraction of the incubation time (0 -> 1)").addCategory(Category.EGG);
@@ -737,6 +787,8 @@ public class EntityDragonEgg extends Entity {
     public boolean spinFlag;
 
     public EnumParticleTypes enumParticleType;
+    public boolean particleSpawnParameterIsColour;
+    public int particleSpawnRGB;
   }
 
   private UserConfiguredParameters userConfiguredParameters = new UserConfiguredParameters();
