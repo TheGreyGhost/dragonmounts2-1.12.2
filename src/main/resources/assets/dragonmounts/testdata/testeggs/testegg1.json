@@ -1,0 +1,10 @@
+// animation no interpolation between frames
+{
+  "breedinternalname": "testegg1",
+  "egg": {
+    "animationticksperframe": 20,
+    "flags": [
+      "animationnointerpolation"
+    ]
+  }
+}

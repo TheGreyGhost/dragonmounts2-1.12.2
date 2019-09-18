@@ -1,0 +1,20 @@
+// all effects
+{
+  "breedinternalname": "testegg8",
+  "egg": {
+    "particlesname": "happyVillager",
+    "size": 2.0,
+    "spinspeed": 1.0,
+    "spinstarttime": 0.5,
+    "wigglestarttime": 0.75,
+    "flags": [
+      "animationnointerpolation",
+      "crackingsounds",
+      "glow",
+      "levitate",
+      "noparticles",
+      "spin",
+      "wiggle"
+    ]
+  }
+}

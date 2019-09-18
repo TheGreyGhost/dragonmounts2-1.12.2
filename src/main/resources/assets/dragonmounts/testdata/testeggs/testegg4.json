@@ -1,0 +1,10 @@
+// wiggling
+{
+  "breedinternalname": "testegg4",
+  "egg": {
+    "wigglestarttime": 0.2,
+    "flags": [
+      "wiggle"
+    ]
+  }
+}

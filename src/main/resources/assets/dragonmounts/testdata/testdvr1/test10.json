@@ -2,6 +2,6 @@
 {
   "breedinternalname": "fire10",
   "lifestage": {
-    "eggsizemetres": true
+    "size": true
   }
 }

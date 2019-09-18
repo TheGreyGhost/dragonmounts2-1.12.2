@@ -1,0 +1,7 @@
+// faster animation
+{
+  "breedinternalname": "testegg2",
+  "egg": {
+    "animationticksperframe": 100
+  }
+}

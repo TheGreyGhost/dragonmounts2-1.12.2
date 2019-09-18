@@ -2,7 +2,7 @@
 {
   "breedinternalname": "fire12",
   "egg": {
-    "eggcrackstart": 0.5,
+    "crackstarttime": 0.5,
     "flags": [
       "wiggle",
       "glow"

@@ -2,10 +2,10 @@
 {
   "breedinternalname": "testdlsv2",
   "lifestage": {
-    "ageinfant": 1,
-    "agechild": 3,
-    "ageearlyteen": 6,
-    "agelateteen": 5,
-    "ageadult": 15
+    "age1infant": 1,
+    "age2child": 3,
+    "age3earlyteen": 6,
+    "age4lateteen": 5,
+    "age5adult": 15
  }
 }

@@ -178,19 +178,18 @@ public class DragonVariantsReader {
     }
 
     int flagCount = 0;
-    int nonFlagLineCount = 0;
+    int totalLineCount = 0;
     for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
+      ++totalLineCount;
       if (entry.getValue() instanceof Boolean) {
         ++flagCount;
-      } else {
-        ++nonFlagLineCount;
       }
     }
 
     int line = 0;
     for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
       if (!(entry.getValue() instanceof Boolean)) { // save the flags for later
-        boolean lastLine = (++line) == nonFlagLineCount;
+        boolean lastLine = (++line) == totalLineCount;
         outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), lastLine, includeComments);
       }
     }

@@ -25,8 +25,8 @@ import java.util.Map;
 public class StartupDebugClientOnly {
   public static void preInitClientOnly() {
     if (!DragonMounts.instance.getConfig().isDebug()) return;
-    testDragonVariantsReader(); //todo comment back out again when testing finished
-//    testDragonLifeStageHelperTags();
+    testDragonVariantsReader();
+    testDragonLifeStageHelperTags();
   }
 
   public static void initClientOnly() {
@@ -72,11 +72,6 @@ public class StartupDebugClientOnly {
       for (DragonVariants dragonVariants : allVariants.values()) {
         String json = DragonVariantsReader.outputAsJSON(dragonVariants, true);
         System.out.print(json);
-      }
-      try {
-        allVariants.get("fire").validateCollection();  // parse errors should revert to default tags
-      } catch (Exception e) {
-        DragonMounts.logger.info("Failed test due to exception " + e);
       }
     }
 

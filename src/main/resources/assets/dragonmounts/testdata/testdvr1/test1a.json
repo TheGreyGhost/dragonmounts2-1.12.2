@@ -2,12 +2,12 @@
 {
   "breedinternalname": "fire",
   "lifestage": {
-    "sizeadult": 5,
+    "size5adult": 5,
     "healthbase": 50.0,
     "armorbase": 10.0
   },
   "egg": {
-    "eggsizemetres": 1.0,
-    "eggparticlesname": "townaura"
+    "size": 1.0,
+    "particlesname": "townaura"
   }
 }

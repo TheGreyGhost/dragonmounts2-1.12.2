@@ -2,11 +2,11 @@
 {
   "breedinternalname": "fire4",
   "lifestage": {
-    "sizeadult": 5,
+    "size5adult": 5,
     "badtagname": 1.0         // basic intensity is 1.0; higher intensity causes more damage / effects
   },
   "egg": {
-    "eggsizemetres": 1.0,
-    "eggparticlesname": "townaura"
+    "size": 1.0,
+    "particlesname": "townaura"
   }
 }

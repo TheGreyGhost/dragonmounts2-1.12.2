@@ -2,12 +2,12 @@
 {
   "breedinternalname": "testdlsv3",
   "lifestage": {
-    "growthratehatchling": 100.0,
-    "growthrateinfant": 100.0,
-    "growthratechild": 100.0,
-    "growthrateearlyteen": 100.0,
-    "growthratelateteen": 100.0,
-    "sizehatchling": 2,
-    "sizeadult": 1
+    "growthrate0hatchling": 100.0,
+    "growthrate1infant": 100.0,
+    "growthrate2child": 100.0,
+    "growthrate3earlyteen": 100.0,
+    "growthrate4lateteen": 100.0,
+    "size0hatchling": 2,
+    "size5adult": 1
   }
 }

@@ -1,0 +1,11 @@
+// levitation
+{
+  "breedinternalname": "testegg7",
+  "egg": {
+    "levitateheight": 2.0,
+    "levitatestarttime": 0.5,
+    "flags": [
+      "levitate"
+    ]
+  }
+}

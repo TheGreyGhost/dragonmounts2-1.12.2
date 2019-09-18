@@ -64,7 +64,7 @@ public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
       rotZ = WIGGLE_AMPLITUDE_DEGREES * (float)Math.sin(wiggleCycleRadians) * tickZ / EntityDragonEgg.WIGGLE_DURATION_TICKS;
     }
 
-    float rotY = 0;
+    float rotY = -dragonEgg.rotationYaw;
     double incubationTicks = dragonEgg.getIncubationTicks() + partialTicks;
     if (userConfiguredParameters.spinFlag && incubationTicks >= userConfiguredParameters.eggSpinStartTicks) {
       double spinTimeFraction = (incubationTicks - userConfiguredParameters.eggGlowStartTicks) /
@@ -75,7 +75,7 @@ public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
       //   is half the current spin speed times the duration
       final double TICKS_PER_SECOND = 20;
       double degrees = 0.5 * spinSpeedDPS * (incubationTicks - userConfiguredParameters.eggGlowStartTicks) / TICKS_PER_SECOND;
-      rotY = (float)(degrees % 360);
+      rotY = (float)((dragonEgg.rotationYaw + degrees) % 360);
     }
 
     try {

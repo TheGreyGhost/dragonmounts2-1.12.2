@@ -2,7 +2,7 @@
 {
   "breedinternalname": "fire6",
   "lifestage": {
-    "sizeadult": ["one", "two"]
+    "size5adult": ["one", "two"]
   },
   "physicalmodel": {
     "numberofnecksegments": 8,

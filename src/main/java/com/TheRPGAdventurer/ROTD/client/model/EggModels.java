@@ -191,22 +191,21 @@ public class EggModels {
     breedTextureRLs.put(new ImmutablePair<>(breed, eggModelState), rl);
   }
 
-//  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/dragon_hatchable_egg.obj");
-  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("eggmodelobj", "models/item/egg_incubating.obj",
+  private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("model", "models/item/egg_incubating.obj",
           "path to a wavefront model for the incubating egg (also when rendered as an item).  Expected to occupy the space from [-0.5, 0, -0.5] to [0.5, 0, 0.5]").addCategory(Category.EGG);
-  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("eggmodelsmashedobj", "models/item/egg_smashed.obj",
+  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED = DragonVariantTag.addTag("modelsmashed", "models/item/egg_smashed.obj",
           "path to a wavefront model for the smashed egg.  Expected to occupy the space from [-0.5, 0, -0.5] to [0.5, 0, 0.5]").addCategory(Category.EGG);
-  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("eggmodelhatchedobj", "models/item/egg_hatched.obj",
+  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED = DragonVariantTag.addTag("modelhatched", "models/item/egg_hatched.obj",
           "path to a wavefront model for the hatched egg.  Expected to occupy the space from [-0.5, 0, -0.5] to [0.5, 0, 0.5]").addCategory(Category.EGG);
-  private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("eggmodeltexture", "textures/items/eggs/egg_default.png",
+  private static final DragonVariantTag EGG_ITEM_MODEL_TEXTURE = DragonVariantTag.addTag("modeltexture", "textures/items/eggs/egg_default.png",
           "path to the animated texture for the incubating egg.  Expected to contain one or more vertical square frames (max 20)").addCategory(Category.EGG);
-  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED_TEXTURE = DragonVariantTag.addTag("eggmodelsmashedtexture", "textures/items/eggs/egg_smashed_default.png",
+  private static final DragonVariantTag EGG_ITEM_MODEL_SMASHED_TEXTURE = DragonVariantTag.addTag("modelsmashedtexture", "textures/items/eggs/egg_smashed_default.png",
           "path to the animated texture for the smashed egg.  Expected to contain one or more vertical square frames (max 20)").addCategory(Category.EGG);
-  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED_TEXTURE = DragonVariantTag.addTag("eggmodelhatchedtexture", "textures/items/eggs/egg_hatched_default.png",
+  private static final DragonVariantTag EGG_ITEM_MODEL_HATCHED_TEXTURE = DragonVariantTag.addTag("modelhatchedtexture", "textures/items/eggs/egg_hatched_default.png",
           "path to the animated texture for the hatched egg.  Expected to contain one or more vertical square frames (max 20)").addCategory(Category.EGG);
-  private static final DragonVariantTag EGG_ITEM_ANIMATION_TICKS_PER_FRAME = DragonVariantTag.addTag("egganimationticksperframe", 8, 1, 1000,
+  private static final DragonVariantTag EGG_ITEM_ANIMATION_TICKS_PER_FRAME = DragonVariantTag.addTag("animationticksperframe", 8, 1, 1000,
           "the number of ticks (1/20 of a second) to display each frame of the animated egg texture").addCategory(Category.EGG);
-  private static final DragonVariantTag EGG_ITEM_ANIMATION_NO_INTERPOLATION = DragonVariantTag.addTag("egganimationnointerpolation",
+  private static final DragonVariantTag EGG_ITEM_ANIMATION_NO_INTERPOLATION = DragonVariantTag.addTag("animationnointerpolation",
           "if this flag is present, don't interpolate between the frames of the animated egg texture").addCategory(Category.EGG);
 
   private final int BASE_MODEL_METADATA = 0;

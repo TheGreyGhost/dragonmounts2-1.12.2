@@ -2,7 +2,7 @@
 {
   "breedinternalname": "fire11",
   "egg": {
-    "eggsizemetres": 1.0,
+    "size": 1.0,
     "flags": [
       "wiggle",
       "glow",
