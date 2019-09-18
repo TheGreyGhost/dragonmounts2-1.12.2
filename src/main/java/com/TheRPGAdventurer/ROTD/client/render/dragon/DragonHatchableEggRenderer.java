@@ -52,21 +52,24 @@ public class DragonHatchableEggRenderer extends Render<EntityDragonEgg> {
     float rotX = 0;
     float rotZ = 0;
 
-    final float WIGGLE_PERIOD_TICKS = 4;
+    final float WIGGLE_PERIOD_TICKS = EntityDragonEgg.WIGGLE_DURATION_TICKS / 2;
     final float WIGGLE_AMPLITUDE_DEGREES = 8;
 
     if (tickX > 0) {
-      float wiggleCycleRadians = 2*(float)Math.PI*tickX/ WIGGLE_PERIOD_TICKS;
+      float wiggleCycleRadians = 2*(float)Math.PI * tickX / WIGGLE_PERIOD_TICKS;
       rotX = WIGGLE_AMPLITUDE_DEGREES * (float)Math.sin(wiggleCycleRadians) * tickX / EntityDragonEgg.WIGGLE_DURATION_TICKS;
+      if (dragonEgg.getEggWiggleInverseDirection()) rotX = -rotX;
     }
     if (tickZ > 0) {
-      float wiggleCycleRadians = 2*(float)Math.PI*tickZ/ WIGGLE_PERIOD_TICKS;
+      float wiggleCycleRadians = 2*(float)Math.PI * tickZ / WIGGLE_PERIOD_TICKS;
       rotZ = WIGGLE_AMPLITUDE_DEGREES * (float)Math.sin(wiggleCycleRadians) * tickZ / EntityDragonEgg.WIGGLE_DURATION_TICKS;
+      if (dragonEgg.getEggWiggleInverseDirection()) rotZ = -rotZ;
     }
 
     float rotY = -dragonEgg.rotationYaw;
     double incubationTicks = dragonEgg.getIncubationTicks() + partialTicks;
-    if (userConfiguredParameters.spinFlag && incubationTicks >= userConfiguredParameters.eggSpinStartTicks) {
+    if (dragonEgg.getEggState() == EntityDragonEgg.EggState.INCUBATING
+        && userConfiguredParameters.spinFlag && incubationTicks >= userConfiguredParameters.eggSpinStartTicks) {
       double spinTimeFraction = (incubationTicks - userConfiguredParameters.eggGlowStartTicks) /
                                 (userConfiguredParameters.eggIncubationCompleteTicks - userConfiguredParameters.eggGlowStartTicks);
       final double INITIAL_SPIN_SPEED = 0;

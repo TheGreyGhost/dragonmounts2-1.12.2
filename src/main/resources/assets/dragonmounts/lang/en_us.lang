@@ -93,7 +93,7 @@ dragon.adult=Adult
 # Item Names
 ##
 item.diamond_shears.name=Diamond Shears
-item.dragonEgg.name=%s Egg
+item.dragon_egg.name=%s Egg
 item.dragon_gender.name=Dragon Gender Gem
 item.gui.dragon_gender=Left Click an owned dragon with the gem will switch its gender
 item.summon_egg.name=Spawn Dragon

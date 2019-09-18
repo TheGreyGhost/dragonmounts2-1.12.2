@@ -5,6 +5,7 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.blocks.BlockDragonBreedEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew.DragonBreedsRegistry;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
@@ -52,9 +53,14 @@ public class ItemDragonHatchableEgg extends Item {
 
   @Override
   public String getItemStackDisplayName(ItemStack stack) {
-    EnumDragonBreed breed = EnumDragonBreed.getBreedFromItemStack(stack);
-    String breedName = net.minecraft.util.text.translation.I18n.translateToLocal("entity.DragonMount." + breed.getName() + ".name");
-    return net.minecraft.util.text.translation.I18n.translateToLocalFormatted("item.dragonEgg.name", breedName);
+    DragonBreedNew breed = DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed();
+    try {
+      breed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(stack.getTagCompound());
+    } catch (IllegalArgumentException iae) {
+      DragonMounts.loggerLimit.warn_once("Dragon egg had unknown breed.");
+    }
+    String breedName = breed.getLocalisedName();
+    return net.minecraft.util.text.translation.I18n.translateToLocalFormatted("item.dragon_egg.name", breedName);
   }
 
   // Code mostly copied from ItemMonsterPlacer

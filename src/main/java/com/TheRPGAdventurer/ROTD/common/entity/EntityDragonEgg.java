@@ -341,14 +341,24 @@ public class EntityDragonEgg extends Entity {
     return eggWiggleZtickTimer;
   }
 
+  public boolean getEggWiggleInverseDirection() {
+    return eggWiggleInverseDirection;
+  }
+
   public float getRenderScale() {
     return width;
   }
 
   /**
    * Returns true if other Entities should be prevented from moving through this Entity.
-   */  @Override
+   */
+  @Override
   public boolean canBeCollidedWith() {
+    return !this.isDead;
+  }
+
+  @Override
+  public boolean canBePushed() {
     return !this.isDead;
   }
 
@@ -376,6 +386,7 @@ public class EntityDragonEgg extends Entity {
   public int getBrightnessForRender()
   {
     int baseLight = super.getBrightnessForRender();
+    if (eggState != EggState.INCUBATING) return baseLight;
 
     int incubationTicks = getIncubationTicks();
     if (!userConfiguredParameters.glowFlag || incubationTicks < userConfiguredParameters.eggGlowStartTicks) {
@@ -386,7 +397,7 @@ public class EntityDragonEgg extends Entity {
     int baseBlockLight = baseLight & (0xf << 4);
 
     float glowFraction =  (incubationTicks - userConfiguredParameters.eggGlowStartTicks) /
-                            (userConfiguredParameters.eggIncubationCompleteTicks - userConfiguredParameters.eggGlowStartTicks);
+            (float)(userConfiguredParameters.eggIncubationCompleteTicks - userConfiguredParameters.eggGlowStartTicks);
     final float MIN_GLOW = 0;
     final float MAX_GLOW = 0x0f;
     int glowBlockLight = Math.round(MathX.lerp(MIN_GLOW, MAX_GLOW, glowFraction));
@@ -491,8 +502,9 @@ public class EntityDragonEgg extends Entity {
 
   private double currentHeightAboveBlock(double targetHeight) {
     double searchDY = -(targetHeight + 0.5);
-    AxisAlignedBB eggAABB = this.getCollisionBoundingBox().expand(0, searchDY, 0);
-    List<AxisAlignedBB> collidingBoxes = this.world.getCollisionBoxes(null, eggAABB);
+    AxisAlignedBB eggAABB = this.getEntityBoundingBox();
+    AxisAlignedBB searchAABB = eggAABB.expand(0, searchDY, 0);
+    List<AxisAlignedBB> collidingBoxes = this.world.getCollisionBoxes(null, searchAABB);
 
     for (AxisAlignedBB aabb : collidingBoxes) {
       searchDY = aabb.calculateYOffset(eggAABB, searchDY);
@@ -500,7 +512,7 @@ public class EntityDragonEgg extends Entity {
     return -searchDY;
   }
 
-  public static final int WIGGLE_DURATION_TICKS = 20;
+  public static final int WIGGLE_DURATION_TICKS = 30;
 
   private void updateEggAnimation() {
     // wiggle, crack and particle are handled here
@@ -520,22 +532,22 @@ public class EntityDragonEgg extends Entity {
       // wait until the egg is nearly hatched
       if (incubationTicks > userConfiguredParameters.eggWiggleStartTicks) {
         doIndependentCrackCheck = false;
-        final float WIGGLE_BASE_CHANCE = 1 / 20.0F;  // one wiggle per second on average
+        final float WIGGLE_BASE_CHANCE = 1 / (1.0F * 20);  // a one second gap between wiggles on average, when ready to hatch
 
         float wiggleDuration = (userConfiguredParameters.eggIncubationCompleteTicks - userConfiguredParameters.eggWiggleStartTicks);
         float wiggleChance = WIGGLE_BASE_CHANCE * (incubationTicks - userConfiguredParameters.eggWiggleStartTicks) / wiggleDuration;
 
         if (eggWiggleXtickTimer > 0) {
-          eggWiggleXtickTimer -= 1/WIGGLE_DURATION_TICKS;
+          --eggWiggleXtickTimer;
+        } else if (eggWiggleZtickTimer > 0) {
+          --eggWiggleZtickTimer;
         } else if (rand.nextFloat() < wiggleChance) {
-          eggWiggleXtickTimer = rand.nextBoolean() ? WIGGLE_DURATION_TICKS / 2 : WIGGLE_DURATION_TICKS;
-          playEggCrackEffect(incubationTicks, false);
-        }
-
-        if (eggWiggleZtickTimer > 0) {
-          eggWiggleZtickTimer -= 1/WIGGLE_DURATION_TICKS;
-        } else if (rand.nextFloat() < wiggleChance) {
-          eggWiggleZtickTimer = rand.nextBoolean() ? WIGGLE_DURATION_TICKS / 2 : WIGGLE_DURATION_TICKS;
+          if (rand.nextBoolean()) {
+            eggWiggleXtickTimer = rand.nextBoolean() ? WIGGLE_DURATION_TICKS / 2 : WIGGLE_DURATION_TICKS;
+          } else {
+            eggWiggleZtickTimer = rand.nextBoolean() ? WIGGLE_DURATION_TICKS / 2 : WIGGLE_DURATION_TICKS;
+          }
+          eggWiggleInverseDirection = rand.nextBoolean();
           playEggCrackEffect(incubationTicks, false);
         }
       }
@@ -752,7 +764,7 @@ public class EntityDragonEgg extends Entity {
   private int idleTicksBeforeDisappear;
   private int eggWiggleXtickTimer;
   private int eggWiggleZtickTimer;
+  private boolean eggWiggleInverseDirection;
 
   private boolean fullyInitialised = false;
-
 }
