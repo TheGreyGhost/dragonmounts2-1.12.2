@@ -1,0 +1,9 @@
+// invalid value for testtag1, validation error for testtag2 and testtag3 (3 is defined but 2 isn't)
+{
+  "breedinternalname": "fire13",
+  "egg": {
+    "testtag1" : "four",
+    "testtag3" : 23
+  }
+}
+

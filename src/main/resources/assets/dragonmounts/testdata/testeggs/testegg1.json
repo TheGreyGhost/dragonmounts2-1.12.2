@@ -1,10 +1,13 @@
-// animation no interpolation between frames
+// animation no interpolation between frames, even particle spawn rate (regular intervals)
 {
   "breedinternalname": "testegg1",
   "egg": {
     "animationticksperframe": 20,
+    "particlesspawnrate" : 1,
+    "particlesname" : "reddust",
     "flags": [
-      "animationnointerpolation"
+      "animationnointerpolation",
+      "particlesspawnregularintervals"
     ]
   }
 }

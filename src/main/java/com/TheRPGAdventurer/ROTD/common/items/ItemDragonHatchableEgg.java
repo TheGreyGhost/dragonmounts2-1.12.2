@@ -56,7 +56,7 @@ public class ItemDragonHatchableEgg extends Item {
     try {
       breed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(stack.getTagCompound());
     } catch (IllegalArgumentException iae) {
-      DragonMounts.loggerLimit.warn_once("Dragon egg had unknown breed.");
+      DragonMounts.loggerLimit.warn_once("Dragon egg had unknown breed:" + iae.getMessage());
     }
     String breedName = breed.getLocalisedName();
     return net.minecraft.util.text.translation.I18n.translateToLocalFormatted("item.dragon_egg.name", breedName);

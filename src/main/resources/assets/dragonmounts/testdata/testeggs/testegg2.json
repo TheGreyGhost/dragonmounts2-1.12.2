@@ -1,7 +1,9 @@
-// slower animation
+// slower animation, slow particle spawn rate
 {
   "breedinternalname": "testegg2",
   "egg": {
-    "animationticksperframe": 100
+    "animationticksperframe": 100,
+    "particlesspawnrate" : 1,
+    "particlesname" : "reddust"
   }
 }

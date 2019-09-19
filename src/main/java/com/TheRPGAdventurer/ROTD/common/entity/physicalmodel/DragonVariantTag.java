@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants.Category;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -84,12 +84,24 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
   }
 
   /**
-   * Adds this category as an expected place to find this tag
-   * @param category
+   * Adds these categories as an expected place to find this tag
+   * @param categories one or more categories
    * @return returns the same tag to allow chaining
    */
-  public DragonVariantTag addCategory(Category category) {
-    expectedCategories.add(category);
+  public DragonVariantTag categories(Category... categories) {
+    for (Category category : categories)
+        expectedCategories.add(category);
+    return this;
+  }
+
+  /**
+   * For string tags: Adds these values as permissible values for the tag
+   * @param values
+   * @return returns the same tag to allow chaining
+   */
+  public DragonVariantTag values(String... values) {
+    for (String value : values)
+      permissibleValues.add(value);
     return this;
   }
 
@@ -113,10 +125,27 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
     return defaultValue;
   }
 
-  public String getComment() {return comment;}
+  public String getComment() {
+    String permissibleValues = getPermissibleValuesAsText("\", \"");
+    if (permissibleValues.length() > 0) {
+      permissibleValues = " Permissible values are: \"" + permissibleValues + "\".";
+    }
+    if (minValue.isPresent()) {
+      permissibleValues += " MinVal:" + minValue.get().toString() + " ";
+    }
+    if (maxValue.isPresent()) {
+      permissibleValues += " MaxVal:" + maxValue.get().toString() + " ";
+    }
+    return comment + permissibleValues;
 
-  public ArrayList<Category> getExpectedCategories() {
-    return expectedCategories;
+  }
+
+  public ImmutableList<Category> getExpectedCategories() {
+    return ImmutableList.copyOf(expectedCategories);
+  }
+
+  public ImmutableList<String> getPermissibleValues() {
+    return ImmutableList.copyOf(permissibleValues);
   }
 
   /**
@@ -135,6 +164,21 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
   }
 
   /**
+   * List all the category names expected for this tag
+   * @return a concatenated list of all expected category names with the separator between the entries
+   */
+  public String getPermissibleValuesAsText(String separator) {
+    StringBuilder stringBuilder = new StringBuilder();
+    boolean first = true;
+    for (String value : getPermissibleValues()) {
+      if (!first) stringBuilder.append(separator);
+      stringBuilder.append(value);
+      first = false;
+    }
+    return stringBuilder.toString();
+  }
+
+  /**
    * Convert the given input value to the suitable type for this tag
    *
    * @param value the value to be converted
@@ -145,8 +189,13 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
       return true;
     }
     if (defaultValue instanceof String) {
-      if (value instanceof String) return value;
-      throw new IllegalArgumentException("Expected a string");
+      if (!(value instanceof String)) {
+        throw new IllegalArgumentException("Expected a string");
+      }
+      if (permissibleValues.size() > 0 && !permissibleValues.contains((String)value)) {
+        throw new IllegalArgumentException("The tag did not have one of the permissible values (\"" + getPermissibleValuesAsText("\", \"") + "\")");
+      }
+      return value;
     }
     if (!(value instanceof Number)) {
       throw new IllegalArgumentException("Expected a number");
@@ -161,7 +210,7 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
         throw new IllegalArgumentException("internal error:unknown tag format in DragonVariantTag");
       }
     } catch (NumberFormatException nfe) {
-      throw new IllegalArgumentException("expected a number with format:" + defaultValue.getClass());
+      throw new IllegalArgumentException("Expected a number with format:" + defaultValue.getClass());
     }
 
     if (minValue.isPresent() && minValue.get().compareTo(numberValue) > 0) {
@@ -198,7 +247,6 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
     this.minValue = minValue;
     this.maxValue = maxValue;
     this.comment = comment;
-    this.expectedCategories = expectedCategories;
   }
 
   static private HashMap<String, DragonVariantTag> allTagNames = new HashMap<>();
@@ -209,6 +257,7 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
   private final String comment; // a comment for the config file
 
   private ArrayList<Category> expectedCategories = new ArrayList<>(); // which categories do we expect to find this tag in?
+  private ArrayList<String> permissibleValues = new ArrayList<>(); // which values can this tag take (for String tags only)
 
   @Override
   public int compareTo(DragonVariantTag other) {

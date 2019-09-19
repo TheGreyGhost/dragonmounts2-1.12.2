@@ -114,10 +114,11 @@ public class DragonBreedNew {
 
     /** fetches the breed corresponding to the given internal name
      * @param internalName
-     * @return
+     * @return the breed corresponding to the name, or Default breed if null
      * @throws IllegalArgumentException if name is not valid
      */
     public DragonBreedNew getBreed(String internalName) throws IllegalArgumentException {
+      if (internalName == null) return getDefaultBreed();
       if (allDragonBreeds.containsKey(internalName)) {
         return allDragonBreeds.get(internalName);
       } else {
@@ -143,13 +144,11 @@ public class DragonBreedNew {
     }
 
     /** fetches the breed corresponding to the given internal name
-     * @return
-     * @throws IllegalArgumentException if the nbt doesn't contain the tag or the tag isn't a valid breed
+     * @return the breed corresponding to the nbt tag; if the nbt tag doesn't exist, return default breed instead.
+     * @throws IllegalArgumentException if the tag isn't a valid breed
      */
     public DragonBreedNew getBreed(NBTTagCompound nbt) throws IllegalArgumentException {
-      if (nbt == null) {
-        throw new IllegalArgumentException();
-      }
+      if (nbt == null) return getDefaultBreed();
       String name = nbt.getString(NBT_BREED_NEW);
       return getBreed(name);
     }

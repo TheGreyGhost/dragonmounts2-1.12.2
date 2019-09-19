@@ -1,0 +1,11 @@
+// validation errors: 2 is defined and 1 is also defined.  1 is "three" and 3 isn't defined.
+{
+  "breedinternalname": "fire15",
+  "egg": {
+    "testtag1" : "three",
+    "flags": [
+      "testtag2flag"
+    ]
+  }
+}
+

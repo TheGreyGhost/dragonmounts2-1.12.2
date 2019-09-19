@@ -1,12 +1,12 @@
 // speed-based particles instead of colour
 {
-  "breedinternalname": "testegg10",
+  "breedinternalname": "testegg11",
   "egg": {
     "particlesspawntype": "speed",
     "particlesspawnrate" : 1,
     "particlesname": "flame",
-    "particlesspawnspeedmin": 0.1,
-    "particlesspawnspeedmax": 0.2,
+    "particlesspawnspeedmin": 2.0,
+    "particlesspawnspeedmax": 2.0,
     "flags": [
       "particlesspawnregularintervals"
     ]

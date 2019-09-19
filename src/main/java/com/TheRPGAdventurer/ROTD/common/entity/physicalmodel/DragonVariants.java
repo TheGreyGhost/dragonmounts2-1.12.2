@@ -33,6 +33,14 @@ import static com.google.common.base.Preconditions.checkElementIndex;
  * 4) call validateCollection() to apply all the registered VariantTagValidator functions on the collection
  * 5) call initialiseResourcesForCollection() to initalise the resources required by the tags in this collection (eg ModelResources)
  * 6) call getValueOrDefault() to retrieve the value of a VariantTag
+ *
+ * You can optionally use DragonVariantsCategoryShortcut to access DragonVariants in a less cluttered way, eg
+ *   DragonVariants.DragonVariantsCategoryShortcut dvc = dragonVariants.new DragonVariantsCategoryShortcut(Category.EGG);
+ * then
+ *  dvc.getValueOrDefault(TAGNAME)
+ *  instead of
+ *  dragonVariants.getValueOrDefault(Category.EGG, TAGNAME)
+ *
  */
 public class DragonVariants {
 
@@ -204,7 +212,7 @@ public class DragonVariants {
       allAppliedTags.get(category.getIdx()).remove(dragonVariantTag);
   }
 
-  public void removeTags(Category category, DragonVariantTag [] tagsToRemove) {
+  public void removeTags(Category category, DragonVariantTag... tagsToRemove) {
     for (DragonVariantTag dragonVariantTag : tagsToRemove)
       allAppliedTags.get(category.getIdx()).remove(dragonVariantTag);
   }
@@ -216,6 +224,97 @@ public class DragonVariants {
   public ImmutableSortedMap<DragonVariantTag, Object> getAllAppliedTagsForCategory(Category category) {
     return ImmutableSortedMap.copyOf(allAppliedTags.get(category.getIdx()));
   }
+
+
+  // shortcut to access DragonVariants with a particular category, without having to provide the category every time
+  //  (visually less cluttered)
+  // For information about the methods, see the corresponding methods in DragonVariants
+  public class DragonVariantsCategoryShortcut {
+    public DragonVariantsCategoryShortcut(Category category) {
+      this.category = category;
+    }
+
+    public Object getValueOrDefault(DragonVariantTag tag) {
+      return DragonVariants.this.getValueOrDefault(category, tag);
+    }
+
+    public boolean tagIsExplictlyApplied(DragonVariantTag tag) {
+      return DragonVariants.this.tagIsExplictlyApplied(category, tag);
+    }
+
+    public boolean checkForConflict(DragonVariantsException.DragonVariantsErrors errors,
+                                    DragonVariantTag masterTag, Object masterConflictState,
+                                    boolean slaveConflictState, DragonVariantTag... slaveTags) {
+      return DragonVariants.this.checkForConflict(errors, category, masterTag, masterConflictState,
+                                                  slaveConflictState, slaveTags);
+    }
+
+      private Category category;
+  }
+
+  /** check whether there is a conflict between a "master" tag and "slave" tags
+   * eg if there is a flag for "egg should spin", and two parameters "spin speed" and "spin direction":
+   *   it's an error if the "spin speed" or "spin direction" are defined, but the "egg should spin" flag isn't
+   *   In this case, the master tag is the flag and the two slaves are the parameters
+   *   masterConflictState is false and slaveConflictState is true
+   * @param errors    the errors log to populate with an error message if any
+   * @param category the category to look in
+   * @param masterTag the master tag to check
+   * @param masterConflictState if the master tag is in this state, check for slave conflicts.
+   * @param slaveConflictState if any of the slave tags are in this state, and master matches masterConflictState, then we have a conflict
+   * @param slaveTags one or more slaveTags to check for conflicts
+   * @return true if a conflict was discovered
+   */
+  public boolean checkForConflict(DragonVariantsException.DragonVariantsErrors errors, Category category,
+                                  DragonVariantTag masterTag, Object masterConflictState,
+                                  boolean slaveConflictState, DragonVariantTag... slaveTags) {
+    String masterConditionText = "";
+    if (masterTag.getDefaultValue() instanceof Boolean) {
+      if ((Boolean)masterConflictState != tagIsExplictlyApplied(category, masterTag)) return false;
+      masterConditionText = (Boolean)masterConflictState ? " is defined" : " is not defined";
+    } else {
+      if (!masterConflictState.equals(getValueOrDefault(category, masterTag))) return false;
+      if (tagIsExplictlyApplied(category, masterTag)) {
+        masterConditionText = " has the value \"" + masterConflictState.toString() + "\"";
+      } else {
+        masterConditionText = " has the default value \"" + masterConflictState.toString() + "\"";
+      }
+    }
+
+    List<DragonVariantTag> conflictSlaves = new ArrayList<>();
+    for (DragonVariantTag slave : slaveTags) {
+      if (slaveConflictState == tagIsExplictlyApplied(category, slave)) {
+        conflictSlaves.add(slave);
+      }
+    }
+    if (conflictSlaves.isEmpty()) return false;
+
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("When ");
+    stringBuilder.append(masterTag.getTextname());
+    stringBuilder.append(masterConditionText);
+    stringBuilder.append(" then the following tags must ");
+    stringBuilder.append(slaveConflictState ? "not be defined:" : "be defined:");
+    boolean first = true;
+    for (DragonVariantTag dragonVariantTag : conflictSlaves) {
+      if (!first) {
+        stringBuilder.append(", ");
+      }
+      first = false;
+      stringBuilder.append(dragonVariantTag.getTextname());
+    }
+    errors.addError(stringBuilder.toString());
+    return true;
+  }
+
+
+/* todo
+what I'm doing:
+validation of possible tag values          '
+validation of mutially exclusive tags - rules how?
+particles spawnings - speeds, random exponential timing,
+*/
+
 
   private ArrayList<HashMap<DragonVariantTag, Object>> allAppliedTags;
   private String breedInternalName;
