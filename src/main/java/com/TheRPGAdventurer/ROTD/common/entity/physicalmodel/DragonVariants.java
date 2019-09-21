@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSortedMap;
 
 import java.util.*;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 
 /**
@@ -18,6 +19,20 @@ import static com.google.common.base.Preconditions.checkElementIndex;
  *
  * Each tag is grouped into a category (allows re-use of the same tag for different categories eg primary and secondary
  * breath weapon)
+ *
+ * Each category can also be "modified" to allow minor variations within the breed; for example male or female.
+ * For example:
+ * "physicalmodel": {
+ *    "size": 2.0,
+ *    "numberofnecksegments": 8
+ * }
+ * "physicalmodel:female": {
+ *   "size": 1.6
+ * }
+ *
+ * then if the dragon is female:
+ * getValueOrDefault("size") returns 1.6
+ * getValueOrDefault("numberofnecksegments") returns 8  (not defined in female, so falls back to unmodified category)
  *
  * Usage:
  * 1) During setup, optionally add VariantTagValidator functions to validate a collection of VariantTags.  These
@@ -40,6 +55,13 @@ import static com.google.common.base.Preconditions.checkElementIndex;
  *  dvc.getValueOrDefault(TAGNAME)
  *  instead of
  *  dragonVariants.getValueOrDefault(Category.EGG, TAGNAME)
+ *
+ * Further notes on priority of the modifiers:
+ * if the target has multiple modifiers applied to it (for example: female,albino):
+ * 1) if there is an exact modified category match (egg:female,albino), use this
+ * 2) if there is a category which contains some of the target tags, and doesn't contain any tags which aren't in the target,
+ *     then take that.  If more than one category matches in this way, take the one with the lower priority
+ * 3) otherwise, take the base category with no modifiers applied
  *
  */
 public class DragonVariants {
@@ -307,13 +329,160 @@ public class DragonVariants {
     return true;
   }
 
+  public enum Modifier implements Comparable<Modifier> {
+    // define in decreasing order of priority.  In case of ambiguity, the highest priority modifier is used, eg
+    //   the earliest in the list
+    // Mutex = mutually exclusive flags.  If two flags have any mutex bits in common, they cannot both be applied at the same time
+    MALE("male", 0x01),
+    FEMALE("female", 0x01),
+    DEBUG1("debug1", 0x02, true),
+    DEBUG2("debug2", 0x04, true);
+    ; // may add other modifiers in future
 
-/* todo
-what I'm doing:
-validation of possible tag values          '
-validation of mutially exclusive tags - rules how?
-particles spawnings - speeds, random exponential timing,
-*/
+    private String textname;
+    private int mutexFlags;
+    private boolean debugOnly;
+
+    Modifier(String textname, int mutexFlags) {
+      this.textname = textname;
+      this.debugOnly = false;
+    }
+    Modifier(String textname, int mutexFlags, boolean debugOnly) {
+      this.textname = textname;
+      this.debugOnly = debugOnly;
+    }
+
+    public static Modifier getModifierFromText(String text) throws IllegalArgumentException {
+      for (Modifier modifier : Modifier.values()) {
+        if (text.equals(modifier.textname)) return modifier;
+      }
+      throw new IllegalArgumentException("Invalid modifier specified:" + text);
+    }
+  }
+
+
+  public static class ModifiedCategory {
+    public ModifiedCategory(Category category, Modifier... modifiers) throws IllegalArgumentException {
+      this.category = category;
+      this.appliedModifiers = modifiers;
+      Arrays.sort(this.appliedModifiers);
+      int appliedMutex = 0;
+      int clashingMutex = 0;
+      for (Modifier modifier : modifiers) {
+        if (0 != (appliedMutex & modifier.mutexFlags)) {
+          clashingMutex |= modifier.mutexFlags;
+        }
+        appliedMutex |= modifier.mutexFlags;
+      }
+      if (clashingMutex == 0) return;
+
+      String errorMsg = "The requested category:modifiers contains the following mutually-exclusive modifiers:";
+      boolean first = true;
+      for (Modifier modifier : modifiers) {
+        if (0 != (clashingMutex & modifier.mutexFlags)) {
+          if (!first) errorMsg += ", ";
+          first = false;
+        }
+      }
+      throw new IllegalArgumentException(errorMsg);
+    }
+
+    public static ModifiedCategory parseFromString(String text) throws IllegalArgumentException {
+      String [] split = text.split(":");
+      Category category;
+      if (split.length == 0) {
+        category = Category.getCategoryFromName("");  // will almost certainly throw IAE
+      } else {
+        category = Category.getCategoryFromName(split[0]);
+      }
+      if (split.length == 1) return new ModifiedCategory(category);
+      if (split.length != 2) {
+        throw new IllegalArgumentException("Syntax error with category:modifiers value (" + text + ")");
+      }
+      split = split[1].split(",");
+      Modifier [] modifiers = new Modifier[split.length];
+      int i = 0;
+      for (String modText : split) {
+        modifiers[i++] = Modifier.getModifierFromText(modText.trim());
+      }
+      return new ModifiedCategory(category, modifiers);
+    }
+    private Category category;
+    private Modifier [] appliedModifiers;  // sorted in order
+
+    @Override
+    public boolean equals(Object other) {
+      if (other == this) return true;
+      if (!(other instanceof ModifiedCategory)) return false;
+      ModifiedCategory otherMC = (ModifiedCategory)other;
+      if (category != otherMC.category) return false;
+      return (appliedModifiers.equals(otherMC.appliedModifiers));
+    }
+
+    @Override
+    public int hashCode() {
+      return category.hashCode() | appliedModifiers.hashCode();
+    }
+  }
+
+  // Create the Ranker specifying the target category
+  // This will then allow sorting on the ModifiedCategory which is the best match for the target
+  public static class ModifiedCategoryRanker implements Comparator<ModifiedCategory> {
+
+    public ModifiedCategoryRanker(ModifiedCategory target) {
+      this.target = target;
+    }
+
+    @Override
+    public int compare(ModifiedCategory o1, ModifiedCategory o2) {
+      if (o1.equals(o2)) return 0;
+
+      ArrayList<Modifier> o1Matches = findMatchingModifiers(o1);
+      if (o1 != null && o1Matches.size() == target.appliedModifiers.length) return -1;
+      ArrayList<Modifier> o2Matches = findMatchingModifiers(o2);
+      if (o1 == null && o2 == null) return 0;
+      if (o1 == null && o2 != null) return 1;
+      if (o1 != null && o2 == null) return -1;
+
+      if (o1Matches.size() > o2Matches.size()) {
+        return -1;
+      } else if (o1Matches.size() < o2Matches.size()) {
+        return  1;
+      }
+
+      for (int i = 0; i < o1Matches.size(); ++i) {
+        int compare = o1Matches.get(i).compareTo(o2Matches.get(i));
+        if (compare != 0) return compare;
+      }
+      return 0;
+    }
+
+    // returns the matching modifiers, or null if incompatible (mc contains modifiers which aren't in the target)
+    private ArrayList<Modifier> findMatchingModifiers(ModifiedCategory mc) {
+      ArrayList<Modifier> matchedModifers = new ArrayList<>();
+      int srcIdx = 0;
+      int dstIdx = 0;
+
+      while (srcIdx < target.appliedModifiers.length && dstIdx < mc.appliedModifiers.length) {
+        int compare = target.appliedModifiers[srcIdx].compareTo(mc.appliedModifiers[dstIdx]);
+        if (compare == 0) {
+          matchedModifers.add(target.appliedModifiers[srcIdx]);
+          ++srcIdx;
+          ++dstIdx;
+        } else if (compare < 0) {
+          ++srcIdx;
+        } else {
+          return null;
+        }
+      }
+      if (dstIdx < mc.appliedModifiers.length) return null;
+      return matchedModifers;
+    }
+
+    private ModifiedCategory target;
+  }
+
+  NEED TO TEST THESE NEW METHODS
 
 
   private ArrayList<HashMap<DragonVariantTag, Object>> allAppliedTags;
