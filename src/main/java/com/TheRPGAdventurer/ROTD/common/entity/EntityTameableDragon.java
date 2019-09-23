@@ -2109,12 +2109,12 @@ public class EntityTameableDragon extends EntityTameable {
     getAttributeMap().registerAttribute(ATTACK_DAMAGE);
     getEntityAttribute(MOVEMENT_SPEED_AIR).setBaseValue(BASE_AIR_SPEED);
     getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(BASE_GROUND_SPEED);
-    getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(BASE_DAMAGE);
+    getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(getLifeStageHelper().getAttackDamage());
     getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
     getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(RESISTANCE);
-    getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(BASE_ARMOR);
-    getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue(BASE_TOUGHNESS);
-    this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0D);
+    getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(getLifeStageHelper().getArmour());
+    getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue(getLifeStageHelper().getArmourToughness());
+    this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(getLifeStageHelper().getHealth());
   }
 
   @Override

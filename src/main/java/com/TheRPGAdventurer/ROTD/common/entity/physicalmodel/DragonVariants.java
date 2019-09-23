@@ -343,20 +343,33 @@ public class DragonVariants {
     private int mutexFlags;
     private boolean debugOnly;
 
-    Modifier(String textname, int mutexFlags) {
+    private Modifier(String textname, int mutexFlags) {
       this.textname = textname;
+      this.mutexFlags = mutexFlags;
       this.debugOnly = false;
     }
-    Modifier(String textname, int mutexFlags, boolean debugOnly) {
+    private Modifier(String textname, int mutexFlags, boolean debugOnly) {
       this.textname = textname;
+      this.mutexFlags = mutexFlags;
       this.debugOnly = debugOnly;
     }
+
+    public String getTextname() {return textname;}
 
     public static Modifier getModifierFromText(String text) throws IllegalArgumentException {
       for (Modifier modifier : Modifier.values()) {
         if (text.equals(modifier.textname)) return modifier;
       }
       throw new IllegalArgumentException("Invalid modifier specified:" + text);
+    }
+
+    // returns a list of all modifiers, excluding any used for debugging
+    public static List<Modifier> getAllModifiers() {
+      ArrayList<Modifier> allModifiers = new ArrayList<>();
+      for (Modifier modifier : Modifier.values()) {
+        if (!modifier.debugOnly) allModifiers.add(modifier);
+      }
+      return allModifiers;
     }
   }
 
@@ -381,6 +394,7 @@ public class DragonVariants {
       for (Modifier modifier : modifiers) {
         if (0 != (clashingMutex & modifier.mutexFlags)) {
           if (!first) errorMsg += ", ";
+          errorMsg += modifier.getTextname();
           first = false;
         }
       }
@@ -415,18 +429,19 @@ public class DragonVariants {
       if (other == this) return true;
       if (!(other instanceof ModifiedCategory)) return false;
       ModifiedCategory otherMC = (ModifiedCategory)other;
-      if (category != otherMC.category) return false;
-      return (appliedModifiers.equals(otherMC.appliedModifiers));
+      if (!category.equals(otherMC.category)) return false;
+      return Arrays.equals(appliedModifiers, otherMC.appliedModifiers);
     }
 
     @Override
     public int hashCode() {
-      return category.hashCode() | appliedModifiers.hashCode();
+      return category.hashCode() ^ appliedModifiers.hashCode();
     }
   }
 
   // Create the Ranker specifying the target category
   // This will then allow sorting on the ModifiedCategory which is the best match for the target
+  // The sorting ignores category, only pays attention to the modifiers
   public static class ModifiedCategoryRanker implements Comparator<ModifiedCategory> {
 
     public ModifiedCategoryRanker(ModifiedCategory target) {
@@ -438,11 +453,11 @@ public class DragonVariants {
       if (o1.equals(o2)) return 0;
 
       ArrayList<Modifier> o1Matches = findMatchingModifiers(o1);
-      if (o1 != null && o1Matches.size() == target.appliedModifiers.length) return -1;
+      if (o1Matches != null && o1Matches.size() == target.appliedModifiers.length) return -1;
       ArrayList<Modifier> o2Matches = findMatchingModifiers(o2);
-      if (o1 == null && o2 == null) return 0;
-      if (o1 == null && o2 != null) return 1;
-      if (o1 != null && o2 == null) return -1;
+      if (o1Matches == null && o2Matches == null) return 0;
+      if (o1Matches == null && o2Matches != null) return 1;
+      if (o1Matches != null && o2Matches == null) return -1;
 
       if (o1Matches.size() > o2Matches.size()) {
         return -1;
@@ -481,9 +496,6 @@ public class DragonVariants {
 
     private ModifiedCategory target;
   }
-
-  NEED TO TEST THESE NEW METHODS
-
 
   private ArrayList<HashMap<DragonVariantTag, Object>> allAppliedTags;
   private String breedInternalName;

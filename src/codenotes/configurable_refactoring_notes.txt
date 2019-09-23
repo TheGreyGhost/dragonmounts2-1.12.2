@@ -79,6 +79,30 @@ eg
 have additional DragonVariantTag overload with modifiers
 
 
+ModifiedCategoryRanker:
+- test for correct rankings:
+  - target is empty:
+    - one mc  is empty the other isn't
+    - both mc are empty
+  - target has one modifier:
+      - one mc has the same modifier, the other a different
+      - one mc has no modifiers, the other has the wrong one
+      - both mc have one modifier which matches
+      - both mc have no modifiers
+  - target has two modifiers:
+      - one mc has one of the modifiers, the other has the other
+      - one mc has one of the modifiers, the other has both
+      - one mc has one of the modifiers, the other has one which is wrong
+      - one mc has one of the modifiers, the other has two, one of which is wrong
+
+
+
+
+
+
+
+
+
 
 
 
