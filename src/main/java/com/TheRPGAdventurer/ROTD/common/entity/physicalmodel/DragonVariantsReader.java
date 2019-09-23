@@ -134,8 +134,8 @@ public class DragonVariantsReader {
    * @return the JSON output
    */
   public static String outputAsJSON(DragonVariants dragonVariants, boolean includeComments) {
-    SortedMap<DragonVariants.Category, ImmutableSortedMap<DragonVariantTag, Object>> allTags = new TreeMap<>();
-    for (DragonVariants.Category category : DragonVariants.Category.values()) {
+    SortedMap<DragonVariants.ModifiedCategory, ImmutableSortedMap<DragonVariantTag, Object>> allTags = new TreeMap<>();
+    for (DragonVariants.ModifiedCategory category : DragonVariants.Category.values()) {
       allTags.put(category, dragonVariants.getAllAppliedTagsForCategory(category));
     }
 
@@ -147,14 +147,14 @@ public class DragonVariantsReader {
       json.append("\",\n");
 
     int nonEmptyCategoryCount = 0;
-    for (SortedMap.Entry<DragonVariants.Category, ImmutableSortedMap<DragonVariantTag, Object>> entry : allTags.entrySet() ) {
+    for (SortedMap.Entry<DragonVariants.ModifiedCategory, ImmutableSortedMap<DragonVariantTag, Object>> entry : allTags.entrySet() ) {
       if (!entry.getValue().isEmpty()) {
         ++nonEmptyCategoryCount;
       }
     }
 
     int line = 0;
-    for (SortedMap.Entry<DragonVariants.Category, ImmutableSortedMap<DragonVariantTag, Object>> entry : allTags.entrySet() ) {
+    for (SortedMap.Entry<DragonVariants.ModifiedCategory, ImmutableSortedMap<DragonVariantTag, Object>> entry : allTags.entrySet() ) {
       if (!entry.getValue().isEmpty()) {
         boolean lastCategory = (++line) == nonEmptyCategoryCount;
         outputCategoryAsJSON(json, entry.getKey(), entry.getValue(), lastCategory, includeComments);
@@ -166,14 +166,14 @@ public class DragonVariantsReader {
   }
 
   private static void outputCategoryAsJSON(StringBuilder json,
-                                           DragonVariants.Category category,  ImmutableMap<DragonVariantTag, Object> tags,
+                                           DragonVariants.ModifiedCategory category,  ImmutableMap<DragonVariantTag, Object> tags,
                                            boolean lastCategory,
                                            boolean includeComments) {
     json.append("  \"");
-    json.append(category.getTextName());
+    json.append(category.toString());
     json.append("\": {\n");
-    if (includeComments && category.getComment().length() > 0) {
-      addComment(json, category.getComment(), "    // ", "    // ");
+    if (includeComments && category.getCategory().getComment().length() > 0) {
+      addComment(json, category.getCategory().getComment(), "    // ", "    // ");
       json.append("\n");
     }
 
@@ -324,7 +324,7 @@ public class DragonVariantsReader {
       String categoryName = entry.getKey();
       if (!categoryName.equals(BREED_INTERNAL_NAME_JSON)) {
         try {
-          DragonVariants.Category category = DragonVariants.Category.getCategoryFromName(categoryName);
+          DragonVariants.ModifiedCategory category = DragonVariants.ModifiedCategory.parseFromString(categoryName);
           deserializeAllTagsForOneCategory(dragonVariants, category, entry.getValue());
         } catch (IllegalArgumentException iae) {
           dragonVariantsErrors.addError(iae);
@@ -340,7 +340,7 @@ public class DragonVariantsReader {
    * @param jsonElement the object comprising the category
    * @return
    */
-  private DragonVariants deserializeAllTagsForOneCategory(DragonVariants dragonVariants, DragonVariants.Category category, JsonElement jsonElement) {
+  private DragonVariants deserializeAllTagsForOneCategory(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category, JsonElement jsonElement) {
     if (!jsonElement.isJsonObject()) throw new IllegalArgumentException("malformed entry for category " + category);
     JsonObject object = jsonElement.getAsJsonObject();
     for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
@@ -369,14 +369,14 @@ public class DragonVariantsReader {
    * @param dragonVariants
    * @param jsonArray
    */
-  private void deserializeFlagTags(DragonVariants dragonVariants, DragonVariants.Category category, JsonArray jsonArray) {
+  private void deserializeFlagTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category, JsonArray jsonArray) {
     // Iterator to traverse the list
     Iterator<JsonElement> flagIterator = jsonArray.iterator();
     while (flagIterator.hasNext()) {
       JsonElement element = flagIterator.next();
       try {
         if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
-          dragonVariantsErrors.addError("problem with tag " + category.getTextName() + ":flags - not correctly formatted");
+          dragonVariantsErrors.addError("problem with flags in category " + category.toString() + " - not correctly formatted");
         } else {
           deserialiseFlagTag(dragonVariants, category, element.getAsJsonPrimitive().getAsString());
         }
@@ -391,7 +391,7 @@ public class DragonVariantsReader {
     }
   }
 
-  private void deserialiseTagWithValue(DragonVariants dragonVariants, DragonVariants.Category category,
+  private void deserialiseTagWithValue(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category,
                                        String tagName, JsonElement tagValue) throws IllegalArgumentException {
     DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
     String value;
@@ -405,11 +405,11 @@ public class DragonVariantsReader {
         throw new IllegalArgumentException("value has an unexpected type");
       }
     } catch (Exception e) {
-      throw new IllegalArgumentException("problem with tag " + category.getTextName() + ":" + tagName + "-" + e.getMessage());
+      throw new IllegalArgumentException("problem with tag " + category.toString() + ":" + tagName + "-" + e.getMessage());
     }
   }
 
-  private void deserialiseFlagTag(DragonVariants dragonVariants, DragonVariants.Category category,
+  private void deserialiseFlagTag(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category,
                                   String tagName) throws IllegalArgumentException {
     DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
     dragonVariants.addTagAndValue(category, tag, "");

@@ -202,7 +202,6 @@ public class DragonVariants {
     if (dragonVariantsErrors.hasErrors()) throw new DragonVariantsException(dragonVariantsErrors);
   }
 
-
   /**
    * Gets the value of a particular tag applied to this dragon, or the default value if the tag hasn't been applied
    *
@@ -401,8 +400,12 @@ public class DragonVariants {
       throw new IllegalArgumentException(errorMsg);
     }
 
+    public Category getCategory() {
+      return category;
+    }
+
     public static ModifiedCategory parseFromString(String text) throws IllegalArgumentException {
-      String [] split = text.split(":");
+      String[] split = text.split(":");
       Category category;
       if (split.length == 0) {
         category = Category.getCategoryFromName("");  // will almost certainly throw IAE
@@ -414,21 +417,22 @@ public class DragonVariants {
         throw new IllegalArgumentException("Syntax error with category:modifiers value (" + text + ")");
       }
       split = split[1].split(",");
-      Modifier [] modifiers = new Modifier[split.length];
+      Modifier[] modifiers = new Modifier[split.length];
       int i = 0;
       for (String modText : split) {
         modifiers[i++] = Modifier.getModifierFromText(modText.trim());
       }
       return new ModifiedCategory(category, modifiers);
     }
+
     private Category category;
-    private Modifier [] appliedModifiers;  // sorted in order
+    private Modifier[] appliedModifiers;  // sorted in order
 
     @Override
     public boolean equals(Object other) {
       if (other == this) return true;
       if (!(other instanceof ModifiedCategory)) return false;
-      ModifiedCategory otherMC = (ModifiedCategory)other;
+      ModifiedCategory otherMC = (ModifiedCategory) other;
       if (!category.equals(otherMC.category)) return false;
       return Arrays.equals(appliedModifiers, otherMC.appliedModifiers);
     }
@@ -436,6 +440,22 @@ public class DragonVariants {
     @Override
     public int hashCode() {
       return category.hashCode() ^ appliedModifiers.hashCode();
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append(category.getTextName());
+      if (appliedModifiers.length > 0) {
+        stringBuilder.append(":");
+        boolean first = true;
+        for (Modifier modifier : appliedModifiers) {
+          if (!first) stringBuilder.append(", ");
+          first = false;
+          stringBuilder.append(modifier.getTextname());
+        }
+      }
+      return stringBuilder.toString();
     }
   }
 
@@ -497,7 +517,9 @@ public class DragonVariants {
     private ModifiedCategory target;
   }
 
-  private ArrayList<HashMap<DragonVariantTag, Object>> allAppliedTags;
+  private HashMap<DragonVariantTag, H>
+
+  private HashMap<ModifiedCategory, HashMap<DragonVariantTag, Object>> allAppliedTags;
   private String breedInternalName;
 
   private static Set<VariantTagValidator> variantTagValidators = new HashSet<>();
