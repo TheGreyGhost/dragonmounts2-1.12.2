@@ -143,27 +143,22 @@ public class DragonVariants {
   }
 
   public DragonVariants(String breedInternalName) {
-    int categoryCount = Category.values().length;
-    allAppliedTags = new ArrayList<>(categoryCount);
-    for (int i = 0; i < categoryCount; ++i) {
-      allAppliedTags.add(i, null);
-    }
-    for (Category category : Category.values()) {
-      checkElementIndex(category.getIdx(), categoryCount);
-      allAppliedTags.set(category.getIdx(), new HashMap<>());
-    }
+    allAppliedTags = new HashMap<>();
     this.breedInternalName = breedInternalName;
   }
 
-  public void addTagAndValue(Category category, DragonVariantTag tag, Object tagValue) throws IllegalArgumentException {
-    if (!tag.getExpectedCategories().contains(category)) {
+  public void addTagAndValue(ModifiedCategory modifiedCategory, DragonVariantTag tag, Object tagValue) throws IllegalArgumentException {
+    if (!tag.getExpectedCategories().contains(modifiedCategory.getCategory())) {
       throw new IllegalArgumentException(
-              "Tag " + tag.getTextname() + " was found in unexpected category " + category.getTextName()
+              "Tag " + tag.getTextname() + " was found in unexpected category " + modifiedCategory.getCategory().getTextName()
               + ".  Valid categories for this tag are: " + tag.getExpectedCategoriesAsText(", ")
               );
     }
     Object convertedValue = tag.convertValue(tagValue);
-    allAppliedTags.get(category.getIdx()).put(tag, convertedValue);
+    if (!allAppliedTags.containsKey(tag)) {
+      allAppliedTags.put(tag, new HashMap<>());
+    }
+    allAppliedTags.get(tag).put(modifiedCategory, convertedValue);
   }
 
   /**
@@ -208,69 +203,100 @@ public class DragonVariants {
    * @param tag
    * @return
    */
-  public Object getValueOrDefault(Category category, DragonVariantTag tag) {
-    return allAppliedTags.get(category.getIdx()).getOrDefault(tag, tag.getDefaultValue());
+  public Object getValueOrDefault(ModifiedCategory modifiedCategory, DragonVariantTag tag) {
+    // algorithm:
+    // if the tag hasn't been applied at all, return the default value
+    // otherwise, find the best-matching modifiedcategory for the target modifiedCategory
+    //   if the match is acceptable (same category, and doesn't contain any modifiers not in the target
+
+    if (!allAppliedTags.containsKey(tag)) return tag.getDefaultValue();
+    HashMap<ModifiedCategory, Object> mco = allAppliedTags.get(tag);
+    ModifiedCategoryRanker mcr = new ModifiedCategoryRanker(modifiedCategory);
+    ModifiedCategory bestMatch = Collections.min(mco.keySet(), mcr);
+    if (mcr.isAcceptableMatch(bestMatch)) {
+      return mco.get(bestMatch);
+    } else {
+      return tag.getDefaultValue();
+    }
   }
 
   /**
-   * Does the config file contain this tag?
-   * @param category
+   * Does the config file contain this tag in the given category?
+   * @param category - the category for the tag, modifiers not relevant
    * @param tag
-   * @return true if the tag has been explicitly applied; false if using the default.
+   * @return true if the tag has been explicitly applied to this category; false if using the default.
    */
   public boolean tagIsExplictlyApplied(Category category, DragonVariantTag tag) {
-    return allAppliedTags.get(category.getIdx()).containsKey(tag);
+    if (!allAppliedTags.containsKey(tag)) return false;
+    HashMap<ModifiedCategory, Object> mco = allAppliedTags.get(tag);
+    for (ModifiedCategory mc : mco.keySet()) {
+      if (mc.getCategory().equals(category)) return true;
+    }
+    return false;
   }
 
   /** remove one or more tags (set back to default)
    */
   public void removeTag(Category category, DragonVariantTag tagToRemove) {
-    allAppliedTags.get(category.getIdx()).remove(tagToRemove);
+    if (!allAppliedTags.containsKey(tagToRemove)) return;
+    HashMap<ModifiedCategory, Object> mco = allAppliedTags.get(tagToRemove);
+    mco.entrySet().removeIf(e->e.getKey().getCategory().equals(category));
   }
 
   public void removeTags(Category category, Collection<DragonVariantTag> tagsToRemove) {
     for (DragonVariantTag dragonVariantTag : tagsToRemove)
-      allAppliedTags.get(category.getIdx()).remove(dragonVariantTag);
+      removeTag(category, dragonVariantTag);
   }
 
   public void removeTags(Category category, DragonVariantTag... tagsToRemove) {
     for (DragonVariantTag dragonVariantTag : tagsToRemove)
-      allAppliedTags.get(category.getIdx()).remove(dragonVariantTag);
+      removeTag(category, dragonVariantTag);
   }
 
   public String getBreedInternalName() {
     return breedInternalName;
   }
 
-  public ImmutableSortedMap<DragonVariantTag, Object> getAllAppliedTagsForCategory(Category category) {
-    return ImmutableSortedMap.copyOf(allAppliedTags.get(category.getIdx()));
-  }
+  public ImmutableSortedMap<DragonVariantTag, Object> getAllAppliedTagsForCategory(ModifiedCategory modifiedCategory) {
+    Map<DragonVariantTag, Object> allTags = new HashMap<>();
+    for (Map.Entry<DragonVariantTag, HashMap<ModifiedCategory, Object>> entry : allAppliedTags.entrySet()) {
+      HashMap<ModifiedCategory, Object> mco = entry.getValue();
+      if (mco.containsKey(modifiedCategory)) {
+        allTags.put(entry.getKey(), mco.get(modifiedCategory));
+      }
+    }
 
+    return ImmutableSortedMap.copyOf(allTags);
+  }
 
   // shortcut to access DragonVariants with a particular category, without having to provide the category every time
   //  (visually less cluttered)
   // For information about the methods, see the corresponding methods in DragonVariants
   public class DragonVariantsCategoryShortcut {
-    public DragonVariantsCategoryShortcut(Category category) {
-      this.category = category;
+    public DragonVariantsCategoryShortcut(ModifiedCategory modifiedCategory) {
+      this.modifiedCategory = modifiedCategory;
     }
 
     public Object getValueOrDefault(DragonVariantTag tag) {
-      return DragonVariants.this.getValueOrDefault(category, tag);
+      return DragonVariants.this.getValueOrDefault(modifiedCategory, tag);
     }
 
     public boolean tagIsExplictlyApplied(DragonVariantTag tag) {
-      return DragonVariants.this.tagIsExplictlyApplied(category, tag);
+      return DragonVariants.this.tagIsExplictlyApplied(modifiedCategory.getCategory(), tag);
     }
 
     public boolean checkForConflict(DragonVariantsException.DragonVariantsErrors errors,
                                     DragonVariantTag masterTag, Object masterConflictState,
                                     boolean slaveConflictState, DragonVariantTag... slaveTags) {
-      return DragonVariants.this.checkForConflict(errors, category, masterTag, masterConflictState,
+      return DragonVariants.this.checkForConflict(errors, modifiedCategory, masterTag, masterConflictState,
                                                   slaveConflictState, slaveTags);
     }
 
-      private Category category;
+      private ModifiedCategory modifiedCategory;
+  }
+
+  public List<ModifiedCategory> getAllModifiedCategories(Category category) {
+
   }
 
   /** check whether there is a conflict between a "master" tag and "slave" tags
@@ -279,23 +305,27 @@ public class DragonVariants {
    *   In this case, the master tag is the flag and the two slaves are the parameters
    *   masterConflictState is false and slaveConflictState is true
    * @param errors    the errors log to populate with an error message if any
-   * @param category the category to look in
+   * @param modifiedCategory the category to look in
    * @param masterTag the master tag to check
    * @param masterConflictState if the master tag is in this state, check for slave conflicts.
    * @param slaveConflictState if any of the slave tags are in this state, and master matches masterConflictState, then we have a conflict
    * @param slaveTags one or more slaveTags to check for conflicts
    * @return true if a conflict was discovered
    */
-  public boolean checkForConflict(DragonVariantsException.DragonVariantsErrors errors, Category category,
+
+  THIS IS A PROBLEM NEED TO RESTRICT CHECKING TO A SINGLE MODIFIEDCATEGORY - the FLAGS MAY NOT WORK OTHERWISE (FALL THROUGH)
+    MAY NEED TO RIP OUT FLAGS AND REPLACE WITH BOOLEAN true/false
+
+  public boolean checkForConflict(DragonVariantsException.DragonVariantsErrors errors, ModifiedCategory modifiedCategory,
                                   DragonVariantTag masterTag, Object masterConflictState,
                                   boolean slaveConflictState, DragonVariantTag... slaveTags) {
     String masterConditionText = "";
     if (masterTag.getDefaultValue() instanceof Boolean) {
-      if ((Boolean)masterConflictState != tagIsExplictlyApplied(category, masterTag)) return false;
+      if ((Boolean)masterConflictState != tagIsExplictlyApplied(modifiedCategory.getCategory(), masterTag)) return false;
       masterConditionText = (Boolean)masterConflictState ? " is defined" : " is not defined";
     } else {
-      if (!masterConflictState.equals(getValueOrDefault(category, masterTag))) return false;
-      if (tagIsExplictlyApplied(category, masterTag)) {
+      if (!masterConflictState.equals(getValueOrDefault(modifiedCategory, masterTag))) return false;
+      if (tagIsExplictlyApplied(modifiedCategory.getCategory(), masterTag)) {
         masterConditionText = " has the value \"" + masterConflictState.toString() + "\"";
       } else {
         masterConditionText = " has the default value \"" + masterConflictState.toString() + "\"";
@@ -304,7 +334,7 @@ public class DragonVariants {
 
     List<DragonVariantTag> conflictSlaves = new ArrayList<>();
     for (DragonVariantTag slave : slaveTags) {
-      if (slaveConflictState == tagIsExplictlyApplied(category, slave)) {
+      if (slaveConflictState == tagIsExplictlyApplied(modifiedCategory.getCategory(), slave)) {
         conflictSlaves.add(slave);
       }
     }
@@ -492,6 +522,14 @@ public class DragonVariants {
       return 0;
     }
 
+    // Is the given ModifiedCategory an acceptable match for the target?
+    // i.e. it belongs to the same category, and it doesn't contain any
+    //   modifiers which are applied to the target?
+    public boolean isAcceptableMatch(ModifiedCategory mc) {
+      List<Modifier> matched = findMatchingModifiers(mc);
+      return (matched != null);
+    }
+
     // returns the matching modifiers, or null if incompatible (mc contains modifiers which aren't in the target)
     private ArrayList<Modifier> findMatchingModifiers(ModifiedCategory mc) {
       ArrayList<Modifier> matchedModifers = new ArrayList<>();
@@ -517,9 +555,7 @@ public class DragonVariants {
     private ModifiedCategory target;
   }
 
-  private HashMap<DragonVariantTag, H>
-
-  private HashMap<ModifiedCategory, HashMap<DragonVariantTag, Object>> allAppliedTags;
+  private HashMap<DragonVariantTag, HashMap<ModifiedCategory, Object>> allAppliedTags;
   private String breedInternalName;
 
   private static Set<VariantTagValidator> variantTagValidators = new HashSet<>();

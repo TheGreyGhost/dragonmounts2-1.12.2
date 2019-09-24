@@ -95,6 +95,20 @@ ModifiedCategoryRanker:
       - one mc has one of the modifiers, the other has one which is wrong
       - one mc has one of the modifiers, the other has two, one of which is wrong
 
+To test:
+getValueOrDefault
+tagIsExplicitlyApplied
+removeTag
+
+getAllAppliedTagsForCategory
+
+validation correct
+
+ModifierCategoryRanker:
+isacceptablematch
+
+
+
 
 
 
