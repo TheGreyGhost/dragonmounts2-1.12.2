@@ -91,8 +91,10 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   public DragonLifeStageHelper(EntityTameableDragon dragon, DataParameter<Integer> dataParam, DragonVariants dragonVariants) {
     super(dragon);
+    DragonVariants.ModifiedCategory modifiedCategory =
+            new DragonVariants.ModifiedCategory(Category.LIFE_STAGE, dragon.getConfigurationFileCategoryModifiers());
     try {
-      readConfiguration(dragonVariants);
+      readConfiguration(dragonVariants, modifiedCategory);
     } catch (IllegalArgumentException iae) {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
@@ -114,7 +116,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     ticksSinceCreationClient = null;
     dataParam = null;
     try {
-      readConfiguration(dragonVariants);
+      readConfiguration(dragonVariants, new DragonVariants.ModifiedCategory(Category.LIFE_STAGE));
     } catch (IllegalArgumentException iae) {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
@@ -755,24 +757,24 @@ public class DragonLifeStageHelper extends DragonHelper {
   private double adultAgeTicks = 0.0;
   private double maximumSizeAtAnyAge = 0.0;
 
-  private static double [] getLifeStageAges(DragonVariants dragonVariants) {
+  private static double [] getLifeStageAges(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) {
     double [] lifeStageAgesConfig = {0.0,
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_LATE_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, AGE_ADULT)
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, AGE_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, AGE_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, AGE_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, AGE_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, AGE_ADULT)
     };
     return lifeStageAgesConfig;
   }
 
-  private static double [] getGrowthRatePoints(DragonVariants dragonVariants) {
+  private static double [] getGrowthRatePoints(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) {
     double [] growthRatePointsConfig = {
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_HATCHLING),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, GROWTHRATE_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, GROWTHRATE_HATCHLING),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, GROWTHRATE_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, GROWTHRATE_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, GROWTHRATE_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, GROWTHRATE_LATE_TEEN),
             0.0
     };
     return growthRatePointsConfig;
@@ -784,90 +786,90 @@ public class DragonLifeStageHelper extends DragonHelper {
    * @param dragonVariants
    * @throws IllegalArgumentException if the configuration is bad (not expected, because validation should have fixed this already)
    */
-  private void readConfiguration(DragonVariants dragonVariants) throws IllegalArgumentException {
-    lifeStageAges = getLifeStageAges(dragonVariants);
+  private void readConfiguration(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
+    lifeStageAges = getLifeStageAges(dragonVariants, modifiedCategory);
     adultAgeTicks = lifeStageAges[lifeStageAges.length - 1] * TICKS_PER_MINECRAFT_DAY;
 
     double [] init2 = {
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_HATCHLING),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_LATE_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, BREATHMATURITY_ADULT)
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_HATCHLING),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_ADULT)
             };
     breathMaturityPoints = init2;
 
     double [] init3 = {
             0.0,
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, PHYSICALMATURITY_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, PHYSICALMATURITY_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, PHYSICALMATURITY_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, PHYSICALMATURITY_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, PHYSICALMATURITY_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, PHYSICALMATURITY_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, PHYSICALMATURITY_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, PHYSICALMATURITY_LATE_TEEN),
             100.0
     };
     physicalMaturityPoints = init3;
 
     double [] init4 = {
             0.0,
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, EMOTIONALMATURITY_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, EMOTIONALMATURITY_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, EMOTIONALMATURITY_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, EMOTIONALMATURITY_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, EMOTIONALMATURITY_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, EMOTIONALMATURITY_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, EMOTIONALMATURITY_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, EMOTIONALMATURITY_LATE_TEEN),
             100.0
     };
     emotionalMaturityPoints = init4;
 
     double [] init5 = {
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ATTACKDAMAGEPERCENT_HATCHLING),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ATTACKDAMAGEPERCENT_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ATTACKDAMAGEPERCENT_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ATTACKDAMAGEPERCENT_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ATTACKDAMAGEPERCENT_LATE_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ATTACKDAMAGEPERCENT_ADULT)
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_HATCHLING),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_ADULT)
     };
     attackdamage = multiplyArrayWithClipping(init5, 0.01 *
-                    (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ATTACKDAMAGEBASE),
+                    (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEBASE),
                     ATTACKDAMAGE_MIN, ATTACKDAMAGE_MAX);
 
     double [] init6 = {
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, HEALTHPERCENT_HATCHLING),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, HEALTHPERCENT_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, HEALTHPERCENT_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, HEALTHPERCENT_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, HEALTHPERCENT_LATE_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, HEALTHPERCENT_ADULT)
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_HATCHLING),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_ADULT)
     };
     health = multiplyArrayWithClipping(init6, 0.01 *
-                    (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, HEALTHBASE),
+                    (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHBASE),
                     HEALTH_MIN, HEALTH_MAX);
 
     double [] init7 = {
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURPERCENT_HATCHLING),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURPERCENT_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURPERCENT_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURPERCENT_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURPERCENT_LATE_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURPERCENT_ADULT)
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_HATCHLING),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_ADULT)
     };
     armour = multiplyArrayWithClipping(init7, 0.01 *
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURBASE),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURBASE),
             ARMOUR_MIN, ARMOUR_MAX);
 
     double [] init8 = {
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURTOUGHNESSPERCENT_HATCHLING),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURTOUGHNESSPERCENT_INFANT),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURTOUGHNESSPERCENT_CHILD),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURTOUGHNESSPERCENT_EARLY_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURTOUGHNESSPERCENT_LATE_TEEN),
-            (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURTOUGHNESSPERCENT_ADULT)
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSPERCENT_HATCHLING),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSPERCENT_INFANT),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSPERCENT_CHILD),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSPERCENT_EARLY_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSPERCENT_LATE_TEEN),
+            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSPERCENT_ADULT)
     };
     armourtoughness = multiplyArrayWithClipping(init8, 0.01 *
-                    (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, ARMOURTOUGHNESSBASE),
+                    (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSBASE),
                     ARMOURTOUGHNESS_MIN, ARMOURTOUGHNESS_MAX);
 
-    growthratePoints = getGrowthRatePoints(dragonVariants);
-    Pair<double[], double []> curves = calculatePhysicalSizeCurve(dragonVariants, lifeStageAges, growthratePoints);
+    growthratePoints = getGrowthRatePoints(dragonVariants, modifiedCategory);
+    Pair<double[], double []> curves = calculatePhysicalSizeCurve(dragonVariants, modifiedCategory, lifeStageAges, growthratePoints);
     physicalSizePoints = curves.getLeft();
     growthratePoints = curves.getRight();
     maximumSizeAtAnyAge = Doubles.max(physicalSizePoints);
@@ -905,7 +907,7 @@ public class DragonLifeStageHelper extends DragonHelper {
    * @return the physical size curve and the growth curve, scaled to units of metres and metres/day respectively
    * @throws IllegalArgumentException
    */
-  private static Pair<double[], double[]> calculatePhysicalSizeCurve(DragonVariants dragonVariants,
+  private static Pair<double[], double[]> calculatePhysicalSizeCurve(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory,
                                                                      double[] lifeStageAges, double[] growthratePoints)
           throws DragonVariantsException
   {
@@ -931,26 +933,26 @@ public class DragonLifeStageHelper extends DragonHelper {
       minIntegral = Math.min(minIntegral, physicalSizePoints[i]);
       maxIntegral = Math.max(maxIntegral, physicalSizePoints[i]);
     }
-    double sizeHatchling = (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, SIZE_HATCHLING);
-    double sizeAdult = (double)dragonVariants.getValueOrDefault(DragonVariants.Category.LIFE_STAGE, SIZE_ADULT);
+    double sizeHatchling = (double)dragonVariants.getValueOrDefault(modifiedCategory, SIZE_HATCHLING);
+    double sizeAdult = (double)dragonVariants.getValueOrDefault(modifiedCategory, SIZE_ADULT);
     double integral = physicalSizePoints[growthratePoints.length-1];
 
     final double SMALL_NON_ZERO = 1;
     double normaliseFactor = 0.0;
     if (   (sizeAdult >= sizeHatchling && integral < SMALL_NON_ZERO)
         || (sizeAdult < sizeHatchling && integral > -SMALL_NON_ZERO))  {
-      dragonVariantsErrors.addError(DragonVariants.Category.LIFE_STAGE.getTextName()
+      dragonVariantsErrors.addError(modifiedCategory.toString()
                                       + " growthrate curve can't be fitted to sizehatchling->sizeadult "
                                       + " (eg growthrates are positive but adult is smaller than hatchling)");
     } else {
       normaliseFactor = (sizeAdult - sizeHatchling) / integral;
       if (sizeHatchling + minIntegral * normaliseFactor < SIZE_MIN) {
         normaliseFactor = 0.0;
-        dragonVariantsErrors.addError(DragonVariants.Category.LIFE_STAGE.getTextName()
+        dragonVariantsErrors.addError(modifiedCategory.toString()
                 + " growthrate curve produces a dragon less than the minimum size of " + SIZE_MIN);
       } else if (sizeHatchling + maxIntegral * normaliseFactor > SIZE_MAX) {
         normaliseFactor = 0.0;
-        dragonVariantsErrors.addError(DragonVariants.Category.LIFE_STAGE.getTextName()
+        dragonVariantsErrors.addError(modifiedCategory.toString()
                 + " growthrate curve produces a dragon bigger than the maximum size of " + SIZE_MAX);
       }
     }
@@ -977,21 +979,22 @@ public class DragonLifeStageHelper extends DragonHelper {
    */
   public static class DragonLifeStageValidator implements DragonVariants.VariantTagValidator {
     @Override
-    public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
+    public void validateVariantTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
       DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
+      if (!modifiedCategory.getCategory().equals(Category.LIFE_STAGE)) return;
 
-      double [] lifeStageAgesConfig = getLifeStageAges(dragonVariants);
+      double [] lifeStageAgesConfig = getLifeStageAges(dragonVariants, modifiedCategory);
       if (!Interpolation.isValidInterpolationArray(lifeStageAgesConfig)) {
         DragonVariantTag [] tagsToRemove = {AGE_INFANT, AGE_CHILD, AGE_EARLY_TEEN, AGE_LATE_TEEN, AGE_ADULT};
         dragonVariants.removeTags(DragonVariants.Category.LIFE_STAGE, tagsToRemove);
-        lifeStageAgesConfig = getLifeStageAges(dragonVariants);  // read defaults
+        lifeStageAgesConfig = getLifeStageAges(dragonVariants, modifiedCategory);  // read defaults
         dragonVariantsErrors.addError(DragonVariants.Category.LIFE_STAGE.getTextName()
                 + " age values invalid (each age must be bigger than the previous age)");
       }
 
-      double [] growthRatePointsConfig = getGrowthRatePoints(dragonVariants);
+      double [] growthRatePointsConfig = getGrowthRatePoints(dragonVariants, modifiedCategory);
       try {
-        Pair<double[], double []> curves = calculatePhysicalSizeCurve(dragonVariants, lifeStageAgesConfig, growthRatePointsConfig);
+        Pair<double[], double []> curves = calculatePhysicalSizeCurve(dragonVariants, modifiedCategory, lifeStageAgesConfig, growthRatePointsConfig);
       } catch (DragonVariantsException dve) {
         DragonVariantTag [] tagsToRemove = {GROWTHRATE_HATCHLING, GROWTHRATE_INFANT, GROWTHRATE_CHILD,
                                             GROWTHRATE_EARLY_TEEN, GROWTHRATE_LATE_TEEN, SIZE_HATCHLING, SIZE_ADULT};
@@ -1004,7 +1007,7 @@ public class DragonLifeStageHelper extends DragonHelper {
       }
     }
     @Override
-    public void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException {
+    public void initaliseResources(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
       // do nothing - no resources to initialise
     }
   }

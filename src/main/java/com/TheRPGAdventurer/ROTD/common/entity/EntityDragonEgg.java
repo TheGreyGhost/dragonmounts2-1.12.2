@@ -34,7 +34,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by TGG on 10/08/2019.
@@ -85,44 +84,52 @@ public class EntityDragonEgg extends Entity {
     DataSerializers.registerSerializer(EGG_STATE_SERIALIZER);
   }
 
+  // get the modifiers which are applied to this dragon
+  //  (female, male, etc)
+  public DragonVariants.Modifier []  getConfigurationFileCategoryModifiers() {
+    return new DragonVariants.Modifier[0];  //todo later on: set appropriately.
+  }
+
   private void initialiseConfigurableParameters(DragonBreedNew dragonBreed) {
+    DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(Category.EGG, getConfigurationFileCategoryModifiers());
+
     final int TICKS_PER_MINECRAFT_DAY = 20 * 60 * 20;  // 20 ticks/sec * 60 sec/min * 20 min per minecraft day
     DragonVariants dragonVariants = dragonBreed.getDragonVariants();
-    userConfiguredParameters.eggSizeMeters = (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_SIZE_METRES);
+    userConfiguredParameters.eggSizeMeters = (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_SIZE_METRES);
 
-    int eggIncubationTicks = (int)(TICKS_PER_MINECRAFT_DAY * (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_INCUBATION_DAYS));
+    int eggIncubationTicks = (int)(TICKS_PER_MINECRAFT_DAY * (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_INCUBATION_DAYS));
     userConfiguredParameters.eggIncubationCompleteTicks = eggIncubationTicks;
-    userConfiguredParameters.eggWiggleStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_WIGGLE_START_FRACTION));
-    userConfiguredParameters.eggCrackStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_CRACK_START_FRACTION));
-    userConfiguredParameters.eggGlowStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_GLOW_START_FRACTION));
-    userConfiguredParameters.eggLevitateStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_LEVITATE_START_FRACTION));
-    userConfiguredParameters.eggSpinStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_SPIN_START_FRACTION));
+    userConfiguredParameters.eggWiggleStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_WIGGLE_START_FRACTION));
+    userConfiguredParameters.eggCrackStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_CRACK_START_FRACTION));
+    userConfiguredParameters.eggGlowStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_GLOW_START_FRACTION));
+    userConfiguredParameters.eggLevitateStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_LEVITATE_START_FRACTION));
+    userConfiguredParameters.eggSpinStartTicks = (int)(eggIncubationTicks * (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_SPIN_START_FRACTION));
 
-    userConfiguredParameters.eggLevitateHeightMetres = (double)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_LEVITATE_HEIGHT_METRES);
-    userConfiguredParameters.eggSpinMaxSpeedDegPerSecond = 360.0F * (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_SPIN_REVS_PER_SECOND);
+    userConfiguredParameters.eggLevitateHeightMetres = (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_LEVITATE_HEIGHT_METRES);
+    userConfiguredParameters.eggSpinMaxSpeedDegPerSecond = 360.0F * (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_SPIN_REVS_PER_SECOND);
 
-    userConfiguredParameters.bounceRecoilFactor = (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_BOUNCE_RECOIL_FACTOR);
+    userConfiguredParameters.bounceRecoilFactor = (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_BOUNCE_RECOIL_FACTOR);
 
-    userConfiguredParameters.wiggleFlag = (boolean)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_WIGGLE);
-    userConfiguredParameters.crackFlag = (boolean)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_CRACKING);
-    userConfiguredParameters.glowFlag = (boolean)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_GLOW);
-    userConfiguredParameters.levitateFlag = (boolean)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_LEVITATE);
-    userConfiguredParameters.spinFlag = (boolean)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_SPIN);
+    userConfiguredParameters.wiggleFlag = (boolean)dragonVariants.getValueOrDefault(modifiedCategory, EGG_WIGGLE);
+    userConfiguredParameters.crackFlag = (boolean)dragonVariants.getValueOrDefault(modifiedCategory, EGG_CRACKING);
+    userConfiguredParameters.glowFlag = (boolean)dragonVariants.getValueOrDefault(modifiedCategory, EGG_GLOW);
+    userConfiguredParameters.levitateFlag = (boolean)dragonVariants.getValueOrDefault(modifiedCategory, EGG_LEVITATE);
+    userConfiguredParameters.spinFlag = (boolean)dragonVariants.getValueOrDefault(modifiedCategory, EGG_SPIN);
 
-    String particleName = (String)dragonVariants.getValueOrDefault(Category.EGG, EGG_PARTICLES_NAME);
+    String particleName = (String)dragonVariants.getValueOrDefault(modifiedCategory, EGG_PARTICLES_NAME);
     userConfiguredParameters.enumParticleType = EnumParticleTypes.getByName(particleName);
-    if ((boolean)dragonVariants.getValueOrDefault(Category.EGG, EGG_NO_PARTICLES)) {
+    if ((boolean)dragonVariants.getValueOrDefault(modifiedCategory, EGG_PARTICLES)) {
       userConfiguredParameters.enumParticleType = null;
     }
-    userConfiguredParameters.particleSpawnParameterIsColour = "color".matches((String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_PARTICLES_SPEED_OR_COLOUR));
-    userConfiguredParameters.particleSpawnRGB = parseRGB((String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_PARTICLES_RGB));
-    userConfiguredParameters.particleSpawnRatePerTick = (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_PARTICLES_SPAWN_RATE_PER_SECOND)
+    userConfiguredParameters.particleSpawnParameterIsColour = "color".matches((String)dragonVariants.getValueOrDefault(modifiedCategory, EGG_PARTICLES_SPEED_OR_COLOUR));
+    userConfiguredParameters.particleSpawnRGB = parseRGB((String)dragonVariants.getValueOrDefault(modifiedCategory, EGG_PARTICLES_RGB));
+    userConfiguredParameters.particleSpawnRatePerTick = (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_PARTICLES_SPAWN_RATE_PER_SECOND)
                                                         / 20.0;
-    userConfiguredParameters.particleSpawnSpeedMinMperTick = (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_PARTICLES_SPEED_MIN_MPS)
+    userConfiguredParameters.particleSpawnSpeedMinMperTick = (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_PARTICLES_SPEED_MIN_MPS)
                                                               / 20.0;
-    userConfiguredParameters.particleSpawnSpeedMaxMperTick = (double)dragonVariants.getValueOrDefault(Category.EGG, EGG_PARTICLES_SPEED_MAX_MPS)
+    userConfiguredParameters.particleSpawnSpeedMaxMperTick = (double)dragonVariants.getValueOrDefault(modifiedCategory, EGG_PARTICLES_SPEED_MAX_MPS)
                                                             / 20.0;
-    userConfiguredParameters.particlesSpawnRegularIntervals = (boolean)dragonVariants.getValueOrDefault(Category.EGG, EGG_PARTICLES_SPAWN_REGULAR_TIMES);
+    userConfiguredParameters.particlesSpawnRegularIntervals = (boolean)dragonVariants.getValueOrDefault(modifiedCategory, EGG_PARTICLES_SPAWN_REGULAR_TIMES);
   }
 
   // parses the given text fragment into an int RGB
@@ -650,14 +657,16 @@ public class EntityDragonEgg extends Entity {
    */
   public static class EntityEggValidator implements DragonVariants.VariantTagValidator {
     @Override
-    public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
+    public void validateVariantTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
       DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
-      DragonVariants.DragonVariantsCategoryShortcut dvc = dragonVariants.new DragonVariantsCategoryShortcut(Category.EGG);
+      if (!modifiedCategory.getCategory().equals(Category.EGG)) return;
+
+      DragonVariants.DragonVariantsCategoryShortcut dvc = dragonVariants.new DragonVariantsCategoryShortcut(modifiedCategory);
 
       String particleName = (String)dvc.getValueOrDefault(EGG_PARTICLES_NAME);
       EnumParticleTypes particleType = EnumParticleTypes.getByName(particleName);
       if (particleType == null) {
-        dragonVariants.removeTag(DragonVariants.Category.EGG, EGG_PARTICLES_NAME);
+        dragonVariants.removeTag(modifiedCategory, EGG_PARTICLES_NAME);
         dragonVariantsErrors.addError("Unknown egg particle name:" + particleName);
       }
 
@@ -693,10 +702,10 @@ public class EntityDragonEgg extends Entity {
 //        dragonVariantsErrors.addError("spinstarttime and/or spinspeed are defined but spin flag is not defined");
 //      }
 
-      dvc.checkForConflict(dragonVariantsErrors, EGG_NO_PARTICLES, true, true,
+      dvc.checkForConflict(dragonVariantsErrors, EGG_PARTICLES, true, true,
               EGG_PARTICLES_NAME, EGG_PARTICLES_SPEED_OR_COLOUR, EGG_PARTICLES_RGB, EGG_PARTICLES_SPAWN_RATE_PER_SECOND,
               EGG_PARTICLES_SPEED_MIN_MPS, EGG_PARTICLES_SPEED_MAX_MPS, EGG_PARTICLES_SPAWN_REGULAR_TIMES);
-//      if (dvc.tagIsExplictlyApplied(EGG_NO_PARTICLES) &&
+//      if (dvc.tagIsExplictlyApplied(EGG_PARTICLES) &&
 //          (dvc.tagIsExplictlyApplied(EGG_PARTICLES_NAME) ||
 //                  dvc.tagIsExplictlyApplied(EGG_PARTICLES_SPEED_OR_COLOUR) ||
 //                  dvc.tagIsExplictlyApplied(EGG_PARTICLES_RGB) ||
@@ -726,7 +735,7 @@ public class EntityDragonEgg extends Entity {
 //      }
 
       try {
-        int rgb = parseRGB((String)dragonVariants.getValueOrDefault(Category.EGG, EGG_PARTICLES_RGB));
+        int rgb = parseRGB((String)dvc.getValueOrDefault(EGG_PARTICLES_RGB));
       } catch (IllegalArgumentException iae) {
         dragonVariantsErrors.addError(iae);
       }
@@ -736,7 +745,7 @@ public class EntityDragonEgg extends Entity {
       }
     }
     @Override
-    public void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException {
+    public void initaliseResources(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
       // do nothing - no resources to initialise
     }
   }
@@ -772,21 +781,21 @@ public class EntityDragonEgg extends Entity {
           "the size (width and height) of the egg in metres").categories(Category.EGG);
   private static final DragonVariantTag EGG_INCUBATION_DAYS = DragonVariantTag.addTag("incubationduration", 1.0, 0.1, 10.0,
           "the number of days that the egg will incubate until it hatches").categories(Category.EGG);
-  private static final DragonVariantTag EGG_WIGGLE = DragonVariantTag.addTag("wiggle",
+  private static final DragonVariantTag EGG_WIGGLE = DragonVariantTag.addTag("wiggle", true,
           "should the egg wiggle when it gets near to hatching?").categories(Category.EGG);
-  private static final DragonVariantTag EGG_GLOW = DragonVariantTag.addTag("glow",
+  private static final DragonVariantTag EGG_GLOW = DragonVariantTag.addTag("glow", false,
           "should the egg glow when it gets near to hatching?").categories(Category.EGG);
-  private static final DragonVariantTag EGG_LEVITATE = DragonVariantTag.addTag("levitate",
+  private static final DragonVariantTag EGG_LEVITATE = DragonVariantTag.addTag("levitate", false,
           "should the egg levitate when it gets near to hatching?").categories(Category.EGG);
-  private static final DragonVariantTag EGG_SPIN = DragonVariantTag.addTag("spin",
+  private static final DragonVariantTag EGG_SPIN = DragonVariantTag.addTag("spin", false,
           "should the egg spin when it gets near to hatching?").categories(Category.EGG);
-  private static final DragonVariantTag EGG_CRACKING = DragonVariantTag.addTag("crackingsounds",
+  private static final DragonVariantTag EGG_CRACKING = DragonVariantTag.addTag("crackingsounds", true,
           "should the egg make cracking sounds when it gets near to hatching?").categories(Category.EGG);
 
   private static final DragonVariantTag EGG_PARTICLES_NAME = DragonVariantTag.addTag("particlesname", "reddust",
           "what particle effect does the egg produce while incubating? as per the /particle command").categories(Category.EGG);
-  private static final DragonVariantTag EGG_NO_PARTICLES = DragonVariantTag.addTag("noparticles",
-          "if this flag is present, don't produce any particles while incubating").categories(Category.EGG);
+  private static final DragonVariantTag EGG_PARTICLES = DragonVariantTag.addTag("particles", true,
+          "if this flag is present, produce particles while incubating").categories(Category.EGG);
   private static final DragonVariantTag EGG_PARTICLES_SPEED_OR_COLOUR =  DragonVariantTag.addTag("particlesspawntype", "color",
           "when spawning particles, provide \"color\" or \"speed\" (depends on particle type)")
           .categories(Category.EGG).values("color", "speed");
@@ -798,7 +807,7 @@ public class EntityDragonEgg extends Entity {
           "for particles which spawn with an initial speed, what is the minimum speed? (metres per second))").categories(Category.EGG);
   private static final DragonVariantTag EGG_PARTICLES_SPEED_MAX_MPS = DragonVariantTag.addTag("particlesspawnspeedmax", 1.0, 0.1, 10.0,
           "for particles which spawn with an initial speed, what is the maximum speed? (metres per second))").categories(Category.EGG);
-  private static final DragonVariantTag EGG_PARTICLES_SPAWN_REGULAR_TIMES = DragonVariantTag.addTag("particlesspawnregularintervals",
+  private static final DragonVariantTag EGG_PARTICLES_SPAWN_REGULAR_TIMES = DragonVariantTag.addTag("particlesspawnregularintervals", false,
           "if this flag is present, the particles spawn at regular intervals.  Otherwise, they spawn at random times.").categories(Category.EGG);
 
   private static final DragonVariantTag EGG_WIGGLE_START_FRACTION = DragonVariantTag.addTag("wigglestarttime", 0.75, 0.0, 1.0,

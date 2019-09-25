@@ -23,6 +23,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.helper.*;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractBase;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.*;
 import com.TheRPGAdventurer.ROTD.common.inventory.ContainerDragon;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonExtras;
@@ -2033,6 +2034,13 @@ public class EntityTameableDragon extends EntityTameable {
 
     return super.attackEntityFrom(source, damage);
   }
+
+  // get the modifiers which are applied to this dragon
+  //  (female, male, etc)
+  public DragonVariants.Modifier []  getConfigurationFileCategoryModifiers() {
+    return new DragonVariants.Modifier[0];  //todo later on: set appropriately.
+  }
+
 
   /**
    * Credits: AlexThe 666 Ice and Fire

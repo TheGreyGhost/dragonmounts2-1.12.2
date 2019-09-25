@@ -135,8 +135,9 @@ public class DragonVariantsReader {
    */
   public static String outputAsJSON(DragonVariants dragonVariants, boolean includeComments) {
     SortedMap<DragonVariants.ModifiedCategory, ImmutableSortedMap<DragonVariantTag, Object>> allTags = new TreeMap<>();
-    for (DragonVariants.ModifiedCategory category : DragonVariants.Category.values()) {
-      allTags.put(category, dragonVariants.getAllAppliedTagsForCategory(category));
+    Set<DragonVariants.ModifiedCategory> modifiedCategories = dragonVariants.getAllModifiedCategories();
+    for (DragonVariants.ModifiedCategory modifiedCategory : modifiedCategories) {
+      allTags.put(modifiedCategory, dragonVariants.getAllAppliedTagsForCategory(modifiedCategory));
     }
 
     StringBuilder json = new StringBuilder();
@@ -166,49 +167,50 @@ public class DragonVariantsReader {
   }
 
   private static void outputCategoryAsJSON(StringBuilder json,
-                                           DragonVariants.ModifiedCategory category,  ImmutableMap<DragonVariantTag, Object> tags,
+                                           DragonVariants.ModifiedCategory modifiedCategory,  ImmutableMap<DragonVariantTag, Object> tags,
                                            boolean lastCategory,
                                            boolean includeComments) {
     json.append("  \"");
-    json.append(category.toString());
+    json.append(modifiedCategory.toString());
     json.append("\": {\n");
-    if (includeComments && category.getCategory().getComment().length() > 0) {
-      addComment(json, category.getCategory().getComment(), "    // ", "    // ");
+    if (includeComments && modifiedCategory.getCategory().getComment().length() > 0) {
+      addComment(json, modifiedCategory.getCategory().getComment(), "    // ", "    // ");
       json.append("\n");
     }
 
-    int flagCount = 0;
-    int totalLineCount = 0;
-    for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
-      ++totalLineCount;
-      if (entry.getValue() instanceof Boolean) {
-        ++flagCount;
-      }
-    }
+//    int flagCount = 0;
+//    int totalLineCount = 0;
+//    for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
+//      ++totalLineCount;
+//      if (entry.getValue() instanceof Boolean) {
+//        ++flagCount;
+//      }
+//    }
 
+    int totalLineCount = tags.size();
     int line = 0;
     for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
-      if (!(entry.getValue() instanceof Boolean)) { // save the flags for later
+//      if (!(entry.getValue() instanceof Boolean)) { // save the flags for later
         boolean lastLine = (++line) == totalLineCount;
         outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), lastLine, includeComments);
-      }
+//      }
     }
 
-    line = 0;
-    for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
-      if ((entry.getValue() instanceof Boolean)) { // save the flags for later
-        boolean lastLine = (++line) == flagCount;
-        if (line == 1) {
-          json.append("    \"");
-          json.append(FLAGS_JSON);
-          json.append("\": [\n");
-        }
-        outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), lastLine, includeComments);
-      }
-    }
-    if (flagCount > 0) {
-      json.append("    ]\n");
-    }
+//    line = 0;
+//    for (ImmutableMap.Entry<DragonVariantTag, Object> entry : tags.entrySet()) {
+//      if ((entry.getValue() instanceof Boolean)) { // save the flags for later
+//        boolean lastLine = (++line) == flagCount;
+//        if (line == 1) {
+//          json.append("    \"");
+//          json.append(FLAGS_JSON);
+//          json.append("\": [\n");
+//        }
+//        outputSingleTagAsJSON(json, entry.getKey(), entry.getValue(), lastLine, includeComments);
+//      }
+//    }
+//    if (flagCount > 0) {
+//      json.append("    ]\n");
+//    }
     json.append("  }");
     json.append(lastCategory ? "\n" : ",\n");
   }
@@ -220,9 +222,12 @@ public class DragonVariantsReader {
   public static String outputAllTagsAsJSON(boolean includeComments) {
     DragonVariants dragonVariants = new DragonVariants("example");
     ImmutableSet<DragonVariantTag> allDefinedTags = DragonVariantTag.getAllDragonVariantTags();
+    List<DragonVariants.Modifier> allModifiers = DragonVariants.Modifier.getAllModifiers();
+    DragonVariants.Modifier [] allModifiersArray = (DragonVariants.Modifier[])allModifiers.toArray();
     for (DragonVariantTag tag : allDefinedTags) {
       for (DragonVariants.Category category : tag.getExpectedCategories()) {
-        dragonVariants.addTagAndValue(category, tag, tag.getDefaultValue());
+        DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(category, allModifiersArray);
+        dragonVariants.addTagAndValue(modifiedCategory, tag, tag.getDefaultValue());
       }
     }
     return outputAsJSON(dragonVariants, includeComments);
@@ -232,13 +237,15 @@ public class DragonVariantsReader {
    * @param json
    */
   public static void outputSingleTagAsJSON(StringBuilder json, DragonVariantTag tag, Object value, boolean lastLine, boolean includeComments) {
-    if (value instanceof Boolean) {
-      json.append("  ");
-    }
+//    if (value instanceof Boolean) {
+//      json.append("  ");
+//    }
     json.append("    \"");
     json.append(tag.getTextname());
     json.append("\"");
     if (value instanceof Boolean) {
+      json.append(": ");
+      json.append(value);
     } else if (value instanceof String) {
       json.append(": \"");
       json.append(value);
@@ -345,9 +352,9 @@ public class DragonVariantsReader {
     JsonObject object = jsonElement.getAsJsonObject();
     for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
       String tagName = entry.getKey();
-      if (tagName.equals("flags") && entry.getValue().isJsonArray()) {
-        deserializeFlagTags(dragonVariants, category, entry.getValue().getAsJsonArray());
-      } else {
+//      if (tagName.equals("flags") && entry.getValue().isJsonArray()) {
+//        deserializeFlagTags(dragonVariants, category, entry.getValue().getAsJsonArray());
+//      } else {
         try {
           deserialiseTagWithValue(dragonVariants, category, tagName, entry.getValue());
         } catch (DragonVariantTagNotFoundException dvtnfe) {
@@ -358,38 +365,38 @@ public class DragonVariantsReader {
         } catch (IllegalArgumentException iae) {
           dragonVariantsErrors.addError(iae);
         }
-      }
+//      }
     }
     return dragonVariants;
   }
 
-  /**
-   * Parse all the tags in the flags array
-   *
-   * @param dragonVariants
-   * @param jsonArray
-   */
-  private void deserializeFlagTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category, JsonArray jsonArray) {
-    // Iterator to traverse the list
-    Iterator<JsonElement> flagIterator = jsonArray.iterator();
-    while (flagIterator.hasNext()) {
-      JsonElement element = flagIterator.next();
-      try {
-        if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
-          dragonVariantsErrors.addError("problem with flags in category " + category.toString() + " - not correctly formatted");
-        } else {
-          deserialiseFlagTag(dragonVariants, category, element.getAsJsonPrimitive().getAsString());
-        }
-      } catch (DragonVariantTagNotFoundException dvtnfe) {
-        // if we're in a dedicated server, ignore this error
-        if (!DragonVariantTagNotFoundException.shouldIgnore()) {
-          dragonVariantsErrors.addError(dvtnfe);
-        }
-      } catch (IllegalArgumentException iae) {
-        dragonVariantsErrors.addError(iae);
-      }
-    }
-  }
+//  /**
+//   * Parse all the tags in the flags array
+//   *
+//   * @param dragonVariants
+//   * @param jsonArray
+//   */
+//  private void deserializeFlagTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category, JsonArray jsonArray) {
+//    // Iterator to traverse the list
+//    Iterator<JsonElement> flagIterator = jsonArray.iterator();
+//    while (flagIterator.hasNext()) {
+//      JsonElement element = flagIterator.next();
+//      try {
+//        if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
+//          dragonVariantsErrors.addError("problem with flags in category " + category.toString() + " - not correctly formatted");
+//        } else {
+//          deserialiseFlagTag(dragonVariants, category, element.getAsJsonPrimitive().getAsString());
+//        }
+//      } catch (DragonVariantTagNotFoundException dvtnfe) {
+//        // if we're in a dedicated server, ignore this error
+//        if (!DragonVariantTagNotFoundException.shouldIgnore()) {
+//          dragonVariantsErrors.addError(dvtnfe);
+//        }
+//      } catch (IllegalArgumentException iae) {
+//        dragonVariantsErrors.addError(iae);
+//      }
+//    }
+//  }
 
   private void deserialiseTagWithValue(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category,
                                        String tagName, JsonElement tagValue) throws IllegalArgumentException {
@@ -397,7 +404,9 @@ public class DragonVariantsReader {
     String value;
     try {
       JsonPrimitive jsonPrimitive = tagValue.getAsJsonPrimitive();
-      if (jsonPrimitive.isNumber()) {
+      if (jsonPrimitive.isBoolean()) {
+        dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsBoolean());
+      } else if (jsonPrimitive.isNumber()) {
         dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsNumber());
       } else if (jsonPrimitive.isString()) {
         dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsString());
@@ -409,17 +418,17 @@ public class DragonVariantsReader {
     }
   }
 
-  private void deserialiseFlagTag(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category,
-                                  String tagName) throws IllegalArgumentException {
-    DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
-    dragonVariants.addTagAndValue(category, tag, "");
-  }
+//  private void deserialiseFlagTag(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category,
+//                                  String tagName) throws IllegalArgumentException {
+//    DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
+//    dragonVariants.addTagAndValue(category, tag, "");
+//  }
 
   private final IResourceManager iResourceManager;
   private final String configFilesFolder;
   private DragonVariantsException.DragonVariantsErrors dragonVariantsErrors;
 
   private static final String BREED_INTERNAL_NAME_JSON = "breedinternalname";
-  private static final String FLAGS_JSON = "flags";
+//  private static final String FLAGS_JSON = "flags";
 
 }

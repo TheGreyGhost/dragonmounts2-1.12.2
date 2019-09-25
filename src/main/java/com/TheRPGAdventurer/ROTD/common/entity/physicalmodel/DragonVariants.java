@@ -41,8 +41,8 @@ import static com.google.common.base.Preconditions.checkElementIndex;
  *    if the dragon growth profile is positive but the final size is smaller than the initial size).
  *    The use of the validator allows the error message to be grouped with other errors during parsing, rather than
  *    during execution of the code which uses the tag values.
- *    The validator may also be used to initialise data structures within objects which use the validator (for example: create
- *       ModelResourceLocations)
+ *    The validator also has a function initaliseResources which be used to initialise data structures within objects which
+ *    use the validator (for example: create ModelResourceLocations)
  * 2) Create a DragonVariants
  * 3) addTagAndValue() for all the tags in the config file
  * 4) call validateCollection() to apply all the registered VariantTagValidator functions on the collection
@@ -109,9 +109,9 @@ public class DragonVariants {
     }
     public String getComment() {return comment;}
 
-    public int getIdx() {
-      return idx;
-    }
+//    public int getIdx() {
+//      return idx;
+//    }
     private String textName;
     private int idx;
     private String comment;
@@ -129,10 +129,12 @@ public class DragonVariants {
    * This checking is performed by validateVariantTags()
    * The VariantTagValidator may also initialise resources in response to a call to initialiseResources()
    * eg create ModelResourceLocations based on tags linked to models
+   *
+   * The function is called repeatedly, once for each ModifiedCategory in the config file
    */
   public interface VariantTagValidator {
-    void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException;
-    void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException;
+    void validateVariantTags(DragonVariants dragonVariants, ModifiedCategory modifiedCategory) throws IllegalArgumentException;
+    void initaliseResources(DragonVariants dragonVariants, ModifiedCategory modifiedCategory) throws IllegalArgumentException;
   }
 
   /**
@@ -169,11 +171,14 @@ public class DragonVariants {
   {
     DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
 
+    Set<ModifiedCategory> allModifiedCategories = getAllModifiedCategories();
     for (VariantTagValidator variantTagValidator : variantTagValidators) {
-      try {
-        variantTagValidator.validateVariantTags(this);
-      } catch (IllegalArgumentException iae) {
-        dragonVariantsErrors.addError(iae);
+      for (ModifiedCategory modifiedCategory : allModifiedCategories) {
+        try {
+          variantTagValidator.validateVariantTags(this, modifiedCategory);
+        } catch (IllegalArgumentException iae) {
+          dragonVariantsErrors.addError(iae);
+        }
       }
     }
     if (dragonVariantsErrors.hasErrors()) throw new DragonVariantsException(dragonVariantsErrors);
@@ -187,11 +192,14 @@ public class DragonVariants {
   {
     DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
 
+    Set<ModifiedCategory> allModifiedCategories = getAllModifiedCategories();
     for (VariantTagValidator variantTagValidator : variantTagValidators) {
-      try {
-        variantTagValidator.initaliseResources(this);
-      } catch (IllegalArgumentException iae) {
-        dragonVariantsErrors.addError(iae);
+      for (ModifiedCategory modifiedCategory : allModifiedCategories) {
+        try {
+          variantTagValidator.initaliseResources(this, modifiedCategory);
+        } catch (IllegalArgumentException iae) {
+          dragonVariantsErrors.addError(iae);
+        }
       }
     }
     if (dragonVariantsErrors.hasErrors()) throw new DragonVariantsException(dragonVariantsErrors);
@@ -235,6 +243,19 @@ public class DragonVariants {
     return false;
   }
 
+  /**
+   * Does the config file contain this tag in the given modifiedcategory?
+   * @param modifiedCategory - the specific modified category for the tag
+   * @param tag
+   * @return true if the tag has been explicitly applied to this modifiedcategory; false if using the default.
+   */
+  public boolean tagIsExplictlyApplied(ModifiedCategory modifiedCategory, DragonVariantTag tag) {
+    if (!allAppliedTags.containsKey(tag)) return false;
+    HashMap<ModifiedCategory, Object> mco = allAppliedTags.get(tag);
+    return mco.containsKey(modifiedCategory);
+  }
+
+
   /** remove one or more tags (set back to default)
    */
   public void removeTag(Category category, DragonVariantTag tagToRemove) {
@@ -249,6 +270,24 @@ public class DragonVariants {
   }
 
   public void removeTags(Category category, DragonVariantTag... tagsToRemove) {
+    for (DragonVariantTag dragonVariantTag : tagsToRemove)
+      removeTag(category, dragonVariantTag);
+  }
+
+  /** remove one or more tags (set back to default)
+   */
+  public void removeTag(ModifiedCategory category, DragonVariantTag tagToRemove) {
+    if (!allAppliedTags.containsKey(tagToRemove)) return;
+    HashMap<ModifiedCategory, Object> mco = allAppliedTags.get(tagToRemove);
+    mco.remove(tagToRemove);
+  }
+
+  public void removeTags(ModifiedCategory category, Collection<DragonVariantTag> tagsToRemove) {
+    for (DragonVariantTag dragonVariantTag : tagsToRemove)
+      removeTag(category, dragonVariantTag);
+  }
+
+  public void removeTags(ModifiedCategory category, DragonVariantTag... tagsToRemove) {
     for (DragonVariantTag dragonVariantTag : tagsToRemove)
       removeTag(category, dragonVariantTag);
   }
@@ -282,7 +321,7 @@ public class DragonVariants {
     }
 
     public boolean tagIsExplictlyApplied(DragonVariantTag tag) {
-      return DragonVariants.this.tagIsExplictlyApplied(modifiedCategory.getCategory(), tag);
+      return DragonVariants.this.tagIsExplictlyApplied(modifiedCategory, tag);
     }
 
     public boolean checkForConflict(DragonVariantsException.DragonVariantsErrors errors,
@@ -295,8 +334,12 @@ public class DragonVariants {
       private ModifiedCategory modifiedCategory;
   }
 
-  public List<ModifiedCategory> getAllModifiedCategories(Category category) {
-
+  public Set<ModifiedCategory> getAllModifiedCategories() {
+    HashSet<ModifiedCategory> allModifiedCategories = new HashSet<>();
+    for (Map.Entry<DragonVariantTag, HashMap<ModifiedCategory, Object>> entry : allAppliedTags.entrySet()) {
+      allModifiedCategories.addAll(entry.getValue().keySet());
+    }
+    return allModifiedCategories;
   }
 
   /** check whether there is a conflict between a "master" tag and "slave" tags
@@ -305,7 +348,7 @@ public class DragonVariants {
    *   In this case, the master tag is the flag and the two slaves are the parameters
    *   masterConflictState is false and slaveConflictState is true
    * @param errors    the errors log to populate with an error message if any
-   * @param modifiedCategory the category to look in
+   * @param modifiedCategory the category to look in.  Does not filter through to other modifiedcategories below this one
    * @param masterTag the master tag to check
    * @param masterConflictState if the master tag is in this state, check for slave conflicts.
    * @param slaveConflictState if any of the slave tags are in this state, and master matches masterConflictState, then we have a conflict
@@ -313,19 +356,16 @@ public class DragonVariants {
    * @return true if a conflict was discovered
    */
 
-  THIS IS A PROBLEM NEED TO RESTRICT CHECKING TO A SINGLE MODIFIEDCATEGORY - the FLAGS MAY NOT WORK OTHERWISE (FALL THROUGH)
-    MAY NEED TO RIP OUT FLAGS AND REPLACE WITH BOOLEAN true/false
-
   public boolean checkForConflict(DragonVariantsException.DragonVariantsErrors errors, ModifiedCategory modifiedCategory,
                                   DragonVariantTag masterTag, Object masterConflictState,
                                   boolean slaveConflictState, DragonVariantTag... slaveTags) {
     String masterConditionText = "";
     if (masterTag.getDefaultValue() instanceof Boolean) {
-      if ((Boolean)masterConflictState != tagIsExplictlyApplied(modifiedCategory.getCategory(), masterTag)) return false;
+      if ((Boolean)masterConflictState != tagIsExplictlyApplied(modifiedCategory, masterTag)) return false;
       masterConditionText = (Boolean)masterConflictState ? " is defined" : " is not defined";
     } else {
       if (!masterConflictState.equals(getValueOrDefault(modifiedCategory, masterTag))) return false;
-      if (tagIsExplictlyApplied(modifiedCategory.getCategory(), masterTag)) {
+      if (tagIsExplictlyApplied(modifiedCategory, masterTag)) {
         masterConditionText = " has the value \"" + masterConflictState.toString() + "\"";
       } else {
         masterConditionText = " has the default value \"" + masterConflictState.toString() + "\"";
@@ -334,7 +374,7 @@ public class DragonVariants {
 
     List<DragonVariantTag> conflictSlaves = new ArrayList<>();
     for (DragonVariantTag slave : slaveTags) {
-      if (slaveConflictState == tagIsExplictlyApplied(modifiedCategory.getCategory(), slave)) {
+      if (slaveConflictState == tagIsExplictlyApplied(modifiedCategory, slave)) {
         conflictSlaves.add(slave);
       }
     }

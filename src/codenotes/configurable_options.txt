@@ -20,3 +20,42 @@ https://mcforge.readthedocs.io/en/latest/models/using/
 
 ModelLoader.setCustomModelResourceLocation
 ModelLoader.setCustomMeshDefinition
+
+How the configuration files work:
+The configuration file for each breed has a number of categories; each category relates to an aspect of the dragon
+eg
+egg = properties of the egg
+physical model = properties of the dragon model / appearance
+breathweapon = properties of the dragon's breathweapon
+
+Within each category, there are a number of tags which can be defined,
+eg
+EggSize = 0.25 // size of egg (width, height) in metres
+If a tag is not explicitly defined, it takes on a default value.
+
+Each category can also be "modified" to reflect variations on the breed, for example male or female, christmasedition, etc
+
+The typical usage for this is to define the base category without modifiers, then redefine some aspects in subsequent modified categories
+for example
+
+"physicalmodel": { // base model
+"size": 2.0, //metres
+"texture": "base_texture.png"
+}
+
+"physicalmodel:female":  {  // female modifier
+"size": 1.5
+}
+
+"physicalmodel:christmasedition": {
+"texture": "christmas_texture.png"
+}
+
+The female is smaller than the base model but has the same texture.
+The christmas edition is the same size as the base model but has a different texture.
+the female christmas edition has both smaller size and different texture.
+
+Some modifiers are mutually exclusive (eg male, female), others can be combined, etc
+
+"physicalmodel:male,christmasedition"
+

@@ -90,39 +90,55 @@ public class EggModels {
    */
   public class EggModelsValidator implements DragonVariants.VariantTagValidator {
     @Override
-    public void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException {
+    public void initaliseResources(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
+      if (!modifiedCategory.getCategory().equals(Category.EGG)) return;
       if (internalState != InternalState.INIT && internalState != InternalState.HAVE_INITIALISED_RESOURCES) {
         DragonMounts.loggerLimit.error_once("Wrong call order for EggModelsValidator: initaliseResources after Model registration");
       }
       internalState = InternalState.HAVE_INITIALISED_RESOURCES;
       DragonBreedNew whichBreed =  DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(dragonVariants);
 
-      String str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL);
-      ResourceLocation rl = new ResourceLocation("dragonmounts", str);
-      addResourceLocation(whichBreed, EggModelState.INCUBATING, rl);
+      String str;
+      ResourceLocation rl;
+      if (dragonVariants.tagIsExplictlyApplied(modifiedCategory, EGG_ITEM_MODEL)) {
+        str = (String) dragonVariants.getValueOrDefault(modifiedCategory, EGG_ITEM_MODEL);
+        rl = new ResourceLocation("dragonmounts", str);
+        addResourceLocation(whichBreed, modifiedCategory, EggModelState.INCUBATING, rl);
+      }
 
-      str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_HATCHED);
-      rl = new ResourceLocation("dragonmounts", str);
-      addResourceLocation(whichBreed, EggModelState.HATCHED, rl);
+      if (dragonVariants.tagIsExplictlyApplied(modifiedCategory, EGG_ITEM_MODEL_HATCHED)) {
+        str = (String)dragonVariants.getValueOrDefault(modifiedCategory, EGG_ITEM_MODEL_HATCHED);
+        rl = new ResourceLocation("dragonmounts", str);
+        addResourceLocation(whichBreed, modifiedCategory, EggModelState.HATCHED, rl);
+      }
 
-      str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_SMASHED);
-      rl = new ResourceLocation("dragonmounts", str);
-      addResourceLocation(whichBreed, EggModelState.SMASHED, rl);
+      if (dragonVariants.tagIsExplictlyApplied(modifiedCategory, EGG_ITEM_MODEL_SMASHED)) {
+        str = (String)dragonVariants.getValueOrDefault(modifiedCategory, EGG_ITEM_MODEL_SMASHED);
+        rl = new ResourceLocation("dragonmounts", str);
+        addResourceLocation(whichBreed, modifiedCategory, EggModelState.SMASHED, rl);
+      }
 
-      str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_TEXTURE);
-      ResourceLocation trl = new ResourceLocation("dragonmounts", str);
-      addTexture(whichBreed, EggModelState.INCUBATING, trl);
+      ResourceLocation trl;
+      if (dragonVariants.tagIsExplictlyApplied(modifiedCategory, EGG_ITEM_MODEL_TEXTURE)) {
+        str = (String)dragonVariants.getValueOrDefault(modifiedCategory, EGG_ITEM_MODEL_TEXTURE);
+        trl = new ResourceLocation("dragonmounts", str);
+        addTexture(whichBreed, modifiedCategory, EggModelState.INCUBATING, trl);
+      }
 
-      str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_SMASHED_TEXTURE);
-      trl = new ResourceLocation("dragonmounts", str);
-      addTexture(whichBreed, EggModelState.SMASHED, trl);
+      if (dragonVariants.tagIsExplictlyApplied(modifiedCategory, EGG_ITEM_MODEL_SMASHED_TEXTURE)) {
+        str = (String)dragonVariants.getValueOrDefault(modifiedCategory, EGG_ITEM_MODEL_SMASHED_TEXTURE);
+        trl = new ResourceLocation("dragonmounts", str);
+        addTexture(whichBreed, modifiedCategory, EggModelState.SMASHED, trl);
+      }
 
-      str = (String)dragonVariants.getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_MODEL_HATCHED_TEXTURE);
-      trl = new ResourceLocation("dragonmounts", str);
-      addTexture(whichBreed, EggModelState.HATCHED, trl);
+      if (dragonVariants.tagIsExplictlyApplied(modifiedCategory, EGG_ITEM_MODEL_HATCHED_TEXTURE)) {
+        str = (String) dragonVariants.getValueOrDefault(modifiedCategory, EGG_ITEM_MODEL_HATCHED_TEXTURE);
+        trl = new ResourceLocation("dragonmounts", str);
+        addTexture(whichBreed, modifiedCategory, EggModelState.HATCHED, trl);
+      }
     }
     @Override
-    public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
+    public void validateVariantTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
       // do nothing - no particular validation required
     }
   }
@@ -147,18 +163,19 @@ public class EggModels {
       }
     }
 
-    for (Map.Entry<Pair<DragonBreedNew, EggModelState>, ResourceLocation> entry : breedTextureRLs.entrySet()) {
+    for (Map.Entry<TripleKey, ResourceLocation> entry : breedTextureRLs.entrySet()) {
       try {
-        DragonBreedNew breed = entry.getKey().getLeft();
+        DragonBreedNew breed = entry.getKey().dragonBreedNew;
+        DragonVariants.ModifiedCategory modifiedCategory = entry.getKey().modifiedCategory;
         AnimatedTexture animatedTexture = new AnimatedTexture(entry.getValue());
-        long ticksPerFrame = (long)breed.getDragonVariants().getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_ANIMATION_TICKS_PER_FRAME);
-        boolean noInterpolation = (boolean)breed.getDragonVariants().getValueOrDefault(DragonVariants.Category.EGG, EGG_ITEM_ANIMATION_NO_INTERPOLATION);
-        animatedTexture.setAnimation((int)ticksPerFrame, !noInterpolation);
+        long ticksPerFrame = (long)breed.getDragonVariants().getValueOrDefault(modifiedCategory, EGG_ITEM_ANIMATION_TICKS_PER_FRAME);
+        boolean interpolation = (boolean)breed.getDragonVariants().getValueOrDefault(modifiedCategory, EGG_ITEM_ANIMATION_INTERPOLATION);
+        animatedTexture.setAnimation((int)ticksPerFrame, interpolation);
         animatedTexture.load(Minecraft.getMinecraft().getResourceManager());
         breedAnimatedTextures.put(entry.getKey(), animatedTexture);
       } catch (Exception e) {
         DragonMounts.logger.warn(String.format("Exception loading resource %s for breed %s: %s",
-                                               entry.getValue(), entry.getKey().getLeft().getInternalName(), e.getCause()));
+                                               entry.getValue(), entry.getKey().dragonBreedNew.getInternalName(), e.getCause()));
       }
     }
 
@@ -173,21 +190,22 @@ public class EggModels {
     ModelLoader.setCustomModelResourceLocation(itemDragonHatchableEgg, BASE_MODEL_METADATA, itemResourceLocation);
   }
 
-  private void addResourceLocation(DragonBreedNew dragonBreedNew, EggModelState eggModelState, ResourceLocation rl) {
-    Pair<DragonBreedNew, EggModelState> key = new ImmutablePair<>(dragonBreedNew,eggModelState);
-    if (breedModelRLs.containsKey(key)) {
-      DragonMounts.loggerLimit.warn_once("Called addResourceLocation twice for same breed + state");
+  private void addResourceLocation(DragonBreedNew dragonBreedNew, DragonVariants.ModifiedCategory modifiedCategory, EggModelState eggModelState, ResourceLocation rl) {
+    TripleKey tripleKey = new TripleKey(dragonBreedNew, modifiedCategory, eggModelState);
+    if (breedModelRLs.containsKey(tripleKey)) {
+      DragonMounts.loggerLimit.warn_once("Called addResourceLocation twice for same breed + modified category + state");
       return;
     }
-    breedModelRLs.put(key, rl);
+    breedModelRLs.put(tripleKey, rl);
   }
 
-  private void addTexture(DragonBreedNew breed, EggModelState eggModelState, ResourceLocation rl) {
-    if (breedTextureRLs.containsKey(breed)) {
-      DragonMounts.loggerLimit.warn_once("Called addResourceLocation twice for same breed + state");
+  private void addTexture(DragonBreedNew breed, DragonVariants.ModifiedCategory modifiedCategory, EggModelState eggModelState, ResourceLocation rl) {
+    TripleKey tripleKey = new TripleKey(breed, modifiedCategory, eggModelState);
+    if (breedTextureRLs.containsKey(tripleKey)) {
+      DragonMounts.loggerLimit.warn_once("Called addResourceLocation twice for same breed + modified category + state");
       return;
     }
-    breedTextureRLs.put(new ImmutablePair<>(breed, eggModelState), rl);
+    breedTextureRLs.put(tripleKey, rl);
   }
 
   private static final DragonVariantTag EGG_ITEM_MODEL = DragonVariantTag.addTag("model", "models/item/egg_incubating.obj",
@@ -204,16 +222,29 @@ public class EggModels {
           "path to the animated texture for the hatched egg.  Expected to contain one or more vertical square frames (max 20)").categories(Category.EGG);
   private static final DragonVariantTag EGG_ITEM_ANIMATION_TICKS_PER_FRAME = DragonVariantTag.addTag("animationticksperframe", 8, 1, 1000,
           "the number of ticks (1/20 of a second) to display each frame of the animated egg texture").categories(Category.EGG);
-  private static final DragonVariantTag EGG_ITEM_ANIMATION_NO_INTERPOLATION = DragonVariantTag.addTag("animationnointerpolation",
-          "if this flag is present, don't interpolate between the frames of the animated egg texture").categories(Category.EGG);
+  private static final DragonVariantTag EGG_ITEM_ANIMATION_INTERPOLATION = DragonVariantTag.addTag("animationinterpolation", true,
+          "if this flag is true, interpolate between the frames of the animated egg texture").categories(Category.EGG);
 
   private final int BASE_MODEL_METADATA = 0;
-  private Map<Pair<DragonBreedNew, EggModelState>, ResourceLocation> breedTextureRLs = new HashMap<>();
-  private Map<Pair<DragonBreedNew, EggModelState>, AnimatedTexture> breedAnimatedTextures = new HashMap<>();
+  private Map<TripleKey, ResourceLocation> breedTextureRLs = new HashMap<>();
+  private Map<TripleKey, AnimatedTexture> breedAnimatedTextures = new HashMap<>();
 
   private enum InternalState {INIT, HAVE_INITIALISED_RESOURCES, REGISTERED_MODELS};
   private InternalState internalState = InternalState.INIT;  // just for debugging / assertion
 
-  private Map<Pair<DragonBreedNew, EggModelState>, ResourceLocation> breedModelRLs = new HashMap<>();
+  private Map<TripleKey, ResourceLocation> breedModelRLs = new HashMap<>();
   private Map<ResourceLocation, WavefrontObject> breedModelOBJs = new HashMap<>();
+
+  private static class TripleKey {
+    public TripleKey(DragonBreedNew dragonBreedNew, DragonVariants.ModifiedCategory modifiedCategory, EggModelState eggModelState) {
+      this.dragonBreedNew = dragonBreedNew;
+      this.modifiedCategory = modifiedCategory;
+      this.eggModelState = eggModelState;
+    }
+
+    public DragonBreedNew dragonBreedNew;
+    public DragonVariants.ModifiedCategory modifiedCategory;
+    public EggModelState eggModelState;
+  }
+
 }

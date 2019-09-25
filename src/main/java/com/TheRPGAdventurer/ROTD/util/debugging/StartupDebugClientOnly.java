@@ -49,7 +49,7 @@ public class StartupDebugClientOnly {
   public static void testDragonVariantsReader() {
 
     TESTTAG1 = DragonVariantTag.addTag("testtag1", "one", "testtag1").categories(DragonVariants.Category.EGG).values("one", "two", "three");
-    TESTTAG2 = DragonVariantTag.addTag("testtag2flag", "testtag2 flag").categories(DragonVariants.Category.EGG);
+    TESTTAG2 = DragonVariantTag.addTag("testtag2flag", true, "testtag2 flag").categories(DragonVariants.Category.EGG);
     TESTTAG3 = DragonVariantTag.addTag("testtag3", 2.0, "testtag3 number").categories(DragonVariants.Category.EGG);
     DragonVariants.addVariantTagValidator(new TestValidator());
 
@@ -73,9 +73,10 @@ public class StartupDebugClientOnly {
 
   public static class TestValidator implements DragonVariants.VariantTagValidator {
     @Override
-    public void validateVariantTags(DragonVariants dragonVariants) throws IllegalArgumentException {
+    public void validateVariantTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
+      if (!modifiedCategory.getCategory().equals(DragonVariants.Category.EGG)) return;
       DragonVariantsException.DragonVariantsErrors errors = new DragonVariantsException.DragonVariantsErrors();
-      DragonVariants.DragonVariantsCategoryShortcut dvc = dragonVariants.new DragonVariantsCategoryShortcut(DragonVariants.Category.EGG);
+      DragonVariants.DragonVariantsCategoryShortcut dvc = dragonVariants.new DragonVariantsCategoryShortcut(modifiedCategory);
       dvc.checkForConflict(errors, TESTTAG2, false, true, TESTTAG3);  // 2 isn't defined and 3 is .
       dvc.checkForConflict(errors, TESTTAG1, "two", true, TESTTAG3);  // 1 is "two" and 3 is defined
       dvc.checkForConflict(errors, TESTTAG2, true, true, TESTTAG1);  // 2 is defined and 1 is also defined
@@ -86,7 +87,7 @@ public class StartupDebugClientOnly {
     }
 
     @Override
-    public void initaliseResources(DragonVariants dragonVariants) throws IllegalArgumentException {
+    public void initaliseResources(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
 
     }
   }

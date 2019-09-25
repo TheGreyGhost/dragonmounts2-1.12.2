@@ -59,8 +59,8 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
 
 */
 
-  public static DragonVariantTag addTag(String textname, String comment) {
-    return addTag(textname, false, Optional.empty(), Optional.empty(), comment);
+  public static DragonVariantTag addTag(String textname, boolean defaultValue, String comment) {
+    return addTag(textname, defaultValue, Optional.empty(), Optional.empty(), comment);
   }
 
   public static DragonVariantTag addTag(String textname, String defaultValue, String comment) {
@@ -186,7 +186,10 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
    */
   public Object convertValue(Object value) throws IllegalArgumentException {
     if (defaultValue instanceof Boolean) {
-      return true;
+      if (!(value instanceof Boolean)) {
+        throw new IllegalArgumentException("Expected a true or false (no quotes)");
+      }
+      return (Boolean)value;
     }
     if (defaultValue instanceof String) {
       if (!(value instanceof String)) {
