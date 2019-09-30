@@ -1,12 +1,10 @@
-// unknown flag
+// unknown flag, flag which doesn't have true or false, flag which has "true"
 {
   "breedinternalname": "fire5",
   "egg": {
     "size": 1.0,
-    "flags": [
-      "wiggle",
-      "glow",
-      "spew"
-    ]
+    "wiggle": "true",
+    "spew": true,
+    "glow": green
   }
 }

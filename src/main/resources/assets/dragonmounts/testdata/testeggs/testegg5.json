@@ -3,8 +3,6 @@
   "breedinternalname": "testegg5",
   "egg": {
     "glowstarttime": 0.8,
-    "flags": [
-      "glow"
-    ]
+    "glow": true
   }
 }

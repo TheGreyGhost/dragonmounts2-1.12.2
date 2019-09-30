@@ -4,8 +4,6 @@
   "egg": {
     "spinspeed": 0.5,
     "spinstarttime": 0.3,
-    "flags": [
-      "spin"
-    ]
+    "spin": true
   }
 }

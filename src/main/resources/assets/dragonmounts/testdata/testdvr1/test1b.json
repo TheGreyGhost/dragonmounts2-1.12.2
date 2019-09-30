@@ -3,10 +3,8 @@
   "breedinternalname": "ice",
   "egg": {
     "size": 1.0,
-    "flags": [
-      "wiggle",
-      "glow"
-    ]
+    "wiggle": true,
+    "glow": false
   }
 }
 

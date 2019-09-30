@@ -3,8 +3,6 @@
   "breedinternalname": "testegg3",
   "egg": {
     "crackstarttime": 0.5,
-    "flags": [
-      "crackingsounds"
-    ]
+    "crackingsounds": true
   }
 }

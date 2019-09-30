@@ -30,8 +30,8 @@ public class StartupDebugClientOnly {
   public static void preInitClientOnly() {
     if (!DragonMounts.instance.getConfig().isDebug()) return;
     testModifiedCategory();
-//    testDragonVariantsReader();
-//    testDragonLifeStageHelperTags();
+    testDragonVariantsReader();
+    testDragonLifeStageHelperTags();
   }
 
   public static void initClientOnly() {

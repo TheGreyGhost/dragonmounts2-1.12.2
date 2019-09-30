@@ -3,10 +3,7 @@
   "breedinternalname": "fire11",
   "egg": {
     "size": 1.0,
-    "flags": [
-      "wiggle",
-      "glow",
-      23
-    ]
+    "wiggle": 23,
+    "glow": false
   }
 }

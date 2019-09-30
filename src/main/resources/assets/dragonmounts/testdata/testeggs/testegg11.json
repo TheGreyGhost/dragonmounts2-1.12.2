@@ -7,8 +7,6 @@
     "particlesname": "flame",
     "particlesspawnspeedmin": 2.0,
     "particlesspawnspeedmax": 2.0,
-    "flags": [
-      "particlesspawnregularintervals"
-    ]
+    "particlesspawnregularintervals": true
   }
 }

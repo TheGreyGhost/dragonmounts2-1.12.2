@@ -3,9 +3,7 @@
   "breedinternalname": "fire15",
   "egg": {
     "testtag1" : "three",
-    "flags": [
-      "testtag2flag"
-    ]
+    "testtag2flag": true
   }
 }
 

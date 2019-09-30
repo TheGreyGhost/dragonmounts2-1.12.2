@@ -702,7 +702,7 @@ public class EntityDragonEgg extends Entity {
 //        dragonVariantsErrors.addError("spinstarttime and/or spinspeed are defined but spin flag is not defined");
 //      }
 
-      dvc.checkForConflict(dragonVariantsErrors, EGG_PARTICLES, true, true,
+      dvc.checkForConflict(dragonVariantsErrors, EGG_PARTICLES, false, true,
               EGG_PARTICLES_NAME, EGG_PARTICLES_SPEED_OR_COLOUR, EGG_PARTICLES_RGB, EGG_PARTICLES_SPAWN_RATE_PER_SECOND,
               EGG_PARTICLES_SPEED_MIN_MPS, EGG_PARTICLES_SPEED_MAX_MPS, EGG_PARTICLES_SPAWN_REGULAR_TIMES);
 //      if (dvc.tagIsExplictlyApplied(EGG_PARTICLES) &&

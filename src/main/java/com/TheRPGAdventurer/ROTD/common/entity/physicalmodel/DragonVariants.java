@@ -344,7 +344,7 @@ public class DragonVariants {
 
   /** check whether there is a conflict between a "master" tag and "slave" tags
    * eg if there is a flag for "egg should spin", and two parameters "spin speed" and "spin direction":
-   *   it's an error if the "spin speed" or "spin direction" are defined, but the "egg should spin" flag isn't
+   *   it's an error if the "spin speed" or "spin direction" are defined, but the "egg should spin" flag is false
    *   In this case, the master tag is the flag and the two slaves are the parameters
    *   masterConflictState is false and slaveConflictState is true
    * @param errors    the errors log to populate with an error message if any
@@ -361,8 +361,8 @@ public class DragonVariants {
                                   boolean slaveConflictState, DragonVariantTag... slaveTags) {
     String masterConditionText = "";
     if (masterTag.getDefaultValue() instanceof Boolean) {
-      if ((Boolean)masterConflictState != tagIsExplictlyApplied(modifiedCategory, masterTag)) return false;
-      masterConditionText = (Boolean)masterConflictState ? " is defined" : " is not defined";
+      if ((Boolean)masterConflictState != getValueOrDefault(modifiedCategory, masterTag)) return false;
+      masterConditionText = (Boolean)masterConflictState ? " is true" : " is false";
     } else {
       if (!masterConflictState.equals(getValueOrDefault(modifiedCategory, masterTag))) return false;
       if (tagIsExplictlyApplied(modifiedCategory, masterTag)) {
@@ -372,29 +372,54 @@ public class DragonVariants {
       }
     }
 
-    List<DragonVariantTag> conflictSlaves = new ArrayList<>();
+    List<DragonVariantTag> conflictSlaveBooleans = new ArrayList<>();
+    List<DragonVariantTag> conflictSlaveNonBooleans = new ArrayList<>();
     for (DragonVariantTag slave : slaveTags) {
-      if (slaveConflictState == tagIsExplictlyApplied(modifiedCategory, slave)) {
-        conflictSlaves.add(slave);
+      if (slave.getDefaultValue() instanceof Boolean) {
+        if ((Boolean)slaveConflictState == getValueOrDefault(modifiedCategory, slave)) {
+          conflictSlaveBooleans.add(slave);
+        }
+      } else if (slaveConflictState == tagIsExplictlyApplied(modifiedCategory, slave)) {
+        conflictSlaveNonBooleans.add(slave);
       }
     }
-    if (conflictSlaves.isEmpty()) return false;
+    if (conflictSlaveNonBooleans.isEmpty() && conflictSlaveBooleans.isEmpty()) return false;
 
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("When ");
     stringBuilder.append(masterTag.getTextname());
     stringBuilder.append(masterConditionText);
-    stringBuilder.append(" then the following tags must ");
-    stringBuilder.append(slaveConflictState ? "not be defined:" : "be defined:");
-    boolean first = true;
-    for (DragonVariantTag dragonVariantTag : conflictSlaves) {
-      if (!first) {
-        stringBuilder.append(", ");
+    if (!conflictSlaveBooleans.isEmpty()) {
+      stringBuilder.append(" then the following tags must be ");
+      stringBuilder.append(slaveConflictState ? "false:" : "true:");
+      boolean first = true;
+      for (DragonVariantTag dragonVariantTag : conflictSlaves) {
+        if (!first) {
+          stringBuilder.append(", ");
+        }
+        first = false;
+        stringBuilder.append(dragonVariantTag.getTextname());
       }
-      first = false;
-      stringBuilder.append(dragonVariantTag.getTextname());
+      errors.addError(stringBuilder.toString());
     }
-    errors.addError(stringBuilder.toString());
+    if (!conflictSlaveNonBooleans.isEmpty()) {
+      stringBuilder.append(" then " +
+
+              stringBuilder.append(" and " +
+              "" +
+              "the following tags must ");
+      stringBuilder.append(slaveConflictState ? "not be defined (must be false for :" : "be defined (true):");
+      boolean first = true;
+      for (DragonVariantTag dragonVariantTag : conflictSlaves) {
+        if (!first) {
+          stringBuilder.append(", ");
+        }
+        first = false;
+        stringBuilder.append(dragonVariantTag.getTextname());
+      }
+      errors.addError(stringBuilder.toString());
+    }
+
     return true;
   }
 

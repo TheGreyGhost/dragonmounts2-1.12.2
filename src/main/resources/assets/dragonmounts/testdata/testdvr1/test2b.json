@@ -6,9 +6,7 @@
   },
   "physicalmodel": {
     "numberoftailsegments": 20,
-    "flags": [
-      "twinridgeplates",
-      "tailspike"
-    ]
+    "twinridgeplates": false,
+    "tailspike": true
   }
 }
