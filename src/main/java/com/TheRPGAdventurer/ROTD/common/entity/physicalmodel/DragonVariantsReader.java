@@ -134,7 +134,8 @@ public class DragonVariantsReader {
    * @return the JSON output
    */
   public static String outputAsJSON(DragonVariants dragonVariants, boolean includeComments) {
-    SortedMap<DragonVariants.ModifiedCategory, ImmutableSortedMap<DragonVariantTag, Object>> allTags = new TreeMap<>();
+    SortedMap<DragonVariants.ModifiedCategory, ImmutableSortedMap<DragonVariantTag, Object>> allTags
+            = new TreeMap<>(new DragonVariants.ModifiedCategoryAlphabeticSorter());
     Set<DragonVariants.ModifiedCategory> modifiedCategories = dragonVariants.getAllModifiedCategories();
     for (DragonVariants.ModifiedCategory modifiedCategory : modifiedCategories) {
       allTags.put(modifiedCategory, dragonVariants.getAllAppliedTagsForCategory(modifiedCategory));
@@ -222,11 +223,26 @@ public class DragonVariantsReader {
   public static String outputAllTagsAsJSON(boolean includeComments) {
     DragonVariants dragonVariants = new DragonVariants("example");
     ImmutableSet<DragonVariantTag> allDefinedTags = DragonVariantTag.getAllDragonVariantTags();
+//    List<DragonVariants.Modifier> allModifiers = DragonVariants.Modifier.getAllModifiers();
+//    DragonVariants.Modifier [] allModifiersArray = new DragonVariants.Modifier[allModifiers.size()];
+//    allModifiersArray = allModifiers.toArray(allModifiersArray);
     List<DragonVariants.Modifier> allModifiers = DragonVariants.Modifier.getAllModifiers();
-    DragonVariants.Modifier [] allModifiersArray = (DragonVariants.Modifier[])allModifiers.toArray();
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("Each configuration file corresponds to one breed.  The file is broken into categories which group\n");
+    sb.append(" the different option tags together, for example \"egg\" for option tags relating to the egg.\n");
+    sb.append("If you don't use a particular tag, it takes on the default value.\n");
+    sb.append("You can optionally define different variations of a breed - for example male or female.\n");
+    sb.append(" This is done by applying a modifier to the category, for example:\n");
+    sb.append(" including an additional category as \"egg:male\" in addition to the base \"egg\" category options.\n");
+    sb.append(" Any option tags which are not defined in \"egg:male\" will use the value from \"egg\".");
+    sb.append(" Multiple modifiers can be applied using a comma, for example:\n");
+    sb.append(" \"egg:male,albino\" is applied to a male dragon who is also .\n");
+    valid modifiers ar
+    )
     for (DragonVariantTag tag : allDefinedTags) {
       for (DragonVariants.Category category : tag.getExpectedCategories()) {
-        DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(category, allModifiersArray);
+        DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(category);
         dragonVariants.addTagAndValue(modifiedCategory, tag, tag.getDefaultValue());
       }
     }

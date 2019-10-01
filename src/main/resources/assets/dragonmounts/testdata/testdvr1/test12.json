@@ -3,6 +3,7 @@
   "breedinternalname": "fire12",
   "egg": {
     "crackstarttime": 0.5,
+    "crackingsounds": false,
     "wiggle": true,
     "glow": true
   }

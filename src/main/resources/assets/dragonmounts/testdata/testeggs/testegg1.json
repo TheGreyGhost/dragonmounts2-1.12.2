@@ -5,7 +5,7 @@
     "animationticksperframe": 20,
     "particlesspawnrate" : 1,
     "particlesname" : "reddust",
-    "animationnointerpolation": true,
+    "animationinterpolation": false,
     "particlesspawnregularintervals": true
   }
 }

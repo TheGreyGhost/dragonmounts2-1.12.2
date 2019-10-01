@@ -49,7 +49,7 @@ public class StartupDebugClientOnly {
   public static void testDragonVariantsReader() {
 
     TESTTAG1 = DragonVariantTag.addTag("testtag1", "one", "testtag1").categories(DragonVariants.Category.EGG).values("one", "two", "three");
-    TESTTAG2 = DragonVariantTag.addTag("testtag2flag", true, "testtag2 flag").categories(DragonVariants.Category.EGG);
+    TESTTAG2 = DragonVariantTag.addTag("testtag2flag", false, "testtag2 flag").categories(DragonVariants.Category.EGG);
     TESTTAG3 = DragonVariantTag.addTag("testtag3", 2.0, "testtag3 number").categories(DragonVariants.Category.EGG);
     DragonVariants.addVariantTagValidator(new TestValidator());
 

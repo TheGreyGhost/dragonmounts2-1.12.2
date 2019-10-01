@@ -6,11 +6,11 @@
     "spinspeed": 1.0,
     "spinstarttime": 0.5,
     "wigglestarttime": 0.75,
-    "animationnointerpolation": true,
+    "animationinterpolation": false,
     "crackingsounds": true,
     "glow": true,
     "levitate": true,
-    "noparticles": true,
+    "particles": false,
     "spin": true,
     "wiggle": true
   }

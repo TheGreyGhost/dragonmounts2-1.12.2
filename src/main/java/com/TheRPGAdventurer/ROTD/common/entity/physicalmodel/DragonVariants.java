@@ -45,9 +45,12 @@ import static com.google.common.base.Preconditions.checkElementIndex;
  *    use the validator (for example: create ModelResourceLocations)
  * 2) Create a DragonVariants
  * 3) addTagAndValue() for all the tags in the config file
- * 4) call validateCollection() to apply all the registered VariantTagValidator functions on the collection
+ * 4) call validateCollection() to apply all the registered VariantTagValidator functions on the collection.  checkForConflict is a
+ *    helper function to help detect illegal combinations of options.  In case of validation errors, you can remove tags using
+ *    removeTag() or removeTags()
  * 5) call initialiseResourcesForCollection() to initalise the resources required by the tags in this collection (eg ModelResources)
- * 6) call getValueOrDefault() to retrieve the value of a VariantTag
+ * 6) call getValueOrDefault() to retrieve the value of a VariantTag, or isExplicitlyDefined to determine if the default is being used
+ * 7) you can optionally call setComment() to add a comment; this is added to the start of the JSON used to store the DragonVariant
  *
  * You can optionally use DragonVariantsCategoryShortcut to access DragonVariants in a less cluttered way, eg
  *   DragonVariants.DragonVariantsCategoryShortcut dvc = dragonVariants.new DragonVariantsCategoryShortcut(Category.EGG);
@@ -308,6 +311,14 @@ public class DragonVariants {
     return ImmutableSortedMap.copyOf(allTags);
   }
 
+  public String getComment() {
+    return comment;
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
+
   // shortcut to access DragonVariants with a particular category, without having to provide the category every time
   //  (visually less cluttered)
   // For information about the methods, see the corresponding methods in DragonVariants
@@ -393,7 +404,7 @@ public class DragonVariants {
       stringBuilder.append(" then the following tags must be ");
       stringBuilder.append(slaveConflictState ? "false:" : "true:");
       boolean first = true;
-      for (DragonVariantTag dragonVariantTag : conflictSlaves) {
+      for (DragonVariantTag dragonVariantTag : conflictSlaveBooleans) {
         if (!first) {
           stringBuilder.append(", ");
         }
@@ -403,14 +414,11 @@ public class DragonVariants {
       errors.addError(stringBuilder.toString());
     }
     if (!conflictSlaveNonBooleans.isEmpty()) {
-      stringBuilder.append(" then " +
-
-              stringBuilder.append(" and " +
-              "" +
-              "the following tags must ");
-      stringBuilder.append(slaveConflictState ? "not be defined (must be false for :" : "be defined (true):");
+      stringBuilder.append(conflictSlaveBooleans.isEmpty() ? " then" : " and");
+      stringBuilder.append(" the following tags must ");
+      stringBuilder.append(slaveConflictState ? "not be defined:" : "be defined:");
       boolean first = true;
-      for (DragonVariantTag dragonVariantTag : conflictSlaves) {
+      for (DragonVariantTag dragonVariantTag : conflictSlaveNonBooleans) {
         if (!first) {
           stringBuilder.append(", ");
         }
@@ -467,7 +475,6 @@ public class DragonVariants {
     }
   }
 
-
   public static class ModifiedCategory {
     public ModifiedCategory(Category category, Modifier... modifiers) throws IllegalArgumentException {
       this.category = category;
@@ -483,7 +490,8 @@ public class DragonVariants {
       }
       if (clashingMutex == 0) return;
 
-      String errorMsg = "The requested category:modifiers contains the following mutually-exclusive modifiers:";
+      String errorMsg = "The requested category:modifiers contains the following mutually-exclusive modifiers - ";
+      errorMsg += category.getTextName() + ":";
       boolean first = true;
       for (Modifier modifier : modifiers) {
         if (0 != (clashingMutex & modifier.mutexFlags)) {
@@ -619,6 +627,35 @@ public class DragonVariants {
 
     private ModifiedCategory target;
   }
+
+  // Sort the modified category alphabetically, first on category, then on the list of modifiers
+  public static class ModifiedCategoryAlphabeticSorter implements Comparator<ModifiedCategory> {
+
+    public ModifiedCategoryAlphabeticSorter() {
+    }
+
+    @Override
+    public int compare(ModifiedCategory o1, ModifiedCategory o2) {
+      // algorithm:
+      // 1: compare categories
+      // 2: find the first tag which isn't identical in both categories (modifiers are sorted
+      //    in alphabetical order already
+      if (o1.equals(o2)) return 0;
+      int cmp = o1.getCategory().getTextName().compareTo(o2.getCategory().getTextName());
+      if (cmp != 0) return cmp;
+
+      for (int i = 0; i < o1.appliedModifiers.length; ++i) {
+        Modifier m1 = o1.appliedModifiers[i];
+        if (o2.appliedModifiers.length < i+1) return -1;
+        Modifier m2 = o2.appliedModifiers[i];
+        cmp = m1.getTextname().compareTo(m2.getTextname());
+        if (cmp != 0) return cmp;
+      }
+      return 0;
+    }
+  }
+
+  private String comment;
 
   private HashMap<DragonVariantTag, HashMap<ModifiedCategory, Object>> allAppliedTags;
   private String breedInternalName;
