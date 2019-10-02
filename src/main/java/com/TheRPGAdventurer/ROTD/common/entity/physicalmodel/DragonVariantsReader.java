@@ -142,6 +142,10 @@ public class DragonVariantsReader {
     }
 
     StringBuilder json = new StringBuilder();
+    if (includeComments) {
+      addComment(json, dragonVariants.getComment(), "// ", "// ");
+      json.append("\n");
+    }
     json.append("{\n  \"");
     json.append(BREED_INTERNAL_NAME_JSON);
     json.append("\": \"");
@@ -231,15 +235,19 @@ public class DragonVariantsReader {
     StringBuilder sb = new StringBuilder();
     sb.append("Each configuration file corresponds to one breed.  The file is broken into categories which group\n");
     sb.append(" the different option tags together, for example \"egg\" for option tags relating to the egg.\n");
-    sb.append("If you don't use a particular tag, it takes on the default value.\n");
-    sb.append("You can optionally define different variations of a breed - for example male or female.\n");
-    sb.append(" This is done by applying a modifier to the category, for example:\n");
-    sb.append(" including an additional category as \"egg:male\" in addition to the base \"egg\" category options.\n");
-    sb.append(" Any option tags which are not defined in \"egg:male\" will use the value from \"egg\".");
-    sb.append(" Multiple modifiers can be applied using a comma, for example:\n");
-    sb.append(" \"egg:male,albino\" is applied to a male dragon who is also .\n");
-    valid modifiers ar
-    )
+    sb.append("If you don't define a particular tag, it takes on its default value.\n");
+    sb.append("You can optionally define different variations of a breed - for example:\n");
+    sb.append("\"egg\": {\n  \"tag1:\": 0.1,\n  \"tag2\": 0.2\n}\n");
+    sb.append("\"egg:male\": {\n  \"tag2\": 0.3 // male eggs have tag1=0.1 and tag2=0.3\n}\n ");
+    sb.append("\"egg:male,albino\": {\n  \"tag1\": 0.15 // male albino eggs have tag1=0.15 and tag2=0.3\n}\n ");
+    sb.append("Valid modifiers are:");
+    String prePend = "";
+    for (DragonVariants.Modifier modifier : allModifiers) {
+      sb.append(prePend);
+      sb.append(modifier.getTextname());
+      prePend = ",";
+    }
+    dragonVariants.setComment(sb.toString());
     for (DragonVariantTag tag : allDefinedTags) {
       for (DragonVariants.Category category : tag.getExpectedCategories()) {
         DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(category);
@@ -289,6 +297,7 @@ public class DragonVariantsReader {
    * @param comment
    */
   private static void addComment(StringBuilder stringBuilder, String comment, String firstlinePrefix, String subsequentLinesPrefix) {
+    if (comment.length() == 0) return;
     String[] strParts = comment.split("\\r?\\n|\\r");
     boolean firstLine = true;
     for (String line : strParts) {

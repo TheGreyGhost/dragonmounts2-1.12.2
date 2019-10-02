@@ -72,11 +72,11 @@ public class DragonVariants {
   public enum Category {
     BREATH_WEAPON_PRIMARY("breathweaponprimary", 0, "This section is used to configure the primary breath weapon"),
     BREATH_WEAPON_SECONDARY("breathweaponsecondary", 1, "This section is used to configure the secondary breath weapon"),
-    PHYSICAL_MODEL("physicalmodel", 2, "Physical characteristics of the dragon model"),
+    PHYSICAL_MODEL("physicalmodel", 2, "Physical characteristics of the dragon model (appearance)"),
     LIFE_STAGE("lifestage", 3,
           "The physical attributes of the dragon change with its age.  The dragon follows development stages similar to a human:\n" +
           "HATCHLING (newly born), INFANT, CHILD, EARLY TEEN, LATE TEEN, ADULT\n" +
-          "The age corresponding to stage is given by the ageXXXXX tags.\n" +
+          "The age corresponding to stage XXXXX is given by the ageXXXXX tags.\n" +
           "The age of the dragon affects the following physical aspects:\n" +
           " 1) PhysicalSize (metres) - for the base dragon, this is the height of the top of the back\n" +
           " 2) PhysicalMaturity (0->100%) - the physical abilities of the dragon such as being able to fly,\n" +
@@ -542,7 +542,10 @@ public class DragonVariants {
 
     @Override
     public int hashCode() {
-      return category.hashCode() ^ appliedModifiers.hashCode();
+      int hc1 = category.hashCode();
+      int hc2 = appliedModifiers.hashCode();
+      int hc3 = hc1 ^ hc2;
+      return category.hashCode() ^ Arrays.deepHashCode(appliedModifiers);
     }
 
     @Override
@@ -655,7 +658,7 @@ public class DragonVariants {
     }
   }
 
-  private String comment;
+  private String comment = "";
 
   private HashMap<DragonVariantTag, HashMap<ModifiedCategory, Object>> allAppliedTags;
   private String breedInternalName;

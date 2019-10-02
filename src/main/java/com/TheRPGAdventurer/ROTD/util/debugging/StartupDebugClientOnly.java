@@ -29,9 +29,9 @@ import java.util.Map;
 public class StartupDebugClientOnly {
   public static void preInitClientOnly() {
     if (!DragonMounts.instance.getConfig().isDebug()) return;
-    testModifiedCategory();
-    testDragonVariantsReader();
-    testDragonLifeStageHelperTags();
+//    testModifiedCategory();
+//    testDragonVariantsReader();
+//    testDragonLifeStageHelperTags();
   }
 
   public static void initClientOnly() {

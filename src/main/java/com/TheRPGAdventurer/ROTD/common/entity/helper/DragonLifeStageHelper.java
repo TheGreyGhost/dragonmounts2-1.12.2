@@ -268,14 +268,14 @@ public class DragonLifeStageHelper extends DragonHelper {
     dragon.world.playSound(null, blockPosIn, ModSounds.DRAGON_HATCHING, SoundCategory.BLOCKS, +1.0F, 1.0F);
   }
 
-  public int getEggWiggleX() {
-    return eggWiggleX;
-  }
-
-  public int getEggWiggleZ() {
-    return eggWiggleZ;
-  }
-
+//  public int getEggWiggleX() {
+//    return eggWiggleX;
+//  }
+//
+//  public int getEggWiggleZ() {
+//    return eggWiggleZ;
+//  }
+//
   /**
    * Returns the current life stage of the dragon.
    *
@@ -349,7 +349,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     }
 
     updateLifeStage();
-    updateEgg();
+//    updateEgg();
     updateAgeScale();
   }
 
@@ -386,9 +386,9 @@ public class DragonLifeStageHelper extends DragonHelper {
 //        return DragonLifeStage.getLifeStageFromTickCount(age);
 //    }
 
-  public boolean isOldEnoughToBreathe() {
-    return getLifeStage().isOldEnoughToBreathe();
-  }
+//  public boolean isOldEnoughToBreathe() {
+//    return getLifeStage().isOldEnoughToBreathe();
+//  }
 
   public BreathNodeP.Power getBreathPowerP() {
     BreathNodeP.Power power = BREATHNODEP_POWER_BY_STAGE.get(getLifeStage());
@@ -399,17 +399,17 @@ public class DragonLifeStageHelper extends DragonHelper {
     return power;
   }
 
-  protected EnumParticleTypes getEggParticle() {
-    switch (dragon.getBreedType()) {
-//      case END:
-//        return EnumParticleTypes.PORTAL;
-//      case NETHER:
-//        return EnumParticleTypes.DRIP_LAVA;
-      //All Eggs without special particles:
-      default:
-        return EnumParticleTypes.TOWN_AURA;
-    }
-  }
+//  protected EnumParticleTypes getEggParticle() {
+//    switch (dragon.getBreedType()) {
+////      case END:
+////        return EnumParticleTypes.PORTAL;
+////      case NETHER:
+////        return EnumParticleTypes.DRIP_LAVA;
+//      //All Eggs without special particles:
+//      default:
+//        return EnumParticleTypes.TOWN_AURA;
+//    }
+//  }
 
   private void applyScaleModifier(IAttribute attribute) {
     IAttributeInstance instance = dragon.getEntityAttribute(attribute);
@@ -462,47 +462,47 @@ public class DragonLifeStageHelper extends DragonHelper {
     }
   }
 
-  private void updateEgg() {
-    if (!isEgg()) {
-      return;
-    }
-
-    // animate egg wiggle based on the time the eggs take to hatch
-    float progress = DragonLifeStage.getStageProgressFromTickCount(getTicksSinceCreation());
-
-    // wait until the egg is nearly hatched
-    if (progress > EGG_WIGGLE_THRESHOLD) {
-      float wiggleChance = (progress - EGG_WIGGLE_THRESHOLD) / EGG_WIGGLE_BASE_CHANCE * (1 - EGG_WIGGLE_THRESHOLD);
-
-      if (eggWiggleX > 0) {
-        eggWiggleX--;
-      } else if (rand.nextFloat() < wiggleChance) {
-        eggWiggleX = rand.nextBoolean() ? 10 : 20;
-        if (progress > EGG_CRACK_THRESHOLD) {
-          playEggCrackEffect();
-        }
-      }
-
-      if (eggWiggleZ > 0) {
-        eggWiggleZ--;
-      } else if (rand.nextFloat() < wiggleChance) {
-        eggWiggleZ = rand.nextBoolean() ? 10 : 20;
-        if (progress > EGG_CRACK_THRESHOLD) {
-          playEggCrackEffect();
-        }
-      }
-    }
-
-    // spawn generic particles
-    double px = dragon.posX + (rand.nextDouble() - 0.3);
-    double py = dragon.posY + (rand.nextDouble() - 0.3);
-    double pz = dragon.posZ + (rand.nextDouble() - 0.3);
-    double ox = (rand.nextDouble() - 0.3) * 2;
-    double oy = (rand.nextDouble() - 0.3) * 2;
-    double oz = (rand.nextDouble() - 0.3) * 2;
-    dragon.world.spawnParticle(this.getEggParticle(), px, py, pz, ox, oy, oz);
-
-  }
+//  private void updateEgg() {
+//    if (!isEgg()) {
+//      return;
+//    }
+//
+//    // animate egg wiggle based on the time the eggs take to hatch
+//    float progress = DragonLifeStage.getStageProgressFromTickCount(getTicksSinceCreation());
+//
+//    // wait until the egg is nearly hatched
+//    if (progress > EGG_WIGGLE_THRESHOLD) {
+//      float wiggleChance = (progress - EGG_WIGGLE_THRESHOLD) / EGG_WIGGLE_BASE_CHANCE * (1 - EGG_WIGGLE_THRESHOLD);
+//
+//      if (eggWiggleX > 0) {
+//        eggWiggleX--;
+//      } else if (rand.nextFloat() < wiggleChance) {
+//        eggWiggleX = rand.nextBoolean() ? 10 : 20;
+//        if (progress > EGG_CRACK_THRESHOLD) {
+//          playEggCrackEffect();
+//        }
+//      }
+//
+//      if (eggWiggleZ > 0) {
+//        eggWiggleZ--;
+//      } else if (rand.nextFloat() < wiggleChance) {
+//        eggWiggleZ = rand.nextBoolean() ? 10 : 20;
+//        if (progress > EGG_CRACK_THRESHOLD) {
+//          playEggCrackEffect();
+//        }
+//      }
+//    }
+//
+//    // spawn generic particles
+//    double px = dragon.posX + (rand.nextDouble() - 0.3);
+//    double py = dragon.posY + (rand.nextDouble() - 0.3);
+//    double pz = dragon.posZ + (rand.nextDouble() - 0.3);
+//    double ox = (rand.nextDouble() - 0.3) * 2;
+//    double oy = (rand.nextDouble() - 0.3) * 2;
+//    double oz = (rand.nextDouble() - 0.3) * 2;
+//    dragon.world.spawnParticle(this.getEggParticle(), px, py, pz, ox, oy, oz);
+//
+//  }
 
   private enum AgeLabel {
 
@@ -537,18 +537,18 @@ public class DragonLifeStageHelper extends DragonHelper {
   private static final Logger L = LogManager.getLogger();
   private static final String NBT_TICKS_SINCE_CREATION = "TicksSinceCreation";
   private static final int TICKS_SINCE_CREATION_UPDATE_INTERVAL = 100;
-  private static final float EGG_CRACK_THRESHOLD = 0.9f;
-  private static final float EGG_WIGGLE_THRESHOLD = 0.75f;
-  private static final float EGG_WIGGLE_BASE_CHANCE = 20;
+//  private static final float EGG_CRACK_THRESHOLD = 0.9f;
+//  private static final float EGG_WIGGLE_THRESHOLD = 0.75f;
+//  private static final float EGG_WIGGLE_BASE_CHANCE = 20;
   // the ticks since creation is used to control the dragon's life stage.  It is only updated by the server occasionally.
   // the client keeps a cached copy of it and uses client ticks to interpolate in the gaps.
   // when the watcher is updated from the server, the client will tick it faster or slower to resynchronise
   private final DataParameter<Integer> dataParam;
   private final ClientServerSynchronisedTickCount ticksSinceCreationClient;
   private DragonLifeStage lifeStagePrev;
-  private int eggWiggleX;
-
-  private int eggWiggleZ;
+//  private int eggWiggleX;
+//
+//  private int eggWiggleZ;
   private int ticksSinceCreationServer;
 
   private boolean testingClass = false;
@@ -582,15 +582,16 @@ public class DragonLifeStageHelper extends DragonHelper {
   private static final double TICKS_PER_MINECRAFT_DAY = REAL_LIFE_MINUTES_PER_MINECRAFT_DAY * 60.0 * TICKS_PER_SECOND;
   private static final double MAX_AGE = Integer.MAX_VALUE / TICKS_PER_MINECRAFT_DAY;
 
-  private static final DragonVariantTag AGE_INFANT = DragonVariantTag.addTag("age1infant", AGE_HUMAN_INFANT * H2D, 0, MAX_AGE,
+
+  private static final DragonVariantTag AGE_INFANT = DragonVariantTag.addTag("age1infant", Math.rint(100*AGE_HUMAN_INFANT * H2D)/100.0, 0, MAX_AGE,
           "in minecraft days").categories(Category.LIFE_STAGE);
-  private static final DragonVariantTag AGE_CHILD = DragonVariantTag.addTag("age2child", AGE_HUMAN_CHILD * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_CHILD = DragonVariantTag.addTag("age2child", Math.rint(100*AGE_HUMAN_CHILD * H2D)/100.0, 0, MAX_AGE,
           "in minecraft days").categories(Category.LIFE_STAGE);
-  private static final DragonVariantTag AGE_EARLY_TEEN = DragonVariantTag.addTag("age3earlyteen", AGE_HUMAN_EARLY_TEEN * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_EARLY_TEEN = DragonVariantTag.addTag("age3earlyteen", Math.rint(100*AGE_HUMAN_EARLY_TEEN * H2D)/100.0, 0, MAX_AGE,
           "in minecraft days").categories(Category.LIFE_STAGE);
-  private static final DragonVariantTag AGE_LATE_TEEN = DragonVariantTag.addTag("age4lateteen", AGE_HUMAN_LATE_TEEN * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_LATE_TEEN = DragonVariantTag.addTag("age4lateteen", Math.rint(100*AGE_HUMAN_LATE_TEEN * H2D)/100.0, 0, MAX_AGE,
           "in minecraft days").categories(Category.LIFE_STAGE);
-  private static final DragonVariantTag AGE_ADULT = DragonVariantTag.addTag("age5adult", AGE_HUMAN_ADULT * H2D, 0, MAX_AGE,
+  private static final DragonVariantTag AGE_ADULT = DragonVariantTag.addTag("age5adult", Math.rint(100*AGE_HUMAN_ADULT * H2D)/100.0, 0, MAX_AGE,
           "in minecraft days").categories(Category.LIFE_STAGE);
 
   // see 190804-GrowthProfile and AgeProfile for explanation
