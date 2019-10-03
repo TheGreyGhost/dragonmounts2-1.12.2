@@ -435,28 +435,34 @@ public class DragonVariants {
     // define in decreasing order of priority.  In case of ambiguity, the highest priority modifier is used, eg
     //   the earliest in the list
     // Mutex = mutually exclusive flags.  If two flags have any mutex bits in common, they cannot both be applied at the same time
-    MALE("male", 0x01),
-    FEMALE("female", 0x01),
-    DEBUG1("debug1", 0x02, true),
-    DEBUG2("debug2", 0x04, true);
+    MALE("male", 0x01, 0),
+    FEMALE("female", 0x01, 1),
+    DEBUG1("debug1", 0x02, 2, true),
+    DEBUG2("debug2", 0x04, 3, true);
     ; // may add other modifiers in future
 
     private String textname;
     private int mutexFlags;
+    private int bitIndex;
     private boolean debugOnly;
 
-    private Modifier(String textname, int mutexFlags) {
+    private Modifier(String textname, int mutexFlags, int bitIndex) {
       this.textname = textname;
       this.mutexFlags = mutexFlags;
+      this.bitIndex = bitIndex;
+      if (bitIndex < 0 || bitIndex > Modifier.MAX_BIT_INDEX) throw new AssertionError("Illegal Modifier.bitindex:"+bitIndex);
       this.debugOnly = false;
     }
-    private Modifier(String textname, int mutexFlags, boolean debugOnly) {
+    private Modifier(String textname, int mutexFlags, int bitIndex, boolean debugOnly) {
       this.textname = textname;
       this.mutexFlags = mutexFlags;
+      this.bitIndex = bitIndex;
+      if (bitIndex < 0 || bitIndex > Modifier.MAX_BIT_INDEX) throw new AssertionError("Illegal Modifier.bitindex:"+bitIndex);
       this.debugOnly = debugOnly;
     }
 
     public String getTextname() {return textname;}
+    public int getBitIndex() {return bitIndex;}
 
     public static Modifier getModifierFromText(String text) throws IllegalArgumentException {
       for (Modifier modifier : Modifier.values()) {
@@ -473,34 +479,43 @@ public class DragonVariants {
       }
       return allModifiers;
     }
+
+    // return true if all modifiers can co-exist, false if any mutexes clash
+    public static boolean validateMutexes(Modifier... modifiers) {
+      int appliedMutex = 0;
+      for (Modifier modifier : modifiers) {
+        if (0 != (appliedMutex & modifier.mutexFlags)) {
+          return false;
+        }
+        appliedMutex |= modifier.mutexFlags;
+      }
+      return true;
+    }
+
+    // return all other Modifiers which share the same mutex
+    public List<Modifier> getSameMutex() {
+      List<Modifier> retval = new ArrayList<>();
+      for (Modifier modifier : Modifier.values()) {
+        if (modifier.mutexFlags == this.mutexFlags) {
+          retval.add(modifier);
+        }
+      }
+      return retval;
+    }
+
+    static final public int MAX_BIT_INDEX = 31;
   }
 
   public static class ModifiedCategory {
     public ModifiedCategory(Category category, Modifier... modifiers) throws IllegalArgumentException {
-      this.category = category;
-      this.appliedModifiers = modifiers;
-      Arrays.sort(this.appliedModifiers);
-      int appliedMutex = 0;
-      int clashingMutex = 0;
-      for (Modifier modifier : modifiers) {
-        if (0 != (appliedMutex & modifier.mutexFlags)) {
-          clashingMutex |= modifier.mutexFlags;
-        }
-        appliedMutex |= modifier.mutexFlags;
-      }
-      if (clashingMutex == 0) return;
+      initialise(category, modifiers);
+    }
 
-      String errorMsg = "The requested category:modifiers contains the following mutually-exclusive modifiers - ";
-      errorMsg += category.getTextName() + ":";
-      boolean first = true;
-      for (Modifier modifier : modifiers) {
-        if (0 != (clashingMutex & modifier.mutexFlags)) {
-          if (!first) errorMsg += ", ";
-          errorMsg += modifier.getTextname();
-          first = false;
-        }
-      }
-      throw new IllegalArgumentException(errorMsg);
+    public ModifiedCategory(Category category, Modifiers modifiers) throws IllegalArgumentException {
+      List<Modifier> modifierList = modifiers.getModifierList();
+      Modifier [] modifierArray = new Modifier[modifierList.size()];
+      modifierArray = modifierList.toArray(modifierArray);
+      initialise(category, modifierArray);
     }
 
     public Category getCategory() {
@@ -526,6 +541,34 @@ public class DragonVariants {
         modifiers[i++] = Modifier.getModifierFromText(modText.trim());
       }
       return new ModifiedCategory(category, modifiers);
+    }
+
+    private void initialise(Category category, Modifier... modifiers) throws IllegalArgumentException {
+      this.category = category;
+      this.appliedModifiers = modifiers;
+      Arrays.sort(this.appliedModifiers);
+      int appliedMutex = 0;
+      int clashingMutex = 0;
+      for (Modifier modifier : modifiers) {
+        if (0 != (appliedMutex & modifier.mutexFlags)) {
+          clashingMutex |= modifier.mutexFlags;
+        }
+        appliedMutex |= modifier.mutexFlags;
+      }
+      if (clashingMutex == 0) return;
+
+      String errorMsg = "The requested category:modifiers contains the following mutually-exclusive modifiers - ";
+      errorMsg += category.getTextName() + ":";
+      boolean first = true;
+      for (Modifier modifier : modifiers) {
+        if (0 != (clashingMutex & modifier.mutexFlags)) {
+          if (!first) errorMsg += ", ";
+          errorMsg += modifier.getTextname();
+          first = false;
+        }
+      }
+      throw new IllegalArgumentException(errorMsg);
+
     }
 
     private Category category;

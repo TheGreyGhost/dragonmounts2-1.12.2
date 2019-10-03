@@ -19,6 +19,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsReader;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
 import com.TheRPGAdventurer.ROTD.common.event.EntityMountEventHandler;
 import com.TheRPGAdventurer.ROTD.common.event.RegistryEventHandler;
 import com.TheRPGAdventurer.ROTD.common.event.VanillaEggHandler;
@@ -128,6 +129,7 @@ abstract public class CommonProxy {
 
   protected void preInitialisePhase1(FMLPreInitializationEvent event) {
 //    DragonMountsConfig.PreInit();
+    Modifiers.preInitialise();
     DragonLifeStageHelper.registerConfigurationTags();
     EntityDragonEgg.registerConfigurationTags();
   }
