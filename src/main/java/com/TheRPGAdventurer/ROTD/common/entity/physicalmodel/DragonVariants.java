@@ -503,7 +503,7 @@ public class DragonVariants {
       return retval;
     }
 
-    static final public int MAX_BIT_INDEX = 31;
+    static final public int MAX_BIT_INDEX = 255; // arbitrary large
   }
 
   public static class ModifiedCategory {

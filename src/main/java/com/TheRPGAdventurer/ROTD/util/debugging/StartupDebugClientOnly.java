@@ -3,15 +3,16 @@ package com.TheRPGAdventurer.ROTD.util.debugging;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsReader;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.*;
 import com.sun.org.apache.xerces.internal.util.DraconianErrorHandler;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * User: The Grey Ghost
@@ -32,6 +33,7 @@ public class StartupDebugClientOnly {
 //    testModifiedCategory();
 //    testDragonVariantsReader();
 //    testDragonLifeStageHelperTags();
+    testModifiers();
   }
 
   public static void initClientOnly() {
@@ -237,4 +239,55 @@ public class StartupDebugClientOnly {
     if (ranker1.compare(mc[5], mct[0]) >= 0 || ranker1.compare(mct[0], mc[5]) <= 0) System.out.println("Test fail:20");
   }
 
-}
+  public static void testModifiers() {
+    // tests:
+    // 1) add and remove modifiers; compare to getModifierList at each step
+    // 2) writeToNBT and getStateFromNBT at each step
+    // 3) Check DataSerializer read and write using a PacketBuffer at each step
+
+    for (int i1 = 0; i1 <= 3; ++i1) {
+      for (int i2 = 0; i2 <= 3; ++i2) {
+        for (int i3 = 0; i3 <= 3; ++i3) {
+          for (int i4 = 0; i4 <= 3; ++i4) {
+            List<DragonVariants.Modifier> modArray = new ArrayList<>();
+            Modifiers modifiers = new Modifiers();
+            if ((i1 & 1) != 0) {modifiers.add(DragonVariants.Modifier.MALE); modArray.add(DragonVariants.Modifier.MALE); }
+            if ((i1 & 2) != 0) {modifiers.remove(DragonVariants.Modifier.MALE); modArray.remove(DragonVariants.Modifier.MALE); }
+            if ((i2 & 1) != 0) {modifiers.add(DragonVariants.Modifier.FEMALE); modArray.add(DragonVariants.Modifier.FEMALE);
+                                modifiers.remove(DragonVariants.Modifier.MALE); modArray.remove(DragonVariants.Modifier.MALE);
+                               }
+            if ((i2 & 2) != 0) {modifiers.remove(DragonVariants.Modifier.FEMALE); modArray.remove(DragonVariants.Modifier.FEMALE); }
+            if ((i3 & 1) != 0) {modifiers.add(DragonVariants.Modifier.DEBUG1); modArray.add(DragonVariants.Modifier.DEBUG1); }
+            if ((i3 & 2) != 0) {modifiers.remove(DragonVariants.Modifier.DEBUG1); modArray.remove(DragonVariants.Modifier.DEBUG1); }
+            if ((i4 & 1) != 0) {modifiers.add(DragonVariants.Modifier.DEBUG2); modArray.add(DragonVariants.Modifier.DEBUG2); }
+            if ((i4 & 2) != 0) {modifiers.remove(DragonVariants.Modifier.DEBUG2); modArray.remove(DragonVariants.Modifier.DEBUG2); }
+            List<DragonVariants.Modifier> modArray1 = modifiers.getModifierListIncludingDebugs();
+            modArray.sort(null);
+            modArray1.sort(null);
+            if (!modArray.equals(modArray1)) System.out.println("Test1 failed for: " + i1 +"," + i2 + "," + i3 + "," + i4);
+
+            NBTTagCompound nbt = new NBTTagCompound();
+            modifiers.writeToNBT(nbt);
+            Modifiers modifiers2 = Modifiers.getStateFromNBT(nbt);
+            List<DragonVariants.Modifier> modArray2 = modifiers2.getModifierList();
+            if ((i3!=1 && i4!=1) && !modArray.equals(modArray2)) System.out.println("Test2 failed for: " + i1 +"," + i2 + "," + i3 + "," + i4);
+              //debug1 and debug2 are removed by the validator
+
+            ByteBuf bb = ByteBufAllocator.DEFAULT.buffer();
+            PacketBuffer pb = new PacketBuffer(bb);
+            Modifiers.MODIFIERS_DATA_SERIALIZER.write(pb, modifiers);
+            try {
+              Modifiers modifiers3 = Modifiers.MODIFIERS_DATA_SERIALIZER.read(pb);
+              List<DragonVariants.Modifier> modArray3 = modifiers3.getModifierList();
+              if ((i3!=1 && i4!=1) && !modArray.equals(modArray3)) System.out.println("Test3 failed for: " + i1 +"," + i2 + "," + i3 + "," + i4);
+              //debug1 and debug2 are removed by the validator
+            } catch (IOException ioe) {
+              System.out.println("Test3 failed with exception: " + ioe);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  }

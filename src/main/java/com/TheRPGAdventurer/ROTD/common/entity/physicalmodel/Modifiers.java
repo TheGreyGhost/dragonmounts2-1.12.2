@@ -17,10 +17,19 @@ import java.util.List;
 /**
  * Created by TGG on 3/10/2019.
  * Keeps track of all modifiers applied to this dragon (eg male, female, etc)
+ * Typical usage:
+ * 0) During proxy.preInitialise, call preInitialise()
+ * 1) call registerDataParameter() during the entityInit() of the Entity which uses the Modifiers
+ * 2) Create an empty Modifiers() or populate from an array of Modifier
+
+ * 3) getStateFromDataParam() and setDataParameter() to synchronise between client and server
+ * 4) getStateFromNBT() and writeToNBT() to load & save the entity
+ *
+ * 5) add() or remove() Modifier
+ * 6) getModifierList() to get an explicit list of the discrete Modifiers
+ *
  */
 public class Modifiers implements Cloneable {
-
-  NEEDS TESTING
 
   public Modifiers() {
   }
@@ -62,6 +71,17 @@ public class Modifiers implements Cloneable {
     return retval;
   }
 
+  // gets the list of applied modifiers as discrete modifiers - for debugging purposes
+  public List<DragonVariants.Modifier> getModifierListIncludingDebugs() {
+    List<DragonVariants.Modifier> retval = new ArrayList<>();
+    for (DragonVariants.Modifier modifier : DragonVariants.Modifier.values()) {
+      if (appliedModifiers.get(modifier.getBitIndex())) {
+        retval.add(modifier);
+      }
+    }
+    return retval;
+  }
+
   public static void preInitialise() {
     DataSerializers.registerSerializer(MODIFIERS_DATA_SERIALIZER);
   }
@@ -83,7 +103,7 @@ public class Modifiers implements Cloneable {
       newModifiers.checkValidity();
       return newModifiers;
     } catch (Exception e) {
-      DragonMounts.loggerLimit.warn_once(e.getMessage());
+      DragonMounts.loggerLimit.warn_once("Error reading NBT tag for Modifiers:" + e.getMessage());
       return new Modifiers();
     }
   }
@@ -116,7 +136,7 @@ public class Modifiers implements Cloneable {
     if (!copy.isEmpty()) {
       throw new IllegalArgumentException("Invalid modifier bit index " + copy.nextSetBit(0));
     }
-    DragonVariants.Modifier[] modifiersMatchedArray = new DragonVariants.Modifier[1];
+    DragonVariants.Modifier[] modifiersMatchedArray = new DragonVariants.Modifier[0];
     if (!DragonVariants.Modifier.validateMutexes(modifiersMatched.toArray(modifiersMatchedArray))) {
       throw new IllegalArgumentException("Two or more modifiers are mutually exclusive.");
     }
@@ -151,7 +171,6 @@ public class Modifiers implements Cloneable {
       return value.createCopy();
     }
   };
-
 
   private BitSet appliedModifiers = new BitSet(DragonVariants.Modifier.MAX_BIT_INDEX + 1);
 

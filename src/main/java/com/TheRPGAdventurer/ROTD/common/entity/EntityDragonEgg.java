@@ -45,7 +45,7 @@ import java.util.List;
  *     b) worldIn.spawnEntity(myEntity);
  *
  *  The usual mechanics for vanilla entity spawing are followed:
- *  After the user has spawned a new ENtity on the server, the packet to the client will call:
+ *  After the user has spawned a new Entity on the server, the packet to the client will call:
  *  1) myEntityClient = new MyEntity(world) will be called
  *  2) myEntityClient notifyDataManagerChange will be called for all DataParameters
 

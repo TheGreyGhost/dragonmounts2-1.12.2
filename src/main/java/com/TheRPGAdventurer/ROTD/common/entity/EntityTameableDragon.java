@@ -24,6 +24,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractBase;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
 import com.TheRPGAdventurer.ROTD.common.inits.*;
 import com.TheRPGAdventurer.ROTD.common.inventory.ContainerDragon;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonExtras;
@@ -161,6 +162,7 @@ public class EntityTameableDragon extends EntityTameable {
   public void writeEntityToNBT(NBTTagCompound nbt) {
     super.writeEntityToNBT(nbt);
     //        nbt.setUniqueId("IdAmulet", this.getUniqueID()); // doesnt save uuid i double checked i/f has this bug makes dragon duplication posible, also why whitle wont work after amulet
+    modifiers.writeToNBT(nbt);
     nbt.setBoolean(NBT_SADDLED, isSaddled());
     nbt.setInteger(NBT_ARMOR, this.getArmor());
     nbt.setBoolean(NBT_CHESTED, this.isChested());
@@ -207,6 +209,7 @@ public class EntityTameableDragon extends EntityTameable {
     } catch (IllegalArgumentException iae) {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
+    modifiers = Modifiers.getStateFromNBT(nbt);
     initialise(dragonBreed);
 
     //        this.setUniqueId(nbt.getUniqueId("IdAmulet")); // doesnt save uuid i double checked i/f has this bug makes dragon duplication posible, also why whitle wont work after amulet
@@ -241,11 +244,19 @@ public class EntityTameableDragon extends EntityTameable {
     helpers.values().forEach(helper -> helper.readFromNBT(nbt));
   }
 
-  /**
-   * Returns relative speed multiplier for the vertical flying speed.
-   *
-   * @return relative vertical speed multiplier
-   */
+  @Override
+  public void notifyDataManagerChange(DataParameter<?> key) {
+    if (key.equals(DATAPARAM_MODIFIERS)) {
+      Modifiers newModifiers = Modifiers.getStateFromDataParam(this.getDataManager(), DATAPARAM_MODIFIERS);
+      //todo fix up initialisation of dragon to match EntityDragonEgg
+    }
+  }
+
+    /**
+     * Returns relative speed multiplier for the vertical flying speed.
+     *
+     * @return relative vertical speed multiplier
+     */
   public double getMoveSpeedAirVert() {
     return this.airSpeedVertical;
   }
@@ -2107,6 +2118,7 @@ public class EntityTameableDragon extends EntityTameable {
     dataManager.register(DATA_BREATH_WEAPON_MODE, 0);
 
     dataManager.register(HUNGER, 0);
+    Modifiers.registerDataParameter(dataManager, DATAPARAM_MODIFIERS);
   }
 
   @Override
@@ -2340,7 +2352,7 @@ public class EntityTameableDragon extends EntityTameable {
 //  private static final DataParameter<Boolean> HAS_ADJUCATOR_STONE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
 
   private static final DataParameter<String> DATA_BREED_NEW = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.STRING);
-
+  private static final DataParameter<Modifiers> DATAPARAM_MODIFIERS = EntityDataManager.createKey(EntityTameableDragon.class, Modifiers.MODIFIERS_DATA_SERIALIZER);
 
   /*    public boolean isGiga() {
         return getLifeStageHelper().isAdult();
@@ -2363,7 +2375,7 @@ public class EntityTameableDragon extends EntityTameable {
 //  private static final String NBT_SHEARED = "Sheared";
   private static final String NBT_CHESTED = "Chested";
   private static final String NBT_BREATHING = "Breathing";
-  private static final String NBT_ISMALE = "IsMale";
+  private static final String NBT_ISMALE = "IsMale";      //todo change to modifier
 //  private static final String NBT_ISALBINO = "IsAlbino";
 //  private static final String NBT_ELDER = "Elder";
 //  private static final String NBT_ADJUCATOR = "Adjucator";
@@ -2381,5 +2393,6 @@ public class EntityTameableDragon extends EntityTameable {
   private DragonAnimator animator;
   private double airSpeedVertical = 0;
   private DragonPhysicalModel dragonPhysicalModel;
+  private Modifiers modifiers = new Modifiers();    // which modifiers are applied to this dragon?
 }
 
