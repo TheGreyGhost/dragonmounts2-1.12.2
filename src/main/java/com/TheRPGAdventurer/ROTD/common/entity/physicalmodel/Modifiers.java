@@ -92,16 +92,16 @@ public class Modifiers implements Cloneable {
     DataSerializers.registerSerializer(MODIFIERS_DATA_SERIALIZER);
   }
 
-  public static Modifiers getStateFromDataParam(EntityDataManager entityDataManager, DataParameter<Modifiers> dataParameter) {
+  public static Modifiers getStateFromDataParam(EntityDataManager entityDataManager, DataParameter<Modifiers> dataParameter) throws IllegalArgumentException {
     try {
       Modifiers newModifiers = entityDataManager.get(dataParameter);
       return newModifiers;
     } catch (Exception e) {
-      return new Modifiers();
+      throw new IllegalArgumentException("Error getting Modifiers state from DataParameter:" + e.getMessage());
     }
   }
 
-  public static Modifiers getStateFromNBT(NBTTagCompound nbtTagCompound) {
+  public static Modifiers getStateFromNBT(NBTTagCompound nbtTagCompound) throws IllegalArgumentException {
     try {
       byte [] bitSet = nbtTagCompound.getByteArray(NBT_MODIFIERS);
       Modifiers newModifiers = new Modifiers();
@@ -109,8 +109,9 @@ public class Modifiers implements Cloneable {
       newModifiers.checkValidity();
       return newModifiers;
     } catch (Exception e) {
-      DragonMounts.loggerLimit.warn_once("Error reading NBT tag for Modifiers:" + e.getMessage());
-      return new Modifiers();
+      throw new IllegalArgumentException("Error reading NBT tag for Modifiers:" + e.getMessage());
+//      DragonMounts.loggerLimit.warn_once("Error reading NBT tag for Modifiers:" + e.getMessage());
+//      return new Modifiers();
     }
   }
 

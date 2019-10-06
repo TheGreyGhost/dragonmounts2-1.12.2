@@ -112,11 +112,12 @@ public class EntityTameableDragon extends EntityTameable {
   public EntityTameableDragon(World world) {
     super(world);
     addHelpers();
+    helpers.values().forEach(DragonHelper::entityInit);
   }
 
   public EntityTameableDragon(World world, DragonBreedNew breed, Modifiers modifiers) {
     this(world);
-    checkState(isServer(), "EntityTameableDragon constructed on client side");
+    checkState(isServer(), "Attempted to explicitly construct EntityTameableDragon on client side.");
     getConfigurationHelper().setInitialConfiguration(breed, modifiers);
     initialiseServerSide();
   }
@@ -130,54 +131,45 @@ public class EntityTameableDragon extends EntityTameable {
   }
 
   private void initialiseServerSide() {
-    checkState(isServer(), "initialiseServerSide called on non-server side");
-    commonHelpers.values().forEach(DragonHelper::initialiseServerSide);
+    checkState(isServer(), "initialiseServerSide unexpectedly called on non-server side");
+    helpers.values().forEach(DragonHelper::initialiseServerSide);
   }
 
   private void initialiseClientSide() {
-    checkState(isClient(), "initialiseClientSide called on non-client side");
-    commonHelpers.values().forEach(DragonHelper::initialiseClientSide);
-    clientHelpers.values().forEach(DragonHelperClient::initialiseClientSide);
+    checkState(isClient(), "initialiseClientSide unexpectedly called on non-client side");
+    helpers.values().forEach(DragonHelper::initialiseClientSide);
   }
 
   /** called to notify that the dragon configuration has changed.
    * intended to be called by DragonConfigurationHelper only.
   **/
   public void onConfigurationChange() {
-    commonHelpers.values().forEach(DragonHelper::onConfigurationChange);
-    if (isClient()) {
-      clientHelpers.values().forEach(DragonHelperClient::onConfigurationChange);
-    }
+    helpers.values().forEach(DragonHelper::onConfigurationChange);
   }
 
-  private void addCommonHelper(DragonHelper helper) {
-    checkArgument(!(helper instanceof DragonHelperClient), "Tried to add a client DragonHelper to common", helper);
-    commonHelpers.put(helper.getClass(), helper);
-  }
-  private void addClientHelper(DragonHelperClient helper) {
-    checkArgument(helper instanceof DragonHelperClient, "Tried to add a common DragonHelper to client", helper);
-    clientHelpers.put(helper.getClass(), helper);
+  private void addHelper(DragonHelper helper) {
+    helpers.put(helper.getClass(), helper);
   }
 
   @SuppressWarnings("unchecked")
   private <T extends DragonHelper> T getHelper(Class<T> clazz) {
-    return (T)commonHelpers.get(clazz);
+    return (T) helpers.get(clazz);
   }
 
-  @SuppressWarnings("unchecked")
-  private <T extends DragonHelperClient> T getHelperClient(Class<T> clazz) {
-    return (T)clientHelpers.get(clazz);
-  }
 
   private void addHelpers() {
     // create entity delegates
-    addCommonHelper(new DragonConfigurationHelper(this, dragonBreed, DATA_BREED, DATA_BREED_NEW));
-    addCommonHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonBreed.getDragonVariants()));
-    addCommonHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
-    addCommonHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
-    addCommonHelper(new DragonInteractHelper(this));
-    if (isServer()) addCommonHelper(new DragonBrain(this));
-
+    addHelper(new DragonConfigurationHelper(this));
+    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonBreed.getDragonVariants()));
+    addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
+    addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
+    addHelper(new DragonInteractHelper(this));
+    if (isServer()) {
+      addHelper(new DragonBrain(this));
+    }
+    if (isClient()) {
+      // add client helpers
+    }
     // todo for now, leave animator and physicalmodel as non-helpers:
     animator = new DragonAnimator(this);
     dragonPhysicalModel = getBreed().getDragonPhysicalModel();
@@ -185,8 +177,8 @@ public class EntityTameableDragon extends EntityTameable {
   }
 
   // server/client delegates
-  private final Map<Class, DragonHelper> commonHelpers = new TreeMap<>(new DragonHelper.DragonHelperSorter());
-  private final Map<Class, DragonHelperClient> clientHelpers = new TreeMap<>(new DragonHelper.DragonHelperSorter());
+  private final Map<Class, DragonHelper> helpers = new TreeMap<>(new DragonHelper.DragonHelperSorter());
+//  private final Map<Class, DragonHelperClient> clientHelpers = new TreeMap<>(new DragonHelper.DragonHelperSorter());
 
   @Override
   protected EntityBodyHelper createBodyHelper()
@@ -232,9 +224,9 @@ public class EntityTameableDragon extends EntityTameable {
     float adultHeight = dragonPhysicalModel.getHitboxHeightWC(FULL_SIZE_DRAGON_SCALE);
     setSize(adultWidth, adultHeight);           //todo: later - update it when breed changes
 
-    // init commonHelpers
+    // init helpers
     aiSit = new EntityAIDragonSit(this);
-    commonHelpers.values().forEach(DragonHelper::applyEntityAttributes);
+    helpers.values().forEach(DragonHelper::applyEntityAttributes);
 
     InitializeDragonInventory();
   }
@@ -278,7 +270,7 @@ public class EntityTameableDragon extends EntityTameable {
     }
     writeDragonInventory(nbt);
     dragonStats.writeNBT(nbt);
-    commonHelpers.values().forEach(helper -> helper.writeToNBT(nbt));
+    helpers.values().forEach(helper -> helper.writeToNBT(nbt));
   }
 
   /**
@@ -288,13 +280,13 @@ public class EntityTameableDragon extends EntityTameable {
   public void readEntityFromNBT(NBTTagCompound nbt) {
     super.readEntityFromNBT(nbt);
 
-    DragonBreedNew dragonBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed();
-    try {
-      dragonBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(nbt);
-    } catch (IllegalArgumentException iae) {
-      DragonMounts.loggerLimit.warn_once(iae.getMessage());
-    }
-    modifiers = Modifiers.getStateFromNBT(nbt);
+//    DragonBreedNew dragonBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed();
+//    try {
+//      dragonBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(nbt);
+//    } catch (IllegalArgumentException iae) {
+//      DragonMounts.loggerLimit.warn_once(iae.getMessage());
+//    }
+//    modifiers = Modifiers.getStateFromNBT(nbt);
     initialise(dragonBreed);
 
     //        this.setUniqueId(nbt.getUniqueId("IdAmulet")); // doesnt save uuid i double checked i/f has this bug makes dragon duplication posible, also why whitle wont work after amulet
@@ -326,15 +318,17 @@ public class EntityTameableDragon extends EntityTameable {
     }
     dragonStats.readNBT(nbt);
     readDragonInventory(nbt);
-    commonHelpers.values().forEach(helper -> helper.readFromNBT(nbt));
+    helpers.values().forEach(helper -> helper.readFromNBT(nbt));
   }
 
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
-    if (key.equals(DATAPARAM_MODIFIERS)) {
-      Modifiers newModifiers = Modifiers.getStateFromDataParam(this.getDataManager(), DATAPARAM_MODIFIERS);
-      //todo fix up initialisation of dragon to match EntityDragonEgg
+    helpers.values().forEach(helper -> helper.notifyDataManagerChange(key));
+    if (allDataParametersReceived) return;
+    for (DragonHelper dragonHelper : helpers.values()) {
+      if (!dragonHelper.allDataParametersReceived()) return;
     }
+    allDataParametersReceived = true;
   }
 
     /**
@@ -792,7 +786,7 @@ public class EntityTameableDragon extends EntityTameable {
 
     if (DebugSettings.isAnimationFrozen()) return;
 
-    commonHelpers.values().forEach(DragonHelper::onLivingUpdate);
+    helpers.values().forEach(DragonHelper::onLivingUpdate);
     getBreed().onLivingUpdate(this);
 
     if (isServer()) {
@@ -1007,7 +1001,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   @Override
   public void setDead() {
-    commonHelpers.values().forEach(DragonHelper::onDeath);
+    helpers.values().forEach(DragonHelper::onDeath);
     super.setDead();
   }
 
@@ -2225,7 +2219,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   protected void onDeathUpdate() {
-    commonHelpers.values().forEach(DragonHelper::onDeathUpdate);
+    helpers.values().forEach(DragonHelper::onDeathUpdate);
 
     // unmount any riding entities
     removePassengers();
@@ -2452,6 +2446,7 @@ public class EntityTameableDragon extends EntityTameable {
   private DragonAnimator animator;
   private double airSpeedVertical = 0;
   private DragonPhysicalModel dragonPhysicalModel;
-  private Modifiers modifiers = new Modifiers();    // which modifiers are applied to this dragon?
+  boolean allDataParametersReceived = false;
+//  private Modifiers modifiers = new Modifiers();    // which modifiers are applied to this dragon?
 }
 
