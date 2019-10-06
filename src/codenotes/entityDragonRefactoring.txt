@@ -1,0 +1,499 @@
+Plan:
+-walk through the dragon classes and list functionality
+-decide where these should go.
+
+how should change in breed and/or modifier be implemented?
+
+EntityTameableDragon:
+has Helpers which chain:
+-read/write NBT
+- applyEntityAttributes which updates attributes after breed change?
+- onLivingUpdate, onDeathUpdate, onDeath
+- should there be any others?  - probably yes: notifyDataManagerChange, entityInit for DataParameters
+isInitialised()?
+
+DragonStats: food/hunger mechanics for the dragon
+DragonInventory: ContainerHorseChest.  Slots for banners, saddle,
+Some variables related to movement, flying, following
+DragonPhysicalModel:
+DragonAnimator
+NBT load/save
+DataParameters initialisation, updating
+"Home Position" - how used?
+
+Functionality:
+saddled
+boosting
+has a chest
+whistle mechanics:
+  nothing, follow, circle, come, homepos, sit
+firesupport?
+male/female
+armour
+allow interaction with other players
+
+related to movement:
+flying - yes / no
+"going down"
+hover, follow yaw, ylock
+vanilla:
+  fall
+  canBePushed, canBeSteered,
+
+related to riding:
+canFitPassenger
+
+
+
+Appearances:
+Banners - in vanilla, and in LayerRendererDragonBanner
+
+
+
+how to ensure proper initialisation?
+require:
+server side creation
+client side creation - initialisation once all dataparams have been received.
+
+Entity has an "initialise" method
+
+Existing DragonHelpers:
+    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonBreed.getDragonVariants()));
+    addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
+    addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
+    addHelper(new DragonInteractHelper(this));
+    if (isServer()) addHelper(new DragonBrain(this));
+    DragonBreedHelper
+    DragonMoveHelper
+
+ The helpers need access to:
+ -base dragon
+ -breed, dragon variants and modifier
+
+The helpers need to know:
+-save/load/initialise
+-config changes - breed
+-ticking
+
+Existing DataParameters:
+    this.setSaddled(nbt.getBoolean(NBT_SADDLED));
+    this.setChested(nbt.getBoolean(NBT_CHESTED));
+    this.setHunger(nbt.getInteger("hunger"));
+    this.setfiresupport(nbt.getBoolean("firesupport"));
+    this.setGrowthPaused(nbt.getBoolean("growthpause"));
+    this.getLifeStageHelper().setTicksSinceCreation(nbt.getInteger("AgeTicks"));
+    this.setArmor(nbt.getInteger(NBT_ARMOR));
+    this.setMale(nbt.getBoolean(NBT_ISMALE));
+    this.setGoingDown(nbt.getBoolean("down"));
+    this.setUnHovered(nbt.getBoolean("unhovered"));
+    this.setYLocked(nbt.getBoolean("ylocked"));
+    this.setFollowYaw(nbt.getBoolean("followyaw"));
+    //        this.setUnFluttered(nbt.getBoolean("unFluttered"));
+    this.setBoosting(nbt.getBoolean("boosting"));
+    //        this.setSleeping(nbt.getBoolean("sleeping")); //unused as of now
+    this.setToAllowedOtherPlayers(nbt.getBoolean(NBT_ALLOWOTHERPLAYERS));
+
+Do I want the modifiers to include such parameters as saddled as well?
+--------------
+Order of refactoring:
+1) Correct initialisation / configuration via NBT, DataParam  -> delegate to helpers
+Remove explicit mentions of breed.  Change BreedHelper to ConfigurationHelper:
+ - stores breed, dragonvariants, Modifiers
+
+
+--------------
+list of all methods sorted by functionality:  "#" = inherited from vanilla
+
+DragonInventory
+DragonInventory
+DragonInventoryListener
+getBanner1
+getBanner2
+getBanner3
+getBanner4
+setBanner1
+setBanner2
+setBanner3
+setBanner4
+InitializeDragonInventory
+openGUI
+readDragonInventory
+writeDragonInventory
+#replaceItemInInventory
+refreshInventory
+isChested
+setChested
+
+Movement
+#fall
+canFly
+#canBeLeashedTo
+#isOnLadder
+#getJumpUpwardsMotion
+#getWaterSlowDown
+#travel
+#updateDistance
+boosting
+getMoveSpeedAirVert
+getHeadPitchSpeed
+getHeadYawSpeed
+liftoff
+isFlying -?
+setFlying -?
+isGoingDown -?
+setBoosting
+
+Children/Reproduction
+#canMateWith
+#createChild
+#canBePushed
+#setGrowingAge
+setMale
+#isChild
+#isBreedingItem
+isAdult
+isBaby
+#getGrowingAge
+isMale
+setOppositeGender
+
+Passengers
+#canFitPassenger
+#canBeSteered
+#getControllingPassenger
+#updatePassenger
+#updateRidden
+#getMountedYOffset (also in appearance)
+#shouldDismountInWater
+setRidingPlayer
+setSaddled
+updateRiding
+updateIntendedRideRotation
+getControllingPlayer
+hasControllingPlayer
+isRidingAboveGround
+applyYawToEntity
+isSaddled
+
+Appearance/Sounds
+#canRenderOnFire
+#setScaleForAge
+spawnBodyParticle
+spawnBodyParticles
+#playLivingSound
+#playSound
+playSound
+#playStepSound
+#getRenderBoundingBox
+#getRenderSizeModifier
+#getHurtSound
+#getEyeHeight
+#getDisplayName
+#getDeathSound
+#getSoundPitch
+#getSoundVolume
+getStepSound
+#getSwimSound
+getVolume
+#getTalkInterval
+getAnimator
+getAttackSound
+getEatSound
+getLivingSound
+getWingsSound
+getAgeScale
+getDeathTime
+getMaxDeathTime
+getPhysicalModel
+lookAtTarget
+setAgeScalePublic
+getAltitude
+getBodyPitch
+getDragonSpeed
+getFlySpeed
+onWingsDown
+roar
+
+Initialisation/Load/Save/Configuration
+#applyEntityAttributes
+addHelper
+#entityInit
+#writeEntityToNBT
+#readEntityFromNBT
+#notifyDataManagerChange
+getBrain
+getBreathHelperP
+getBreed
+getBreedHelper
+getBreedType
+getConfigurationFileCategoryModifiers
+getInteractHelper
+getLifeStageHelper
+getHelper
+getReproductionHelper
+initialise
+#setDead
+#canDespawn
+setBreedType
+
+Behaviour
+come
+comeToPlayerFlying
+firesupport
+fireSupport
+follow
+followPlayerFlying
+followYaw
+circle
+circleTarget1
+circleTarget2
+setnothing
+setUnHovered
+setWhistleState
+setYLocked
+sit
+homepos
+nothing
+setControllingWhistle
+setfiresupport
+getWhistleState
+getControllingWhistle
+isUnHovered
+isYLocked
+equalizeYaw
+getFollowRange
+setStateField
+setFollowYaw
+
+Interactions; tameable
+allowedOtherPlayers
+#processInteract
+tamedFor
+setToAllowedOtherPlayers
+isTamedFor
+isGrowthPaused
+setGrowthPaused
+
+Attacks
+#attackEntityAsMob
+#attackEntityFrom
+#shouldAttackEntity
+#isEntityInvulnerable
+#onStruckByLightning
+getArmor
+getArmorResistance
+getHealthRelative
+getHunger
+setImmuneToFire
+shouldHeal
+getTicksSinceLastAttack
+#swingArm
+setArmor
+setAttackDamage
+setHunger
+
+Ticking & Updates
+#onDeath
+#onDeathUpdate
+#onEntityUpdate
+#onLivingUpdate
+#onUpdate
+
+Miscellaneous properties
+#getCreatureAttribute - for undead/arthropod etc
+isClient
+isServer
+updateKeys
+?collideWithEntities
+onSolidGround
+isBlockSolid
+isUsingBreathWeapon
+
+--------------
+list of all methods:  "#" = inherited from vanilla
+EntityTameableDragon
+DragonInventory
+DragonInventoryListener
+EntityTameableDragon
+addHelper
+allowedOtherPlayers
+#applyEntityAttributes
+applyYawToEntity
+#attackEntityAsMob
+#attackEntityFrom
+boosting
+#canBeLeashedTo
+#canBePushed
+#canBeSteered
+#canDespawn
+#canFitPassenger
+canFly
+#canMateWith
+#canRenderOnFire
+circle
+circleTarget1
+circleTarget2
+collideWithEntities
+come
+comeToPlayerFlying
+#createChild
+#entityInit
+equalizeYaw
+#fall
+firesupport
+fireSupport
+follow
+followPlayerFlying
+followYaw
+getAgeScale
+getAltitude
+getAnimator
+getArmor
+getArmorResistance
+getAttackSound
+getBanner1
+getBanner2
+getBanner3
+getBanner4
+getBodyPitch
+getBrain
+getBreathHelperP
+getBreed
+getBreedHelper
+getBreedType
+getConfigurationFileCategoryModifiers
+#getControllingPassenger
+getControllingPlayer
+getControllingWhistle
+#getCreatureAttribute
+#getDeathSound
+getDeathTime
+#getDisplayName
+getDragonSpeed
+getEatSound
+#getEyeHeight
+getFlySpeed
+getFollowRange
+#getGrowingAge
+getHeadPitchSpeed
+getHeadYawSpeed
+getHealthRelative
+getHelper
+getHunger
+#getHurtSound
+getInteractHelper
+#getJumpUpwardsMotion
+getLifeStageHelper
+getLivingSound
+getMaxDeathTime
+#getMountedYOffset
+getMoveSpeedAirVert
+getPhysicalModel
+#getRenderBoundingBox
+#getRenderSizeModifier
+getReproductionHelper
+#getSoundPitch
+#getSoundVolume
+getStepSound
+#getSwimSound
+#getTalkInterval
+getTicksSinceLastAttack
+getVolume
+#getWaterSlowDown
+getWhistleState
+getWingsSound
+hasControllingPlayer
+homepos
+initialise
+InitializeDragonInventory
+isAdult
+isBaby
+isBlockSolid
+#isBreedingItem
+isChested
+#isChild
+isClient
+#isEntityInvulnerable
+isFlying
+isGoingDown
+isGrowthPaused
+isMale
+#isOnLadder
+isRidingAboveGround
+isSaddled
+isServer
+isTamedFor
+isUnHovered
+isUsingBreathWeapon
+isYLocked
+liftOff
+lookAtTarget
+nothing
+#notifyDataManagerChange
+#onDeath
+#onDeathUpdate
+#onEntityUpdate
+#onLivingUpdate
+onSolidGround
+#onStruckByLightning
+#onUpdate
+onWingsDown
+openGUI
+#playLivingSound
+#playSound
+playSound
+#playStepSound
+#processInteract
+readDragonInventory
+#readEntityFromNBT
+refreshInventory
+#replaceItemInInventory
+roar
+setAgeScalePublic
+setArmor
+setAttackDamage
+setBanner1
+setBanner2
+setBanner3
+setBanner4
+setBoosting
+setBreedType
+setChested
+setControllingWhistle
+#setDead
+setfiresupport
+setFlying
+setFollowYaw
+setGoingDown
+#setGrowingAge
+setGrowthPaused
+setHunger
+setImmuneToFire
+setMale
+setnothing
+setOppositeGender
+setRidingPlayer
+setSaddled
+#setScaleForAge
+setStateField
+setToAllowedOtherPlayers
+setUnHovered
+setWhistleState
+setYLocked
+#shouldAttackEntity
+#shouldDismountInWater
+shouldHeal
+sit
+spawnBodyParticle
+spawnBodyParticles
+#swingArm
+tamedFor
+#travel
+#updateDistance
+updateIntendedRideRotation
+updateKeys
+#updatePassenger
+#updateRidden
+updateRiding
+writeDragonInventory
+#writeEntityToNBT

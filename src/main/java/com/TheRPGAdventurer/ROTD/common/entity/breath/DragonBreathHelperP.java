@@ -88,6 +88,9 @@ public class DragonBreathHelperP extends DragonHelper {
 
   }
 
+  public static void registerConfigurationTags() { //todo initialise tags here
+  }
+
   // changes the breath weapon after the breed is changed
   public void refreshBreed(EntityTameableDragon dragon) {
     DragonBreed newBreed = dragon.getBreed();

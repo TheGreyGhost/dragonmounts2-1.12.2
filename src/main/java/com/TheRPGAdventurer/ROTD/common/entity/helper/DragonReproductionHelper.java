@@ -46,6 +46,9 @@ public class DragonReproductionHelper extends DragonHelper {
     entityDataManager.register(dataIndexReproCount, 0);
   }
 
+  public static void registerConfigurationTags() { //todo initialise tags here
+  }
+
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
     Optional<UUID> breederID = getBreederID();
@@ -150,8 +153,8 @@ public class DragonReproductionHelper extends DragonHelper {
 
     EntityTameableDragon parent1 = dragon;
     EntityTameableDragon parent2 = (EntityTameableDragon) mate;
-    DragonBreedNew dragonBreed = rand.nextBoolean() ? parent1.getBreedHelper().getDragonBreedNew()
-                                                    : parent2.getBreedHelper().getDragonBreedNew();
+    DragonBreedNew dragonBreed = rand.nextBoolean() ? parent1.getConfigurationHelper().getDragonBreedNew()
+                                                    : parent2.getConfigurationHelper().getDragonBreedNew();
     EntityTameableDragon baby = DragonFactory.getDefaultDragonFactory().createDragon(dragon.world, dragonBreed);
 
     // mix the custom names in case both parents have one
@@ -196,7 +199,7 @@ public class DragonReproductionHelper extends DragonHelper {
     }
 
     // inherit the baby's breed from its parents
-    baby.getBreedHelper().inheritBreed(parent1, parent2);
+    baby.getConfigurationHelper().inheritBreed(parent1, parent2);
 
     // increase reproduction counter
     parent1.getReproductionHelper().addReproduced();

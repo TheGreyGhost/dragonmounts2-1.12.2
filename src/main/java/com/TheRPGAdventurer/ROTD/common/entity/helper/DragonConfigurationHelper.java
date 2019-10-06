@@ -10,18 +10,21 @@
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
 import net.minecraft.block.Block;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import org.apache.commons.lang3.EnumUtils;
@@ -38,20 +41,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Helper class for breed properties.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
+ *
+ * Usage:
+ *   1) See DragonHelper for correct initialisation
+ *   2) changeConfiguration(), addModifier(), removeModifier() to change the breed and/or modifiers
+ *   3) hasModifier() to check if a given modifier is applied
+ *   4) getVariantTagValue() to retrieve the value for a given DragonVariantTag
+ *
  */
-public class DragonBreedHelper extends DragonHelper {
+public class DragonConfigurationHelper extends DragonHelper {
 
-  public DragonBreedHelper(EntityTameableDragon dragon, DragonBreedNew dragonBreedNew,
-                           DataParameter<String> dataParamBreed, DataParameter<String> dataParamBreedNew) {
+  public DragonConfigurationHelper(EntityTameableDragon dragon) {
     super(dragon);
-
-    this.dataParam = dataParamBreed;
-    this.dataParamNew = dataParamBreedNew;
-    this.dragonBreedNew = dragonBreedNew;
-
-    entityDataManager.register(dataParamBreed, EnumDragonBreed.FIRE.getName());
-    dragonBreedNew.registerDataParameter(entityDataManager, dataParamBreedNew);
-//    entityDataManager.register(dataParamBreed, EnumDragonBreed.END.getName());
 
     if (dragon.isServer()) {
       // initialize map to avoid future checkings
@@ -63,6 +64,76 @@ public class DragonBreedHelper extends DragonHelper {
       breedPoints.get(EnumDragonBreed.FIRE).set(POINTS_INITIAL);
     }
 
+  }
+
+  public void entityInit() {
+    entityDataManager.register(DATAPARAM_BREED, DragonBreedNew.DragonBreedsRegistry.DEFAULT_NAME);
+    Modifiers.registerDataParameter(entityDataManager, DATAPARAM_MODIFIERS);
+    helperState = HelperState.ENTITY_INIT_DONE;
+  }
+
+  public  void initialiseServerSide() {
+
+  }
+
+  public  void initialiseClientSide() {
+
+  }
+
+  public static void registerConfigurationTags() { //todo initialise tags here
+  }
+
+  public void setInitialConfiguration(DragonBreedNew newBreed, Modifiers newModifiers) {
+    dragonBreedNew = newBreed;
+    modifiers = newModifiers;
+  }
+
+  public void changeConfiguration(DragonBreedNew newBreed, Modifiers newModifiers) {
+    if (dragonBreedNew == newBreed && newModifiers.equals(modifiers)) return;
+    dragonBreedNew = newBreed;
+    modifiers = newModifiers;
+    notifyOfConfigurationChange();
+  }
+
+  public void changeConfiguration(DragonBreedNew newBreed) {
+    if (dragonBreedNew == newBreed) return;
+    dragonBreedNew = newBreed;
+    notifyOfConfigurationChange();
+  }
+
+  public void changeConfiguration(Modifiers newModifiers) {
+    if (newModifiers.equals(modifiers)) return;
+    modifiers = newModifiers;
+    notifyOfConfigurationChange();
+  }
+
+  public void addModifier(DragonVariants.Modifier modifier) {
+    Modifiers prevModifiers = modifiers.createCopy();
+    modifiers.add(modifier);
+    if (!prevModifiers.equals(modifiers)) {
+      notifyOfConfigurationChange();
+    }
+  }
+
+  public void removeModifier(DragonVariants.Modifier modifier) {
+    Modifiers prevModifiers = modifiers.createCopy();
+    modifiers.remove(modifier);
+    if (!prevModifiers.equals(modifiers)) {
+      notifyOfConfigurationChange();
+    }
+  }
+
+  public boolean hasModifier(DragonVariants.Modifier modifier) {
+    return modifiers.hasModifier(modifier);
+  }
+
+  public Object getVariantTagValue(DragonVariants.Category category, DragonVariantTag tag) {
+    DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(category, modifiers);
+    return dragonBreedNew.getDragonVariants().getValueOrDefault(modifiedCategory, tag);
+  }
+
+  private void notifyOfConfigurationChange() {
+    dragon.onConfigurationChange();
   }
 
   @Override
@@ -246,10 +317,12 @@ public class DragonBreedHelper extends DragonHelper {
   private static final int TICK_RATE_BLOCK = 20;
   private static final String NBT_BREED = "Breed";
   private static final String NBT_BREED_POINTS = "breedPoints";
-  private final DataParameter<String> dataParam;
-  private final DataParameter<String> dataParamNew;
   private DragonBreedNew dragonBreedNew;
+  private Modifiers modifiers;
 
   private final Map<EnumDragonBreed, AtomicInteger> breedPoints = new EnumMap<>(EnumDragonBreed.class);
+
+  private static final DataParameter<String> DATAPARAM_BREED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.STRING);
+  private static final DataParameter<Modifiers> DATAPARAM_MODIFIERS = EntityDataManager.createKey(EntityTameableDragon.class, Modifiers.MODIFIERS_DATA_SERIALIZER);
 
 }

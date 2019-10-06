@@ -12,7 +12,7 @@ package com.TheRPGAdventurer.ROTD.client.model.dragon.anim;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathHelperP;
-import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonHeadPositionHelper;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonHeadPositionCalcs;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.SegmentSizePositionRotation;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.util.Spline;
@@ -92,11 +92,11 @@ public class DragonAnimator {
     wingFingerRotateX = new float[WING_FINGERS];
     wingFingerRotateY = new float[WING_FINGERS];
     tailSegments = new SegmentSizePositionRotation[TAIL_SEGMENTS];
-    dragonHeadPositionHelper = new DragonHeadPositionHelper(dragon);
+    dragonHeadPositionCalcs = new DragonHeadPositionCalcs(dragon);
   }
 
-  public DragonHeadPositionHelper getDragonHeadPositionHelper() {
-    return dragonHeadPositionHelper;
+  public DragonHeadPositionCalcs getDragonHeadPositionCalcs() {
+    return dragonHeadPositionCalcs;
   }
 
   public void setPartialTicks(float partialTicks) {
@@ -298,7 +298,7 @@ public class DragonAnimator {
     if (!haveCalculatedAnimations) {
       animate();
     }
-    return dragonHeadPositionHelper.getThroatPosition();
+    return dragonHeadPositionCalcs.getThroatPosition();
   }
 
   public SegmentSizePositionRotation getTail() {
@@ -515,7 +515,7 @@ public class DragonAnimator {
   }
 
   protected void animHeadAndNeck() {
-    dragonHeadPositionHelper.calculateHeadAndNeck(animRadians, flutter, sit, walk, speed, ground, lookYaw, lookPitch, breath);
+    dragonHeadPositionCalcs.calculateHeadAndNeck(animRadians, flutter, sit, walk, speed, ground, lookYaw, lookPitch, breath);
     final float BITE_ANGLE = 0.72F;
     final float ROAR_ANGLE = 0.58F;
     final float BREATH_ANGLE = 0.67F;
@@ -671,7 +671,7 @@ public class DragonAnimator {
   protected void animLegs() {
     // do nothing - server doesn't need any of these positions so the DragonModel can do it all
   }
-  private final DragonHeadPositionHelper dragonHeadPositionHelper;
+  private final DragonHeadPositionCalcs dragonHeadPositionCalcs;
   // entity parameters
   private final EntityTameableDragon dragon;
   private final int WING_FINGERS;

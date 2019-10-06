@@ -132,6 +132,7 @@ abstract public class CommonProxy {
     Modifiers.preInitialise();
     DragonLifeStageHelper.registerConfigurationTags();
     EntityDragonEgg.registerConfigurationTags();
+
   }
 
   // read the dragon variants information for all breed config files, create the respective breeds, and initialise any corresponding resources

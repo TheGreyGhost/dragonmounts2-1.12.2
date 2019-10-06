@@ -11,7 +11,7 @@
 package com.TheRPGAdventurer.ROTD.client.model.dragon;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
-import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonHeadPositionHelper;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonHeadPositionCalcs;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.SegmentSizePositionRotation;
@@ -233,7 +233,7 @@ public class DragonModel extends AdvancedModelBase {
   }
 
   protected void animHeadAndNeck(EntityTameableDragon dragon) {
-    DragonHeadPositionHelper headPositionHelper = dragon.getAnimator().getDragonHeadPositionHelper();
+    DragonHeadPositionCalcs headPositionHelper = dragon.getAnimator().getDragonHeadPositionCalcs();
 
     SegmentSizePositionRotation[] segmentData = headPositionHelper.getNeckSegmentPositionSizeLocations();
 
@@ -777,7 +777,7 @@ public class DragonModel extends AdvancedModelBase {
     // update pitch
     pitch = dragonAnimator.getBodyPitch();
 
-    relativeHeadScale = dragonAnimator.getDragonHeadPositionHelper().getRelativeHeadSize();
+    relativeHeadScale = dragonAnimator.getDragonHeadPositionCalcs().getRelativeHeadSize();
 
     if (DebugSettings.isForceDragonModel()) {
       offsetX = (float) DebugSettings.getDebugParameter("ox");

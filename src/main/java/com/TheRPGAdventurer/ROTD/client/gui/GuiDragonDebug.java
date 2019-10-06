@@ -12,7 +12,7 @@ package com.TheRPGAdventurer.ROTD.client.gui;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonBreedHelper;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonConfigurationHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStageHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonReproductionHelper;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
@@ -291,7 +291,7 @@ public class GuiDragonDebug extends Gui {
     text.println("Breed points");
     text.setColor(WHITE);
 
-    DragonBreedHelper breedHelper = dragonServer.getBreedHelper();
+    DragonConfigurationHelper breedHelper = dragonServer.getConfigurationHelper();
     breedHelper.getBreedPoints().forEach((breedType, points) -> {
       text.setColor(breedType.getBreed().getColor());
       text.printf("%s: %d\n", breedType, points.get());

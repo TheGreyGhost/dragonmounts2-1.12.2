@@ -427,7 +427,7 @@ public abstract class DragonBreed {
 //  }
 
   /**
-   * used for converting the model dimensions into world dimensions (see DragonHeadPositionHelper)
+   * used for converting the model dimensions into world dimensions (see DragonHeadPositionCalcs)
    * I don't know why this is the magic # of 0.1F
    * It's probably linked to getAdultModelRenderScaleFactor
    * @return

@@ -20,13 +20,13 @@ import net.minecraft.util.math.Vec3d;
  * 4) getHeadPositionSizeLocation, getNeckPositionSizeLocation, getNeckSegmentPositionSizeLocations are used to
  * provide detailed position information for the model
  */
-public class DragonHeadPositionHelper {
+public class DragonHeadPositionCalcs {
 
   public SegmentSizePositionRotation[] neckSegments;
   public SegmentSizePositionRotation head;
   public SegmentSizePositionRotation neck;  //not required?  not sure.
 
-  public DragonHeadPositionHelper(EntityTameableDragon parent) {
+  public DragonHeadPositionCalcs(EntityTameableDragon parent) {
     dragon = parent;
     dragonPhysicalModel = parent.getPhysicalModel();
     NUMBER_OF_NECK_SEGMENTS = dragonPhysicalModel.getNumberOfNeckSegments();
@@ -106,21 +106,21 @@ public class DragonHeadPositionHelper {
 
   public SegmentSizePositionRotation getHeadPositionSizeLocation() {
     if (head == null) {
-      throw new IllegalStateException("DragonHeadPositionHelper.calculateHeadAndNeck() must be called first");
+      throw new IllegalStateException("DragonHeadPositionCalcs.calculateHeadAndNeck() must be called first");
     }
     return head.getCopy();
   }
 
   public SegmentSizePositionRotation getNeckPositionSizeLocation() {
     if (neck == null) {
-      throw new IllegalStateException("DragonHeadPositionHelper.calculateHeadAndNeck() must be called first");
+      throw new IllegalStateException("DragonHeadPositionCalcs.calculateHeadAndNeck() must be called first");
     }
     return neck.getCopy();
   }
 
   public SegmentSizePositionRotation[] getNeckSegmentPositionSizeLocations() {
     if (neckSegments == null) {
-      throw new IllegalStateException("DragonHeadPositionHelper.calculateHeadAndNeck() must be called first");
+      throw new IllegalStateException("DragonHeadPositionCalcs.calculateHeadAndNeck() must be called first");
     }
     SegmentSizePositionRotation[] retval = new SegmentSizePositionRotation[neckSegments.length];
     for (int i = 0; i < neckSegments.length; ++i) {
@@ -137,7 +137,7 @@ public class DragonHeadPositionHelper {
    */
   public Vec3d getThroatPosition() {
     if (head == null) {
-      throw new IllegalStateException("DragonHeadPositionHelper.calculateHeadAndNeck() must be called first");
+      throw new IllegalStateException("DragonHeadPositionCalcs.calculateHeadAndNeck() must be called first");
     }
 
     // algorithm is:

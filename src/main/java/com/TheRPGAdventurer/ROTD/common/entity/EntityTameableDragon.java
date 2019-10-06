@@ -75,10 +75,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import static com.google.common.base.Preconditions.checkArgument;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static com.google.common.base.Preconditions.checkState;
 import static net.minecraft.entity.SharedMonsterAttributes.ATTACK_DAMAGE;
 import static net.minecraft.entity.SharedMonsterAttributes.FOLLOW_RANGE;
 
@@ -88,13 +89,113 @@ import static net.minecraft.entity.SharedMonsterAttributes.FOLLOW_RANGE;
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  * @Modifier James Miller <TheRPGAdventurer.>
  *
- *   Usage:
- *   1) If spawning manually:
- *     a) EntityTameableDragon(world)
- *     b) either initialise(breed) or readEntityFromNBT(nbt)
  *
+ *  Usage:
+ *   1) call EntityTameableDragon.registerConfigurationTags() during commonproxy.preInitialisePhase to ensure that the configuration tags are properly registered
+ *   2) To spawn a new entity:
+ *     a) EntityTameableDragon(world, dragonBreed, modifiers)
+ *     b) worldIn.spawnEntity(myEntity);
+ *
+ *  The usual mechanics for vanilla entity spawing are followed:
+ *  After the user has spawned a new Entity on the server, the packet to the client will call:
+ *  1) myEntityClient = new MyEntity(world) will be called
+ *  2) myEntityClient notifyDataManagerChange will be called for all DataParameters
+
+ *  For reloading of an existing entity from disk:
+ *  1) myEntityServer = new MyEntity(world) will be called
+ *  2) myEntityServer.readEntityFromNBT will be called
+ *     The client creation then occurs as above.
  */
+
 public class EntityTameableDragon extends EntityTameable {
+
+  public EntityTameableDragon(World world) {
+    super(world);
+    addHelpers();
+  }
+
+  public EntityTameableDragon(World world, DragonBreedNew breed, Modifiers modifiers) {
+    this(world);
+    checkState(isServer(), "EntityTameableDragon constructed on client side");
+    getConfigurationHelper().setInitialConfiguration(breed, modifiers);
+    initialiseServerSide();
+  }
+
+  public static void registerConfigurationTags() {
+    DragonLifeStageHelper.registerConfigurationTags();
+    DragonConfigurationHelper.registerConfigurationTags();
+    DragonReproductionHelper.registerConfigurationTags();
+    DragonInteractHelper.registerConfigurationTags();
+    DragonBreathHelperP.registerConfigurationTags();
+  }
+
+  private void initialiseServerSide() {
+    checkState(isServer(), "initialiseServerSide called on non-server side");
+    commonHelpers.values().forEach(DragonHelper::initialiseServerSide);
+  }
+
+  private void initialiseClientSide() {
+    checkState(isClient(), "initialiseClientSide called on non-client side");
+    commonHelpers.values().forEach(DragonHelper::initialiseClientSide);
+    clientHelpers.values().forEach(DragonHelperClient::initialiseClientSide);
+  }
+
+  /** called to notify that the dragon configuration has changed.
+   * intended to be called by DragonConfigurationHelper only.
+  **/
+  public void onConfigurationChange() {
+    commonHelpers.values().forEach(DragonHelper::onConfigurationChange);
+    if (isClient()) {
+      clientHelpers.values().forEach(DragonHelperClient::onConfigurationChange);
+    }
+  }
+
+  private void addCommonHelper(DragonHelper helper) {
+    checkArgument(!(helper instanceof DragonHelperClient), "Tried to add a client DragonHelper to common", helper);
+    commonHelpers.put(helper.getClass(), helper);
+  }
+  private void addClientHelper(DragonHelperClient helper) {
+    checkArgument(helper instanceof DragonHelperClient, "Tried to add a common DragonHelper to client", helper);
+    clientHelpers.put(helper.getClass(), helper);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T extends DragonHelper> T getHelper(Class<T> clazz) {
+    return (T)commonHelpers.get(clazz);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T extends DragonHelperClient> T getHelperClient(Class<T> clazz) {
+    return (T)clientHelpers.get(clazz);
+  }
+
+  private void addHelpers() {
+    // create entity delegates
+    addCommonHelper(new DragonConfigurationHelper(this, dragonBreed, DATA_BREED, DATA_BREED_NEW));
+    addCommonHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonBreed.getDragonVariants()));
+    addCommonHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
+    addCommonHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
+    addCommonHelper(new DragonInteractHelper(this));
+    if (isServer()) addCommonHelper(new DragonBrain(this));
+
+    // todo for now, leave animator and physicalmodel as non-helpers:
+    animator = new DragonAnimator(this);
+    dragonPhysicalModel = getBreed().getDragonPhysicalModel();
+    moveHelper = new DragonMoveHelper(this);   // not a DragonHelper despite the name; is vanilla
+  }
+
+  // server/client delegates
+  private final Map<Class, DragonHelper> commonHelpers = new TreeMap<>(new DragonHelper.DragonHelperSorter());
+  private final Map<Class, DragonHelperClient> clientHelpers = new TreeMap<>(new DragonHelper.DragonHelperSorter());
+
+  @Override
+  protected EntityBodyHelper createBodyHelper()
+  {
+    return new DragonBodyHelper(this);
+  }
+
+  //---------------------
+
   // base attributes
   public static final double BASE_GROUND_SPEED = 0.4;
   public static final double BASE_AIR_SPEED = 0.9;
@@ -115,9 +216,6 @@ public class EntityTameableDragon extends EntityTameable {
   public BlockPos homePos;
   public EntityTameableDragonStats dragonStats = new EntityTameableDragonStats();
 
-  public EntityTameableDragon(World world) {
-    super(world);
-  }
 
   /** initialise the dragon to the desired breed:
    *  * if the caller has manually constructed the entity, need to call this method
@@ -128,28 +226,15 @@ public class EntityTameableDragon extends EntityTameable {
     // enables walking over blocks
     stepHeight = 1;
 
-    // create entity delegates
-    addHelper(new DragonBreedHelper(this, dragonBreed, DATA_BREED, DATA_BREED_NEW));
-
-    dragonPhysicalModel = getBreed().getDragonPhysicalModel();
-
-    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonBreed.getDragonVariants()));
-    addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
-    addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
-    addHelper(new DragonInteractHelper(this));
-    if (isServer()) addHelper(new DragonBrain(this));
-
     // set dimensions of full-grown dragon.  The actual width & height is multiplied by the dragon scale (setScale) in EntityAgeable
     final float FULL_SIZE_DRAGON_SCALE = 1.0F;
     float adultWidth = dragonPhysicalModel.getHitboxWidthWC(FULL_SIZE_DRAGON_SCALE);
     float adultHeight = dragonPhysicalModel.getHitboxHeightWC(FULL_SIZE_DRAGON_SCALE);
     setSize(adultWidth, adultHeight);           //todo: later - update it when breed changes
 
-    // init helpers
-    moveHelper = new DragonMoveHelper(this);
+    // init commonHelpers
     aiSit = new EntityAIDragonSit(this);
-    helpers.values().forEach(DragonHelper::applyEntityAttributes);
-    animator = new DragonAnimator(this);
+    commonHelpers.values().forEach(DragonHelper::applyEntityAttributes);
 
     InitializeDragonInventory();
   }
@@ -193,7 +278,7 @@ public class EntityTameableDragon extends EntityTameable {
     }
     writeDragonInventory(nbt);
     dragonStats.writeNBT(nbt);
-    helpers.values().forEach(helper -> helper.writeToNBT(nbt));
+    commonHelpers.values().forEach(helper -> helper.writeToNBT(nbt));
   }
 
   /**
@@ -241,7 +326,7 @@ public class EntityTameableDragon extends EntityTameable {
     }
     dragonStats.readNBT(nbt);
     readDragonInventory(nbt);
-    helpers.values().forEach(helper -> helper.readFromNBT(nbt));
+    commonHelpers.values().forEach(helper -> helper.readFromNBT(nbt));
   }
 
   @Override
@@ -368,7 +453,6 @@ public class EntityTameableDragon extends EntityTameable {
 
   public boolean homepos() {
     return (dataManager.get(WHISTLE_STATE)) == 4;
-
   }
 
   public boolean sit() {
@@ -708,7 +792,7 @@ public class EntityTameableDragon extends EntityTameable {
 
     if (DebugSettings.isAnimationFrozen()) return;
 
-    helpers.values().forEach(DragonHelper::onLivingUpdate);
+    commonHelpers.values().forEach(DragonHelper::onLivingUpdate);
     getBreed().onLivingUpdate(this);
 
     if (isServer()) {
@@ -923,7 +1007,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   @Override
   public void setDead() {
-    helpers.values().forEach(DragonHelper::onDeath);
+    commonHelpers.values().forEach(DragonHelper::onDeath);
     super.setDead();
   }
 
@@ -1374,30 +1458,24 @@ public class EntityTameableDragon extends EntityTameable {
     }
   }
 
-  public DragonBreedHelper getBreedHelper() {
-    return getHelper(DragonBreedHelper.class);
+  public DragonConfigurationHelper getConfigurationHelper() {
+    return getHelper(DragonConfigurationHelper.class);
   }
-
   public DragonLifeStageHelper getLifeStageHelper() {
     return getHelper(DragonLifeStageHelper.class);
   }
-
   public DragonReproductionHelper getReproductionHelper() {
     return getHelper(DragonReproductionHelper.class);
   }
-
   public DragonBreathHelperP getBreathHelperP() {
     return getHelper(DragonBreathHelperP.class);
   }
-
   public DragonAnimator getAnimator() {
     return animator;
   }
-
   public DragonBrain getBrain() {
     return getHelper(DragonBrain.class);
   }
-
   public DragonInteractHelper getInteractHelper() {
     return getHelper(DragonInteractHelper.class);
   }
@@ -1408,7 +1486,7 @@ public class EntityTameableDragon extends EntityTameable {
    * @return breed
    */
   public EnumDragonBreed getBreedType() {
-    return getBreedHelper().getBreedType();
+    return getConfigurationHelper().getBreedType();
   }
 
   /**
@@ -1417,7 +1495,7 @@ public class EntityTameableDragon extends EntityTameable {
    * @param type new breed
    */
   public void setBreedType(EnumDragonBreed type) {
-    getBreedHelper().setBreedType(type);
+    getConfigurationHelper().setBreedType(type);
   }
 
   public DragonPhysicalModel getPhysicalModel() {
@@ -2118,7 +2196,6 @@ public class EntityTameableDragon extends EntityTameable {
     dataManager.register(DATA_BREATH_WEAPON_MODE, 0);
 
     dataManager.register(HUNGER, 0);
-    Modifiers.registerDataParameter(dataManager, DATAPARAM_MODIFIERS);
   }
 
   @Override
@@ -2148,7 +2225,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   protected void onDeathUpdate() {
-    helpers.values().forEach(DragonHelper::onDeathUpdate);
+    commonHelpers.values().forEach(DragonHelper::onDeathUpdate);
 
     // unmount any riding entities
     removePassengers();
@@ -2246,16 +2323,6 @@ public class EntityTameableDragon extends EntityTameable {
     return state.getMaterial().isSolid() || (this.getControllingPlayer() == null && (this.isInWater() || this.isInLava()));
   }
 
-  private void addHelper(DragonHelper helper) {
-    L.trace("addHelper({})", helper.getClass().getName());
-    helpers.put(helper.getClass(), helper);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T extends DragonHelper> T getHelper(Class<T> clazz) {
-    return (T) helpers.get(clazz);
-  }
-
   /**
    * Credits: AlexThe 666 Ice and Fire
    */
@@ -2340,7 +2407,6 @@ public class EntityTameableDragon extends EntityTameable {
   private static final DataParameter<Boolean> Y_LOCKED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> FOLLOW_YAW = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Optional<UUID>> DATA_BREEDER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.OPTIONAL_UNIQUE_ID);
-  private static final DataParameter<String> DATA_BREED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.STRING);
   private static final DataParameter<Integer> DATA_REPRO_COUNT = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
   private static final DataParameter<Integer> HUNGER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
   private static final DataParameter<Integer> DATA_TICKS_SINCE_CREATION = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
@@ -2350,9 +2416,6 @@ public class EntityTameableDragon extends EntityTameable {
   private static final DataParameter<ItemStack> BANNER3 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);
   private static final DataParameter<ItemStack> BANNER4 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);
 //  private static final DataParameter<Boolean> HAS_ADJUCATOR_STONE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-
-  private static final DataParameter<String> DATA_BREED_NEW = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.STRING);
-  private static final DataParameter<Modifiers> DATAPARAM_MODIFIERS = EntityDataManager.createKey(EntityTameableDragon.class, Modifiers.MODIFIERS_DATA_SERIALIZER);
 
   /*    public boolean isGiga() {
         return getLifeStageHelper().isAdult();
@@ -2379,10 +2442,6 @@ public class EntityTameableDragon extends EntityTameable {
 //  private static final String NBT_ISALBINO = "IsAlbino";
 //  private static final String NBT_ELDER = "Elder";
 //  private static final String NBT_ADJUCATOR = "Adjucator";
-  // server/client delegates
-  private final Map<Class, DragonHelper> helpers = new HashMap<>();
-  // client-only delegates
-  private final DragonBodyHelper dragonBodyHelper = new DragonBodyHelper(this);
   private boolean hasChestVarChanged = false;
   //  private boolean isUsingBreathWeapon;
 //  private boolean altBreathing;

@@ -33,7 +33,7 @@ public class StartupDebugClientOnly {
 //    testModifiedCategory();
 //    testDragonVariantsReader();
 //    testDragonLifeStageHelperTags();
-    testModifiers();
+//    testModifiers();
   }
 
   public static void initClientOnly() {
@@ -289,5 +289,4 @@ public class StartupDebugClientOnly {
       }
     }
   }
-
-  }
+}

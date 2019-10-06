@@ -27,6 +27,9 @@ public class DragonInteractHelper extends DragonHelper {
     actions.add(new DragonInteract(dragon));
   }
 
+  public static void registerConfigurationTags() { //todo initialise tags here
+  }
+
   public boolean interact(EntityPlayer player, ItemStack item) {
     return actions.stream().anyMatch(action -> action.interact(player, item));
   }

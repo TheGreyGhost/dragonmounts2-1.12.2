@@ -82,6 +82,12 @@ public class Modifiers implements Cloneable {
     return retval;
   }
 
+  // returns true if Modifiers contains the given modifier
+  public boolean hasModifier(DragonVariants.Modifier modifier) {
+    boolean retval = appliedModifiers.get(modifier.getBitIndex());
+    return retval;
+  }
+
   public static void preInitialise() {
     DataSerializers.registerSerializer(MODIFIERS_DATA_SERIALIZER);
   }
