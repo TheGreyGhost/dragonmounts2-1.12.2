@@ -34,14 +34,17 @@ import static com.google.common.base.Preconditions.checkState;
  *    The initialisation sequence for the helper is:
  *    a) new DragonHelper(EntityTameableDragon)
  *    b) entityInit() = register DataParameters; also add them to the initialisedDataParameters HashMap
+ *    c) applyEntityAttributes - register IAttributes here.  Don't set the base values yet, this is deferred to initialiseServerSide below, once all helpers are initialised.
  *
- *    onInitialSpawn()
- *    c1) server side only: either setInitialConfiguration (for a newly spawning entity) or readEntityFromNBT (when loading from disk)
- *    c2) server side only: initialiseServerSide
- *    d1) client side only: notifyDataManager is received for all DataParameters
- *    d2) client side only: when all dataParameters have been received, allDataParametersReceived should return true.
- *    d3) client side only: initialiseClientSide
- *    e) both sides: onConfigurationChange()
+ *    d1) server side only: onInitialSpawn() - for freshly spawned creatures only (vanilla does this in ItemMonsterPlacer).  Used to randomly vary attributes.
+ *    d2) server side only: either setInitialConfiguration (for a newly spawning entity) or readEntityFromNBT (when loading from disk)
+ *    d3) server side only: initialiseServerSide to initialise all local data structures and Attributes from the DataParameters
+ *
+ *    e1) client side only: notifyDataManager is received for all DataParameters
+ *    e2) client side only: when all dataParameters have been received, allDataParametersReceived should return true.
+ *    e3) client side only: initialiseClientSide to initialise all local data structures and Attributes from the DataParameters
+ *
+ *    f) both sides: onConfigurationChange()
  *   4) If the helper depends on the dragon configuration (breed, Modifiers) then implement onConfigurationChange()
  *
  *   To help detect program bugs early, several helper functions are provided:
@@ -67,14 +70,14 @@ import static com.google.common.base.Preconditions.checkState;
  * Server side:
  *   INITIAL
  *   CONSTRUCTED
- *   ENTITY_INIT_DONE (after entityInit() has been called)
+ *   ENTITY_INIT_DONE (after entityInit() has been called).  Still assembling config info (entityAttributes, initialSpawn)
  *   SERVER_DATA_COMPLETE (after readFromNBT() has been called, or the relevant parameters have been explicitly provided)
  *   INITIALISED (after initialiseServerSide() has been called)
  *
  * Client side:
  *   INITIAL
  *   CONSTRUCTED
- *   ENTITY_INIT_DONE (after entityInit() has been called)
+ *   ENTITY_INIT_DONE (after entityInit() has been called).  Assembling config info from DataParameters.
  *   CLIENT_DATA_COMPLETE (after receivedDataParameter has been called for all DataParameters)
  *   INITIALISED (after initialiseClientSide() has been called)
  *
@@ -94,6 +97,23 @@ public abstract class DragonHelper {
    * Register all DataParameter used by the helper in here
    */
   public abstract void entityInit();
+
+  /**
+   * Register new IAttributes in here.  Don't set base values yet, these go in initialiseServerSide, initialiseClientSide.
+    */
+  public void applyEntityAttributes() {
+  }
+
+  /**
+   * Called once when the entity is first spawned (and not when it's later loaded from disk)
+   * @param difficulty
+   * @param livingdata
+   * @return
+   */
+  @Nullable
+  public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+    return livingdata;
+  }
 
   /**
    * Initialise the helper - server side - called once all other helpers have loaded their configuration data (NBT),
@@ -120,15 +140,6 @@ public abstract class DragonHelper {
    */
   public void onConfigurationChange() {
   }
-
-  public void applyEntityAttributes() {
-  }
-
-  @Nullable
-  public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
-
-  }
-
 
   public void onLivingUpdate() {
   }
@@ -178,6 +189,15 @@ public abstract class DragonHelper {
       }
       case ENTITY_INIT: {
         checkState(helperState == HelperState.CONSTRUCTED, "Unexpected helperState when calling DragonHelper.entityInit():%s", helperState);
+        break;
+      }
+      case ON_INITIAL_SPAWN: {
+        checkState(dragon.isServer(), "DragonHelper.onInitialSpawn() was called from non-Server code");
+        checkState(helperState == HelperState.ENTITY_INIT_DONE, "Unexpected helperState when calling DragonHelper.onInitialSpawn():%s", helperState);
+        break;
+      }
+      case APPLY_ENTITY_ATTRIBUTES: {
+        checkState(helperState == HelperState.ENTITY_INIT_DONE, "Unexpected helperState when calling DragonHelper.applyEntityAttributes():%s", helperState);
         break;
       }
       case DATAPARAMETER_RECEIVED: {
@@ -251,6 +271,8 @@ public abstract class DragonHelper {
         helperState = HelperState.INITIALISED;
         break;
       }
+      case ON_INITIAL_SPAWN:
+      case APPLY_ENTITY_ATTRIBUTES:
       case ON_CONFIG_CHANGE:  // do nothing
       case VANILLA:
       case WRITE_TO_NBT:
@@ -273,8 +295,10 @@ public abstract class DragonHelper {
 
   protected enum HelperState {INITIAL, CONSTRUCTED, ENTITY_INIT_DONE, SERVER_DATA_COMPLETE, CLIENT_DATA_COMPLETE, INITIALISED}
   protected HelperState helperState = HelperState.INITIAL;
-  protected enum FunctionTag {CONSTRUCTOR, ENTITY_INIT, INITIALISE_CLIENT, INITIALISE_SERVER, DATAPARAMETER_RECEIVED, ON_CONFIG_CHANGE,
-                              VANILLA, READ_FROM_NBT, WRITE_TO_NBT, SET_INITIAL_CONFIGURATION, CHANGE_CONFIGURATION}
+  protected enum FunctionTag {CONSTRUCTOR, ENTITY_INIT, APPLY_ENTITY_ATTRIBUTES, ON_INITIAL_SPAWN,
+                              SET_INITIAL_CONFIGURATION, READ_FROM_NBT, DATAPARAMETER_RECEIVED,
+                              INITIALISE_CLIENT, INITIALISE_SERVER, ON_CONFIG_CHANGE,
+                              VANILLA, WRITE_TO_NBT, CHANGE_CONFIGURATION}
   protected Map<DataParameter, Boolean> intialisedDataParameters = new HashMap<>();
 
   /**

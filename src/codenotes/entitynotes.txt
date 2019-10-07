@@ -6,6 +6,7 @@ For spawning of a new entity:
   a) set your x,y,z, etc in the constructor
   b) myEntity.entityInit() will be called; register your DataParameters with EntityDataManager in here
   c) applyEntityAttributes() will be called; register and/or set your Attributes here.  They will be sent from server to client.
+  d) on the server: initEntityAI()
 
 2) Call worldIn.spawnEntity(myEntity);
 3) vanilla will then setup a tracker which will send the DataParameters to the client.
