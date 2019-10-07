@@ -10,10 +10,13 @@
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.world.DifficultyInstance;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -31,6 +34,8 @@ import static com.google.common.base.Preconditions.checkState;
  *    The initialisation sequence for the helper is:
  *    a) new DragonHelper(EntityTameableDragon)
  *    b) entityInit() = register DataParameters; also add them to the initialisedDataParameters HashMap
+ *
+ *    onInitialSpawn()
  *    c1) server side only: either setInitialConfiguration (for a newly spawning entity) or readEntityFromNBT (when loading from disk)
  *    c2) server side only: initialiseServerSide
  *    d1) client side only: notifyDataManager is received for all DataParameters
@@ -118,6 +123,12 @@ public abstract class DragonHelper {
 
   public void applyEntityAttributes() {
   }
+
+  @Nullable
+  public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+
+  }
+
 
   public void onLivingUpdate() {
   }

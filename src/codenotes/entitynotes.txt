@@ -5,6 +5,7 @@ For spawning of a new entity:
 1) Call the constructor- could be MyEntity(World) but also MyEntity(World, x, y, z) or MyEntity(World, other custom parameters)
   a) set your x,y,z, etc in the constructor
   b) myEntity.entityInit() will be called; register your DataParameters with EntityDataManager in here
+  c) applyEntityAttributes() will be called; register and/or set your Attributes here.  They will be sent from server to client.
 
 2) Call worldIn.spawnEntity(myEntity);
 3) vanilla will then setup a tracker which will send the DataParameters to the client.
@@ -16,3 +17,15 @@ For reloading of an existing entity from disk:
 1) myEntityServer = new MyEntity(world) will be called
 2) myEntityServer.readEntityFromNBT will be called
 the client then follows as above.
+----------
+Attributes:
+Attributes are a system of buffs/debuffs which are properties on mobs and players. Attributes also have modifiers which adjust the strength of their effect.
+generic.maxHealth
+generic.followRange
+generic.knockbackResistance
+generic.movementSpeed
+generic.attackDamage
+generic.armor
+generic.armorToughness
+generic.attackKnockback
+EntityLivingBase.SWIM_SPEED -"forge.swimSpeed"

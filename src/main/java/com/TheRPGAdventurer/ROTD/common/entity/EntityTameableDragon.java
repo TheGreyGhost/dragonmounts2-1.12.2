@@ -80,8 +80,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkState;
-import static net.minecraft.entity.SharedMonsterAttributes.ATTACK_DAMAGE;
-import static net.minecraft.entity.SharedMonsterAttributes.FOLLOW_RANGE;
 
 /**
  * Here be dragons.
@@ -147,6 +145,17 @@ public class EntityTameableDragon extends EntityTameable {
     helpers.values().forEach(DragonHelper::onConfigurationChange);
   }
 
+  @Override
+  public void notifyDataManagerChange(DataParameter<?> key) {
+    helpers.values().forEach(helper -> helper.notifyDataManagerChange(key));
+    if (allDataParametersReceived) return;
+    for (DragonHelper dragonHelper : helpers.values()) {
+      if (!dragonHelper.allDataParametersReceived()) return;
+    }
+    allDataParametersReceived = true;
+    initialiseClientSide();
+  }
+
   private void addHelper(DragonHelper helper) {
     helpers.put(helper.getClass(), helper);
   }
@@ -155,7 +164,6 @@ public class EntityTameableDragon extends EntityTameable {
   private <T extends DragonHelper> T getHelper(Class<T> clazz) {
     return (T) helpers.get(clazz);
   }
-
 
   private void addHelpers() {
     // create entity delegates
@@ -239,7 +247,6 @@ public class EntityTameableDragon extends EntityTameable {
   public void writeEntityToNBT(NBTTagCompound nbt) {
     super.writeEntityToNBT(nbt);
     //        nbt.setUniqueId("IdAmulet", this.getUniqueID()); // doesnt save uuid i double checked i/f has this bug makes dragon duplication posible, also why whitle wont work after amulet
-    modifiers.writeToNBT(nbt);
     nbt.setBoolean(NBT_SADDLED, isSaddled());
     nbt.setInteger(NBT_ARMOR, this.getArmor());
     nbt.setBoolean(NBT_CHESTED, this.isChested());
@@ -319,16 +326,6 @@ public class EntityTameableDragon extends EntityTameable {
     dragonStats.readNBT(nbt);
     readDragonInventory(nbt);
     helpers.values().forEach(helper -> helper.readFromNBT(nbt));
-  }
-
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-    helpers.values().forEach(helper -> helper.notifyDataManagerChange(key));
-    if (allDataParametersReceived) return;
-    for (DragonHelper dragonHelper : helpers.values()) {
-      if (!dragonHelper.allDataParametersReceived()) return;
-    }
-    allDataParametersReceived = true;
   }
 
     /**
