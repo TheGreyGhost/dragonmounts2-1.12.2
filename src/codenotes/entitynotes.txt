@@ -30,3 +30,120 @@ generic.armor
 generic.armorToughness
 generic.attackKnockback
 EntityLivingBase.SWIM_SPEED -"forge.swimSpeed"
+
+
+What should the sequence be for the dragon and the helpers be?
+
+FOr a new:
+Construct.
+set up dataparameters
+provide initial parameters
+applyEntityAttributes
+initialSpawn
+
+For a reloaded:
+Construct.
+Set up data parameters
+Read NBT
+applyEntityAttributes?
+
+What does the helper need?
+Server side, initial spawning:
+
+1) Initial construction
+2) Addition of DataParameters
+3) Initialisation once all config info is available, including applying EntityAttributes
+4) Initial spawn variation  (need to refresh config)
+5) Spawn in world
+
+Server side, reload from disk:
+1) Initial construction
+2) Addition of DataParameters
+3) readFromNBT
+4) Initialisation
+
+Client side:
+1) Initial construction
+2) Addition of DataParameters
+3) notifyDataManagerChange
+4) Initialisation, including applying EntityAttributes
+
+The entity construction sequence is:
+For a spawner on the server side:
+
+EntityWolf as example
+EntityWolf
+  EntityTameable
+    EntityAnimal
+      EntityAgeable
+        EntityCreature
+          EntityLiving
+            EntityLivingBase
+              Entity
+                registers some DataParameters.
+                calls entityInit
+              applyEntityAttributes
+              setHealth(from maxHealth)
+            adds various Helpers (Look, MOve, Jump, Body)
+            adds navigator, senses, AItasks
+            initEntityAI
+Then onInitialSpawn
+
+For reading from NBT:
+Construct EntityWolf as above
+Then: readFromNBT
+
+better names:
+entityInit -> registerDataParameters
+applyEntityAttributes -> registerEntityAttributes
+
+DataParameters it gets:
+Entity->
+  FLAGS (Known flags: 0: burning; 1: sneaking; 2: unused; 3: sprinting;
+              * 4: unused; 5: invisible; 6: glowing; 7: elytra flying)
+  AIR (amount of breath)
+  CUSTOM_NAME
+  CUSTOM_NAME_VISIBLE boolean
+  SILENT
+  NO_GRAVITY
+EntityLivingBase->
+  HAND_STATES  Hand states, used to trigger blocking/eating/drinking animation.
+  POTION_EFFECTS
+  HIDE_PARTICLES
+  ARROW_COUNT_IN_ENTITY
+  HEALTH
+EntityLiving->
+  AI_FLAGS (byte)     /** First bit used for AI disabling, second bit used for marking entity as left handed */
+EntityCreature->
+EntityAgeable->
+  BABY (boolean)
+EntityAnimal->
+EntityTameable->
+  TAMED (byte)  - flags for sitting, tamed,
+  OWNER_UNIQUE_ID
+
+EntityAttributes:
+Entity-> N/A
+EntityLivingBase->
+  MAX_HEALTH
+  KNOCKBACK_RESISTANCE
+  MOVEMENT_SPEED
+  ARMOR
+  ARMOR_TOUGHNESS
+  SWIM_SPEED
+EntityLiving->
+  FOLLOW_RANGE
+EntityCreature->
+EntityAgeable->
+EntityAnimal->
+EntityTameable->
+
+Logic:
+EntityCreature - leashes, home positions
+EntityAgeable- babies size
+EntityAnimal - breeding
+EnityTameable - taming
+
+
+
+

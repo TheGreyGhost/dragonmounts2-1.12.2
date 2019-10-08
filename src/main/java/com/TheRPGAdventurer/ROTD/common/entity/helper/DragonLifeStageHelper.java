@@ -29,7 +29,6 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -250,7 +249,7 @@ public class DragonLifeStageHelper extends DragonHelper {
   }
 
   @Override
-  public void applyEntityAttributes() {
+  public void registerEntityAttributes() {
     applyScaleModifier(MAX_HEALTH);
     applyScaleModifier(ATTACK_DAMAGE);
     applyScaleModifierArmor(ARMOR);
@@ -446,7 +445,7 @@ public class DragonLifeStageHelper extends DragonHelper {
       dragon.getBrain().updateAITasks();
 
       // update attribute modifier
-      applyEntityAttributes();
+      registerEntityAttributes();
 
       // heal dragon to updated full health
       dragon.setHealth(dragon.getMaxHealth());

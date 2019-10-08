@@ -163,7 +163,7 @@
 //  }
 //
 //  @Override
-//  protected void entityInit() {
+//  protected void registerDataParameters() {
 //  }
 //
 //  @Override

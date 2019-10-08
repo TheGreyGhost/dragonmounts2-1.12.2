@@ -280,7 +280,7 @@ public class DragonBreathHelperP extends DragonHelper {
   }
 
   @Override
-  public void applyEntityAttributes() {
+  public void registerEntityAttributes() {
   }
 
   @Override

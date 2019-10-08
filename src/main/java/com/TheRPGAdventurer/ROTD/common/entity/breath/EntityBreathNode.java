@@ -135,7 +135,7 @@
 //    private EntityMoveAndResizeHelper entityMoveAndResizeHelper;
 //
 //    @Override
-//    protected void entityInit() {}
+//    protected void registerDataParameters() {}
 //
 //    @Override
 //    protected void readEntityFromNBT(NBTTagCompound tagCompund) {}

@@ -54,13 +54,13 @@ public class DragonConfigurationHelper extends DragonHelper {
   }
 
   @Override
-  public void entityInit() {
-    checkPreConditions(FunctionTag.ENTITY_INIT);
+  public void registerDataParameters() {
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
     DragonBreedNew.registerDataParameter(entityDataManager, DATAPARAM_BREED);
     Modifiers.registerDataParameter(entityDataManager, DATAPARAM_MODIFIERS);
     intialisedDataParameters.put(DATAPARAM_MODIFIERS, Boolean.FALSE);
     intialisedDataParameters.put(DATAPARAM_BREED, Boolean.FALSE);
-    setCompleted(FunctionTag.ENTITY_INIT);
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
   @Override

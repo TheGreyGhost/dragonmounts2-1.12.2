@@ -68,6 +68,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -109,14 +110,13 @@ public class EntityTameableDragon extends EntityTameable {
 
   public EntityTameableDragon(World world) {
     super(world);
-    addHelpers();
-    helpers.values().forEach(DragonHelper::entityInit);
   }
 
   public EntityTameableDragon(World world, DragonBreedNew breed, Modifiers modifiers) {
     this(world);
     checkState(isServer(), "Attempted to explicitly construct EntityTameableDragon on client side.");
     getConfigurationHelper().setInitialConfiguration(breed, modifiers);
+    helpers.values().forEach(DragonHelper::registerEntityAttributes);
     initialiseServerSide();
   }
 
@@ -128,8 +128,64 @@ public class EntityTameableDragon extends EntityTameable {
     DragonBreathHelperP.registerConfigurationTags();
   }
 
+  @Override
+  protected void entityInit() {
+    super.entityInit();
+
+    dataManager.register(DATA_FLYING, false);
+    dataManager.register(GROWTH_PAUSED, false);
+//    dataManager.register(DATA_BREATHING, false);
+//    dataManager.register(DATA_ALT_BREATHING, false);
+    dataManager.register(GOING_DOWN, false);
+    dataManager.register(DATA_SADDLED, false);
+    dataManager.register(CHESTED, false);
+    dataManager.register(IS_MALE, getRNG().nextBoolean());
+//    dataManager.register(IS_ALBINO, getRNG().nextInt(40) == 0);
+//    dataManager.register(DRAGON_SCALES, (byte) 0);
+    dataManager.register(ARMOR, 0);
+    dataManager.register(BANNER1, ItemStack.EMPTY);
+    dataManager.register(BANNER2, ItemStack.EMPTY);
+    dataManager.register(BANNER3, ItemStack.EMPTY);
+    dataManager.register(BANNER4, ItemStack.EMPTY);
+//    dataManager.register(HAS_ELDER_STONE, false);
+//    dataManager.register(HAS_ADJUCATOR_STONE, false);
+    dataManager.register(FIRE_SUPPORT, false);
+    dataManager.register(ALLOW_OTHERPLAYERS, false);
+    dataManager.register(BOOSTING, false);
+    dataManager.register(WHISTLE_STATE, (byte) 0);
+    dataManager.register(WHISTLE, ItemStack.EMPTY);
+    //        dataManager.register(SLEEP, false); //unused as of now
+    dataManager.register(HOVER_CANCELLED, false);
+    dataManager.register(Y_LOCKED, false);
+    dataManager.register(FOLLOW_YAW, true);
+    dataManager.register(DATA_BREATH_WEAPON_TARGET, "");
+    dataManager.register(DATA_BREATH_WEAPON_MODE, 0);
+
+    dataManager.register(HUNGER, 0);
+
+    addHelpers();
+    helpers.values().forEach(DragonHelper::registerDataParameters);
+  }
+
+  @Override
+  protected void applyEntityAttributes() {
+    super.applyEntityAttributes();
+
+    getAttributeMap().registerAttribute(MOVEMENT_SPEED_AIR);
+    helpers.values().forEach(DragonHelper::registerEntityAttributes);
+  }
+
   private void initialiseServerSide() {
     checkState(isServer(), "initialiseServerSide unexpectedly called on non-server side");
+    getEntityAttribute(MOVEMENT_SPEED_AIR).setBaseValue(BASE_AIR_SPEED);
+    getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(BASE_GROUND_SPEED);
+    getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(getLifeStageHelper().getAttackDamage());
+    getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
+    getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(RESISTANCE);
+    getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(getLifeStageHelper().getArmour());
+    getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue(getLifeStageHelper().getArmourToughness());
+    this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(getLifeStageHelper().getHealth());
+
     helpers.values().forEach(DragonHelper::initialiseServerSide);
   }
 
@@ -154,6 +210,21 @@ public class EntityTameableDragon extends EntityTameable {
     }
     allDataParametersReceived = true;
     initialiseClientSide();
+  }
+
+  /**
+   * Called once when the entity is first spawned (and not when it's later loaded from disk)
+   * @param difficulty
+   * @param livingdata
+   * @return
+   */
+  @Override
+  @Nullable
+  public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+    for (DragonHelper dragonHelper : helpers.values()) {
+      livingdata = dragonHelper.onInitialSpawn(difficulty, livingdata);
+    }
+    return livingdata;
   }
 
   private void addHelper(DragonHelper helper) {
@@ -182,6 +253,7 @@ public class EntityTameableDragon extends EntityTameable {
     animator = new DragonAnimator(this);
     dragonPhysicalModel = getBreed().getDragonPhysicalModel();
     moveHelper = new DragonMoveHelper(this);   // not a DragonHelper despite the name; is vanilla
+     // consider the other vanilla helpers from EntityLivingBase - (Look, Move, Jump, Body)
   }
 
   // server/client delegates
@@ -234,7 +306,7 @@ public class EntityTameableDragon extends EntityTameable {
 
     // init helpers
     aiSit = new EntityAIDragonSit(this);
-    helpers.values().forEach(DragonHelper::applyEntityAttributes);
+    helpers.values().forEach(DragonHelper::registerEntityAttributes);
 
     InitializeDragonInventory();
   }
@@ -2152,58 +2224,6 @@ public class EntityTameableDragon extends EntityTameable {
   protected float updateDistance(float f1, float f2) {
     dragonBodyHelper.updateRenderAngles();
     return f2;
-  }
-
-  @Override
-  protected void entityInit() {
-    super.entityInit();
-
-    dataManager.register(DATA_FLYING, false);
-    dataManager.register(GROWTH_PAUSED, false);
-//    dataManager.register(DATA_BREATHING, false);
-//    dataManager.register(DATA_ALT_BREATHING, false);
-    dataManager.register(GOING_DOWN, false);
-    dataManager.register(DATA_SADDLED, false);
-    dataManager.register(CHESTED, false);
-    dataManager.register(IS_MALE, getRNG().nextBoolean());
-//    dataManager.register(IS_ALBINO, getRNG().nextInt(40) == 0);
-//    dataManager.register(DRAGON_SCALES, (byte) 0);
-    dataManager.register(ARMOR, 0);
-    dataManager.register(BANNER1, ItemStack.EMPTY);
-    dataManager.register(BANNER2, ItemStack.EMPTY);
-    dataManager.register(BANNER3, ItemStack.EMPTY);
-    dataManager.register(BANNER4, ItemStack.EMPTY);
-//    dataManager.register(HAS_ELDER_STONE, false);
-//    dataManager.register(HAS_ADJUCATOR_STONE, false);
-    dataManager.register(FIRE_SUPPORT, false);
-    dataManager.register(ALLOW_OTHERPLAYERS, false);
-    dataManager.register(BOOSTING, false);
-    dataManager.register(WHISTLE_STATE, (byte) 0);
-    dataManager.register(WHISTLE, ItemStack.EMPTY);
-    //        dataManager.register(SLEEP, false); //unused as of now
-    dataManager.register(HOVER_CANCELLED, false);
-    dataManager.register(Y_LOCKED, false);
-    dataManager.register(FOLLOW_YAW, true);
-    dataManager.register(DATA_BREATH_WEAPON_TARGET, "");
-    dataManager.register(DATA_BREATH_WEAPON_MODE, 0);
-
-    dataManager.register(HUNGER, 0);
-  }
-
-  @Override
-  protected void applyEntityAttributes() {
-    super.applyEntityAttributes();
-
-    getAttributeMap().registerAttribute(MOVEMENT_SPEED_AIR);
-    getAttributeMap().registerAttribute(ATTACK_DAMAGE);
-    getEntityAttribute(MOVEMENT_SPEED_AIR).setBaseValue(BASE_AIR_SPEED);
-    getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(BASE_GROUND_SPEED);
-    getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(getLifeStageHelper().getAttackDamage());
-    getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
-    getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(RESISTANCE);
-    getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(getLifeStageHelper().getArmour());
-    getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue(getLifeStageHelper().getArmourToughness());
-    this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(getLifeStageHelper().getHealth());
   }
 
   @Override

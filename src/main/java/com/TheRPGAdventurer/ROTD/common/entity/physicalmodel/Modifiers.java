@@ -19,7 +19,7 @@ import java.util.List;
  * Keeps track of all modifiers applied to this dragon (eg male, female, etc)
  * Typical usage:
  * 0) During proxy.preInitialise, call preInitialise()
- * 1) call registerDataParameter() during the entityInit() of the Entity which uses the Modifiers
+ * 1) call registerDataParameter() during the registerDataParameters() of the Entity which uses the Modifiers
  * 2) Create an empty Modifiers() or populate from an array of Modifier
 
  * 3) getStateFromDataParam() and setDataParameter() to synchronise between client and server

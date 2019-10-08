@@ -165,7 +165,7 @@ public class EntityDragonEgg extends Entity {
 
   @Override
   protected void entityInit() {
-    // super.entityInit();
+    // super.registerDataParameters();
     DragonBreedNew.registerDataParameter(this.getDataManager(), DATAPARAM_BREED);
     EggState.registerDataParameter(this.getDataManager(), DATAPARAM_EGGSTATE);
     getDataManager().register(DATAPARAM_INCUBATIONTICKS, 0); // just a default
