@@ -208,7 +208,9 @@ public abstract class DragonHelper {
       }
       case READ_FROM_NBT: {
         checkState(dragon.isServer(), "DragonHelper.readFromNBT() was called from non-Server code");
-        checkState(helperState == HelperState.ENTITY_INIT_DONE, "Unexpected helperState when calling DragonHelper.onConfigurationChange():%s", helperState);
+        checkState(helperState == HelperState.ENTITY_INIT_DONE  || helperState == HelperState.INITIALISED,
+                // sometimes vanilla does WRITE_NBT, add a name tag, then READ_NBT again, before spawning
+                "Unexpected helperState when calling DragonHelper.onConfigurationChange():%s", helperState);
         break;
       }
       case SET_INITIAL_CONFIGURATION: {

@@ -16,21 +16,20 @@ import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants.Category;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
-import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.Interpolation;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Doubles;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -60,35 +59,25 @@ import static net.minecraft.entity.SharedMonsterAttributes.*;
  * Usage:
  * 1) During initial setup, call DragonLifeStageHelper.registerConfigurationTags() to register all the tags that are
  *    used to configure this, and to set up the variant tag validation
- * 2) Create the DragonLifeStageHelper
+ * 2) Create the DragonLifeStageHelper as described in DragonHelper
  * 3) Call its update methods to keep it synchronised as described in DragonHelper
  *
- * The ageScale, used by vanilla, is set to 0->1.0 and is
- *
+ * Is responsible for setting MAX_HEALTH, ARMOR, ARMOR_TOUGHNESS and ATTACK_DAMAGE:
+ *    these are applied via the corresponding attributes using a DragonLifeStageModifier
  */
 public class DragonLifeStageHelper extends DragonHelper {
-
-  public static final Map<DragonLifeStage, BreathNodeP.Power> BREATHNODEP_POWER_BY_STAGE =
-          ImmutableMap.<DragonLifeStage, BreathNodeP.Power>builder()
-                  .put(DragonLifeStage.EGG, BreathNodeP.Power.SMALL)           // dummy
-                  .put(DragonLifeStage.HATCHLING, BreathNodeP.Power.SMALL)     // dummy
-                  .put(DragonLifeStage.INFANT, BreathNodeP.Power.SMALL)        // dummy
-                  .put(DragonLifeStage.PREJUVENILE, BreathNodeP.Power.SMALL)
-                  .put(DragonLifeStage.JUVENILE, BreathNodeP.Power.MEDIUM)
-                  .put(DragonLifeStage.ADULT, BreathNodeP.Power.LARGE)
-                  .build();
-
 
   /**
    * Initialise all the configuration tags used by this helper
    */
   public static void registerConfigurationTags()
   {
-    // dummy method for the tags themselves -the initialisation is all done in static initialisers
+    // the initialisation of the tags is all done in their static initialisers
     DragonVariants.addVariantTagValidator(new DragonLifeStageValidator());
   }
 
-  public DragonLifeStageHelper(EntityTameableDragon dragon, DataParameter<Integer> dataParam, DragonVariants dragonVariants) {
+
+  public DragonLifeStageHelper(EntityTameableDragon dragon) {
     super(dragon);
     DragonVariants.ModifiedCategory modifiedCategory =
             new DragonVariants.ModifiedCategory(Category.LIFE_STAGE, dragon.getConfigurationFileCategoryModifiers());
@@ -98,8 +87,6 @@ public class DragonLifeStageHelper extends DragonHelper {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
 
-    this.dataParam = dataParam;
-    entityDataManager.register(dataParam, ticksSinceCreationServer);
 
     if (dragon.isClient()) {
       ticksSinceCreationClient = new ClientServerSynchronisedTickCount(TICKS_SINCE_CREATION_UPDATE_INTERVAL);
@@ -107,13 +94,13 @@ public class DragonLifeStageHelper extends DragonHelper {
     } else {
       ticksSinceCreationClient = null;
     }
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
   private DragonLifeStageHelper(DragonVariants dragonVariants) {
     super();
     testingClass = true;
     ticksSinceCreationClient = null;
-    dataParam = null;
     try {
       readConfiguration(dragonVariants, new DragonVariants.ModifiedCategory(Category.LIFE_STAGE));
     } catch (IllegalArgumentException iae) {
@@ -121,61 +108,50 @@ public class DragonLifeStageHelper extends DragonHelper {
     }
   }
 
-  /**
-   * Run some tests on the class.  Inspect the results printed to console...
-   * @param dragonVariants
-   * @param testnumber
-   */
-  public static void testClass(DragonVariants dragonVariants, int testnumber) {
-    DragonLifeStageHelper test = new DragonLifeStageHelper(dragonVariants);
-    switch (testnumber) {
-      case 0: {
-        DragonMounts.logger.info("Age AgeLabel physicalmaturity breathmaturity emotionalmaturity physicalsize");
+  @Override
+  public void registerDataParameters() {
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
+    entityDataManager.register(DATA_TICKS_SINCE_CREATION, ticksSinceCreationServer);  //default value
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
+  }
 
-        for (double age = 0; age < 25; age += 1) {
-          test.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
-          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, test.getAgeLabel(), test.getPhysicalMaturity(),
-                  test.getBreathMaturity(), test.getEmotionalMaturity(), test.getPhysicalSize());
-          DragonMounts.logger.info(output);
-        }
-        DragonMounts.logger.info("Max size at any age:"+test.getMaximumSizeAtAnyAge());
-        break;
-      }
-      case 1: {
-        DragonMounts.logger.info("Age AgeLabel health attackdamage armour armourtoughness");
+  @Override
+  public void registerEntityAttributes() {
+    checkPreConditions(FunctionTag.REGISTER_ENTITY_ATTRIBUTES);
+    dragon.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
+    setCompleted(FunctionTag.REGISTER_ENTITY_ATTRIBUTES);
+  }
 
-        for (double age = 0; age < 25; age += 1) {
-          test.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
-          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, test.getAgeLabel(), test.getHealth(),
-                  test.getAttackDamage(), test.getArmour(), test.getArmourToughness());
-          DragonMounts.logger.info(output);
-        }
-        break;
-      }
-      case 2: {  // output the default curves
-        DragonVariants dvDefault = new DragonVariants("test");
-        DragonLifeStageHelper testDefault = new DragonLifeStageHelper(dvDefault);
-        DragonMounts.logger.info("Age AgeLabel physicalmaturity breathmaturity emotionalmaturity physicalsize");
+  @Override
+  public void initialiseServerSide() {
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    initialiseBothSides();
+    setCompleted(FunctionTag.INITIALISE_SERVER);
+  }
 
-        for (double age = 0; age <= 3; age += 0.01) {
-          testDefault.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
-          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, testDefault.getAgeLabel(), testDefault.getPhysicalMaturity(),
-                  testDefault.getBreathMaturity(), testDefault.getEmotionalMaturity(), testDefault.getPhysicalSize());
-          DragonMounts.logger.info(output);
-        }
-        DragonMounts.logger.info("Age AgeLabel health attackdamage armour armourtoughness");
+  @Override
+  public void initialiseClientSide() {
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    initialiseBothSides();
+    setCompleted(FunctionTag.INITIALISE_CLIENT);
+  }
 
-        for (double age = 0; age <= 3; age += 0.01) {
-          testDefault.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
-          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, testDefault.getAgeLabel(), testDefault.getHealth(),
-                  testDefault.getAttackDamage(), testDefault.getArmour(), testDefault.getArmourToughness());
-          DragonMounts.logger.info(output);
-        }
+  private void initialiseBothSides() {
+    DragonConfigurationHelper dch = dragon.getConfigurationHelper();
+    dragon.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue((double) dch.getVariantTagValue(Category.LIFE_STAGE, ATTACKDAMAGEBASE));
+    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURBASE));
+    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURTOUGHNESSBASE));
+    dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, HEALTHBASE));
+  }
 
-      }
+  @Override
+  public void notifyDataManagerChange(DataParameter<?> key) {
 
-    }
+  }
 
+  @Override
+  public void onConfigurationChange() {
+    initialiseBothSides();
   }
 
   /** get the physical maturity of the dragon at its current age
@@ -248,33 +224,6 @@ public class DragonLifeStageHelper extends DragonHelper {
     return ageLabels[(int)index].getTextLabel();
   }
 
-  @Override
-  public void registerEntityAttributes() {
-    applyScaleModifier(MAX_HEALTH);
-    applyScaleModifier(ATTACK_DAMAGE);
-    applyScaleModifierArmor(ARMOR);
-  }
-
-  /**
-   * Generates some egg shell particles and a breaking sound.
-   */
-  public void playEggCrackEffect() {
-    // dragon.world.playEvent(2001, dragon.getPosition(), Block.getIdFromBlock(BlockDragonBreedEgg.DRAGON_HATCHABLE_EGG));
-    this.playEvent(dragon.getPosition());
-  }
-
-  public void playEvent(BlockPos blockPosIn) {
-    dragon.world.playSound(null, blockPosIn, ModSounds.DRAGON_HATCHING, SoundCategory.BLOCKS, +1.0F, 1.0F);
-  }
-
-//  public int getEggWiggleX() {
-//    return eggWiggleX;
-//  }
-//
-//  public int getEggWiggleZ() {
-//    return eggWiggleZ;
-//  }
-//
   /**
    * Returns the current life stage of the dragon.
    *
@@ -335,7 +284,7 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   @Override
   public void onLivingUpdate() {
-    // if the dragon is not an adult pr paused, update its growth ticks
+    // if the dragon is not an adult or paused, update its growth ticks
     if (dragon.isServer()) {
       if (!isFullyGrown() && !dragon.isGrowthPaused()) {
         ticksSinceCreationServer++;
@@ -348,23 +297,11 @@ public class DragonLifeStageHelper extends DragonHelper {
     }
 
     updateLifeStage();
-//    updateEgg();
     updateAgeScale();
-  }
-
-  public EntityDataManager getDataWatcher() {
-    return entityDataManager;
   }
 
   @Override
   public void onDeath() {
-    if (dragon.isClient() && isEgg()) {
-      playEggCrackEffect();
-    }
-  }
-
-  public boolean isEgg() {
-    return getLifeStage().isEgg();
   }
 
   public boolean isFullyGrown() {
@@ -380,15 +317,6 @@ public class DragonLifeStageHelper extends DragonHelper {
     return getLifeStage().isBaby();
   }
 
-//    public DragonLifeStage getLifeStageP() {
-//        int age = getTicksSinceCreation();
-//        return DragonLifeStage.getLifeStageFromTickCount(age);
-//    }
-
-//  public boolean isOldEnoughToBreathe() {
-//    return getLifeStage().isOldEnoughToBreathe();
-//  }
-
   public BreathNodeP.Power getBreathPowerP() {
     BreathNodeP.Power power = BREATHNODEP_POWER_BY_STAGE.get(getLifeStage());
     if (power == null) {
@@ -398,34 +326,40 @@ public class DragonLifeStageHelper extends DragonHelper {
     return power;
   }
 
-//  protected EnumParticleTypes getEggParticle() {
-//    switch (dragon.getBreedType()) {
-////      case END:
-////        return EnumParticleTypes.PORTAL;
-////      case NETHER:
-////        return EnumParticleTypes.DRIP_LAVA;
-//      //All Eggs without special particles:
-//      default:
-//        return EnumParticleTypes.TOWN_AURA;
-//    }
-//  }
 
-  private void applyScaleModifier(IAttribute attribute) {
+  public static final Map<DragonLifeStage, BreathNodeP.Power> BREATHNODEP_POWER_BY_STAGE =
+          ImmutableMap.<DragonLifeStage, BreathNodeP.Power>builder()
+                  .put(DragonLifeStage.EGG, BreathNodeP.Power.SMALL)           // dummy
+                  .put(DragonLifeStage.HATCHLING, BreathNodeP.Power.SMALL)     // dummy
+                  .put(DragonLifeStage.INFANT, BreathNodeP.Power.SMALL)        // dummy
+                  .put(DragonLifeStage.PREJUVENILE, BreathNodeP.Power.SMALL)
+                  .put(DragonLifeStage.JUVENILE, BreathNodeP.Power.MEDIUM)
+                  .put(DragonLifeStage.ADULT, BreathNodeP.Power.LARGE)
+                  .build();
+
+
+  private void applyLifeStageModifiers() {
+    applyLifeStageModifier(MAX_HEALTH);
+    applyLifeStageModifier(ATTACK_DAMAGE);
+    applyScaleModifierArmor(ARMOR);
+  }
+
+  private void applyLifeStageModifier(IAttribute attribute, double multiplier) {
     IAttributeInstance instance = dragon.getEntityAttribute(attribute);
-    AttributeModifier oldModifier = instance.getModifier(DragonScaleModifier.ID);
+    AttributeModifier oldModifier = instance.getModifier(DragonLifeStageModifier.ID);
     if (oldModifier != null) {
       instance.removeModifier(oldModifier);
     }
-    instance.applyModifier(new DragonScaleModifier(MathX.clamp(getAgeScale(), 0.1, 1)));
+    instance.applyModifier(new DragonLifeStageModifier(multiplier));
   }
 
   private void applyScaleModifierArmor(IAttribute attribute) {
     IAttributeInstance instance = dragon.getEntityAttribute(attribute);
-    AttributeModifier oldModifier = instance.getModifier(DragonScaleModifier.ID);
+    AttributeModifier oldModifier = instance.getModifier(DragonLifeStageModifier.ID);
     if (oldModifier != null) {
       instance.removeModifier(oldModifier);
     }
-    instance.applyModifier(new DragonScaleModifier(MathX.clamp(getAgeScale(), 0.1, 1.2)));
+    instance.applyModifier(new DragonLifeStageModifier(MathX.clamp(getAgeScale(), 0.1, 1.2)));
   }
 
   /**
@@ -435,11 +369,6 @@ public class DragonLifeStageHelper extends DragonHelper {
     L.trace("onNewLifeStage({},{})", prevLifeStage, lifeStage);
 
     if (dragon.isClient()) {
-      // play particle and sound effects when the dragon hatches
-      if (prevLifeStage != null && prevLifeStage.isEgg() && !lifeStage.isBaby()) {
-        playEggCrackEffect();
-        dragon.world.playSound(dragon.posX, dragon.posY, dragon.posZ, ModSounds.DRAGON_HATCHED, SoundCategory.BLOCKS, 4, 1, false);
-      }
     } else {
       // update AI
       dragon.getBrain().updateAITasks();
@@ -460,48 +389,6 @@ public class DragonLifeStageHelper extends DragonHelper {
       lifeStagePrev = lifeStage;
     }
   }
-
-//  private void updateEgg() {
-//    if (!isEgg()) {
-//      return;
-//    }
-//
-//    // animate egg wiggle based on the time the eggs take to hatch
-//    float progress = DragonLifeStage.getStageProgressFromTickCount(getTicksSinceCreation());
-//
-//    // wait until the egg is nearly hatched
-//    if (progress > EGG_WIGGLE_THRESHOLD) {
-//      float wiggleChance = (progress - EGG_WIGGLE_THRESHOLD) / EGG_WIGGLE_BASE_CHANCE * (1 - EGG_WIGGLE_THRESHOLD);
-//
-//      if (eggWiggleX > 0) {
-//        eggWiggleX--;
-//      } else if (rand.nextFloat() < wiggleChance) {
-//        eggWiggleX = rand.nextBoolean() ? 10 : 20;
-//        if (progress > EGG_CRACK_THRESHOLD) {
-//          playEggCrackEffect();
-//        }
-//      }
-//
-//      if (eggWiggleZ > 0) {
-//        eggWiggleZ--;
-//      } else if (rand.nextFloat() < wiggleChance) {
-//        eggWiggleZ = rand.nextBoolean() ? 10 : 20;
-//        if (progress > EGG_CRACK_THRESHOLD) {
-//          playEggCrackEffect();
-//        }
-//      }
-//    }
-//
-//    // spawn generic particles
-//    double px = dragon.posX + (rand.nextDouble() - 0.3);
-//    double py = dragon.posY + (rand.nextDouble() - 0.3);
-//    double pz = dragon.posZ + (rand.nextDouble() - 0.3);
-//    double ox = (rand.nextDouble() - 0.3) * 2;
-//    double oy = (rand.nextDouble() - 0.3) * 2;
-//    double oz = (rand.nextDouble() - 0.3) * 2;
-//    dragon.world.spawnParticle(this.getEggParticle(), px, py, pz, ox, oy, oz);
-//
-//  }
 
   private enum AgeLabel {
 
@@ -536,18 +423,11 @@ public class DragonLifeStageHelper extends DragonHelper {
   private static final Logger L = LogManager.getLogger();
   private static final String NBT_TICKS_SINCE_CREATION = "TicksSinceCreation";
   private static final int TICKS_SINCE_CREATION_UPDATE_INTERVAL = 100;
-//  private static final float EGG_CRACK_THRESHOLD = 0.9f;
-//  private static final float EGG_WIGGLE_THRESHOLD = 0.75f;
-//  private static final float EGG_WIGGLE_BASE_CHANCE = 20;
   // the ticks since creation is used to control the dragon's life stage.  It is only updated by the server occasionally.
   // the client keeps a cached copy of it and uses client ticks to interpolate in the gaps.
   // when the watcher is updated from the server, the client will tick it faster or slower to resynchronise
-  private final DataParameter<Integer> dataParam;
   private final ClientServerSynchronisedTickCount ticksSinceCreationClient;
   private DragonLifeStage lifeStagePrev;
-//  private int eggWiggleX;
-//
-//  private int eggWiggleZ;
   private int ticksSinceCreationServer;
 
   private boolean testingClass = false;
@@ -565,6 +445,10 @@ public class DragonLifeStageHelper extends DragonHelper {
     ticksSinceCreationServer = ticksRead;
     entityDataManager.set(dataParam, ticksSinceCreationServer);
   }
+
+  private static final DataParameter<Integer> DATA_TICKS_SINCE_CREATION = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
+
+  //----------------------------------
 
   // see codenotes - 190804-GrowthProfile and AgeProfile for explanation
   // assume dragons follow roughly human growth / maturity (why not?)
@@ -749,6 +633,11 @@ public class DragonLifeStageHelper extends DragonHelper {
   private double [] physicalSizePoints = new double[AgeLabel.values().length];        // metres to top of back
   private double [] growthratePoints = new double[AgeLabel.values().length];          // metres per day
 
+  private double [] attackdamagePoints = new double[AgeLabel.values().length];
+  private double [] healthPoints = new double[AgeLabel.values().length];
+  private double [] armourPoints = new double[AgeLabel.values().length];
+  private double [] armourtoughnessPoints = new double[AgeLabel.values().length];
+
   private double [] attackdamage = new double[AgeLabel.values().length];
   private double [] health = new double[AgeLabel.values().length];
   private double [] armour = new double[AgeLabel.values().length];
@@ -828,6 +717,7 @@ public class DragonLifeStageHelper extends DragonHelper {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_LATE_TEEN),
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_ADULT)
     };
+    attackdamagePoints = multiplyArrayWithClipping(init5, 0.01, 0, 1);
     attackdamage = multiplyArrayWithClipping(init5, 0.01 *
                     (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEBASE),
                     ATTACKDAMAGE_MIN, ATTACKDAMAGE_MAX);
@@ -840,6 +730,7 @@ public class DragonLifeStageHelper extends DragonHelper {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_LATE_TEEN),
             (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_ADULT)
     };
+    healthPoints = multiplyArrayWithClipping(init6, 0.01, 0, 1);
     health = multiplyArrayWithClipping(init6, 0.01 *
                     (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHBASE),
                     HEALTH_MIN, HEALTH_MAX);
@@ -852,6 +743,7 @@ public class DragonLifeStageHelper extends DragonHelper {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_LATE_TEEN),
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_ADULT)
     };
+    armourPoints = multiplyArrayWithClipping(init7, 0.01, 0, 1);
     armour = multiplyArrayWithClipping(init7, 0.01 *
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURBASE),
             ARMOUR_MIN, ARMOUR_MAX);
@@ -864,6 +756,7 @@ public class DragonLifeStageHelper extends DragonHelper {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSPERCENT_LATE_TEEN),
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSPERCENT_ADULT)
     };
+    armourtoughnessPoints = multiplyArrayWithClipping(init8, 0.01, 0, 1);
     armourtoughness = multiplyArrayWithClipping(init8, 0.01 *
                     (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURTOUGHNESSBASE),
                     ARMOURTOUGHNESS_MIN, ARMOURTOUGHNESS_MAX);
@@ -1012,4 +905,57 @@ public class DragonLifeStageHelper extends DragonHelper {
     }
   }
 
+  /**
+   * Run some tests on the class.  Inspect the results printed to console...
+   * @param dragonVariants
+   * @param testnumber
+   */
+  public static void testClass(DragonVariants dragonVariants, int testnumber) {
+    DragonLifeStageHelper test = new DragonLifeStageHelper(dragonVariants);
+    switch (testnumber) {
+      case 0: {
+        DragonMounts.logger.info("Age AgeLabel physicalmaturity breathmaturity emotionalmaturity physicalsize");
+
+        for (double age = 0; age < 25; age += 1) {
+          test.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
+          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, test.getAgeLabel(), test.getPhysicalMaturity(),
+                  test.getBreathMaturity(), test.getEmotionalMaturity(), test.getPhysicalSize());
+          DragonMounts.logger.info(output);
+        }
+        DragonMounts.logger.info("Max size at any age:"+test.getMaximumSizeAtAnyAge());
+        break;
+      }
+      case 1: {
+        DragonMounts.logger.info("Age AgeLabel health attackdamage armour armourtoughness");
+
+        for (double age = 0; age < 25; age += 1) {
+          test.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
+          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, test.getAgeLabel(), test.getHealth(),
+                  test.getAttackDamage(), test.getArmour(), test.getArmourToughness());
+          DragonMounts.logger.info(output);
+        }
+        break;
+      }
+      case 2: {  // output the default curves
+        DragonVariants dvDefault = new DragonVariants("test");
+        DragonLifeStageHelper testDefault = new DragonLifeStageHelper(dvDefault);
+        DragonMounts.logger.info("Age AgeLabel physicalmaturity breathmaturity emotionalmaturity physicalsize");
+
+        for (double age = 0; age <= 3; age += 0.01) {
+          testDefault.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
+          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, testDefault.getAgeLabel(), testDefault.getPhysicalMaturity(),
+                  testDefault.getBreathMaturity(), testDefault.getEmotionalMaturity(), testDefault.getPhysicalSize());
+          DragonMounts.logger.info(output);
+        }
+        DragonMounts.logger.info("Age AgeLabel health attackdamage armour armourtoughness");
+
+        for (double age = 0; age <= 3; age += 0.01) {
+          testDefault.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
+          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, testDefault.getAgeLabel(), testDefault.getHealth(),
+                  testDefault.getAttackDamage(), testDefault.getArmour(), testDefault.getArmourToughness());
+          DragonMounts.logger.info(output);
+        }
+      }
+    }
+  }
 }

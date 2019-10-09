@@ -503,6 +503,24 @@ public class EntityDragonEgg extends Entity {
   private void hatchEgg() {
     changeEggState(EggState.HATCHED);
     //todo spawn the dragon here!
+
+//    // play particle and sound effects when the dragon hatches
+//    if (prevLifeStage != null && prevLifeStage.isEgg() && !lifeStage.isBaby()) {
+//      playEggCrackEffect();
+//      dragon.world.playSound(dragon.posX, dragon.posY, dragon.posZ, ModSounds.DRAGON_HATCHED, SoundCategory.BLOCKS, 4, 1, false);
+//    }
+//    /**
+//     * Generates some egg shell particles and a breaking sound.
+//     */
+//    public void playEggCrackEffect() {
+//      // dragon.world.playEvent(2001, dragon.getPosition(), Block.getIdFromBlock(BlockDragonBreedEgg.DRAGON_HATCHABLE_EGG));
+//      this.playEvent(dragon.getPosition());
+//    }
+//
+//    public void playEvent(BlockPos blockPosIn) {
+//      dragon.world.playSound(null, blockPosIn, ModSounds.DRAGON_HATCHING, SoundCategory.BLOCKS, +1.0F, 1.0F);
+//    }
+
   }
 
   // levitate to a given target height by manipulating motionY:

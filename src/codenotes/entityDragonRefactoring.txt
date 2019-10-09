@@ -497,3 +497,10 @@ updateKeys
 updateRiding
 writeDragonInventory
 #writeEntityToNBT
+-------------------------------
+Strategy for LifeStageHelper:
+two choices -
+1) put attributes (health, damage, armor) into LifeStageHelper
+2) put attributes into base dragon and rely on getPercentage from helper
+
+Option (1) is less clutter

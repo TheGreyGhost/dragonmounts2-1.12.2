@@ -177,21 +177,21 @@ public class EntityTameableDragon extends EntityTameable {
 
   private void initialiseServerSide() {
     checkState(isServer(), "initialiseServerSide unexpectedly called on non-server side");
-    getEntityAttribute(MOVEMENT_SPEED_AIR).setBaseValue(BASE_AIR_SPEED);
-    getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(BASE_GROUND_SPEED);
-    getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(getLifeStageHelper().getAttackDamage());
-    getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
-    getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(RESISTANCE);
-    getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(getLifeStageHelper().getArmour());
-    getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue(getLifeStageHelper().getArmourToughness());
-    this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(getLifeStageHelper().getHealth());
-
-    helpers.values().forEach(DragonHelper::initialiseServerSide);
+    initialiseBothSides();
+     helpers.values().forEach(DragonHelper::initialiseServerSide);
   }
 
   private void initialiseClientSide() {
     checkState(isClient(), "initialiseClientSide unexpectedly called on non-client side");
+    initialiseBothSides();
     helpers.values().forEach(DragonHelper::initialiseClientSide);
+  }
+
+  private void initialiseBothSides() {
+    getEntityAttribute(MOVEMENT_SPEED_AIR).setBaseValue(BASE_AIR_SPEED);
+    getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(BASE_GROUND_SPEED);
+    getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
+    getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(RESISTANCE);
   }
 
   /** called to notify that the dragon configuration has changed.
@@ -214,6 +214,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   /**
    * Called once when the entity is first spawned (and not when it's later loaded from disk)
+   * Used to randomly vary attributes for this instance
    * @param difficulty
    * @param livingdata
    * @return
@@ -238,6 +239,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   private void addHelpers() {
     // create entity delegates
+    // don't forget to add corresponding entries in registerConfigurationTags too.
     addHelper(new DragonConfigurationHelper(this));
     addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonBreed.getDragonVariants()));
     addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
@@ -2421,7 +2423,6 @@ public class EntityTameableDragon extends EntityTameable {
   private static final DataParameter<Optional<UUID>> DATA_BREEDER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.OPTIONAL_UNIQUE_ID);
   private static final DataParameter<Integer> DATA_REPRO_COUNT = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
   private static final DataParameter<Integer> HUNGER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
-  private static final DataParameter<Integer> DATA_TICKS_SINCE_CREATION = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
 //  private static final DataParameter<Byte> DRAGON_SCALES = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BYTE);
   private static final DataParameter<ItemStack> BANNER1 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);
   private static final DataParameter<ItemStack> BANNER2 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);

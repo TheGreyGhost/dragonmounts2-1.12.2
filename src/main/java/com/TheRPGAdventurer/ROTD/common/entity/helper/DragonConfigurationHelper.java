@@ -51,6 +51,7 @@ public class DragonConfigurationHelper extends DragonHelper {
 //      // default breed has initial points
 //      breedPoints.get(EnumDragonBreed.FIRE).set(POINTS_INITIAL);
 //    }
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
   @Override
