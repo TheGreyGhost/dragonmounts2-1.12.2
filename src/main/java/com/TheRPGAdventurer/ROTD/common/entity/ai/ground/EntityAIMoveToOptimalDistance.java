@@ -42,7 +42,7 @@ public class EntityAIMoveToOptimalDistance extends EntityAIBase {
    */
   @Override
   public boolean shouldExecute() {
-    return dragon.getBreathHelperP().hasBreathTargetForMoving() && !dragon.isRiding();
+    return dragon.breathweapon().hasBreathTargetForMoving() && !dragon.isRiding();
   }
 
   /**
@@ -68,7 +68,7 @@ public class EntityAIMoveToOptimalDistance extends EntityAIBase {
    */
   @Override
   public void updateTask() {
-    BreathWeaponTarget currentTarget = dragon.getBreathHelperP().getBreathTargetForMoving();
+    BreathWeaponTarget currentTarget = dragon.breathweapon().getBreathTargetForMoving();
     boolean targetChanged = !BreathWeaponTarget.approximatelyMatches(currentTarget, lastTickTarget);
     lastTickTarget = currentTarget;
 

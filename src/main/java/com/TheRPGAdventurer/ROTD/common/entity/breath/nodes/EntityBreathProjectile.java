@@ -389,7 +389,7 @@ public abstract class EntityBreathProjectile extends Entity implements IEntityAd
       EntityTameableDragon parentDragon = getParentDragon();
       if (parentDragon != null) {
         infoToUpdate.dragonMouthLocation = parentDragon.getPositionVector();
-        infoToUpdate.lifeStage = parentDragon.getLifeStageHelper().getLifeStage();
+        infoToUpdate.lifeStage = parentDragon.lifeStage().getLifeStage();
       } else {
         infoToUpdate.dragonMouthLocation = new Vec3d(0, 0, 0);     //arbitrary fall-back values
         infoToUpdate.lifeStage = DragonLifeStage.HATCHLING;

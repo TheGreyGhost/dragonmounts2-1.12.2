@@ -127,7 +127,7 @@
 //            Vec3d origin=dragon.getAnimator().getThroatPosition();
 //            Vec3d lookDirection=dragon.getLook(1.0f);
 //            Vec3d endOfLook=origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
-//            BreathNode.Power power=dragon.getLifeStageHelper().getBreathPower();
+//            BreathNode.Power power=dragon.lifeStage().getBreathPower();
 //            if (endOfLook!=null && currentBreathState==BreathState.SUSTAIN) {
 //                dragon.getBreed().continueAndUpdateBreathing(dragon.getEntityWorld(), origin, endOfLook, power, dragon);
 //            }
@@ -142,7 +142,7 @@
 ////            Vec3d lookDirection=dragon.getLook(1.0f);
 ////            Vec3d endOfLook=origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
 ////            if (endOfLook!=null && currentBreathState==BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
-////                BreathNode.Power power=dragon.getLifeStageHelper().getBreathPower();
+////                BreathNode.Power power=dragon.lifeStage().getBreathPower();
 ////                dragon.getBreed().spawnBreathParticlesForFireDragon(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
 ////            }
 ////        }
@@ -214,7 +214,7 @@
 //            Vec3d origin=dragon.getAnimator().getThroatPosition();
 //            infoToUpdate.dragonHeadLocation=origin;
 //            infoToUpdate.relativeVolume=dragon.getScale();
-//            infoToUpdate.lifeStage=dragon.getLifeStageHelper().getLifeStage();
+//            infoToUpdate.lifeStage=dragon.lifeStage().getLifeStage();
 //
 //            boolean isUsingBreathweapon=false;
 //            if (dragon.isUsingBreathWeapon()) {

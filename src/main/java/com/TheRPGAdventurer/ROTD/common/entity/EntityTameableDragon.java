@@ -115,7 +115,7 @@ public class EntityTameableDragon extends EntityTameable {
   public EntityTameableDragon(World world, DragonBreedNew breed, Modifiers modifiers) {
     this(world);
     checkState(isServer(), "Attempted to explicitly construct EntityTameableDragon on client side.");
-    getConfigurationHelper().setInitialConfiguration(breed, modifiers);
+    configuration().setInitialConfiguration(breed, modifiers);
     helpers.values().forEach(DragonHelper::registerEntityAttributes);
     initialiseServerSide();
   }
@@ -133,7 +133,7 @@ public class EntityTameableDragon extends EntityTameable {
     super.entityInit();
 
     dataManager.register(DATA_FLYING, false);
-    dataManager.register(GROWTH_PAUSED, false);
+//    dataManager.register(GROWTH_PAUSED, false);
 //    dataManager.register(DATA_BREATHING, false);
 //    dataManager.register(DATA_ALT_BREATHING, false);
     dataManager.register(GOING_DOWN, false);
@@ -334,7 +334,7 @@ public class EntityTameableDragon extends EntityTameable {
     nbt.setBoolean("followyaw", this.followYaw());
     nbt.setBoolean("firesupport", this.firesupport());
     //        nbt.setBoolean("unFluttered", this.isUnFluttered());
-    nbt.setInteger("AgeTicks", this.getLifeStageHelper().getTicksSinceCreation());
+    nbt.setInteger("AgeTicks", this.lifeStage().getTicksSinceCreation());
     nbt.setInteger("hunger", this.getHunger());
     nbt.setBoolean("boosting", this.boosting());
     nbt.setBoolean("ylocked", this.isYLocked());
@@ -379,7 +379,7 @@ public class EntityTameableDragon extends EntityTameable {
     this.setGrowthPaused(nbt.getBoolean("growthpause"));
 //    this.setUsingBreathWeapon(nbt.getBoolean("Breathing"));
 //    this.setUsingAltBreathWeapon(nbt.getBoolean("alt_breathing"));
-    this.getLifeStageHelper().setTicksSinceCreation(nbt.getInteger("AgeTicks"));
+    this.lifeStage().setTicksSinceCreation(nbt.getInteger("AgeTicks"));
     this.setArmor(nbt.getInteger(NBT_ARMOR));
     this.setMale(nbt.getBoolean(NBT_ISMALE));
 //    this.setAlbino(nbt.getBoolean(NBT_ISALBINO));
@@ -602,14 +602,6 @@ public class EntityTameableDragon extends EntityTameable {
     return !isBaby();
   }
 
-  public boolean isGrowthPaused() {
-    return dataManager.get(GROWTH_PAUSED);
-  }
-
-  public void setGrowthPaused(boolean paused) {
-    dataManager.set(GROWTH_PAUSED, paused);
-  }
-
   /**
    * Returns true if the entity is flying.
    */
@@ -629,7 +621,7 @@ public class EntityTameableDragon extends EntityTameable {
    * Returns true if the entity is breathing.
    */
   public boolean isUsingBreathWeapon() {
-    BreathWeaponTarget breathWeaponTarget = this.getBreathHelperP().getPlayerSelectedTarget();
+    BreathWeaponTarget breathWeaponTarget = this.breathweapon().getPlayerSelectedTarget();
     return (null != breathWeaponTarget);
   }
 
@@ -959,7 +951,7 @@ public class EntityTameableDragon extends EntityTameable {
     // if we're breathing at a target, look at it
     if (isUsingBreathWeapon()) {
       Vec3d dragonEyePos = this.getPositionVector().addVector(0, this.getEyeHeight(), 0);
-      BreathWeaponTarget breathWeaponTarget = this.getBreathHelperP().getPlayerSelectedTarget();
+      BreathWeaponTarget breathWeaponTarget = this.breathweapon().getPlayerSelectedTarget();
       if (breathWeaponTarget != null) {
         breathWeaponTarget.setEntityLook(this.world, this.getLookHelper(), dragonEyePos,
                 this.getHeadYawSpeed(), this.getHeadPitchSpeed());
@@ -1505,7 +1497,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public boolean canMateWith(EntityAnimal mate) {
-    return getReproductionHelper().canMateWith(mate);
+    return reproduction().canMateWith(mate);
   }
 
   /**
@@ -1518,22 +1510,22 @@ public class EntityTameableDragon extends EntityTameable {
     EntityTameableDragon parent2 = (EntityTameableDragon) mate;
 
     if (parent1.isMale() && !parent2.isMale() || !parent1.isMale() && parent2.isMale()) {
-      return getReproductionHelper().createChild(parent1.isMale() ? mate : parent1);
+      return reproduction().createChild(parent1.isMale() ? mate : parent1);
     } else {
       return null;
     }
   }
 
-  public DragonConfigurationHelper getConfigurationHelper() {
+  public DragonConfigurationHelper configuration() {
     return getHelper(DragonConfigurationHelper.class);
   }
-  public DragonLifeStageHelper getLifeStageHelper() {
+  public DragonLifeStageHelper lifeStage() {
     return getHelper(DragonLifeStageHelper.class);
   }
-  public DragonReproductionHelper getReproductionHelper() {
+  public DragonReproductionHelper reproduction() {
     return getHelper(DragonReproductionHelper.class);
   }
-  public DragonBreathHelperP getBreathHelperP() {
+  public DragonBreathHelperP breathweapon() {
     return getHelper(DragonBreathHelperP.class);
   }
   public DragonAnimator getAnimator() {
@@ -1546,31 +1538,31 @@ public class EntityTameableDragon extends EntityTameable {
     return getHelper(DragonInteractHelper.class);
   }
 
-  /**
-   * Returns the breed for this
-   *
-   * @return breed
-   */
-  public EnumDragonBreed getBreedType() {
-    return getConfigurationHelper().getBreedType();
-  }
-
-  /**
-   * Sets the new breed for this
-   *
-   * @param type new breed
-   */
-  public void setBreedType(EnumDragonBreed type) {
-    getConfigurationHelper().setBreedType(type);
-  }
+//  /**
+//   * Returns the breed for this
+//   *
+//   * @return breed
+//   */
+//  public EnumDragonBreed getBreedType() {
+//    return configuration().getBreedType();
+//  }
+//
+//  /**
+//   * Sets the new breed for this
+//   *
+//   * @param type new breed
+//   */
+//  public void setBreedType(EnumDragonBreed type) {
+//    configuration().setBreedType(type);
+//  }
 
   public DragonPhysicalModel getPhysicalModel() {
     return dragonPhysicalModel;
   }
 
-  public DragonBreed getBreed() {
-    return getBreedType().getBreed();
-  }
+//  public DragonBreed getBreed() {
+//    return getBreedType().getBreed();
+//  }
 
   public double getDragonSpeed() {
     return isFlying() ? BASE_FOLLOW_RANGE_FLYING : BASE_FOLLOW_RANGE;
@@ -1868,11 +1860,11 @@ public class EntityTameableDragon extends EntityTameable {
    * @return scale
    */
   public float getAgeScale() {
-    return getLifeStageHelper().getAgeScale();
+    return lifeStage().getAgeScale();
   }
 
   public boolean isBaby() {
-    return getLifeStageHelper().isBaby();
+    return lifeStage().isBaby();
   }
 
   /**
@@ -1881,24 +1873,24 @@ public class EntityTameableDragon extends EntityTameable {
    * @return
    */
 //    public boolean isHatchling() {
-//        return getLifeStageHelper().isHatchling() || getLifeStageHelper().isInfant();
+//        return lifeStage().isHatchling() || lifeStage().isInfant();
 //    }
 //
 //    public boolean isInfant() {
-//        return getLifeStageHelper().isInfant();
+//        return lifeStage().isInfant();
 //    }
 //
 //    public boolean isJuvenile() {
-//        return getLifeStageHelper().isJuvenile() || getLifeStageHelper().isPreJuvenile();
+//        return lifeStage().isJuvenile() || lifeStage().isPreJuvenile();
 //    }
 //
   public boolean isAdult() {
-    return getLifeStageHelper().isFullyGrown();
+    return lifeStage().isFullyGrown();
   }
 
   @Override
   public boolean isChild() {
-    return getLifeStageHelper().isBaby();
+    return lifeStage().isBaby();
   }
 
   /**
@@ -2022,7 +2014,7 @@ public class EntityTameableDragon extends EntityTameable {
   }
 
   public boolean canFitPassenger(Entity passenger) {
-    return this.getPassengers().size() < dragonPhysicalModel.getMaxNumberOfPassengers(getLifeStageHelper().getLifeStage());
+    return this.getPassengers().size() < dragonPhysicalModel.getMaxNumberOfPassengers(lifeStage().getLifeStage());
   }
 
   /**
@@ -2406,7 +2398,6 @@ public class EntityTameableDragon extends EntityTameable {
   private static final SimpleNetworkWrapper n = DragonMounts.NETWORK_WRAPPER;
   // data value IDs
   private static final DataParameter<Boolean> DATA_FLYING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<Boolean> GROWTH_PAUSED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> DATA_SADDLED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
 //  private static final DataParameter<Boolean> DATA_BREATHING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
 //  private static final DataParameter<Boolean> DATA_ALT_BREATHING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
@@ -2431,10 +2422,10 @@ public class EntityTameableDragon extends EntityTameable {
 //  private static final DataParameter<Boolean> HAS_ADJUCATOR_STONE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
 
   /*    public boolean isGiga() {
-        return getLifeStageHelper().isAdult();
+        return lifeStage().isAdult();
     }
     public boolean isAdjudicator() {
-        return getLifeStageHelper().isAdult();
+        return lifeStage().isAdult();
     }
 */
 //  private static final DataParameter<Boolean> HAS_ELDER_STONE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);

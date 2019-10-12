@@ -106,7 +106,7 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
       Vec3d point = dragon.getPhysicalModel().offsetOfOriginFromEntityPosWC(dragonScale, dragon.isSitting());
       point = point.rotateYaw(yaw).add(dragonPos);
       CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z, Color.WHITE);
-      for (int i = 0; i < dragon.getPhysicalModel().getMaxNumberOfPassengers(dragon.getLifeStageHelper().getLifeStage()); ++i) {
+      for (int i = 0; i < dragon.getPhysicalModel().getMaxNumberOfPassengers(dragon.lifeStage().getLifeStage()); ++i) {
         point = dragon.getPhysicalModel().getRiderPositionOffsetWC(dragonScale, dragon.getBodyPitch(), dragon.isSitting(), i);
         point = point.rotateYaw(-(float) Math.toRadians(yaw)).add(dragonPos);
         CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z, Color.BLUE);
@@ -211,7 +211,7 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 
 //  protected void renderEgg(EntityTameableDragon dragon, double x, double y, double z, float pitch, float partialTicks) {
 //    // apply egg wiggle
-//    DragonLifeStageHelper lifeStage = dragon.getLifeStageHelper();
+//    DragonLifeStageHelper lifeStage = dragon.lifeStage();
 //    float tickX = lifeStage.getEggWiggleX();
 //    float tickZ = lifeStage.getEggWiggleZ();
 //

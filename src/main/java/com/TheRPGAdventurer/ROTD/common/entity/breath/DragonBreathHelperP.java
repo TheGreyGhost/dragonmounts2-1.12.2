@@ -357,7 +357,7 @@ public class DragonBreathHelperP extends DragonHelper {
       origin = dragon.getAnimator().getThroatPosition();
       infoToUpdate.dragonHeadLocation = origin;
       infoToUpdate.relativeVolume = dragon.getAgeScale();
-      infoToUpdate.lifeStage = dragon.getLifeStageHelper().getLifeStage();
+      infoToUpdate.lifeStage = dragon.lifeStage().getLifeStage();
 
       boolean isBreathing = false;
       if (target != null) {
@@ -382,7 +382,7 @@ public class DragonBreathHelperP extends DragonHelper {
 //      Vec3d origin = dragon.getAnimator().getThroatPosition();
 //      infoToUpdate.dragonHeadLocation = origin;
 //      infoToUpdate.relativeVolume = dragon.getAgeScale();
-//      infoToUpdate.lifeStage = dragon.getLifeStageHelper().getLifeStage();
+//      infoToUpdate.lifeStage = dragon.lifeStage().getLifeStage();
 //
 //      boolean isUsingBreathweapon = false;
 //      if (dragon.isUsingBreathWeapon()) {
@@ -457,7 +457,7 @@ public class DragonBreathHelperP extends DragonHelper {
 //    }
 
     dragon.getBreed().getBreathWeapon(dragon).updateBreathWeaponMode();
-    DragonBreathMode dragonBreathMode = dragon.getBreathHelperP().getBreathMode();
+    DragonBreathMode dragonBreathMode = dragon.breathweapon().getBreathMode();
 
     switch (dragon.getBreed().getBreathWeaponSpawnType(dragon)) {
       case NODES: {
@@ -465,7 +465,7 @@ public class DragonBreathHelperP extends DragonHelper {
           Vec3d origin = dragon.getAnimator().getThroatPosition();
           Vec3d destination = target.getTargetedPoint(dragon.world, origin);
           if (destination != null && currentBreathState == BreathState.SUSTAIN) {
-            BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+            BreathNodeP.Power power = dragon.lifeStage().getBreathPowerP();
             breathAffectedAreaP.continueBreathing(dragon.getEntityWorld(), origin, destination, breathNodeFactory, power, dragonBreathMode);
           }
         }
@@ -477,7 +477,7 @@ public class DragonBreathHelperP extends DragonHelper {
           Vec3d origin = dragon.getAnimator().getThroatPosition();
           Vec3d destination = target.getTargetedPoint(dragon.world, origin);
           if (destination != null && currentBreathState == BreathState.SUSTAIN) {
-            BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+            BreathNodeP.Power power = dragon.lifeStage().getBreathPowerP();
             boolean spawned = breathProjectileFactory.spawnProjectile(dragon.getEntityWorld(), dragon,  // may not spawn anything if a projectile was spawned recently...
                     origin, destination, power);
             if (spawned) {
@@ -503,7 +503,7 @@ public class DragonBreathHelperP extends DragonHelper {
 //      Vec3d origin = dragon.getAnimator().getThroatPosition();
 //      Vec3d lookDirection = dragon.getLook(1.0f);
 //      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
-//      BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+//      BreathNodeP.Power power = dragon.lifeStage().getBreathPowerP();
 //      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN) {
 //        dragon.getBreed().continueAndUpdateBreathingLegacy(dragon.getEntityWorld(), origin, endOfLook, power, dragon);
 //      }
@@ -531,7 +531,7 @@ public class DragonBreathHelperP extends DragonHelper {
           Vec3d destination = target.getTargetedPoint(dragon.world, origin);
           if (destination != null && currentBreathState == BreathState.SUSTAIN) {
             breathWeaponFXEmitter.setBeamEndpoints(origin, destination);
-            BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+            BreathNodeP.Power power = dragon.lifeStage().getBreathPowerP();
             breathWeaponFXEmitter.spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter);
           }
         }
@@ -569,7 +569,7 @@ public class DragonBreathHelperP extends DragonHelper {
 //      Vec3d endOfLook = origin.addVector(lookDirection.x, lookDirection.y, lookDirection.z);
 //      if (endOfLook != null && currentBreathState == BreathState.SUSTAIN && dragon.getBreed().canUseBreathWeapon()) {
 //
-//        BreathNodeP.Power power = dragon.getLifeStageHelper().getBreathPowerP();
+//        BreathNodeP.Power power = dragon.lifeStage().getBreathPowerP();
 //        dragon.getBreed().spawnBreathParticles(dragon.getEntityWorld(), power, tickCounter, origin, endOfLook, dragon);
 //      }
 //    }

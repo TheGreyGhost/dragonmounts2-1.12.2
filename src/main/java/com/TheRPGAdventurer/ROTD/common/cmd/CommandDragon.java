@@ -10,7 +10,6 @@
 package com.TheRPGAdventurer.ROTD.common.cmd;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
@@ -27,7 +26,7 @@ public class CommandDragon extends CommandBaseNested implements IDragonModifier 
     BiConsumer<EntityTameableDragon, EnumDragonBreed> breedConsumer = (dragon, enumValue) -> dragon.setBreedType(enumValue);
     addCommand(new CommandDragonEnumSetter<EnumDragonBreed>("breed", EnumDragonBreed.class, breedConsumer));
 
-    BiConsumer<EntityTameableDragon, DragonLifeStage> lifeStageConsumer = (dragon, enumValue) -> dragon.getLifeStageHelper().setLifeStage(enumValue);
+    BiConsumer<EntityTameableDragon, DragonLifeStage> lifeStageConsumer = (dragon, enumValue) -> dragon.lifeStage().setLifeStage(enumValue);
     addCommand(new CommandDragonEnumSetter<DragonLifeStage>("stage", DragonLifeStage.class, lifeStageConsumer));
 
     addCommand(new CommandDragonTame());

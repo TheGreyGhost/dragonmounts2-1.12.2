@@ -103,7 +103,7 @@ public class EntityAIDragonMate extends EntityAIDragonBase {
       dragon.resetInLove();
       dragonMate.resetInLove();
       dragonBaby.setLocationAndAngles(dragon.posX, dragon.posY, dragon.posZ, 0, 0);
-      dragonBaby.getLifeStageHelper().setLifeStage(DragonLifeStage.EGG);
+      dragonBaby.lifeStage().setLifeStage(DragonLifeStage.EGG);
 
       world.spawnEntity(dragonBaby);
       // TODO: particles for the clients?

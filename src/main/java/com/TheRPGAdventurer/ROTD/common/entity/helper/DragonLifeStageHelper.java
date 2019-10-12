@@ -10,7 +10,6 @@
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
@@ -20,10 +19,8 @@ import com.TheRPGAdventurer.ROTD.util.ClientServerSynchronisedTickCount;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.Interpolation;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Doubles;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.nbt.NBTTagCompound;
@@ -34,8 +31,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Map;
 
 import static net.minecraft.entity.SharedMonsterAttributes.*;
 
@@ -63,7 +58,10 @@ import static net.minecraft.entity.SharedMonsterAttributes.*;
  * 3) Call its update methods to keep it synchronised as described in DragonHelper
  *
  * Is responsible for setting MAX_HEALTH, ARMOR, ARMOR_TOUGHNESS and ATTACK_DAMAGE:
- *    these are applied via the corresponding attributes using a DragonLifeStageModifier
+ *    these are applied via the corresponding attributes by updating the base value
+ *
+ * Debug:
+ *   "forcedageticks" debugparameter can be used to force a particular age
  */
 public class DragonLifeStageHelper extends DragonHelper {
 
@@ -79,14 +77,6 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   public DragonLifeStageHelper(EntityTameableDragon dragon) {
     super(dragon);
-    DragonVariants.ModifiedCategory modifiedCategory =
-            new DragonVariants.ModifiedCategory(Category.LIFE_STAGE, dragon.getConfigurationFileCategoryModifiers());
-    try {
-      readConfiguration(dragonVariants, modifiedCategory);
-    } catch (IllegalArgumentException iae) {
-      DragonMounts.loggerLimit.warn_once(iae.getMessage());
-    }
-
 
     if (dragon.isClient()) {
       ticksSinceCreationClient = new ClientServerSynchronisedTickCount(TICKS_SINCE_CREATION_UPDATE_INTERVAL);
@@ -97,6 +87,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
+  // for testing only
   private DragonLifeStageHelper(DragonVariants dragonVariants) {
     super();
     testingClass = true;
@@ -111,7 +102,8 @@ public class DragonLifeStageHelper extends DragonHelper {
   @Override
   public void registerDataParameters() {
     checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
-    entityDataManager.register(DATA_TICKS_SINCE_CREATION, ticksSinceCreationServer);  //default value
+    registerForInitialisation(DATAPARAM_DATA_TICKS_SINCE_CREATION, ticksSinceCreationServer);  //default value
+    registerForInitialisation(DATAPARAM_GROWTH_PAUSED, Boolean.FALSE);
     setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
@@ -120,6 +112,26 @@ public class DragonLifeStageHelper extends DragonHelper {
     checkPreConditions(FunctionTag.REGISTER_ENTITY_ATTRIBUTES);
     dragon.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
     setCompleted(FunctionTag.REGISTER_ENTITY_ATTRIBUTES);
+  }
+  @Override
+  public void writeToNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
+    nbt.setInteger(NBT_TICKS_SINCE_CREATION, getTicksSinceCreation());
+    nbt.setBoolean(NBT_GROWTH_PAUSED, isGrowthPaused());
+    setCompleted(FunctionTag.WRITE_TO_NBT);
+  }
+
+  @Override
+  public void readFromNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
+    int ticksRead = nbt.getInteger(NBT_TICKS_SINCE_CREATION);
+    ticksRead = MathX.clamp(ticksRead, 0, adultAgeTicks);
+    ticksSinceCreationServer = ticksRead;
+    entityDataManager.set(DATAPARAM_DATA_TICKS_SINCE_CREATION, ticksSinceCreationServer);
+
+    boolean growthPaused = nbt.getBoolean(NBT_GROWTH_PAUSED);
+    entityDataManager.set(DATAPARAM_GROWTH_PAUSED, growthPaused);
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
   @Override
@@ -137,7 +149,7 @@ public class DragonLifeStageHelper extends DragonHelper {
   }
 
   private void initialiseBothSides() {
-    DragonConfigurationHelper dch = dragon.getConfigurationHelper();
+    DragonConfigurationHelper dch = dragon.configuration();
     dragon.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue((double) dch.getVariantTagValue(Category.LIFE_STAGE, ATTACKDAMAGEBASE));
     dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURBASE));
     dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURTOUGHNESSBASE));
@@ -146,12 +158,25 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
-
+    if (helperState != HelperState.INITIALISED) {
+      checkPreConditions(FunctionTag.DATAPARAMETER_RECEIVED);
+      receivedDataParameter(key);
+      setCompleted(FunctionTag.DATAPARAMETER_RECEIVED);
+    }
+    // don't need to update ticksSinceCreation since it's updated every tick in onLivingUpdate
   }
 
   @Override
   public void onConfigurationChange() {
     initialiseBothSides();
+  }
+
+  public boolean isGrowthPaused() {
+    return entityDataManager.get(DATAPARAM_GROWTH_PAUSED);
+  }
+
+  public void setGrowthPaused(boolean paused) {
+    entityDataManager.set(DATAPARAM_GROWTH_PAUSED, paused);
   }
 
   /** get the physical maturity of the dragon at its current age
@@ -176,6 +201,7 @@ public class DragonLifeStageHelper extends DragonHelper {
    * @return  height to the top of the dragon's back, in metres.
    */
   public double getPhysicalSize() {
+    checkPreConditions(FunctionTag.VANILLA);
     double index = Interpolation.findIndex(getTicksSinceCreation() / TICKS_PER_MINECRAFT_DAY, lifeStageAges);
     int idx = (int)index;
     double frac = index - idx;
@@ -193,7 +219,7 @@ public class DragonLifeStageHelper extends DragonHelper {
   /** get the unmodified health points of the dragon at its current age
    * @return  health points
    */
-  public double getHealth() { return Interpolation.linearArray(getTicksSinceCreation() / TICKS_PER_MINECRAFT_DAY,
+  public double getMaxHealth() { return Interpolation.linearArray(getTicksSinceCreation() / TICKS_PER_MINECRAFT_DAY,
           lifeStageAges, health);  }
 
   /** get the unmodified attack damage of the dragon at its current age
@@ -214,7 +240,6 @@ public class DragonLifeStageHelper extends DragonHelper {
   public double getArmourToughness() { return Interpolation.linearArray(getTicksSinceCreation() / TICKS_PER_MINECRAFT_DAY,
           lifeStageAges, armourtoughness);  }
 
-
   /**
    * get the text label for this age (infant, child, etc)
    * @return
@@ -224,31 +249,31 @@ public class DragonLifeStageHelper extends DragonHelper {
     return ageLabels[(int)index].getTextLabel();
   }
 
-  /**
-   * Returns the current life stage of the dragon.
-   *
-   * @return current life stage
-   */
-  public DragonLifeStage getLifeStage() {
-    int age = getTicksSinceCreation();
-    return DragonLifeStage.getLifeStageFromTickCount(age);
-  }
+//  /**
+//   * Returns the current life stage of the dragon.
+//   *
+//   * @return current life stage
+//   */
+//  public DragonLifeStage getLifeStage() {
+//    int age = getTicksSinceCreation();
+//    return DragonLifeStage.getLifeStageFromTickCount(age);
+//  }
 
-  /**
-   * Sets a new life stage for the dragon.
-   *
-   * @param lifeStage
-   */
-  public final void setLifeStage(DragonLifeStage lifeStage) {
-    L.trace("setLifeStage({})", lifeStage);
-    if (dragon.isServer()) {
-      ticksSinceCreationServer = lifeStage.getStartTickCount();
-      entityDataManager.set(dataParam, ticksSinceCreationServer);
-    } else {
-      L.error("setLifeStage called on Client");
-    }
-    updateLifeStage();
-  }
+//  /**
+//   * Sets a new life stage for the dragon.
+//   *
+//   * @param lifeStage
+//   */
+//  public final void setLifeStage(DragonLifeStage lifeStage) {
+//    L.trace("setLifeStage({})", lifeStage);
+//    if (dragon.isServer()) {
+//      ticksSinceCreationServer = lifeStage.getStartTickCount();
+//      entityDataManager.set(DATAPARAM_DATA_TICKS_SINCE_CREATION, ticksSinceCreationServer);
+//    } else {
+//      L.error("setLifeStage called on Client");
+//    }
+//    updateLifeStage();
+//  }
 
   public int getTicksSinceCreation() {
     if (DebugSettings.existsDebugParameter("forcedageticks")) {
@@ -284,20 +309,23 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   @Override
   public void onLivingUpdate() {
-    // if the dragon is not an adult or paused, update its growth ticks
+    checkPreConditions(FunctionTag.VANILLA);
+    // if the dragon is not an adult, or is paused, update its growth ticks
     if (dragon.isServer()) {
-      if (!isFullyGrown() && !dragon.isGrowthPaused()) {
+      if (!isFullyGrown() && !isGrowthPaused()) {
         ticksSinceCreationServer++;
         if (ticksSinceCreationServer % TICKS_SINCE_CREATION_UPDATE_INTERVAL == 0)
-          entityDataManager.set(dataParam, ticksSinceCreationServer);
+          entityDataManager.set(DATAPARAM_DATA_TICKS_SINCE_CREATION, ticksSinceCreationServer);
       }
     } else {
-      ticksSinceCreationClient.updateFromServer(entityDataManager.get(dataParam));
+      ticksSinceCreationClient.updateFromServer(entityDataManager.get(DATAPARAM_DATA_TICKS_SINCE_CREATION));
       if (!isFullyGrown()) ticksSinceCreationClient.tick();
     }
 
-    updateLifeStage();
-    updateAgeScale();
+    applyLifeStageChanges();
+
+//    updateLifeStage();
+//    updateAgeScale();
   }
 
   @Override
@@ -305,90 +333,95 @@ public class DragonLifeStageHelper extends DragonHelper {
   }
 
   public boolean isFullyGrown() {
-    return getLifeStage().isFullyGrown();
+    return getTicksSinceCreation() >= adultAgeTicks;
   }
 
-  /**
-   * Does this life stage act like a minecraft baby?
-   *
-   * @return
-   */
-  public boolean isBaby() {
-    return getLifeStage().isBaby();
+//  /**
+//   * Does this life stage act like a minecraft baby?
+//   *
+//   * @return
+//   */
+//  public boolean isBaby() {
+//    return getLifeStage().isBaby();
+//  }
+//
+//  public BreathNodeP.Power getBreathPowerP() {
+//    BreathNodeP.Power power = BREATHNODEP_POWER_BY_STAGE.get(getLifeStage());
+//    if (power == null) {
+//      DragonMounts.loggerLimit.error_once("Illegal lifestage in getBreathPowerP():" + getLifeStage());
+//      power = BreathNodeP.Power.SMALL;
+//    }
+//    return power;
+//  }
+
+//  public static final Map<DragonLifeStage, BreathNodeP.Power> BREATHNODEP_POWER_BY_STAGE =
+//          ImmutableMap.<DragonLifeStage, BreathNodeP.Power>builder()
+//                  .put(DragonLifeStage.EGG, BreathNodeP.Power.SMALL)           // dummy
+//                  .put(DragonLifeStage.HATCHLING, BreathNodeP.Power.SMALL)     // dummy
+//                  .put(DragonLifeStage.INFANT, BreathNodeP.Power.SMALL)        // dummy
+//                  .put(DragonLifeStage.PREJUVENILE, BreathNodeP.Power.SMALL)
+//                  .put(DragonLifeStage.JUVENILE, BreathNodeP.Power.MEDIUM)
+//                  .put(DragonLifeStage.ADULT, BreathNodeP.Power.LARGE)
+//                  .build();
+
+
+  private void applyLifeStageChanges() {
+    applyLifeStageAttributeChange(MAX_HEALTH, getMaxHealth());
+    applyLifeStageAttributeChange(ATTACK_DAMAGE, getAttackDamage());
+    applyLifeStageAttributeChange(ARMOR, getArmour());
+    applyLifeStageAttributeChange(ARMOR_TOUGHNESS, getArmourToughness());
   }
 
-  public BreathNodeP.Power getBreathPowerP() {
-    BreathNodeP.Power power = BREATHNODEP_POWER_BY_STAGE.get(getLifeStage());
-    if (power == null) {
-      DragonMounts.loggerLimit.error_once("Illegal lifestage in getBreathPowerP():" + getLifeStage());
-      power = BreathNodeP.Power.SMALL;
-    }
-    return power;
-  }
-
-
-  public static final Map<DragonLifeStage, BreathNodeP.Power> BREATHNODEP_POWER_BY_STAGE =
-          ImmutableMap.<DragonLifeStage, BreathNodeP.Power>builder()
-                  .put(DragonLifeStage.EGG, BreathNodeP.Power.SMALL)           // dummy
-                  .put(DragonLifeStage.HATCHLING, BreathNodeP.Power.SMALL)     // dummy
-                  .put(DragonLifeStage.INFANT, BreathNodeP.Power.SMALL)        // dummy
-                  .put(DragonLifeStage.PREJUVENILE, BreathNodeP.Power.SMALL)
-                  .put(DragonLifeStage.JUVENILE, BreathNodeP.Power.MEDIUM)
-                  .put(DragonLifeStage.ADULT, BreathNodeP.Power.LARGE)
-                  .build();
-
-
-  private void applyLifeStageModifiers() {
-    applyLifeStageModifier(MAX_HEALTH);
-    applyLifeStageModifier(ATTACK_DAMAGE);
-    applyScaleModifierArmor(ARMOR);
-  }
-
-  private void applyLifeStageModifier(IAttribute attribute, double multiplier) {
+  private final double SIGNIFICANT_DIFFERENCE = 0.01; // only update the multiplier if it is significantly different to the old one
+  private void applyLifeStageAttributeChange(IAttribute attribute, double newValue) {
     IAttributeInstance instance = dragon.getEntityAttribute(attribute);
-    AttributeModifier oldModifier = instance.getModifier(DragonLifeStageModifier.ID);
-    if (oldModifier != null) {
-      instance.removeModifier(oldModifier);
-    }
-    instance.applyModifier(new DragonLifeStageModifier(multiplier));
+    if (Math.abs(newValue - instance.getBaseValue()) < SIGNIFICANT_DIFFERENCE) return;
+    instance.setBaseValue(newValue);
+//    double operation0Multipler = - (1.0 - multiplier);
+//    // operation 0 Modifier does modifiedValue = baseValue + multiplier *
+//    AttributeModifier oldModifier = instance.getModifier(DragonLifeStageModifier.ID);
+//    if (oldModifier != null) {
+//      instance.removeModifier(oldModifier);
+//    }
+//    instance.applyModifier(new DragonLifeStageModifier(multiplier));
   }
 
-  private void applyScaleModifierArmor(IAttribute attribute) {
-    IAttributeInstance instance = dragon.getEntityAttribute(attribute);
-    AttributeModifier oldModifier = instance.getModifier(DragonLifeStageModifier.ID);
-    if (oldModifier != null) {
-      instance.removeModifier(oldModifier);
-    }
-    instance.applyModifier(new DragonLifeStageModifier(MathX.clamp(getAgeScale(), 0.1, 1.2)));
-  }
+//  private void applyScaleModifierArmor(IAttribute attribute) {
+//    IAttributeInstance instance = dragon.getEntityAttribute(attribute);
+//    AttributeModifier oldModifier = instance.getModifier(DragonLifeStageModifier.ID);
+//    if (oldModifier != null) {
+//      instance.removeModifier(oldModifier);
+//    }
+//    instance.applyModifier(new DragonLifeStageModifier(MathX.clamp(getAgeScale(), 0.1, 1.2)));
+//  }
 
-  /**
-   * Called when the dragon enters a new life stage.
-   */
-  private void onNewLifeStage(DragonLifeStage lifeStage, DragonLifeStage prevLifeStage) {
-    L.trace("onNewLifeStage({},{})", prevLifeStage, lifeStage);
-
-    if (dragon.isClient()) {
-    } else {
-      // update AI
-      dragon.getBrain().updateAITasks();
-
-      // update attribute modifier
-      registerEntityAttributes();
-
-      // heal dragon to updated full health
-      dragon.setHealth(dragon.getMaxHealth());
-    }
-  }
-
-  private void updateLifeStage() {
-    // trigger event when a new life stage was reached
-    DragonLifeStage lifeStage = getLifeStage();
-    if (lifeStagePrev != lifeStage) {
-      onNewLifeStage(lifeStage, lifeStagePrev);
-      lifeStagePrev = lifeStage;
-    }
-  }
+//  /**
+//   * Called when the dragon enters a new life stage.
+//   */
+//  private void onNewLifeStage(DragonLifeStage lifeStage, DragonLifeStage prevLifeStage) {
+//    L.trace("onNewLifeStage({},{})", prevLifeStage, lifeStage);
+//
+//    if (dragon.isClient()) {
+//    } else {
+//      // update AI
+//      dragon.getBrain().updateAITasks();
+//
+//      // update attribute modifier
+//      registerEntityAttributes();
+//
+//      // heal dragon to updated full health
+//      dragon.setHealth(dragon.getMaxHealth());
+//    }
+//  }
+//
+//  private void updateLifeStage() {
+//    // trigger event when a new life stage was reached
+//    DragonLifeStage lifeStage = getLifeStage();
+//    if (lifeStagePrev != lifeStage) {
+//      onNewLifeStage(lifeStage, lifeStagePrev);
+//      lifeStagePrev = lifeStage;
+//    }
+//  }
 
   private enum AgeLabel {
 
@@ -407,46 +440,35 @@ public class DragonLifeStageHelper extends DragonHelper {
     private String textLabel;
   }
 
-  private void updateAgeScale() {
-    dragon.setAgeScalePublic(getAgeScale());
-  }
+//  private void updateAgeScale() {
+//    dragon.setAgeScalePublic(getAgeScale());
+//  }
 
-  /**
-   * Returns the size multiplier for the current age.
-   *
-   * @return size
-   */
-  public float getAgeScale() {
-    return DragonLifeStage.getAgeScaleFromTickCount(getTicksSinceCreation());
-  }
+//  /**
+//   * Returns the size multiplier for the current age.
+//   *
+//   * @return size
+//   */
+//  public float getAgeScale() {
+//    return DragonLifeStage.getAgeScaleFromTickCount(getTicksSinceCreation());
+//  }
 
   private static final Logger L = LogManager.getLogger();
   private static final String NBT_TICKS_SINCE_CREATION = "TicksSinceCreation";
+  private static final String NBT_GROWTH_PAUSED = "GrowthPaused";
   private static final int TICKS_SINCE_CREATION_UPDATE_INTERVAL = 100;
   // the ticks since creation is used to control the dragon's life stage.  It is only updated by the server occasionally.
   // the client keeps a cached copy of it and uses client ticks to interpolate in the gaps.
   // when the watcher is updated from the server, the client will tick it faster or slower to resynchronise
   private final ClientServerSynchronisedTickCount ticksSinceCreationClient;
-  private DragonLifeStage lifeStagePrev;
+//  private DragonLifeStage lifeStagePrev;
   private int ticksSinceCreationServer;
 
   private boolean testingClass = false;
   private int testingTicksSinceCreation = 0;
 
-  @Override
-  public void writeToNBT(NBTTagCompound nbt) {
-    nbt.setInteger(NBT_TICKS_SINCE_CREATION, getTicksSinceCreation());
-  }
-
-  @Override
-  public void readFromNBT(NBTTagCompound nbt) {
-    int ticksRead = nbt.getInteger(NBT_TICKS_SINCE_CREATION);
-    ticksRead = DragonLifeStage.clipTickCountToValid(ticksRead);
-    ticksSinceCreationServer = ticksRead;
-    entityDataManager.set(dataParam, ticksSinceCreationServer);
-  }
-
-  private static final DataParameter<Integer> DATA_TICKS_SINCE_CREATION = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
+  private static final DataParameter<Integer> DATAPARAM_DATA_TICKS_SINCE_CREATION = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
+  private static final DataParameter<Boolean> DATAPARAM_GROWTH_PAUSED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
 
   //----------------------------------
 
@@ -643,7 +665,7 @@ public class DragonLifeStageHelper extends DragonHelper {
   private double [] armour = new double[AgeLabel.values().length];
   private double [] armourtoughness = new double[AgeLabel.values().length];
 
-  private double adultAgeTicks = 0.0;
+  private int adultAgeTicks = 0;  // age of the adult, in ticks
   private double maximumSizeAtAnyAge = 0.0;
 
   private static double [] getLifeStageAges(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) {
@@ -677,7 +699,7 @@ public class DragonLifeStageHelper extends DragonHelper {
    */
   private void readConfiguration(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
     lifeStageAges = getLifeStageAges(dragonVariants, modifiedCategory);
-    adultAgeTicks = lifeStageAges[lifeStageAges.length - 1] * TICKS_PER_MINECRAFT_DAY;
+    adultAgeTicks = (int)(lifeStageAges[lifeStageAges.length - 1] * TICKS_PER_MINECRAFT_DAY); // guaranteed to fit into an int, due to tag max value
 
     double [] init2 = {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_HATCHLING),
@@ -930,7 +952,7 @@ public class DragonLifeStageHelper extends DragonHelper {
 
         for (double age = 0; age < 25; age += 1) {
           test.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
-          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, test.getAgeLabel(), test.getHealth(),
+          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, test.getAgeLabel(), test.getMaxHealth(),
                   test.getAttackDamage(), test.getArmour(), test.getArmourToughness());
           DragonMounts.logger.info(output);
         }
@@ -951,7 +973,7 @@ public class DragonLifeStageHelper extends DragonHelper {
 
         for (double age = 0; age <= 3; age += 0.01) {
           testDefault.testingTicksSinceCreation = (int)(age * TICKS_PER_MINECRAFT_DAY);
-          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, testDefault.getAgeLabel(), testDefault.getHealth(),
+          String output = String.format("%3f:%15s%20.1f%20.1f%20.1f%20.2f", age, testDefault.getAgeLabel(), testDefault.getMaxHealth(),
                   testDefault.getAttackDamage(), testDefault.getArmour(), testDefault.getArmourToughness());
           DragonMounts.logger.info(output);
         }

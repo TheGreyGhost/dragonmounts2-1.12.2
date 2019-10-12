@@ -44,7 +44,7 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
    */
   @Override
   public boolean shouldExecute() {
-    BreathWeaponTarget playerSelectedTarget = this.dragon.getBreathHelperP().getPlayerSelectedTarget();
+    BreathWeaponTarget playerSelectedTarget = this.dragon.breathweapon().getPlayerSelectedTarget();
     return playerSelectedTarget != null || currentTarget != null;
   }
 
@@ -62,8 +62,8 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
   @Override
   public void resetTask() {
     currentTarget = null;
-    dragon.getBreathHelperP().setBreathingTarget(null);
-    dragon.getBreathHelperP().setBreathTargetForMoving(null);
+    dragon.breathweapon().setBreathingTarget(null);
+    dragon.breathweapon().setBreathTargetForMoving(null);
     dragon.setAttackTarget(null);
   }
 
@@ -75,7 +75,7 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
     // check which target the player has selected; if deselected, wait a short while before losing interest
     // if autolock is on, only change target when the player releases the button
     final int TARGET_DESELECTION_TIME = 60; // 60 ticks until dragon loses interest in target
-    BreathWeaponTarget playerSelectedTarget = this.dragon.getBreathHelperP().getPlayerSelectedTarget();
+    BreathWeaponTarget playerSelectedTarget = this.dragon.breathweapon().getPlayerSelectedTarget();
     boolean breathingNow = (playerSelectedTarget != null);
     boolean orbTargetAutoLock = DragonMounts.instance.getConfig().isOrbTargetAutoLock();
     if (playerSelectedTarget != null) {
@@ -92,8 +92,8 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
     }
 
     if (currentTarget == null) {
-      dragon.getBreathHelperP().setBreathingTarget(null);
-      dragon.getBreathHelperP().setBreathTargetForMoving(null);
+      dragon.breathweapon().setBreathingTarget(null);
+      dragon.breathweapon().setBreathTargetForMoving(null);
       dragon.setAttackTarget(null);
       return;
     }
@@ -120,13 +120,13 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
           biteMode = false;
         } else {
           dragon.setAttackTarget((EntityLivingBase) targetEntity);
-          dragon.getBreathHelperP().setBreathTargetForMoving(null);
+          dragon.breathweapon().setBreathTargetForMoving(null);
         }
       }
     }
 
     if (!biteMode) {
-      dragon.getBreathHelperP().setBreathTargetForMoving(currentTarget);
+      dragon.breathweapon().setBreathTargetForMoving(currentTarget);
     }
 
     // breathe at the target if the conditions are right
@@ -141,9 +141,9 @@ public class EntityAIRangedBreathAttack extends EntityAIBase {
       canSeeTarget = (targetEntity != null) && dragon.getEntitySenses().canSee(targetEntity);
     }
     if (breathingNow && canSeeTarget && targetRangeOK && headAngleOK) {
-      dragon.getBreathHelperP().setBreathingTarget(currentTarget);
+      dragon.breathweapon().setBreathingTarget(currentTarget);
     } else {
-      dragon.getBreathHelperP().setBreathingTarget(null);
+      dragon.breathweapon().setBreathingTarget(null);
     }
   }
 

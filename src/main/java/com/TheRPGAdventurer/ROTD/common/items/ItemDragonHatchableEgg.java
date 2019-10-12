@@ -174,7 +174,7 @@ public class ItemDragonHatchableEgg extends Item {
   public static EntityDragonEgg spawnEgg(World worldIn, DragonBreedNew breed, double x, double y, double z) {
     EntityDragonEgg entityDragonEgg = DragonFactory.getDefaultDragonFactory().createEgg(worldIn, breed);
     entityDragonEgg.setLocationAndAngles(x, y, z, MathHelper.wrapDegrees(worldIn.rand.nextFloat() * 360.0F), 0.0F);
-//    dragon.getReproductionHelper().setBreeder(player);
+//    dragon.reproduction().setBreeder(player);
     boolean success = worldIn.spawnEntity(entityDragonEgg);
     if (!success) return null;
 

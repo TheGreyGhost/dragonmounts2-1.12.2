@@ -245,8 +245,8 @@ public class TestRunner {
 
     EntityTameableDragon entityDragon = DragonFactory.getDefaultDragonFactory().createDragon(worldIn, DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed());
     entityDragon.setBreedType(dragonBreedToSpawn);
-    entityDragon.getLifeStageHelper().setLifeStage(DragonLifeStage.ADULT);
-    entityDragon.getReproductionHelper().setBreeder(playerIn);
+    entityDragon.lifeStage().setLifeStage(DragonLifeStage.ADULT);
+    entityDragon.reproduction().setBreeder(playerIn);
     entityDragon.setPosition(playerIn.posX + 5, playerIn.posY + 0.2, playerIn.posZ + 5);
     entityDragon.tamedFor(playerIn, true);
     ItemStack saddle = new ItemStack(Items.SADDLE, 1);

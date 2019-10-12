@@ -10,12 +10,9 @@
 package com.TheRPGAdventurer.ROTD.common.entity.ai;
 
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathWeaponTarget;
-import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import com.TheRPGAdventurer.ROTD.util.reflection.PrivateAccessor;
-import net.minecraft.init.MobEffects;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -100,7 +97,7 @@ public class EntityAIDragonPlayerControl extends EntityAIDragonBase implements P
     dragon.getMoveHelper().setMoveTo(x, y, z, 1.2);
 
     // if we're breathing at a target, look at it
-    BreathWeaponTarget breathWeaponTarget = dragon.getBreathHelperP().getPlayerSelectedTarget();
+    BreathWeaponTarget breathWeaponTarget = dragon.breathweapon().getPlayerSelectedTarget();
     if (breathWeaponTarget != null) {
       Vec3d dragonEyePos = dragon.getPositionVector().addVector(0, dragon.getEyeHeight(), 0);
       breathWeaponTarget.setEntityLook(dragon.world, dragon.getLookHelper(), dragonEyePos,

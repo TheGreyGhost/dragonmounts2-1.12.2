@@ -237,13 +237,13 @@
 //  }
 //
 //  public void continueAndUpdateBreathing(World world, Vec3d origin, Vec3d endOfLook, BreathNode.Power power, EntityTameableDragon dragon) {
-//    dragon.getBreathHelperP().getBreathAffectedArea().continueBreathing(world, origin, endOfLook, power, dragon);
-//    dragon.getBreathHelperP().getBreathAffectedArea().updateTick(world);
+//    dragon.breathweapon().getBreathAffectedArea().continueBreathing(world, origin, endOfLook, power, dragon);
+//    dragon.breathweapon().getBreathAffectedArea().updateTick(world);
 //  }
 //
 //  public void spawnBreathParticlesForFireDragon(World world, BreathNode.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//    dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
-//    dragon.getBreathHelperP().getEmitter().spawnBreathParticlesForFireDragon(world, power, tickCounter);
+//    dragon.breathweapon().getEmitter().setBeamEndpoints(origin, endOfLook);
+//    dragon.breathweapon().getEmitter().spawnBreathParticlesForFireDragon(world, power, tickCounter);
 //  }
 //
 //  public SoundEffectNames[] getBreathWeaponSoundEffects(EnumDragonLifeStage stage) {

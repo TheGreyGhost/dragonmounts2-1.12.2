@@ -39,8 +39,8 @@
 //
 //  @Override
 //  public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNodeP.Power power, EntityTameableDragon dragon) {
-//    dragon.getBreathHelperP().getBreathAffectedAreaNether().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
-//    dragon.getBreathHelperP().getBreathAffectedAreaNether().updateTickLegacy(world);
+//    dragon.breathweapon().getBreathAffectedAreaNether().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
+//    dragon.breathweapon().getBreathAffectedAreaNether().updateTickLegacy(world);
 //  }
 //
 //  //	@Override
@@ -50,8 +50,8 @@
 //
 //  @Override
 //  public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//    dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
-//    dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforNetherDragon(world, power, tickCounter);
+//    dragon.breathweapon().getEmitter().setBeamEndpoints(origin, endOfLook);
+//    dragon.breathweapon().getEmitter().spawnBreathParticlesforNetherDragon(world, power, tickCounter);
 //  }
 //
 //  @Override

@@ -72,7 +72,7 @@ public class DragonBrain extends DragonHelper {
     // mutex 2: looking
     // mutex 4: special state
 
-    Pair<Float, Float> ranges = dragon.getBreed().getBreathWeaponRange(dragon.getLifeStageHelper().getLifeStage());
+    Pair<Float, Float> ranges = dragon.getBreed().getBreathWeaponRange(dragon.lifeStage().getLifeStage());
     float minAttackRange = ranges.getLeft();
     float maxAttackRange = ranges.getRight();
     EntityAIMoveToOptimalDistance moveToOptimalAttackDistance =

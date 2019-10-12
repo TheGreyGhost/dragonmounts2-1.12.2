@@ -139,7 +139,7 @@ public class DragonReproductionHelper extends DragonHelper {
       return false;
     } else if (!dragonMate.isTamed()) {
       return false;
-    } else if (!dragonMate.getReproductionHelper().canReproduce()) {
+    } else if (!dragonMate.reproduction().canReproduce()) {
       return false;
     } else {
       return dragon.isInLove() && dragonMate.isInLove();
@@ -153,8 +153,8 @@ public class DragonReproductionHelper extends DragonHelper {
 
     EntityTameableDragon parent1 = dragon;
     EntityTameableDragon parent2 = (EntityTameableDragon) mate;
-    DragonBreedNew dragonBreed = rand.nextBoolean() ? parent1.getConfigurationHelper().getDragonBreedNew()
-                                                    : parent2.getConfigurationHelper().getDragonBreedNew();
+    DragonBreedNew dragonBreed = rand.nextBoolean() ? parent1.configuration().getDragonBreedNew()
+                                                    : parent2.configuration().getDragonBreedNew();
     EntityTameableDragon baby = DragonFactory.getDefaultDragonFactory().createDragon(dragon.world, dragonBreed);
 
     // mix the custom names in case both parents have one
@@ -199,11 +199,11 @@ public class DragonReproductionHelper extends DragonHelper {
     }
 
     // inherit the baby's breed from its parents
-    baby.getConfigurationHelper().inheritBreed(parent1, parent2);
+    baby.configuration().inheritBreed(parent1, parent2);
 
     // increase reproduction counter
-    parent1.getReproductionHelper().addReproduced();
-    parent2.getReproductionHelper().addReproduced();
+    parent1.reproduction().addReproduced();
+    parent2.reproduction().addReproduced();
 
     return baby;
   }

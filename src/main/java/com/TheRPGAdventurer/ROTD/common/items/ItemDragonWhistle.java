@@ -62,7 +62,7 @@ public class ItemDragonWhistle extends Item implements IHasModel {
 
     EnumItemBreedTypes type = EnumItemBreedTypes.valueOf(dragon.getBreedType().toString());
     nbt.setString("Name", type.color + (dragon.hasCustomName() ? dragon.getCustomNameTag() : DMUtils.translateToLocal("dragon." + type.toString().toLowerCase()) + " Dragon"));
-    nbt.setString("Age", DMUtils.translateToLocal("dragon." + dragon.getLifeStageHelper().getLifeStage().toString().toLowerCase()));
+    nbt.setString("Age", DMUtils.translateToLocal("dragon." + dragon.lifeStage().getLifeStage().toString().toLowerCase()));
     nbt.setString("OwnerName", dragon.getOwner().getName());
     nbt.setInteger("Color", dragon.getBreed().getColor());
 

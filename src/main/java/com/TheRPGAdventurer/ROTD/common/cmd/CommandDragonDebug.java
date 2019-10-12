@@ -28,7 +28,7 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
 
   public CommandDragonDebug() {
 //    addCommand(new CommandDragonLambda("toItem", dragon -> {
-//      dragon.getLifeStageHelper().transformToEgg();
+//      dragon.lifeStage().transformToEgg();
 //    }));
 
     addCommand(new CommandDragonLambda("dumpNBT", dragon -> {
@@ -104,7 +104,7 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
       new Thread(() -> {
         try {
           for (DragonLifeStage stage : DragonLifeStage.values()) {
-            dragon.getLifeStageHelper().setLifeStage(stage);
+            dragon.lifeStage().setLifeStage(stage);
             Thread.sleep(1000);
           }
         } catch (InterruptedException ex) {
@@ -113,7 +113,7 @@ public class CommandDragonDebug extends CommandBaseNested implements IDragonModi
     }));
 
     addCommand(new CommandDragonLambda("testAge", dragon -> {
-      dragon.getLifeStageHelper().setTicksSinceCreation(18000);
+      dragon.lifeStage().setTicksSinceCreation(18000);
     }));
 
     addCommand(new CommandDragonLambda("testMount", (server, sender, args) -> {

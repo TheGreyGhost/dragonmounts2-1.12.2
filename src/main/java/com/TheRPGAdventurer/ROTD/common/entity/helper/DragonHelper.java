@@ -172,6 +172,18 @@ public abstract class DragonHelper {
   protected final EntityDataManager entityDataManager;
   protected final Random rand;
 
+  /**
+   * Register a DataParameter and add it to the helper's list of DataParameters which require initialisation
+   *   (i.e. the helper won't proceed to INITIALISE_CLIENT until all the expected DataParameters have been received
+   * @param dataParameter
+   * @param value
+   * @param <T>
+   */
+  protected <T> void registerForInitialisation(DataParameter<T> dataParameter, T value) {
+    entityDataManager.register(dataParameter, value);
+    intialisedDataParameters.put(dataParameter, Boolean.FALSE);
+  }
+
   protected void receivedDataParameter(DataParameter dataParameter) {
     checkArgument(intialisedDataParameters.containsKey(dataParameter),
             "DragonHelper.receivedDataParameter was called for DataParameter %s which was not expected", dataParameter.getId());

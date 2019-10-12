@@ -99,8 +99,8 @@ public class EntityAIDragonAttack extends EntityAIDragonBase {
     this.dragon.getNavigator().clearPath();
 //        dragon.setUsingBreathWeapon(false);
 //        currentTarget = null;
-    dragon.getBreathHelperP().setBreathingTarget(null);
-//        dragon.getBreathHelperP().setBreathTargetForMoving(null);
+    dragon.breathweapon().setBreathingTarget(null);
+//        dragon.breathweapon().setBreathTargetForMoving(null);
 //        dragon.setAttackTarget(null);
   }
 
@@ -189,7 +189,7 @@ public class EntityAIDragonAttack extends EntityAIDragonBase {
       this.attackTick = 20;
       if (target.isEntityAlive()) {
         BreathWeaponTarget breathWeaponTarget = BreathWeaponTarget.targetEntity(target, BreathWeaponTarget.WeaponUsed.PRIMARY);  // default to PRIMARY until I can figure this out better
-        dragon.getBreathHelperP().setBreathingTarget(breathWeaponTarget);
+        dragon.breathweapon().setBreathingTarget(breathWeaponTarget);
       }
       dragon.getLookHelper().setLookPositionWithEntity(target, 120, 90);
     }

@@ -35,14 +35,14 @@
 //
 //  @Override
 //  public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNodeP.Power power, EntityTameableDragon dragon) {
-//    dragon.getBreathHelperP().getbreathAffectedAreaHydro().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
-//    dragon.getBreathHelperP().getbreathAffectedAreaHydro().updateTickLegacy(world);
+//    dragon.breathweapon().getbreathAffectedAreaHydro().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
+//    dragon.breathweapon().getbreathAffectedAreaHydro().updateTickLegacy(world);
 //  }
 //
 //  @Override
 //  public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//    dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
-//    dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforWaterDragon(world, power, tickCounter);
+//    dragon.breathweapon().getEmitter().setBeamEndpoints(origin, endOfLook);
+//    dragon.breathweapon().getEmitter().spawnBreathParticlesforWaterDragon(world, power, tickCounter);
 //  }
 //
 //  @Override

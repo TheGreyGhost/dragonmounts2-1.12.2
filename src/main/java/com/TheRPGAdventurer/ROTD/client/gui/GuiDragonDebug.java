@@ -207,9 +207,9 @@ public class GuiDragonDebug extends Gui {
     text.setColor(WHITE);
 
     // life stage
-    DragonLifeStageHelper lifeStage = dragon.getLifeStageHelper();
+    DragonLifeStageHelper lifeStage = dragon.lifeStage();
     String lifeStageName = lifeStage.getLifeStage().name().toLowerCase();
-    int ticksSinceCreation = dragon.getLifeStageHelper().getTicksSinceCreation();
+    int ticksSinceCreation = dragon.lifeStage().getTicksSinceCreation();
     text.printf("Life stage: %s (%d)\n", lifeStageName, ticksSinceCreation);
 
     // size
@@ -243,7 +243,7 @@ public class GuiDragonDebug extends Gui {
 
 
     // breeder name
-    DragonReproductionHelper reproduction = dragon.getReproductionHelper();
+    DragonReproductionHelper reproduction = dragon.reproduction();
     EntityPlayer breeder = reproduction.getBreeder();
     String breederName;
     if (breeder == null) {
@@ -291,7 +291,7 @@ public class GuiDragonDebug extends Gui {
     text.println("Breed points");
     text.setColor(WHITE);
 
-    DragonConfigurationHelper breedHelper = dragonServer.getConfigurationHelper();
+    DragonConfigurationHelper breedHelper = dragonServer.configuration();
     breedHelper.getBreedPoints().forEach((breedType, points) -> {
       text.setColor(breedType.getBreed().getColor());
       text.printf("%s: %d\n", breedType, points.get());

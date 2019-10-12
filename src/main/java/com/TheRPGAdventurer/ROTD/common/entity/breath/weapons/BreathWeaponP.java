@@ -51,7 +51,7 @@ public abstract class BreathWeaponP {
    * Update the breath weapon's mode depending on what the dragon is doing.
    */
   public void updateBreathWeaponMode() {
-    dragon.getBreathHelperP().setBreathMode(DragonBreathMode.DEFAULT);
+    dragon.breathweapon().setBreathMode(DragonBreathMode.DEFAULT);
   }
 
   // return true if the breath affected area should be reset (wipe) when the dragon breath mode changes

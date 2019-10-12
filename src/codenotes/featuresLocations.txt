@@ -1,0 +1,4 @@
+Max health, attack damage, armour: in DragonLifeStageHelper
+ - aging, stop/start growth
+
+Storing all breed+modifier configuration information - in DragonConfigurationHelper

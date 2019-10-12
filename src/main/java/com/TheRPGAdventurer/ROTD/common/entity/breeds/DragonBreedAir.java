@@ -56,14 +56,14 @@
 //
 //  @Override
 //  public void continueAndUpdateBreathingLegacy(World world, Vec3d origin, Vec3d endOfLook, BreathNodeP.Power power, EntityTameableDragon dragon) {
-//    dragon.getBreathHelperP().getbreathAffectedAreaAether().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
-//    dragon.getBreathHelperP().getbreathAffectedAreaAether().updateTickLegacy(world);
+//    dragon.breathweapon().getbreathAffectedAreaAether().continueBreathingLegacy(world, origin, endOfLook, power, dragon);
+//    dragon.breathweapon().getbreathAffectedAreaAether().updateTickLegacy(world);
 //  }
 //
 //  @Override
 //  public void spawnBreathParticles(World world, BreathNodeP.Power power, int tickCounter, Vec3d origin, Vec3d endOfLook, EntityTameableDragon dragon) {
-//    dragon.getBreathHelperP().getEmitter().setBeamEndpoints(origin, endOfLook);
-//    dragon.getBreathHelperP().getEmitter().spawnBreathParticlesforAetherDragon(world, power, tickCounter);
+//    dragon.breathweapon().getEmitter().setBeamEndpoints(origin, endOfLook);
+//    dragon.breathweapon().getEmitter().spawnBreathParticlesforAetherDragon(world, power, tickCounter);
 //  }
 //
 //  public SoundEffectNames[] getBreathWeaponSoundEffects(DragonLifeStage stage) {

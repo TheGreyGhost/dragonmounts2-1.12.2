@@ -229,7 +229,7 @@ public class DragonAnimator {
 
 
     // update bite opening transition and breath transitions
-    DragonBreathHelperP.BreathState breathState = dragon.getBreathHelperP().getCurrentBreathState();
+    DragonBreathHelperP.BreathState breathState = dragon.breathweapon().getCurrentBreathState();
     switch (breathState) {
       case IDLE: {  // breath is idle, handle bite attack
         int ticksSinceLastAttack = dragon.getTicksSinceLastAttack();
@@ -246,11 +246,11 @@ public class DragonAnimator {
       }
       case STARTING: {
         biteTimer.set(0.0F);
-        breathTimer.set(dragon.getBreathHelperP().getBreathStateFractionComplete());
+        breathTimer.set(dragon.breathweapon().getBreathStateFractionComplete());
         break;
       }
       case STOPPING: {
-        float breathStateFractionComplete = dragon.getBreathHelperP().getBreathStateFractionComplete();
+        float breathStateFractionComplete = dragon.breathweapon().getBreathStateFractionComplete();
         breathTimer.set(1.0F - breathStateFractionComplete);
         break;
       }
