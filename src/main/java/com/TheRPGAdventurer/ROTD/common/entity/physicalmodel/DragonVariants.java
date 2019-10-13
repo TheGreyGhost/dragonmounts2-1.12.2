@@ -90,7 +90,8 @@ public class DragonVariants {
           " e.g. if ageinfant is 1.0 days, healthpercentinfant = 20.0, agechild is 2.0 days, and healthpercentchild = 50.0,\n" +
           "   then healthpercent at 1.5 days of age is 35.0\n"
     ),
-    EGG("egg", 4, "This section is used to configure the dragon's egg");
+    EGG("egg", 4, "This section is used to configure the dragon's egg"),
+    REPRODUCTION("reproduction", 5, "Settings related to reproduction / having children.");
 
     /**
      * Checks if the given name has a corresponding Category
@@ -438,7 +439,9 @@ public class DragonVariants {
     MALE("male", 0x01, 0),
     FEMALE("female", 0x01, 1),
     DEBUG1("debug1", 0x02, 2, true),
-    DEBUG2("debug2", 0x04, 3, true);
+    DEBUG2("debug2", 0x04, 3, true),
+    FERTILE("fertile", 0x02, 4),
+    INFERTILE("infertile", 0x03, 5);
     ; // may add other modifiers in future
 
     private String textname;

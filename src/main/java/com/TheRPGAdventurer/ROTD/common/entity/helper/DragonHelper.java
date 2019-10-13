@@ -138,6 +138,7 @@ public abstract class DragonHelper {
    * Notify that the dragon configuration (breed and/or modifiers) has changed, i.e.
    * Called at the end of initialisation and then again whenever the breed/and or modifiers have been changed to new values
    *   (different from previous value)
+   * Be careful not to trigger a recursive update (eg changing the modifier causes variants to change, which causes the modifier to change back, etc)
    */
   public void onConfigurationChange() {
   }

@@ -196,11 +196,23 @@ public class EntityTameableDragon extends EntityTameable {
 
   /** called to notify that the dragon configuration has changed.
    * intended to be called by DragonConfigurationHelper only.
+   * Detects cascading changes and aborts if detected
   **/
   public void onConfigurationChange() {
-    helpers.values().forEach(DragonHelper::onConfigurationChange);
+    if (configurationRecursionCount > MAX_CONFIGURATION_RECURSION) {
+      DragonMounts.loggerLimit.warn_once("Excessive recursion detected in onConfigurationChange: i.e. the changed configuration has further configuration changes.");
+      return;
+    }
+    try {
+      ++configurationRecursionCount;
+      helpers.values().forEach(DragonHelper::onConfigurationChange);
+    } finally {
+      --configurationRecursionCount;
+    }
   }
 
+  private int configurationRecursionCount = 0;
+  private static final int MAX_CONFIGURATION_RECURSION = 4;
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
     helpers.values().forEach(helper -> helper.notifyDataManagerChange(key));
@@ -2411,8 +2423,6 @@ public class EntityTameableDragon extends EntityTameable {
   private static final DataParameter<Boolean> HOVER_CANCELLED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> Y_LOCKED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> FOLLOW_YAW = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<Optional<UUID>> DATA_BREEDER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.OPTIONAL_UNIQUE_ID);
-  private static final DataParameter<Integer> DATA_REPRO_COUNT = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
   private static final DataParameter<Integer> HUNGER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
 //  private static final DataParameter<Byte> DRAGON_SCALES = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BYTE);
   private static final DataParameter<ItemStack> BANNER1 = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.ITEM_STACK);

@@ -12,15 +12,23 @@ package com.TheRPGAdventurer.ROTD.common.entity.helper;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantsException;
 import com.google.common.base.Optional;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.world.DifficultyInstance;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
@@ -28,69 +36,105 @@ import java.util.UUID;
  */
 public class DragonReproductionHelper extends DragonHelper {
 
-  public static final String NBT_BREEDER = "HatchedByUUID";
-  public static final String NBT_REPRO_COUNT = "ReproductionCount";
-  // old NBT keys
-  public static final String NBT_REPRODUCED = "HasReproduced";
-  public static final String NBT_BREEDER_OLD = "HatchedBy";
-  public static final byte REPRO_LIMIT = 2;
-  public DragonReproductionHelper(EntityTameableDragon dragon,
-                                  DataParameter<Optional<UUID>> dataParamBreeder,
-                                  DataParameter<Integer> dataIndexReproCount) {
+  public DragonReproductionHelper(EntityTameableDragon dragon) {
     super(dragon);
-
-    this.dataParamBreeder = dataParamBreeder;
-    this.dataParamReproduced = dataIndexReproCount;
-
-    entityDataManager.register(dataParamBreeder, Optional.absent());
-    entityDataManager.register(dataIndexReproCount, 0);
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
-  public static void registerConfigurationTags() { //todo initialise tags here
+  /**
+   * Initialise all the configuration tags used by this helper
+   */
+  public static void registerConfigurationTags()
+  {
+    // the initialisation of the tags is all done in their static initialisers
+    DragonVariants.addVariantTagValidator(new DragonReproductionValidator());
+  }
+
+  @Override
+  public void registerDataParameters() {
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
+    registerForInitialisation(DATAPARAM_BREEDER, Optional.absent());
+    registerForInitialisation(DATAPARAM_REPRO_COUNT, 0);
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
     Optional<UUID> breederID = getBreederID();
     if (breederID.isPresent()) {
       nbt.setUniqueId(NBT_BREEDER, breederID.get());
     }
     nbt.setInteger(NBT_REPRO_COUNT, getReproCount());
+    nbt.setInteger(NBT_REPRO_LIMIT, reproductionLimit);
+    setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
-    int reproCount = 0;
-    if (nbt.hasKey(NBT_REPRO_COUNT)) {
-      reproCount = nbt.getInteger(NBT_REPRO_COUNT);
-    } else if (nbt.hasKey(NBT_REPRODUCED)) {
-      // convert old boolean value
-      if (nbt.getBoolean(NBT_REPRODUCED)) {
-        reproCount++;
-      }
-    }
-
-    if (nbt.hasKey(NBT_BREEDER)) {
-      setBreederID(nbt.getUniqueId(NBT_BREEDER));
-    } else if (nbt.hasKey(NBT_BREEDER_OLD)) {
-      // lookup breeder name on server and convert to UUID
-      // if we're lucky, it'll work. if not... well, it's not really being
-      // used right now anyway...
-      String breederName = nbt.getString(NBT_BREEDER_OLD);
-      EntityPlayer breeder = dragon.world.getPlayerEntityByName(breederName);
-      setBreeder(breeder);
-    }
-
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
+    int reproCount = nbt.getInteger(NBT_REPRO_COUNT);
+    UUID uuid = nbt.getUniqueId(NBT_BREEDER);
+    reproductionLimit = nbt.getInteger(NBT_REPRO_LIMIT);
     setReproCount(reproCount);
+    setBreederID(uuid);
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
+  @Override
+  public void initialiseServerSide() {
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    setCompleted(FunctionTag.INITIALISE_SERVER);
+  }
+
+  /**
+   * Called once when the entity is first spawned (and not when it's later loaded from disk)
+   * Is called after initialiseServerSide
+   * @param difficulty
+   * @param livingdata
+   * @return
+   */
+  @Nullable
+  public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+    // set the reproduction limit for this dragon
+    int lowerlimit = (int)dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, REPRODUCTION_LOWER_LIMIT);
+    int upperlimit = (int)dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, REPRODUCTION_UPPER_LIMIT);
+    reproductionLimit = rand.nextInt(upperlimit - lowerlimit + 1) + lowerlimit;
+    updateFertilityModifiers();
+    return livingdata;
+  }
+
+  @Override
+  public void initialiseClientSide() {
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    setCompleted(FunctionTag.INITIALISE_CLIENT);
+  }
+
+  @Override
+  public void notifyDataManagerChange(DataParameter<?> key) {
+    if (helperState != HelperState.INITIALISED) {
+      checkPreConditions(FunctionTag.DATAPARAMETER_RECEIVED);
+      receivedDataParameter(key);
+      setCompleted(FunctionTag.DATAPARAMETER_RECEIVED);
+    }
+  }
+
+  @Override
+  public void onConfigurationChange() {
+
+  }
+
+
   public int getReproCount() {
-    return entityDataManager.get(dataParamReproduced);
+    return entityDataManager.get(DATAPARAM_REPRO_COUNT);
   }
 
   public void setReproCount(int reproCount) {
-    L.trace("setReproCount({})", reproCount);
-    entityDataManager.set(dataParamReproduced, reproCount);
+    entityDataManager.set(DATAPARAM_REPRO_COUNT, reproCount);
+  }
+
+  public boolean isFertile() {
+    return getReproCount() < reproductionLimit;
   }
 
   public void addReproduced() {
@@ -98,16 +142,28 @@ public class DragonReproductionHelper extends DragonHelper {
   }
 
   public boolean canReproduce() {
-    return dragon.isTamed() && getReproCount() < REPRO_LIMIT;
+    double emotionalMaturityThreshold = (double)dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, REPRODUCTION_EMOTIONAL_MATURITY_THRESHOLD);
+    return dragon.isTamed() && isFertile() && dragon.lifeStage().getEmotionalMaturity() >= emotionalMaturityThreshold;
+  }
+
+  public void updateFertilityModifiers() {
+    boolean hasFertileModifier = dragon.configuration().hasModifier(DragonVariants.Modifier.FERTILE);
+    boolean hasInfertileModifier = dragon.configuration().hasModifier(DragonVariants.Modifier.INFERTILE);
+    if (isFertile()) {
+      if (hasFertileModifier) return;
+      dragon.configuration().addModifier(DragonVariants.Modifier.FERTILE);
+    } else {
+      if (hasInfertileModifier) return;
+      dragon.configuration().addModifier(DragonVariants.Modifier.INFERTILE);
+    }
   }
 
   public Optional<UUID> getBreederID() {
-    return entityDataManager.get(dataParamBreeder);
+    return entityDataManager.get(DATAPARAM_BREEDER);
   }
 
   public void setBreederID(UUID breederID) {
-    L.trace("setBreederUUID({})", breederID);
-    entityDataManager.set(dataParamBreeder, Optional.fromNullable(breederID));
+    entityDataManager.set(DATAPARAM_BREEDER, Optional.fromNullable(breederID));
   }
 
   public EntityPlayer getBreeder() {
@@ -227,7 +283,51 @@ public class DragonReproductionHelper extends DragonHelper {
 
     return nameNew;
   }
+
+  /**
+   * Validates the following aspects of the tags:
+   * 1) reproduction upper limit >= lower limit
+   * If any errors are found, revert to the defaults and throw an error
+   */
+  public static class DragonReproductionValidator implements DragonVariants.VariantTagValidator {
+    @Override
+    public void validateVariantTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
+      DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
+      if (!modifiedCategory.getCategory().equals(DragonVariants.Category.REPRODUCTION)) return;
+
+      if ((double)dragonVariants.getValueOrDefault(modifiedCategory, REPRODUCTION_LOWER_LIMIT)
+          >= (double)dragonVariants.getValueOrDefault(modifiedCategory, REPRODUCTION_UPPER_LIMIT)) {
+        dragonVariants.removeTags(DragonVariants.Category.REPRODUCTION, REPRODUCTION_LOWER_LIMIT, REPRODUCTION_UPPER_LIMIT);
+        dragonVariantsErrors.addError("\"" + REPRODUCTION_LOWER_LIMIT.getTextname() + "\" must be <= \"" + REPRODUCTION_UPPER_LIMIT.getTextname() + "\"");
+      }
+      if (dragonVariantsErrors.hasErrors()) {
+        throw new DragonVariantsException(dragonVariantsErrors);
+      }
+    }
+    @Override
+    public void initaliseResources(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
+      // do nothing - no resources to initialise
+    }
+  }
+
+  private int reproductionLimit = 0; // max number of times this dragon can reproduce
+
+  public static final String NBT_BREEDER = "HatchedByUUID";
+  public static final String NBT_REPRO_COUNT = "ReproductionCount";
+  public static final String NBT_REPRO_LIMIT = "ReproductionLimit";
+
+  private static final DataParameter<Optional<UUID>> DATAPARAM_BREEDER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.OPTIONAL_UNIQUE_ID);
+  private static final DataParameter<Integer> DATAPARAM_REPRO_COUNT = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
+
   private static final Logger L = LogManager.getLogger();
-  private final DataParameter<Optional<UUID>> dataParamBreeder;
-  private final DataParameter<Integer> dataParamReproduced;
+
+  private static final DragonVariantTag REPRODUCTION_LOWER_LIMIT = DragonVariantTag.addTag("reproductionlowerlimit", 1, 0, 100,
+          "dragon can reproduce at least this many times").categories(DragonVariants.Category.REPRODUCTION);
+  private static final DragonVariantTag REPRODUCTION_UPPER_LIMIT = DragonVariantTag.addTag("reproductiorupperlimit", 5, 0, 100,
+          "dragon can reproduce at most this many times").categories(DragonVariants.Category.REPRODUCTION);
+  private static final DragonVariantTag REPRODUCTION_EMOTIONAL_MATURITY_THRESHOLD = DragonVariantTag.addTag("emotionalmaturitythreshold", 75, 0, 100,
+          "dragon cannot mate until its emotional maturity (%) is equal to this value or higher").categories(DragonVariants.Category.REPRODUCTION);
+
+
+
 }

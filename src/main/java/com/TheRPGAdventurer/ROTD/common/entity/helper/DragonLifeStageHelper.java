@@ -150,10 +150,11 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   private void initialiseBothSides() {
     DragonConfigurationHelper dch = dragon.configuration();
-    dragon.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue((double) dch.getVariantTagValue(Category.LIFE_STAGE, ATTACKDAMAGEBASE));
-    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURBASE));
-    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURTOUGHNESSBASE));
-    dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, HEALTHBASE));
+    applyLifeStageChanges();
+//    dragon.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue((double) dch.getVariantTagValue(Category.LIFE_STAGE, ATTACKDAMAGEBASE));
+//    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURBASE));
+//    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURTOUGHNESSBASE));
+//    dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, HEALTHBASE));
   }
 
   @Override
@@ -372,10 +373,12 @@ public class DragonLifeStageHelper extends DragonHelper {
     applyLifeStageAttributeChange(ARMOR_TOUGHNESS, getArmourToughness());
   }
 
-  private final double SIGNIFICANT_DIFFERENCE = 0.01; // only update the multiplier if it is significantly different to the old one
+  private final double SIGNIFICANT_DIFFERENCE = 0.01; // only update the new value if it is significantly different to the old one
   private void applyLifeStageAttributeChange(IAttribute attribute, double newValue) {
     IAttributeInstance instance = dragon.getEntityAttribute(attribute);
-    if (Math.abs(newValue - instance.getBaseValue()) < SIGNIFICANT_DIFFERENCE) return;
+    double significantDifference = SIGNIFICANT_DIFFERENCE * (Math.abs(newValue) + Math.abs(instance.getBaseValue()));
+
+    if (Math.abs(newValue - instance.getBaseValue()) < significantDifference) return;
     instance.setBaseValue(newValue);
 //    double operation0Multipler = - (1.0 - multiplier);
 //    // operation 0 Modifier does modifiedValue = baseValue + multiplier *

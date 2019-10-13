@@ -2,3 +2,7 @@ Max health, attack damage, armour: in DragonLifeStageHelper
  - aging, stop/start growth
 
 Storing all breed+modifier configuration information - in DragonConfigurationHelper
+Reproduction & mating in DragonReproductionHelper:
+  - each dragon has a maximum # of times it can reproduce.
+  - when max is reached, dragon acquires the "infertile" modifier
+  - only reproduce if: tamed, fertile, and has high enough emotional maturity
