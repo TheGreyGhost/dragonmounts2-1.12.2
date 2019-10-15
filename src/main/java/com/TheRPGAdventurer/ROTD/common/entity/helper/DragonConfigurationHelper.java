@@ -245,7 +245,7 @@ public class DragonConfigurationHelper extends DragonHelper {
 //    return EnumUtils.getEnum(EnumDragonBreed.class, breedName.toUpperCase());
 //  }
 
-//  public DragonBreedNew getDragonBreedNew() {return dragonBreedNew;}
+  public DragonBreedNew getDragonBreedNew() {return dragonBreedNew;}
 //
 //  public void setBreedType(EnumDragonBreed newType) {
 //    L.trace("setBreed({})", newType);

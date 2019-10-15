@@ -6,3 +6,6 @@ Reproduction & mating in DragonReproductionHelper:
   - each dragon has a maximum # of times it can reproduce.
   - when max is reached, dragon acquires the "infertile" modifier
   - only reproduce if: tamed, fertile, and has high enough emotional maturity
+  - dragon is either male (default) or female.
+  - only reproduce if in "love mode" (EntityAnimal vanilla)
+  - the child breed is randomly either of the parents, and is named as a combination of the parents

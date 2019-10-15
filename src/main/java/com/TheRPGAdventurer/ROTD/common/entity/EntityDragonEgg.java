@@ -503,6 +503,7 @@ public class EntityDragonEgg extends Entity {
   private void hatchEgg() {
     changeEggState(EggState.HATCHED);
     //todo spawn the dragon here!
+    //todo copy the egg name into the dragon
 
 //    // play particle and sound effects when the dragon hatches
 //    if (prevLifeStage != null && prevLifeStage.isEgg() && !lifeStage.isBaby()) {

@@ -196,11 +196,13 @@ public class EntityTameableDragon extends EntityTameable {
 
   /** called to notify that the dragon configuration has changed.
    * intended to be called by DragonConfigurationHelper only.
-   * Detects cascading changes and aborts if detected
+   * Detects cascading changes (recursion beyond a given depth) and aborts if detected
   **/
   public void onConfigurationChange() {
+    if (recursionLimitReached) return;
     if (configurationRecursionCount > MAX_CONFIGURATION_RECURSION) {
       DragonMounts.loggerLimit.warn_once("Excessive recursion detected in onConfigurationChange: i.e. the changed configuration has further configuration changes.");
+      recursionLimitReached = true;
       return;
     }
     try {
@@ -208,11 +210,14 @@ public class EntityTameableDragon extends EntityTameable {
       helpers.values().forEach(DragonHelper::onConfigurationChange);
     } finally {
       --configurationRecursionCount;
+      if (configurationRecursionCount == 0) recursionLimitReached = false;
     }
   }
 
   private int configurationRecursionCount = 0;
+  private boolean recursionLimitReached = false;
   private static final int MAX_CONFIGURATION_RECURSION = 4;
+
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
     helpers.values().forEach(helper -> helper.notifyDataManagerChange(key));
@@ -567,25 +572,6 @@ public class EntityTameableDragon extends EntityTameable {
 
   public void setWhistleState(byte state) {
     dataManager.set(WHISTLE_STATE, state);
-  }
-
-  /**
-   * Gets the gender since booleans return only 2 values (true or false) true == MALE, false == FEMALE
-   * 2 genders only dont call me sexist and dont talk to me about political correctness
-   */
-  public boolean isMale() {
-    return dataManager.get(IS_MALE);
-  }
-
-  public void setMale(boolean male) {
-    dataManager.set(IS_MALE, male);
-  }
-
-  /**
-   * set in commands
-   */
-  public void setOppositeGender() {
-    this.setMale(!this.isMale());
   }
 
 //  public boolean isAlbino() {
@@ -1518,14 +1504,13 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public EntityAgeable createChild(EntityAgeable mate) {
-    EntityTameableDragon parent1 = this;
-    EntityTameableDragon parent2 = (EntityTameableDragon) mate;
-
-    if (parent1.isMale() && !parent2.isMale() || !parent1.isMale() && parent2.isMale()) {
-      return reproduction().createChild(parent1.isMale() ? mate : parent1);
-    } else {
+    if (!(mate instanceof EntityTameableDragon)) {
+      DragonMounts.loggerLimit.warn_once("Called createChild when mate wasn't a dragon");
       return null;
     }
+    EntityTameableDragon dragonMate = (EntityTameableDragon)mate;
+    if (!this.reproduction().canMateWith(dragonMate)) return null;
+    return this.reproduction().createChild(dragonMate);
   }
 
   public DragonConfigurationHelper configuration() {

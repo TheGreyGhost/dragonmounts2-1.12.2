@@ -9,6 +9,8 @@
  */
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonFactory;
@@ -33,6 +35,11 @@ import java.util.UUID;
 
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
+ *
+ * Controls reproduction and gender
+ * * male (default) or female - via modifiers
+ * * fertile or infertile - based on reproduction limit - via modifiers
+ *
  */
 public class DragonReproductionHelper extends DragonHelper {
 
@@ -84,6 +91,7 @@ public class DragonReproductionHelper extends DragonHelper {
   @Override
   public void initialiseServerSide() {
     checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    verifyModifiers(false);
     setCompleted(FunctionTag.INITIALISE_SERVER);
   }
 
@@ -101,6 +109,8 @@ public class DragonReproductionHelper extends DragonHelper {
     int upperlimit = (int)dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, REPRODUCTION_UPPER_LIMIT);
     reproductionLimit = rand.nextInt(upperlimit - lowerlimit + 1) + lowerlimit;
     updateFertilityModifiers();
+    verifyModifiers(true);
+
     return livingdata;
   }
 
@@ -121,9 +131,28 @@ public class DragonReproductionHelper extends DragonHelper {
 
   @Override
   public void onConfigurationChange() {
-
+    verifyModifiers(true);
   }
 
+  private void verifyModifiers(boolean raiseError) {
+    boolean hasFertileModifier = dragon.configuration().hasModifier(DragonVariants.Modifier.FERTILE);
+    boolean hasInfertileModifier = dragon.configuration().hasModifier(DragonVariants.Modifier.INFERTILE);
+    boolean hasMaleModifier = dragon.configuration().hasModifier(DragonVariants.Modifier.MALE);
+    boolean hasFemaleModifier = dragon.configuration().hasModifier(DragonVariants.Modifier.FEMALE);
+    if (!hasFemaleModifier && !hasMaleModifier) {
+      dragon.configuration().addModifier(DragonVariants.Modifier.MALE);
+      if (raiseError) {
+        DragonMounts.loggerLimit.warn_once("Dragon unexpectedly had neither FEMALE nor MALE modifier.");
+      }
+    }
+
+    if (!hasFertileModifier && !hasInfertileModifier) {
+      updateFertilityModifiers();
+      if (raiseError) {
+        DragonMounts.loggerLimit.warn_once("Dragon unexpectedly had neither FERTILE nor INFERTILE modifier.");
+      }
+    }
+  }
 
   public int getReproCount() {
     return entityDataManager.get(DATAPARAM_REPRO_COUNT);
@@ -179,6 +208,26 @@ public class DragonReproductionHelper extends DragonHelper {
     setBreederID(breeder != null ? breeder.getUniqueID() : null);
   }
 
+  /**
+   * is the dragon male?
+   */
+  public boolean isMale() {
+    verifyModifiers(true);
+    return dragon.configuration().hasModifier(DragonVariants.Modifier.MALE);
+  }
+
+  public void setMale(boolean male) {
+    dragon.configuration().addModifier(male ? DragonVariants.Modifier.MALE : DragonVariants.Modifier.FEMALE);
+  }
+
+  /**
+   * set in commands
+   */
+  public void setToOppositeGender() {
+    this.setMale(!this.isMale());
+  }
+
+  // checks if both dragons can reproduce, are interbreeding compatible, are opposite gender, are are both in love
   public boolean canMateWith(EntityAnimal mate) {
     if (mate == dragon) {
       // No. Just... no.
@@ -190,28 +239,33 @@ public class DragonReproductionHelper extends DragonHelper {
     }
 
     EntityTameableDragon dragonMate = (EntityTameableDragon) mate;
+    if (!dragonMate.reproduction().canReproduce()) return false;
+    if (this.isMale() == dragonMate.reproduction().isMale()) return false;
 
-    if ((dragonMate.isMale() && !dragon.isMale()) || (!dragonMate.isMale() && dragon.isMale())) {
-      return false;
-    } else if (!dragonMate.isTamed()) {
-      return false;
-    } else if (!dragonMate.reproduction().canReproduce()) {
-      return false;
-    } else {
-      return dragon.isInLove() && dragonMate.isInLove();
-    }
+    if (!canInterbreed(dragonMate)) return false;
+    return dragon.isInLove() && dragonMate.isInLove();
   }
 
-  public EntityAgeable createChild(EntityAgeable mate) {
-    if (!(mate instanceof EntityTameableDragon)) {
-      throw new IllegalArgumentException("The mate isn't a dragon");
+  // can these two dragon breeds interbreed with each other?
+  private boolean canInterbreed(EntityTameableDragon mate) {
+    String compatibility1 = (String)dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
+    String compatibility2 = (String)mate.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
+    for (char c : compatibility1.toCharArray()) {
+      if (compatibility2.indexOf(c) >= 0) return true;
+    }
+    return false;
+  }
+
+  public EntityDragonEgg createChild(EntityTameableDragon mate) {
+    if (!canMateWith(mate)) {
+      throw new IllegalArgumentException("Attempted to createChild but canMateWith() is false");
     }
 
     EntityTameableDragon parent1 = dragon;
-    EntityTameableDragon parent2 = (EntityTameableDragon) mate;
+    EntityTameableDragon parent2 = mate;
     DragonBreedNew dragonBreed = rand.nextBoolean() ? parent1.configuration().getDragonBreedNew()
                                                     : parent2.configuration().getDragonBreedNew();
-    EntityTameableDragon baby = DragonFactory.getDefaultDragonFactory().createDragon(dragon.world, dragonBreed);
+    EntityDragonEgg baby = DragonFactory.getDefaultDragonFactory().createEgg(dragon.world, dragonBreed);
 
     // mix the custom names in case both parents have one
     if (parent1.hasCustomName() && parent2.hasCustomName()) {
@@ -254,8 +308,8 @@ public class DragonReproductionHelper extends DragonHelper {
       baby.setCustomNameTag(babyName);
     }
 
-    // inherit the baby's breed from its parents
-    baby.configuration().inheritBreed(parent1, parent2);
+//    // inherit the baby's breed from its parents
+//    baby.configuration().inheritBreed(parent1, parent2);
 
     // increase reproduction counter
     parent1.reproduction().addReproduced();
@@ -327,7 +381,8 @@ public class DragonReproductionHelper extends DragonHelper {
           "dragon can reproduce at most this many times").categories(DragonVariants.Category.REPRODUCTION);
   private static final DragonVariantTag REPRODUCTION_EMOTIONAL_MATURITY_THRESHOLD = DragonVariantTag.addTag("emotionalmaturitythreshold", 75, 0, 100,
           "dragon cannot mate until its emotional maturity (%) is equal to this value or higher").categories(DragonVariants.Category.REPRODUCTION);
-
-
-
+  private static final DragonVariantTag INTERBREEDING_COMPATABILITY = DragonVariantTag.addTag("interbreedingcategories", "",
+          "different species of dragon can interbreed if they have one or more letters in common." +
+          "eg if air has \"AB\", water has \"D\", and cloud has \"AD\", then cloud can breed with air (shares \"A\"), cloud can breed with water (shares \"D\")," +
+          "but air can't breed with water").categories(DragonVariants.Category.REPRODUCTION);
 }
