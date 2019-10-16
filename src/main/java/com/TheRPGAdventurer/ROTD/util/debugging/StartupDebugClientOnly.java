@@ -67,6 +67,12 @@ public class StartupDebugClientOnly {
       System.out.print(json);
     }
 
+    ADD TESTS HERE FOR THE NEW ARRAYS:
+     - Array type with correct strings
+     - empty array
+     - array with numbers
+     - array with nested array
+            
     String json = DragonVariantsReader.outputAllTagsAsJSON(true);
     System.out.print(json);
     json = DragonVariantsReader.outputAllTagsAsJSON(false);

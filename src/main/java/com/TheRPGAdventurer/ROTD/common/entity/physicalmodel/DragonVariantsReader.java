@@ -277,6 +277,18 @@ public class DragonVariantsReader {
     } else if (value instanceof Number) {
       json.append(": ");
       json.append(value);
+    } else if (value instanceof String []) {
+      json.append(": [");
+      String [] valueArray = (String [])value;
+      boolean first = true;
+      for (String item : valueArray) {
+        if (!first) json.append(",");
+        json.append("\"");
+        json.append(item);
+        json.append("\"");
+        first = false;
+      }
+      json.append("]");
     } else {
       throw new IllegalArgumentException("Unexpected object type");
     }
@@ -427,22 +439,40 @@ public class DragonVariantsReader {
                                        String tagName, JsonElement tagValue) throws IllegalArgumentException {
     DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
     String value;
+
     try {
-      JsonPrimitive jsonPrimitive = tagValue.getAsJsonPrimitive();
-      if (jsonPrimitive.isBoolean()) {
-        dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsBoolean());
-      } else if (jsonPrimitive.isNumber()) {
-        dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsNumber());
-      } else if (jsonPrimitive.isString()) {
-        dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsString());
+      if (tagValue.isJsonArray()) {
+        deserialiseTagArray(dragonVariants, category, tag, tagValue.getAsJsonArray());
       } else {
-        throw new IllegalArgumentException("value has an unexpected type");
+        JsonPrimitive jsonPrimitive = tagValue.getAsJsonPrimitive();
+        if (jsonPrimitive.isBoolean()) {
+          dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsBoolean());
+        } else if (jsonPrimitive.isNumber()) {
+          dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsNumber());
+        } else if (jsonPrimitive.isString()) {
+          dragonVariants.addTagAndValue(category, tag, jsonPrimitive.getAsString());
+        } else {
+          throw new IllegalArgumentException("value has an unexpected type");
+        }
       }
     } catch (Exception e) {
       throw new IllegalArgumentException("problem with tag " + category.toString() + ":" + tagName + "-" + e.getMessage());
     }
   }
 
+  private void deserialiseTagArray(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category,
+                                       DragonVariantTag tag, JsonArray tagValue) throws IllegalArgumentException {
+    int entryCount = tagValue.size();
+    String [] entries = new String[entryCount];
+    for (int i = 0; i < entryCount; ++i) {
+      JsonElement element = tagValue.get(i);
+      if (!element.isJsonPrimitive()) throw new IllegalArgumentException("value has unexpected type (array must contain strings only)");
+      JsonPrimitive primitive = element.getAsJsonPrimitive();
+      if (!primitive.isString()) throw new IllegalArgumentException("value has unexpected type (array must contain strings only)");
+      entries[i] = primitive.getAsString();
+    }
+    dragonVariants.addTagAndValue(category, tag, entries);
+  }
 //  private void deserialiseFlagTag(DragonVariants dragonVariants, DragonVariants.ModifiedCategory category,
 //                                  String tagName) throws IllegalArgumentException {
 //    DragonVariantTag tag = DragonVariantTag.getTagFromName(tagName);
