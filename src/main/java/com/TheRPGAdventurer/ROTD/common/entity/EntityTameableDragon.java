@@ -16,11 +16,9 @@ import com.TheRPGAdventurer.ROTD.common.entity.ai.ground.EntityAIDragonSit;
 import com.TheRPGAdventurer.ROTD.common.entity.ai.path.PathNavigateFlying;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathHelperP;
-import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.*;
-import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractBase;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
@@ -31,7 +29,6 @@ import com.TheRPGAdventurer.ROTD.common.network.MessageDragonExtras;
 import com.TheRPGAdventurer.ROTD.common.network.MessageDragonInventory;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
-import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
@@ -46,7 +43,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ContainerHorseChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.IInventoryChangedListener;
@@ -1290,37 +1286,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public boolean processInteract(EntityPlayer player, EnumHand hand) {
-    ItemStack item = player.getHeldItem(hand);
-
-    ItemStack itemstack = player.getHeldItem(hand);
-
-    if (itemstack.getItem() == Items.BUCKET && !player.capabilities.isCreativeMode && !this.isChild() && DragonMounts.instance.getConfig().canMilk) {
-      player.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
-      itemstack.shrink(1);
-
-      if (itemstack.isEmpty()) {
-        player.setHeldItem(hand, new ItemStack(Items.MILK_BUCKET));
-      } else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MILK_BUCKET))) {
-        player.dropItem(new ItemStack(Items.MILK_BUCKET), false);
-      }
-
-      return true;
-    }
-
-    if (getHealth() <= 0) return false;
-
-    // if the dragon is small enough, put it on the player's shoulder
-    if (this.isTamedFor(player) && this.isBaby() && !player.isSneaking() && !DragonInteractBase.hasInteractItemsEquipped(player)) {
-      this.setSitting(false);
-      this.startRiding(player, true);
-      return true;
-    }
-
-    if (player.isPassenger(this)) {
-      return false;
-    }
-
-    return getInteractHelper().interact(player, item);
+    return interactions().processInteract(player, hand);
   }
 
   public void tamedFor(EntityPlayer player, boolean successful) {
@@ -1531,7 +1497,7 @@ public class EntityTameableDragon extends EntityTameable {
   public DragonBrain getBrain() {
     return getHelper(DragonBrain.class);
   }
-  public DragonInteractHelper getInteractHelper() {
+  public DragonInteractHelper interactions() {
     return getHelper(DragonInteractHelper.class);
   }
 

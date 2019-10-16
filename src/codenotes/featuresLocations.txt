@@ -9,3 +9,18 @@ Reproduction & mating in DragonReproductionHelper:
   - dragon is either male (default) or female.
   - only reproduce if in "love mode" (EntityAnimal vanilla)
   - the child breed is randomly either of the parents, and is named as a combination of the parents
+
+Player->Dragon interactions (as per vanilla) in DragonInteractHelper:
+  - looks like originally intended to have one class per interaction but later decided not to.
+Valid interactions for:
+  - dragon whistle - various
+  - bone: dragon sits
+  - stick: dragon sits
+  - food: instanceof ItemFood-->
+    - fish or dragonfood->
+      * if untamed -> random chance of taming
+      * depending on hungerDecrement config: either heal dragon, or raise its hunger satiation
+      * if fully satiated, and this is a breeding item, set dragon in love
+    - shrinking food or growing food, to pause or restart growth.
+  - click without interacting item -> riding (not sneaking) or dragon GUI (with sneaking)
+Checks if the dragon is untamed, or tamed by someone else.

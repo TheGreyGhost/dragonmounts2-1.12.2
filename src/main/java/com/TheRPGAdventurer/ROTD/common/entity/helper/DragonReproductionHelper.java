@@ -383,6 +383,6 @@ public class DragonReproductionHelper extends DragonHelper {
           "dragon cannot mate until its emotional maturity (%) is equal to this value or higher").categories(DragonVariants.Category.REPRODUCTION);
   private static final DragonVariantTag INTERBREEDING_COMPATABILITY = DragonVariantTag.addTag("interbreedingcategories", "",
           "different species of dragon can interbreed if they have one or more letters in common." +
-          "eg if air has \"AB\", water has \"D\", and cloud has \"AD\", then cloud can breed with air (shares \"A\"), cloud can breed with water (shares \"D\")," +
+          "eg if air has \"AB\", water has \"D\", and cloud has \"AD\", then cloud can breed with air (both have \"A\"), cloud can breed with water (both have \"D\")," +
           "but air can't breed with water").categories(DragonVariants.Category.REPRODUCTION);
 }
