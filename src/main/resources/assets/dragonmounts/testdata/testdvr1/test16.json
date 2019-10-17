@@ -1,0 +1,7 @@
+// check for correct parsing of array
+{
+  "breedinternalname": "fire16",
+  "egg": {
+    "testtag4": ["one", "two", "four"]
+  }
+}

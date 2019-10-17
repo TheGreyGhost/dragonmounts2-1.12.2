@@ -1,0 +1,7 @@
+// incorrect - nested array
+{
+  "breedinternalname": "fire20",
+  "egg": {
+    "testtag4": ["one", "two", ["three", "four"]]
+  }
+}

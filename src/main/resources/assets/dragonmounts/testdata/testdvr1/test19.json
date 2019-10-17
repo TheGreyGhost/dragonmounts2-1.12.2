@@ -1,0 +1,7 @@
+// incorrect tag type (array of numbers)
+{
+  "breedinternalname": "fire19",
+  "lifestage": {
+    "size5adult": [1, 2]
+  }
+}

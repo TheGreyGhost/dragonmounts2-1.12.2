@@ -205,6 +205,36 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
       }
       return value;
     }
+    if (defaultValue instanceof String []) {
+      if (!(value instanceof String [])) {
+        throw new IllegalArgumentException("Expected an array of strings");
+      }
+      if (permissibleValues.size() > 0) {
+        String[] inputValues = (String[]) value;
+        ArrayList<String> badValues = new ArrayList<>();
+        for (String eachValue : inputValues) {
+          if (!permissibleValues.contains(eachValue)) {
+            badValues.add(eachValue);
+          }
+        }
+        if (badValues.size() > 0) {
+          StringBuilder sb = new StringBuilder();
+          sb.append("The tag had the following entries which are not permissible values:");
+          boolean firstline = true;
+          for (String badValue : badValues) {
+            if (!firstline) sb.append(", ");
+            sb.append("\"");
+            sb.append(badValue);
+            sb.append("\"");
+            firstline = false;
+          }
+          sb.append("Permissible values are: " +  getPermissibleValuesAsText("\", \"") );
+          throw new IllegalArgumentException(sb.toString());
+        }
+      }
+      return value;
+    }
+
     if (!(value instanceof Number)) {
       throw new IllegalArgumentException("Expected a number");
     }

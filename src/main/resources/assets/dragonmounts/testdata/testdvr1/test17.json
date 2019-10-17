@@ -1,0 +1,7 @@
+// incorrect array type (numbers)
+{
+  "breedinternalname": "fire17",
+  "egg": {
+    "testtag4": [1, 2, 3]
+  }
+}
