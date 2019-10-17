@@ -1,0 +1,7 @@
+// incorrect - one doesn't match permissible values
+{
+  "breedinternalname": "fire22",
+  "egg": {
+    "testtag5": ["six", "seven", "three"]
+  }
+}

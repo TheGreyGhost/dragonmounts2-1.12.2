@@ -1,0 +1,7 @@
+// matches permissible values (empty array)
+{
+  "breedinternalname": "fire24",
+  "egg": {
+    "testtag5": []
+  }
+}

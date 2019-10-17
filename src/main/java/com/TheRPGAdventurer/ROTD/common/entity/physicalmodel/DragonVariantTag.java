@@ -25,12 +25,13 @@ import com.google.common.collect.ImmutableSet;
  * Usage:
  * 1) During setup, all classes which need to use a tag should add their desired tags
  *     eg DragonVariantTag NUMBER_OF_NECK_SEGMENTS = DragonVariantTag.addTag("numberofnecksegments", 5);
- *     Tags can have one of four types:
+ *     Tags can have one of five types:
  *     Flag (true or false)
  *     String
  *     Long
  *     Double
- *     String, Long and Double must have a default value
+ *     Array of string
+ *     String, Long, Double, and array of string must have a default value
  *     Long and Double can have optional minimum and maximum  (Inclusive i.e. [min = 3, max = 6] -> 3, 4, 5, 6 ok)
  *     The Comment is intended to be human-readable to help people configure the parameters correctly
  *
@@ -72,6 +73,10 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
   }
 
   public static DragonVariantTag addTag(String textname, double defaultValue, String comment) {
+    return addTag(textname, defaultValue, Optional.empty(), Optional.empty(), comment);
+  }
+
+  public static DragonVariantTag addTag(String textname, String [] defaultValue, String comment) {
     return addTag(textname, defaultValue, Optional.empty(), Optional.empty(), comment);
   }
 
@@ -200,6 +205,36 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
       }
       return value;
     }
+    if (defaultValue instanceof String []) {
+      if (!(value instanceof String [])) {
+        throw new IllegalArgumentException("Expected an array of strings");
+      }
+      if (permissibleValues.size() > 0) {
+        String[] inputValues = (String[]) value;
+        ArrayList<String> badValues = new ArrayList<>();
+        for (String eachValue : inputValues) {
+          if (!permissibleValues.contains(eachValue)) {
+            badValues.add(eachValue);
+          }
+        }
+        if (badValues.size() > 0) {
+          StringBuilder sb = new StringBuilder();
+          sb.append("The tag had the following entries which are not permissible values:");
+          boolean firstline = true;
+          for (String badValue : badValues) {
+            if (!firstline) sb.append(", ");
+            sb.append("\"");
+            sb.append(badValue);
+            sb.append("\"");
+            firstline = false;
+          }
+          sb.append("Permissible values are: " +  getPermissibleValuesAsText("\", \"") );
+          throw new IllegalArgumentException(sb.toString());
+        }
+      }
+      return value;
+    }
+
     if (!(value instanceof Number)) {
       throw new IllegalArgumentException("Expected a number");
     }

@@ -1,0 +1,7 @@
+// test for correct parsing of empty array
+{
+  "breedinternalname": "fire18",
+  "egg": {
+    "testtag4": []
+  }
+}

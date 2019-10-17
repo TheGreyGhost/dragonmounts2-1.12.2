@@ -1,8 +1,10 @@
-// incorrect tag type
+// incorrect tag type (nested)
 {
   "breedinternalname": "fire6",
   "lifestage": {
-    "size5adult": ["one", "two"]
+    "size5adult": {
+      "arbitrary": 3
+    }
   },
   "physicalmodel": {
     "numberofnecksegments": 8,

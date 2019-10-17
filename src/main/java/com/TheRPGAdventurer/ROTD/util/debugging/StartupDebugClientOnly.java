@@ -31,7 +31,7 @@ public class StartupDebugClientOnly {
   public static void preInitClientOnly() {
     if (!DragonMounts.instance.getConfig().isDebug()) return;
 //    testModifiedCategory();
-//    testDragonVariantsReader();
+    testDragonVariantsReader();
 //    testDragonLifeStageHelperTags();
 //    testModifiers();
   }
@@ -47,12 +47,18 @@ public class StartupDebugClientOnly {
   static DragonVariantTag TESTTAG1;
   static DragonVariantTag TESTTAG2;
   static DragonVariantTag TESTTAG3;
+  static DragonVariantTag TESTTAG4;
+  static DragonVariantTag TESTTAG5;
 
   public static void testDragonVariantsReader() {
 
     TESTTAG1 = DragonVariantTag.addTag("testtag1", "one", "testtag1").categories(DragonVariants.Category.EGG).values("one", "two", "three");
     TESTTAG2 = DragonVariantTag.addTag("testtag2flag", false, "testtag2 flag").categories(DragonVariants.Category.EGG);
     TESTTAG3 = DragonVariantTag.addTag("testtag3", 2.0, "testtag3 number").categories(DragonVariants.Category.EGG);
+    String [] defaultArray = {"one", "two", "three"};
+    TESTTAG4 = DragonVariantTag.addTag("testtag4", defaultArray, "testtag4 array").categories(DragonVariants.Category.EGG);
+    TESTTAG5 = DragonVariantTag.addTag("testtag5", defaultArray, "testtag4 array").categories(DragonVariants.Category.EGG).values("one", "two", "three");
+
     DragonVariants.addVariantTagValidator(new TestValidator());
 
     final String TEST_FOLDER = "testdata/testdvr1";
