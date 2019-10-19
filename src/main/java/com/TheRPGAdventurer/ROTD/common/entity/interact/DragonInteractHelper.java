@@ -85,6 +85,9 @@ public class DragonInteractHelper extends DragonHelper {
 
   public boolean interact(EntityPlayer player, ItemStack item) {
     if (dragon.isServer()) {
+      if (attemptBreedingInteraction(player, item)) return true;
+
+
       if (isAllowed(player)) {
                 /*
                  * Riding
@@ -169,7 +172,45 @@ public class DragonInteractHelper extends DragonHelper {
 
   }
 
+  /**
+   * attempt to use this item to put the dragon into love mode
+   * @param player
+   * @param itemstack
+   * @return true if success
+   */
+  private boolean attemptBreedingInteraction(EntityPlayer player, ItemStack itemstack) {
+    if (!itemstack.isEmpty()) {
+      if (dragon.isBreedingItem(itemstack) && dragon.reproduction().canReproduce() && !dragon.isInLove()) {
+        itemstack.shrink(1);
+        dragon.setInLove(player);
+        return true;
+      }
+    }
+    return false;
+  }
 
+  /**
+   * attempt to put the dragon on the player's shoulder (like a parrot)
+   * @param player
+   * @param itemStack
+   * @return
+   */
+  private boolean attemptRideOnShoulder(EntityPlayer player, ItemStack itemStack) {
+    // if the dragon is small enough, put it on the player's shoulder
+    if (!dragon.isTamedFor(player) || player.isSneaking()) return false;
+
+
+
+      dragon.setSitting(false);
+      dragon.startRiding(player, true);
+      return true;
+    }
+
+    if (player.isPassenger(this)) {
+      return false;
+    }
+
+  }
 
   public boolean processInteract(EntityPlayer player, EnumHand hand) {
     ItemStack item = player.getHeldItem(hand);
@@ -191,16 +232,6 @@ public class DragonInteractHelper extends DragonHelper {
 
     if (getHealth() <= 0) return false;
 
-    // if the dragon is small enough, put it on the player's shoulder
-    if (this.isTamedFor(player) && this.isBaby() && !player.isSneaking() && !DragonInteractBase.hasInteractItemsEquipped(player)) {
-      this.setSitting(false);
-      this.startRiding(player, true);
-      return true;
-    }
-
-    if (player.isPassenger(this)) {
-      return false;
-    }
 
     return getInteractHelper().interact(player, item);
   }

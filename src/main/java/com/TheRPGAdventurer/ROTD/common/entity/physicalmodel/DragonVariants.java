@@ -91,7 +91,8 @@ public class DragonVariants {
           "   then healthpercent at 1.5 days of age is 35.0\n"
     ),
     EGG("egg", 4, "This section is used to configure the dragon's egg"),
-    REPRODUCTION("reproduction", 5, "Settings related to reproduction / having children.");
+    REPRODUCTION("reproduction", 5, "Settings related to reproduction / having children."),
+    BEHAVIOUR("behaviour", 6, "Settings related to general behaviour");
 
     /**
      * Checks if the given name has a corresponding Category

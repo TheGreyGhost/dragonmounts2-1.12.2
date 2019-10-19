@@ -22,15 +22,21 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.DifficultyInstance;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -171,8 +177,12 @@ public class DragonReproductionHelper extends DragonHelper {
   }
 
   public boolean canReproduce() {
+    return dragon.isTamed() && isFertile() && hasReachedReproductiveAge();
+  }
+
+  public boolean hasReachedReproductiveAge() {
     double emotionalMaturityThreshold = (double)dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, REPRODUCTION_EMOTIONAL_MATURITY_THRESHOLD);
-    return dragon.isTamed() && isFertile() && dragon.lifeStage().getEmotionalMaturity() >= emotionalMaturityThreshold;
+    return dragon.lifeStage().getEmotionalMaturity() >= emotionalMaturityThreshold;
   }
 
   public void updateFertilityModifiers() {
@@ -207,6 +217,17 @@ public class DragonReproductionHelper extends DragonHelper {
   public void setBreeder(EntityPlayer breeder) {
     setBreederID(breeder != null ? breeder.getUniqueID() : null);
   }
+
+  /**
+   * Checks if the parameter is an item which this animal can be fed to breed it
+   * (wheat, carrots or seeds depending on the animal type)
+   */
+  public boolean isBreedingItem(ItemStack item) {
+    String itemName = item.getUnlocalizedName();
+    boolean found = Arrays.asList(dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, BREEDING_ITEMS)).contains(itemName);
+    return found;
+  }
+
 
   /**
    * is the dragon male?
@@ -248,10 +269,11 @@ public class DragonReproductionHelper extends DragonHelper {
 
   // can these two dragon breeds interbreed with each other?
   private boolean canInterbreed(EntityTameableDragon mate) {
-    String compatibility1 = (String)dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
-    String compatibility2 = (String)mate.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
-    for (char c : compatibility1.toCharArray()) {
-      if (compatibility2.indexOf(c) >= 0) return true;
+    String [] compatibility1 = (String [])dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
+    String [] compatibility2 = (String [])mate.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
+    ArrayList<String> comp2 = new ArrayList<>(Arrays.asList(compatibility2));
+    for (String toFind : compatibility1) {
+      if (comp2.contains(toFind)) return true;
     }
     return false;
   }
@@ -354,6 +376,30 @@ public class DragonReproductionHelper extends DragonHelper {
         dragonVariants.removeTags(DragonVariants.Category.REPRODUCTION, REPRODUCTION_LOWER_LIMIT, REPRODUCTION_UPPER_LIMIT);
         dragonVariantsErrors.addError("\"" + REPRODUCTION_LOWER_LIMIT.getTextname() + "\" must be <= \"" + REPRODUCTION_UPPER_LIMIT.getTextname() + "\"");
       }
+
+      String [] breedingItemNames = (String [])dragonVariants.getValueOrDefault(modifiedCategory, BREEDING_ITEMS);
+      ArrayList<String> badItemNames = new ArrayList<>();
+      for (String name : breedingItemNames) {
+        Item item = Item.REGISTRY.getObject(new ResourceLocation(name));
+        if (item == null) {
+          badItemNames.add(name);
+        }
+      }
+      if (badItemNames.size() > 0) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("one or more items were not found:");
+        boolean first = true;
+        for (String badItemName : badItemNames) {
+          if (!first) sb.append(",");
+          sb.append("\"");
+          sb.append(badItemName);
+          sb.append("\"");
+          first = false;
+        }
+        dragonVariants.removeTag(DragonVariants.Category.REPRODUCTION, BREEDING_ITEMS);
+        dragonVariantsErrors.addError(sb.toString());
+      }
+
       if (dragonVariantsErrors.hasErrors()) {
         throw new DragonVariantsException(dragonVariantsErrors);
       }
@@ -381,8 +427,13 @@ public class DragonReproductionHelper extends DragonHelper {
           "dragon can reproduce at most this many times").categories(DragonVariants.Category.REPRODUCTION);
   private static final DragonVariantTag REPRODUCTION_EMOTIONAL_MATURITY_THRESHOLD = DragonVariantTag.addTag("emotionalmaturitythreshold", 75, 0, 100,
           "dragon cannot mate until its emotional maturity (%) is equal to this value or higher").categories(DragonVariants.Category.REPRODUCTION);
-  private static final DragonVariantTag INTERBREEDING_COMPATABILITY = DragonVariantTag.addTag("interbreedingcategories", "",
-          "different species of dragon can interbreed if they have one or more letters in common." +
-          "eg if air has \"AB\", water has \"D\", and cloud has \"AD\", then cloud can breed with air (both have \"A\"), cloud can breed with water (both have \"D\")," +
+  private static final String [] defaultBreedingCodes = {"all"};
+  private static final DragonVariantTag INTERBREEDING_COMPATABILITY = DragonVariantTag.addTag("interbreedingcodes", defaultBreedingCodes,
+          "different species of dragon can interbreed if they have one or more codes in common." +
+          "eg if air has [\"one\",\"two\"], water has [\"three\"], and cloud has [\"one\",\"three\"], " +
+          "then cloud can breed with air (both have \"one\"), cloud can breed with water (both have \"three\")," +
           "but air can't breed with water").categories(DragonVariants.Category.REPRODUCTION);
+  private static final String [] defaultBreedingItems = {"item.fish"};
+  private static final DragonVariantTag BREEDING_ITEMS = DragonVariantTag.addTag("breedingitems", defaultBreedingItems,
+          "list of items which can be used on the dragon to make it breed").categories(DragonVariants.Category.REPRODUCTION);
 }

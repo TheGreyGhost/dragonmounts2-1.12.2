@@ -122,6 +122,7 @@ public class EntityTameableDragon extends EntityTameable {
     DragonReproductionHelper.registerConfigurationTags();
     DragonInteractHelper.registerConfigurationTags();
     DragonBreathHelperP.registerConfigurationTags();
+    DragonShoulderRidingHelper.registerConfigurationTags();
   }
 
   @Override
@@ -254,10 +255,11 @@ public class EntityTameableDragon extends EntityTameable {
     // create entity delegates
     // don't forget to add corresponding entries in registerConfigurationTags too.
     addHelper(new DragonConfigurationHelper(this));
-    addHelper(new DragonLifeStageHelper(this, DATA_TICKS_SINCE_CREATION, dragonBreed.getDragonVariants()));
-    addHelper(new DragonReproductionHelper(this, DATA_BREEDER, DATA_REPRO_COUNT));
+    addHelper(new DragonLifeStageHelper(this));
+    addHelper(new DragonReproductionHelper(this));
     addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
     addHelper(new DragonInteractHelper(this));
+    addHelper(new DragonShoulderRidingHelper(this));
     if (isServer()) {
       addHelper(new DragonBrain(this));
     }
@@ -1313,7 +1315,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public boolean isBreedingItem(ItemStack item) {
-    return getBreed().getBreedingItem() == item.getItem();
+    return reproduction().isBreedingItem(item);
   }
 
   /**
