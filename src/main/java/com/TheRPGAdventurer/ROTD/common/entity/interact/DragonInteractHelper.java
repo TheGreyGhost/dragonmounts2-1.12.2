@@ -15,6 +15,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonHelper;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
@@ -41,6 +42,8 @@ import java.util.List;
  *
  *   Was originally structured as Interaction base class with subclasses (one per type of action) but this is probably overkill
  *     so I just combined them all into one class.
+ *
+ *   deals with tamed
  *
  */
 public class DragonInteractHelper extends DragonHelper {
@@ -79,6 +82,18 @@ public class DragonInteractHelper extends DragonHelper {
   public void notifyDataManagerChange(DataParameter<?> key) {
 
   }
+
+  @Override
+  public void onLivingUpdate() {
+    // set home position near owner when tamed
+    if (isTamed()) {
+      Entity owner = getOwner();
+      if (owner != null) {
+        setHomePosAndDistance(owner.getPosition(), HOME_RADIUS);
+      }
+    }
+  }
+
 
   public static void registerConfigurationTags() { //todo initialise tags here
   }
@@ -267,6 +282,35 @@ public class DragonInteractHelper extends DragonHelper {
       return dragon.isTamedFor(player);
     } else return true;
   }
+
+  public boolean allowedOtherPlayers() {
+    return this.dataManager.get(ALLOW_OTHERPLAYERS);
+  }
+
+  public void setToAllowedOtherPlayers(boolean allow) {
+    dataManager.set(ALLOW_OTHERPLAYERS, allow);
+  }
+
+  public void tamedFor(EntityPlayer player, boolean successful) {
+    if (successful) {
+      dragon.setTamed(true);
+      navigator.clearPath(); // replacement for setPathToEntity(null);
+      setAttackTarget(null);
+      setOwnerId(player.getUniqueID());
+      playTameEffect(true);
+      world.setEntityState(this, (byte) 7);
+    } else {
+      playTameEffect(false);
+      world.setEntityState(this, (byte) 6);
+    }
+  }
+
+  public boolean isTamedFor(EntityPlayer player) {
+    return isTamed() && isOwner(player);
+  }
+
+
+private static final String NBT_ALLOWOTHERPLAYERS = "AllowOtherPlayers";
 
 //    private final List<DragonInteractBase> actions = new ArrayList<>();
 }

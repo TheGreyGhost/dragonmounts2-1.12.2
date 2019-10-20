@@ -278,6 +278,20 @@ public class DragonReproductionHelper extends DragonHelper {
     return false;
   }
 
+  /**
+   * This function is used when two same-species animals in 'love mode' breed to
+   * generate the new baby animal.
+   */
+  public EntityAgeable createChild(EntityAgeable mate) {
+    if (!(mate instanceof EntityTameableDragon)) {
+      DragonMounts.loggerLimit.warn_once("Called createChild when mate wasn't a dragon");
+      return null;
+    }
+    EntityTameableDragon dragonMate = (EntityTameableDragon)mate;
+    if (!this.reproduction().canMateWith(dragonMate)) return null;
+    return this.reproduction().createChild(dragonMate);
+  }
+
   public EntityDragonEgg createChild(EntityTameableDragon mate) {
     if (!canMateWith(mate)) {
       throw new IllegalArgumentException("Attempted to createChild but canMateWith() is false");

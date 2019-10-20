@@ -15,6 +15,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.ai.air.EntityAIDragonFollowOwnerE
 import com.TheRPGAdventurer.ROTD.common.entity.ai.ground.*;
 import com.TheRPGAdventurer.ROTD.common.entity.ai.targeting.EntityAIRangedBreathAttack;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.inits.ModSounds;
 import com.TheRPGAdventurer.ROTD.util.EntityClassPredicate;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.EntityLiving;
@@ -24,10 +25,13 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -132,6 +136,22 @@ public class DragonBrain extends DragonHelper {
     }
 
   }
+
+  @Override
+  public void onLivingUpdate() {
+    Random rand = new Random();
+    if (this.getBreed().getSneezeParticle() != null && rand.nextInt(750) == 1 && !this.isUsingBreathWeapon() && !isBaby()) {
+      double throatPosX = (this.getAnimator().getThroatPosition().x);
+      double throatPosY = (this.getAnimator().getThroatPosition().z);
+      double throatPosZ = (this.getAnimator().getThroatPosition().y + 1.7);
+      world.spawnParticle(this.getBreed().getSneezeParticle(), throatPosX, throatPosY, throatPosZ, 0, 0.3, 0);
+      world.spawnParticle(this.getBreed().getSneezeParticle(), throatPosX, throatPosY, throatPosZ, 0, 0.3, 0);
+      world.spawnParticle(this.getBreed().getSneezeParticle(), throatPosX, throatPosY, throatPosZ, 0, 0.3, 0);
+      world.playSound(null, new BlockPos(throatPosX, throatPosY, throatPosZ), ModSounds.DRAGON_SNEEZE, SoundCategory.NEUTRAL, 1, 1);
+    }
+
+  }
+
   // mutex 1: movement
   // mutex 2: looking
   // mutex 4: special state
