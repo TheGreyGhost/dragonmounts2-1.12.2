@@ -31,6 +31,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,6 +188,16 @@ public class DragonInteractHelper extends DragonHelper {
 
   }
 
+  @Nullable
+  public EntityPlayer getControllingPlayer() {
+    Entity entity = this.getPassengers().isEmpty() ? null : getPassengers().get(0);
+    if (entity instanceof EntityPlayer) {
+      return (EntityPlayer) entity;
+    } else {
+      return null;
+    }
+  }
+
   /**
    * attempt to use this item to put the dragon into love mode
    * @param player
@@ -226,6 +237,11 @@ public class DragonInteractHelper extends DragonHelper {
     }
 
   }
+
+  public boolean canBeLeashedTo(EntityPlayer player) {
+    return true;
+  }
+
 
   public boolean processInteract(EntityPlayer player, EnumHand hand) {
     ItemStack item = player.getHeldItem(hand);

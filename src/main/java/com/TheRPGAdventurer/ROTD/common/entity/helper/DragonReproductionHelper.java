@@ -269,11 +269,10 @@ public class DragonReproductionHelper extends DragonHelper {
 
   // can these two dragon breeds interbreed with each other?
   private boolean canInterbreed(EntityTameableDragon mate) {
-    String [] compatibility1 = (String [])dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
-    String [] compatibility2 = (String [])mate.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
-    ArrayList<String> comp2 = new ArrayList<>(Arrays.asList(compatibility2));
-    for (String toFind : compatibility1) {
-      if (comp2.contains(toFind)) return true;
+    String compatibility1 = (String)dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
+    String compatibility2 = (String)mate.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, INTERBREEDING_COMPATABILITY);
+    for (char c : compatibility1.toCharArray()) {
+      if (compatibility2.indexOf(c) >= 0) return true;
     }
     return false;
   }

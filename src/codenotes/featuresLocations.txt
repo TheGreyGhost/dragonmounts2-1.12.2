@@ -1,8 +1,9 @@
-Max health, attack damage, armour: in DragonLifeStageHelper
+DragonLifeStageHelper: Max health, attack damage, armour
  - aging, stop/start growth
 
-Storing all breed+modifier configuration information - in DragonConfigurationHelper
-Reproduction & mating in DragonReproductionHelper:
+DragonConfigurationHelper: Storing all breed+modifier configuration information
+
+DragonReproductionHelper: Reproduction & mating
   - each dragon has a maximum # of times it can reproduce.
   - when max is reached, dragon acquires the "infertile" modifier
   - only reproduce if: tamed, fertile, and has high enough emotional maturity
@@ -10,7 +11,7 @@ Reproduction & mating in DragonReproductionHelper:
   - only reproduce if in "love mode" (EntityAnimal vanilla)
   - the child breed is randomly either of the parents, and is named as a combination of the parents
 
-Player->Dragon interactions (as per vanilla) in DragonInteractHelper:
+DragonInteractHelper: Player->Dragon interactions (as per vanilla) in
   - looks like originally intended to have one class per interaction but later decided not to.
 Valid interactions for:
   - dragon whistle - various
@@ -24,3 +25,31 @@ Valid interactions for:
     - shrinking food or growing food, to pause or restart growth.
   - click without interacting item -> riding (not sneaking) or dragon GUI (with sneaking)
 Checks if the dragon is untamed, or tamed by someone else.
+Knows who the controlling player is.
+
+DragonCombatHelper: Health, attacks, damage (not including breath weapons)
+
+DragonBreathHelper: breath weapon
+
+DragonInventoryHelper: inventory, wearable armour, banners
+
+DragonRidingHelper:
+  - dragon riding on player shoulder
+  - player riding on dragon
+
+DragonSoundsHelper: general sounds that the dragon makes
+
+DragonWhistleHelper: control of the dragon by the whistle
+
+DragonMovementHelper: control of dragon motion/movement and posture (look) - in conjunction with the vanilla lookhelper, movehelper, bodyhelper
+
+Vanilla helpers:
+DragonLookHelper: EntityLookHelper lookHelper;
+DragonMoveHelper: EntityMoveHelper moveHelper;
+DragonBodyHelper: EntityBodyHelper bodyHelper;
+
+protected EntityJumpHelper jumpHelper;  // not used for dragon
+
+
+
+

@@ -13,6 +13,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -153,6 +154,29 @@ public class DragonRidingHelper extends DragonHelper {
     this.motionZ = 0.0D;
     this.onUpdate();
     if (this.isRiding()) this.updateRiding((EntityLivingBase) entity);
+  }
+
+  public void updateIntendedRideRotation(EntityPlayer rider) {
+    boolean hasRider = this.hasControllingPlayer(rider);
+    if (this.isUsingBreathWeapon() && hasRider && rider.moveStrafing == 0) {
+      this.rotationYaw = rider.rotationYaw;
+      this.prevRotationYaw = this.rotationYaw;
+      this.rotationPitch = rider.rotationPitch;
+      this.setRotation(this.rotationYaw, this.rotationPitch);
+      this.renderYawOffset = this.rotationYaw;
+      this.rotationYawHead = this.renderYawOffset;
+    }
+  }
+
+  @Nullable
+  public Entity getControllingPassenger() {
+    return this.getPassengers().isEmpty() ? null : getPassengers().get(0);
+  }
+
+  public boolean isRidingAboveGround(Entity entityBeingRidden) {
+    int groundPos = world.getHeight(getPosition()).getY();
+    double altitude = entityBeingRidden.posY - groundPos;
+    return altitude > 2.0;
   }
 
   /**
