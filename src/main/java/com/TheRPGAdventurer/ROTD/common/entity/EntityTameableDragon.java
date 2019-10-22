@@ -1018,32 +1018,9 @@ public class EntityTameableDragon extends EntityTameable {
     return false;
   }
 
-
   private static final Logger L = LogManager.getLogger();
   private static final SimpleNetworkWrapper n = DragonMounts.NETWORK_WRAPPER;
-  // data value IDs
-  private static final DataParameter<Boolean> DATA_FLYING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<Boolean> GOING_DOWN = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<Boolean> ALLOW_OTHERPLAYERS = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<Boolean> BOOSTING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<Boolean> HOVER_CANCELLED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<Boolean> Y_LOCKED = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<Boolean> FOLLOW_YAW = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
 
-  /*    public boolean isGiga() {
-        return lifeStage().isAdult();
-    }
-    public boolean isAdjudicator() {
-        return lifeStage().isAdult();
-    }
-*/
-//  private static final DataParameter<Boolean> HAS_ELDER_STONE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  // data NBT IDs
-
-  private boolean isGoingDown;
-  private boolean isUnhovered;
-  private boolean yLocked;
-  private boolean followYaw;
   private DragonAnimator animator;
   private double airSpeedVertical = 0;
   private DragonPhysicalModel dragonPhysicalModel;
