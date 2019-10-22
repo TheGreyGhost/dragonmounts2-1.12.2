@@ -12,6 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -65,6 +66,11 @@ public class DragonRidingHelper extends DragonHelper {
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
 
+  }
+
+  @Override
+  public void onConfigurationChange() {
+    throw new NotImplementedException("onConfigurationChange()");
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
@@ -12,6 +13,9 @@ import net.minecraft.util.math.Vec3d;
  * This class describes the physical configuration of the dragon
  * At the moment it only describes some parts which are necessary for code to know about
  * eg hitbox size, throat position, rider positions, banner positions
+ *
+ * It contains configuration information only, no state information.
+ *
  * <p>
  * It's also just a "copy" of the DragonModel in easier-to-understand form
  * i.e. if DragonModel changes, this DragonPhysicalModel needs to be updated manually
@@ -32,6 +36,11 @@ import net.minecraft.util.math.Vec3d;
  * the z-axis is front/back (front = highest z)
  */
 public class DragonPhysicalModel {
+
+  public DragonPhysicalModel(DragonBreedNew dragonBreedNew, Modifiers modifiers) {
+    this.dragonVariants = dragonBreedNew.getDragonVariants();
+    this.modifiers = modifiers;
+  }
 
   public float getHitboxWidthWC(float ageScale) {
     return ageScale * getHitboxWidthBC() * CONVERT_BC_TO_WC;
@@ -321,5 +330,8 @@ public class DragonPhysicalModel {
   private int NUMBER_OF_NECK_SEGMENTS = 7;
   private int NUMBER_OF_WING_FINGERS = 4;
   private int NUMBER_OF_TAIL_SEGMENTS = 12;
+
+  private final DragonVariants dragonVariants;
+  private final Modifiers modifiers;
 
 }

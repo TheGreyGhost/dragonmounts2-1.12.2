@@ -18,6 +18,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 
@@ -29,18 +30,39 @@ public class DragonInventoryHelper extends DragonHelper {
     super(dragon);
   }
 
+  public static void registerConfigurationTags()
+  {
+    // the initialisation of the tags is all done in their static initialisers
+    //    DragonVariants.addVariantTagValidator(new DragonReproductionValidator());
+  }
+
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    nbt.setBoolean(NBT_SADDLED, isSaddled());
+    nbt.setInteger(NBT_ARMOR, this.getArmor());
+    nbt.setBoolean(NBT_CHESTED, this.isChested());
+    writeDragonInventory(nbt);
 
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    this.setSaddled(nbt.getBoolean(NBT_SADDLED));
+    this.setChested(nbt.getBoolean(NBT_CHESTED));
+    this.setArmor(nbt.getInteger(NBT_ARMOR));
+    readDragonInventory(nbt);
 
   }
 
   @Override
   public void registerDataParameters() {
+    dataManager.register(ARMOR, 0);
+    dataManager.register(BANNER1, ItemStack.EMPTY);
+    dataManager.register(BANNER2, ItemStack.EMPTY);
+    dataManager.register(BANNER3, ItemStack.EMPTY);
+    dataManager.register(BANNER4, ItemStack.EMPTY);
+    dataManager.register(DATA_SADDLED, false);
+    dataManager.register(CHESTED, false);
 
   }
 
@@ -57,6 +79,11 @@ public class DragonInventoryHelper extends DragonHelper {
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
 
+  }
+
+  @Override
+  public void onConfigurationChange() {
+    throw new NotImplementedException("onConfigurationChange()");
   }
 
   @Override

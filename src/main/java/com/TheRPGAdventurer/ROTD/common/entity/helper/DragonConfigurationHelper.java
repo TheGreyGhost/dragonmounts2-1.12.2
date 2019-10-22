@@ -169,6 +169,11 @@ public class DragonConfigurationHelper extends DragonHelper {
     return modifiers.hasModifier(modifier);
   }
 
+  public Modifiers getModifiers() {
+    checkPreConditions(FunctionTag.VANILLA);
+    return modifiers.createCopy();
+  }
+
   public Object getVariantTagValue(DragonVariants.Category category, DragonVariantTag tag) {
     checkPreConditions(FunctionTag.VANILLA);
     DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(category, modifiers);

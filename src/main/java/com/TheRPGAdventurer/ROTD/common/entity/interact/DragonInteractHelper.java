@@ -26,10 +26,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -56,16 +58,30 @@ public class DragonInteractHelper extends DragonHelper {
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
-
+    nbt.setBoolean(NBT_ALLOWOTHERPLAYERS, this.allowedOtherPlayers());
+    //        nbt.setBoolean("sleeping", this.isSleeping()); //unused as of now
+    nbt.setBoolean("HasHomePosition", this.hasHomePosition);
+    if (homePos != null && this.hasHomePosition) {
+      nbt.setInteger("HomeAreaX", homePos.getX());
+      nbt.setInteger("HomeAreaY", homePos.getY());
+      nbt.setInteger("HomeAreaZ", homePos.getZ());
+    }
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    this.setToAllowedOtherPlayers(nbt.getBoolean(NBT_ALLOWOTHERPLAYERS));
+    this.hasHomePosition = nbt.getBoolean("HasHomePosition");
+    if (hasHomePosition && nbt.getInteger("HomeAreaX") != 0 && nbt.getInteger("HomeAreaY") != 0 && nbt.getInteger("HomeAreaZ") != 0) {
+      homePos = new BlockPos(nbt.getInteger("HomeAreaX"), nbt.getInteger("HomeAreaY"), nbt.getInteger("HomeAreaZ"));
+    }
 
   }
 
   @Override
   public void registerDataParameters() {
+    dataManager.register(ALLOW_OTHERPLAYERS, false);
+//    dataManager.register(GROWTH_PAUSED, false);
 
   }
 
@@ -82,6 +98,10 @@ public class DragonInteractHelper extends DragonHelper {
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
 
+  }
+
+  public void onConfigurationChange() {
+    throw new NotImplementedException("onConfigurationChange()");
   }
 
   @Override
@@ -329,4 +349,12 @@ public class DragonInteractHelper extends DragonHelper {
 private static final String NBT_ALLOWOTHERPLAYERS = "AllowOtherPlayers";
 
 //    private final List<DragonInteractBase> actions = new ArrayList<>();
+
+public static final double BASE_FOLLOW_RANGE = 70;
+public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
+public static final int HOME_RADIUS = 64;
+
+public boolean hasHomePosition = false;
+public BlockPos homePos;
+
 }

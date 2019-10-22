@@ -4,6 +4,9 @@ import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -14,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
 
@@ -25,8 +29,16 @@ public class DragonMovementHelper extends DragonHelper {
     super(dragon);
   }
 
+  public static void registerConfigurationTags()
+  {
+    // the initialisation of the tags is all done in their static initialisers
+    //    DragonVariants.addVariantTagValidator(new DragonReproductionValidator());
+  }
+
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    nbt.setBoolean("boosting", this.boosting());
+    nbt.setBoolean("down", this.isGoingDown());
 
   }
 
@@ -40,6 +52,13 @@ public class DragonMovementHelper extends DragonHelper {
 
   }
 
+  public void registerEntityAttributes() {
+    checkPreConditions(FunctionTag.REGISTER_ENTITY_ATTRIBUTES);
+    dragon.getAttributeMap().registerAttribute(MOVEMENT_SPEED_AIR);
+    setCompleted(FunctionTag.REGISTER_ENTITY_ATTRIBUTES);
+
+  }
+
   @Override
   public void initialiseServerSide() {
 
@@ -50,9 +69,20 @@ public class DragonMovementHelper extends DragonHelper {
 
   }
 
+  private void initialiseBothSides() {
+    getEntityAttribute(MOVEMENT_SPEED_AIR).setBaseValue(BASE_AIR_SPEED);
+    getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(BASE_GROUND_SPEED);
+
+  }
+
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
 
+  }
+
+  @Override
+  public void onConfigurationChange() {
+    throw new NotImplementedException("onConfigurationChange()");
   }
 
   /**
@@ -363,5 +393,12 @@ public class DragonMovementHelper extends DragonHelper {
       }
     }
   }
+
+  public static final IAttribute MOVEMENT_SPEED_AIR = new RangedAttribute(null, "generic.movementSpeedAir", 0.9, 0.0, Double.MAX_VALUE).setDescription("Movement Speed Air").setShouldWatch(true);
+
+
+  public static final double BASE_GROUND_SPEED = 0.4;
+  public static final double BASE_AIR_SPEED = 0.9;
+
 
 }

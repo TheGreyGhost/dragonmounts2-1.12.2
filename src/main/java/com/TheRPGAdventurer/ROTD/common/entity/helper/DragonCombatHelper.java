@@ -6,6 +6,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,6 +17,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Optional;
 
@@ -27,18 +29,27 @@ public class DragonCombatHelper extends DragonHelper {
     super(dragon);
   }
 
+  public static void registerConfigurationTags()
+  {
+    // the initialisation of the tags is all done in their static initialisers
+    //    DragonVariants.addVariantTagValidator(new DragonReproductionValidator());
+  }
+
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    nbt.setInteger("hunger", this.getHunger());
 
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    this.setHunger(nbt.getInteger("hunger"));
 
   }
 
   @Override
   public void registerDataParameters() {
+    dataManager.register(HUNGER, 0);
 
   }
 
@@ -52,9 +63,19 @@ public class DragonCombatHelper extends DragonHelper {
 
   }
 
+  private void initialiseBothSides() {
+    getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
+    getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(RESISTANCE);
+
+  }
+
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
 
+  }
+
+  public void onConfigurationChange() {
+    throw new NotImplementedException("onConfigurationChange()");
   }
 
   @Override
@@ -266,6 +287,10 @@ public class DragonCombatHelper extends DragonHelper {
     return immunities.contains(dmg.damageType);
   }
 
+//  public static final double BASE_DAMAGE = DragonMounts.instance.getConfig().BASE_DAMAGE;
+//  public static final double BASE_ARMOR = DragonMounts.instance.getConfig().ARMOR;
+//  public static final double BASE_TOUGHNESS = 30.0D;
+public static final float RESISTANCE = 10.0f;
 
 
 }

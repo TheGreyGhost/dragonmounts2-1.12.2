@@ -11,6 +11,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Created by TGG on 20/10/2019.
@@ -18,6 +19,12 @@ import net.minecraft.util.math.BlockPos;
 public class DragonSoundsHelper extends DragonHelper {
   public DragonSoundsHelper(EntityTameableDragon dragon) {
     super(dragon);
+  }
+
+  public static void registerConfigurationTags()
+  {
+    // the initialisation of the tags is all done in their static initialisers
+    //    DragonVariants.addVariantTagValidator(new DragonReproductionValidator());
   }
 
   @Override
@@ -48,6 +55,11 @@ public class DragonSoundsHelper extends DragonHelper {
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
 
+  }
+
+  @Override
+  public void onConfigurationChange() {
+    throw new NotImplementedException("onConfigurationChange()");
   }
 
   @Override

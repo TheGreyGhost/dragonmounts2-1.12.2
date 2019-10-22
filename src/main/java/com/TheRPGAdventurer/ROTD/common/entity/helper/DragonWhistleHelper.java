@@ -10,6 +10,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Created by TGG on 20/10/2019.
@@ -19,18 +20,44 @@ public class DragonWhistleHelper extends DragonHelper {
     super(dragon);
   }
 
+  public static void registerConfigurationTags()
+  {
+    // the initialisation of the tags is all done in their static initialisers
+    //    DragonVariants.addVariantTagValidator(new DragonReproductionValidator());
+  }
+
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    nbt.setBoolean("unhovered", this.isUnHovered());
+    nbt.setBoolean("followyaw", this.followYaw());
+    nbt.setBoolean("firesupport", this.firesupport());
+    //        nbt.setBoolean("unFluttered", this.isUnFluttered());
+    nbt.setBoolean("ylocked", this.isYLocked());
 
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    this.setGoingDown(nbt.getBoolean("down"));
+    this.setUnHovered(nbt.getBoolean("unhovered"));
+    this.setYLocked(nbt.getBoolean("ylocked"));
+    this.setFollowYaw(nbt.getBoolean("followyaw"));
+    //        this.setUnFluttered(nbt.getBoolean("unFluttered"));
+    this.setBoosting(nbt.getBoolean("boosting"));
+    this.setfiresupport(nbt.getBoolean("firesupport"));
 
   }
 
   @Override
   public void registerDataParameters() {
+    dataManager.register(WHISTLE_STATE, (byte) 0);
+    dataManager.register(WHISTLE, ItemStack.EMPTY);
+    dataManager.register(BOOSTING, false);
+    dataManager.register(HOVER_CANCELLED, false);
+    dataManager.register(Y_LOCKED, false);
+    dataManager.register(FOLLOW_YAW, true);
+    dataManager.register(FIRE_SUPPORT, false);
+
 
   }
 
@@ -49,6 +76,10 @@ public class DragonWhistleHelper extends DragonHelper {
 
   }
 
+  @Override
+  public void onConfigurationChange() {
+    throw new NotImplementedException("onConfigurationChange()");
+  }
 
   @Override
   public void onLivingUpdate() {

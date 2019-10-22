@@ -117,12 +117,17 @@ public class EntityTameableDragon extends EntityTameable {
   }
 
   public static void registerConfigurationTags() {
-    DragonLifeStageHelper.registerConfigurationTags();
-    DragonConfigurationHelper.registerConfigurationTags();
-    DragonReproductionHelper.registerConfigurationTags();
-    DragonInteractHelper.registerConfigurationTags();
     DragonBreathHelperP.registerConfigurationTags();
+    DragonCombatHelper.registerConfigurationTags();
+    DragonConfigurationHelper.registerConfigurationTags();
+    DragonInteractHelper.registerConfigurationTags();
+    DragonInventoryHelper.registerConfigurationTags();
+    DragonLifeStageHelper.registerConfigurationTags();
+    DragonMovementHelper.registerConfigurationTags();
+    DragonReproductionHelper.registerConfigurationTags();
     DragonRidingHelper.registerConfigurationTags();
+    DragonSoundsHelper.registerConfigurationTags();
+    DragonWhistleHelper.registerConfigurationTags();
   }
 
   @Override
@@ -130,36 +135,9 @@ public class EntityTameableDragon extends EntityTameable {
     super.entityInit();
 
     dataManager.register(DATA_FLYING, false);
-//    dataManager.register(GROWTH_PAUSED, false);
 //    dataManager.register(DATA_BREATHING, false);
 //    dataManager.register(DATA_ALT_BREATHING, false);
     dataManager.register(GOING_DOWN, false);
-    dataManager.register(DATA_SADDLED, false);
-    dataManager.register(CHESTED, false);
-    dataManager.register(IS_MALE, getRNG().nextBoolean());
-//    dataManager.register(IS_ALBINO, getRNG().nextInt(40) == 0);
-//    dataManager.register(DRAGON_SCALES, (byte) 0);
-    dataManager.register(ARMOR, 0);
-    dataManager.register(BANNER1, ItemStack.EMPTY);
-    dataManager.register(BANNER2, ItemStack.EMPTY);
-    dataManager.register(BANNER3, ItemStack.EMPTY);
-    dataManager.register(BANNER4, ItemStack.EMPTY);
-//    dataManager.register(HAS_ELDER_STONE, false);
-//    dataManager.register(HAS_ADJUCATOR_STONE, false);
-    dataManager.register(FIRE_SUPPORT, false);
-    dataManager.register(ALLOW_OTHERPLAYERS, false);
-    dataManager.register(BOOSTING, false);
-    dataManager.register(WHISTLE_STATE, (byte) 0);
-    dataManager.register(WHISTLE, ItemStack.EMPTY);
-    //        dataManager.register(SLEEP, false); //unused as of now
-    dataManager.register(HOVER_CANCELLED, false);
-    dataManager.register(Y_LOCKED, false);
-    dataManager.register(FOLLOW_YAW, true);
-    dataManager.register(DATA_BREATH_WEAPON_TARGET, "");
-    dataManager.register(DATA_BREATH_WEAPON_MODE, 0);
-
-    dataManager.register(HUNGER, 0);
-
     addHelpers();
     helpers.values().forEach(DragonHelper::registerDataParameters);
   }
@@ -167,15 +145,13 @@ public class EntityTameableDragon extends EntityTameable {
   @Override
   protected void applyEntityAttributes() {
     super.applyEntityAttributes();
-
-    getAttributeMap().registerAttribute(MOVEMENT_SPEED_AIR);
     helpers.values().forEach(DragonHelper::registerEntityAttributes);
   }
 
   private void initialiseServerSide() {
     checkState(isServer(), "initialiseServerSide unexpectedly called on non-server side");
     initialiseBothSides();
-     helpers.values().forEach(DragonHelper::initialiseServerSide);
+    helpers.values().forEach(DragonHelper::initialiseServerSide);
   }
 
   private void initialiseClientSide() {
@@ -185,10 +161,11 @@ public class EntityTameableDragon extends EntityTameable {
   }
 
   private void initialiseBothSides() {
-    getEntityAttribute(MOVEMENT_SPEED_AIR).setBaseValue(BASE_AIR_SPEED);
-    getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(BASE_GROUND_SPEED);
-    getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
-    getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(RESISTANCE);
+    dragonPhysicalModel = new DragonPhysicalModel(configuration().getDragonBreedNew(), configuration().getModifiers());
+  }
+
+  private void onConfigurationChangeThis() {
+    dragonPhysicalModel = new DragonPhysicalModel(configuration().getDragonBreedNew(), configuration().getModifiers());
   }
 
   /** called to notify that the dragon configuration has changed.
@@ -208,6 +185,10 @@ public class EntityTameableDragon extends EntityTameable {
     } finally {
       --configurationRecursionCount;
       if (configurationRecursionCount == 0) recursionLimitReached = false;
+    }
+
+    if (configurationRecursionCount == 0) {
+      onConfigurationChangeThis();
     }
   }
 
@@ -254,12 +235,18 @@ public class EntityTameableDragon extends EntityTameable {
   private void addHelpers() {
     // create entity delegates
     // don't forget to add corresponding entries in registerConfigurationTags too.
+    addHelper(new DragonBreathHelperP(this));
+    addHelper(new DragonCombatHelper(this));
     addHelper(new DragonConfigurationHelper(this));
-    addHelper(new DragonLifeStageHelper(this));
-    addHelper(new DragonReproductionHelper(this));
-    addHelper(new DragonBreathHelperP(this, DATA_BREATH_WEAPON_TARGET, DATA_BREATH_WEAPON_MODE));
     addHelper(new DragonInteractHelper(this));
+    addHelper(new DragonInventoryHelper(this));
+    addHelper(new DragonLifeStageHelper(this));
+    addHelper(new DragonMovementHelper(this));
+    addHelper(new DragonReproductionHelper(this));
     addHelper(new DragonRidingHelper(this));
+    addHelper(new DragonSoundsHelper(this));
+    addHelper(new DragonWhistleHelper(this));
+
     if (isServer()) {
       addHelper(new DragonBrain(this));
     }
@@ -268,7 +255,9 @@ public class EntityTameableDragon extends EntityTameable {
     }
     // todo for now, leave animator and physicalmodel as non-helpers:
     animator = new DragonAnimator(this);
-    dragonPhysicalModel = getBreed().getDragonPhysicalModel();
+    // just a default for now
+    dragonPhysicalModel = new DragonPhysicalModel(DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed(), new Modifiers());
+
     moveHelper = new DragonMoveHelper(this);   // not a DragonHelper despite the name; is vanilla
      // consider the other vanilla helpers from EntityLivingBase - (Look, Move, Jump, Body)
   }
@@ -286,22 +275,10 @@ public class EntityTameableDragon extends EntityTameable {
   //---------------------
 
   // base attributes
-  public static final double BASE_GROUND_SPEED = 0.4;
-  public static final double BASE_AIR_SPEED = 0.9;
-  public static final IAttribute MOVEMENT_SPEED_AIR = new RangedAttribute(null, "generic.movementSpeedAir", 0.9, 0.0, Double.MAX_VALUE).setDescription("Movement Speed Air").setShouldWatch(true);
-//  public static final double BASE_DAMAGE = DragonMounts.instance.getConfig().BASE_DAMAGE;
-//  public static final double BASE_ARMOR = DragonMounts.instance.getConfig().ARMOR;
-//  public static final double BASE_TOUGHNESS = 30.0D;
-  public static final float RESISTANCE = 10.0f;
-  public static final double BASE_FOLLOW_RANGE = 70;
-  public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
-  public static final int HOME_RADIUS = 64;
   public static final double IN_AIR_THRESH = 10;
   public int inAirTicks;
   public int boostTicks;
-  public boolean hasHomePosition = false;
   public int roarTicks;
-  public BlockPos homePos;
   public EntityTameableDragonStats dragonStats = new EntityTameableDragonStats();
 
 
@@ -324,7 +301,7 @@ public class EntityTameableDragon extends EntityTameable {
     aiSit = new EntityAIDragonSit(this);
     helpers.values().forEach(DragonHelper::registerEntityAttributes);
 
-    InitializeDragonInventory();
+//    InitializeDragonInventory();
   }
 
   /**
@@ -334,36 +311,7 @@ public class EntityTameableDragon extends EntityTameable {
   @Override
   public void writeEntityToNBT(NBTTagCompound nbt) {
     super.writeEntityToNBT(nbt);
-    //        nbt.setUniqueId("IdAmulet", this.getUniqueID()); // doesnt save uuid i double checked i/f has this bug makes dragon duplication posible, also why whitle wont work after amulet
-    nbt.setBoolean(NBT_SADDLED, isSaddled());
-    nbt.setInteger(NBT_ARMOR, this.getArmor());
-    nbt.setBoolean(NBT_CHESTED, this.isChested());
-//    nbt.setBoolean(NBT_SHEARED, this.isSheared());
-//    nbt.setBoolean("Breathing", this.isUsingBreathWeapon());
-//    nbt.setBoolean("alt_breathing", this.isUsingAltBreathWeapon());
-    nbt.setBoolean("down", this.isGoingDown());
-    nbt.setBoolean(NBT_ISMALE, this.isMale());
-//    nbt.setBoolean(NBT_ISALBINO, this.isAlbino());
-    nbt.setBoolean("unhovered", this.isUnHovered());
-    nbt.setBoolean("followyaw", this.followYaw());
-    nbt.setBoolean("firesupport", this.firesupport());
-    //        nbt.setBoolean("unFluttered", this.isUnFluttered());
-    nbt.setInteger("AgeTicks", this.lifeStage().getTicksSinceCreation());
-    nbt.setInteger("hunger", this.getHunger());
-    nbt.setBoolean("boosting", this.boosting());
-    nbt.setBoolean("ylocked", this.isYLocked());
-//    nbt.setBoolean(NBT_ELDER, this.canBeElder());
-//    nbt.setBoolean(NBT_ADJUCATOR, this.canBeAdjucator());
-    nbt.setBoolean("growthpause", this.isGrowthPaused());
-    nbt.setBoolean(NBT_ALLOWOTHERPLAYERS, this.allowedOtherPlayers());
-    //        nbt.setBoolean("sleeping", this.isSleeping()); //unused as of now
-    nbt.setBoolean("HasHomePosition", this.hasHomePosition);
-    if (homePos != null && this.hasHomePosition) {
-      nbt.setInteger("HomeAreaX", homePos.getX());
-      nbt.setInteger("HomeAreaY", homePos.getY());
-      nbt.setInteger("HomeAreaZ", homePos.getZ());
-    }
-    writeDragonInventory(nbt);
+
     dragonStats.writeNBT(nbt);
     helpers.values().forEach(helper -> helper.writeToNBT(nbt));
   }
@@ -382,47 +330,11 @@ public class EntityTameableDragon extends EntityTameable {
 //      DragonMounts.loggerLimit.warn_once(iae.getMessage());
 //    }
 //    modifiers = Modifiers.getStateFromNBT(nbt);
-    initialise(dragonBreed);
+//    initialise(dragonBreed);
 
-    //        this.setUniqueId(nbt.getUniqueId("IdAmulet")); // doesnt save uuid i double checked i/f has this bug makes dragon duplication posible, also why whitle wont work after amulet
-    this.setSaddled(nbt.getBoolean(NBT_SADDLED));
-    this.setChested(nbt.getBoolean(NBT_CHESTED));
-//    this.setSheared(nbt.getBoolean(NBT_SHEARED));
-    this.setHunger(nbt.getInteger("hunger"));
-    this.setfiresupport(nbt.getBoolean("firesupport"));
-    this.setGrowthPaused(nbt.getBoolean("growthpause"));
-//    this.setUsingBreathWeapon(nbt.getBoolean("Breathing"));
-//    this.setUsingAltBreathWeapon(nbt.getBoolean("alt_breathing"));
-    this.lifeStage().setTicksSinceCreation(nbt.getInteger("AgeTicks"));
-    this.setArmor(nbt.getInteger(NBT_ARMOR));
-    this.setMale(nbt.getBoolean(NBT_ISMALE));
-//    this.setAlbino(nbt.getBoolean(NBT_ISALBINO));
-    this.setGoingDown(nbt.getBoolean("down"));
-    this.setUnHovered(nbt.getBoolean("unhovered"));
-    this.setYLocked(nbt.getBoolean("ylocked"));
-    this.setFollowYaw(nbt.getBoolean("followyaw"));
-    //        this.setUnFluttered(nbt.getBoolean("unFluttered"));
-    this.setBoosting(nbt.getBoolean("boosting"));
-    //        this.setSleeping(nbt.getBoolean("sleeping")); //unused as of now
-//    this.setCanBeElder(nbt.getBoolean(NBT_ELDER));
-//    this.setCanBeAdjucator(nbt.getBoolean(NBT_ADJUCATOR));
-    this.setToAllowedOtherPlayers(nbt.getBoolean(NBT_ALLOWOTHERPLAYERS));
-    this.hasHomePosition = nbt.getBoolean("HasHomePosition");
-    if (hasHomePosition && nbt.getInteger("HomeAreaX") != 0 && nbt.getInteger("HomeAreaY") != 0 && nbt.getInteger("HomeAreaZ") != 0) {
-      homePos = new BlockPos(nbt.getInteger("HomeAreaX"), nbt.getInteger("HomeAreaY"), nbt.getInteger("HomeAreaZ"));
-    }
     dragonStats.readNBT(nbt);
-    readDragonInventory(nbt);
     helpers.values().forEach(helper -> helper.readFromNBT(nbt));
     initialiseServerSide();
-  }
-
-  /**
-   * Returns true if the entity is breathing.
-   */
-  public boolean isUsingBreathWeapon() {
-    BreathWeaponTarget breathWeaponTarget = this.breathweapon().getPlayerSelectedTarget();
-    return (null != breathWeaponTarget);
   }
 
   /**
@@ -1111,8 +1023,6 @@ public class EntityTameableDragon extends EntityTameable {
   private static final SimpleNetworkWrapper n = DragonMounts.NETWORK_WRAPPER;
   // data value IDs
   private static final DataParameter<Boolean> DATA_FLYING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-//  private static final DataParameter<Boolean> DATA_BREATHING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-//  private static final DataParameter<Boolean> DATA_ALT_BREATHING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> GOING_DOWN = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> ALLOW_OTHERPLAYERS = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
   private static final DataParameter<Boolean> BOOSTING = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
@@ -1128,11 +1038,8 @@ public class EntityTameableDragon extends EntityTameable {
     }
 */
 //  private static final DataParameter<Boolean> HAS_ELDER_STONE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
-  private static final DataParameter<String> DATA_BREATH_WEAPON_TARGET = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.STRING);
-  private static final DataParameter<Integer> DATA_BREATH_WEAPON_MODE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
   // data NBT IDs
-  //  private boolean isUsingBreathWeapon;
-//  private boolean altBreathing;
+
   private boolean isGoingDown;
   private boolean isUnhovered;
   private boolean yLocked;

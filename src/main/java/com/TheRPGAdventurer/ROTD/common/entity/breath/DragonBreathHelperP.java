@@ -11,15 +11,20 @@ import com.TheRPGAdventurer.ROTD.common.entity.breath.weapons.*;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonHelper;
+import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,7 +43,7 @@ import org.apache.logging.log4j.Logger;
  * - adding delays for jaw open / breathing start
  * - interrupting the beam when the dragon is facing the wrong way / the angle of the beam mismatches the head angle
  * Usage:
- * 1) Create instance, providing the parent dragon entity and a datawatcher index to use for breathing
+ * 1) Create instance, providing the parent dragon entity
  * 2) call onLivingUpdate(), onDeath(), onDeathUpdate(), readFromNBT() and writeFromNBT() from the corresponding
  * parent entity methods
  * 3a) The AI task responsible for targeting should call getPlayerSelectedTarget() to find out what the player wants
@@ -52,43 +57,17 @@ public class DragonBreathHelperP extends DragonHelper {
   public enum BreathState {
     IDLE, STARTING, SUSTAIN, STOPPING
   }
-//  @Deprecated
-//  public BreathAffectedArea breathAffectedAreaEnder = null;
-//  @Deprecated
-//  public BreathAffectedArea breathAffectedAreaNether = null;
-//  @Deprecated
-//  public BreathAffectedArea breathAffectedAreaIce = null;
-//  @Deprecated
-//  public BreathAffectedArea breathAffectedAreaHydro = null;
-//  @Deprecated
-//  public BreathAffectedArea breathAffectedAreaWither = null;
-//  @Deprecated
-//  public BreathAffectedArea breathAffectedAreaPoison = null;
-//  @Deprecated
-//  public BreathAffectedArea breathAffectedAreaAether = null;
 
-  public DragonBreathHelperP(EntityTameableDragon dragon, DataParameter<String> i_dataParamBreathWeaponTarget,
-                             DataParameter<Integer> i_dataParamBreathWeaponMode) {
+  public DragonBreathHelperP(EntityTameableDragon dragon) {
     super(dragon);
-    dataParamBreathWeaponTarget = i_dataParamBreathWeaponTarget;
-    dataParamBreathWeaponMode = i_dataParamBreathWeaponMode;
     refreshBreed(dragon);
-
-//    breathAffectedAreaFire = new BreathAffectedArea(new BreathWeaponFire(dragon));
-//    breathAffectedAreaNether = new BreathAffectedArea(new BreathWeaponNether(dragon));
-//    breathAffectedAreaIce = new BreathAffectedArea(new BreathWeaponIce(dragon));
-//    breathAffectedAreaHydro = new BreathAffectedArea(new BreathWeaponHydro(dragon));
-//    breathAffectedAreaEnder = new BreathAffectedArea(new BreathWeaponEnder(dragon));
-//    breathAffectedAreaWither = new BreathAffectedArea(new BreathWeaponWither(dragon));
-//    breathAffectedAreaPoison = new BreathAffectedArea(new BreathWeaponPoison(dragon));
-//    breathAffectedAreaAether = new BreathAffectedArea(new BreathWeaponAether(dragon));
-//    if (dragon.isClient()) {
-//      breathWeaponEmitter = new BreathWeaponEmitter();
-//    }
-
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
-  public static void registerConfigurationTags() { //todo initialise tags here
+  public static void registerConfigurationTags()
+  {
+    // the initialisation of the tags is all done in their static initialisers
+    //    DragonVariants.addVariantTagValidator(new DragonReproductionValidator());
   }
 
   // changes the breath weapon after the breed is changed
@@ -123,12 +102,25 @@ public class DragonBreathHelperP extends DragonHelper {
 
   }
 
+  public void onConfigurationChange() {
+    throw new NotImplementedException("onConfigurationChange()");
+  }
+
   public void refreshBreedClientOnly(EntityTameableDragon dragon) {
     soundEffectBreathWeapon = dragon.getBreed().getSoundEffectBreathWeapon(getSoundController(dragon.getEntityWorld()), weaponInfoLink);
   }
 
   public BreathState getCurrentBreathState() {
     return currentBreathState;
+  }
+
+
+  /**
+   * Returns true if the entity is breathing.
+   */
+  public boolean isUsingBreathWeapon() {
+    BreathWeaponTarget breathWeaponTarget = this.breathweapon().getPlayerSelectedTarget();
+    return (null != breathWeaponTarget);
   }
 
   public float getBreathStateFractionComplete() {
@@ -273,22 +265,67 @@ public class DragonBreathHelperP extends DragonHelper {
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
+    setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
+
+  @Override
+  public void registerDataParameters() {
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
+    registerForInitialisation(DATA_BREATH_WEAPON_TARGET, "");  //default value
+    registerForInitialisation(DATA_BREATH_WEAPON_MODE, 0);
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
+  }
+
 
   @Override
   public void registerEntityAttributes() {
+    checkPreConditions(FunctionTag.REGISTER_ENTITY_ATTRIBUTES);
+    setCompleted(FunctionTag.REGISTER_ENTITY_ATTRIBUTES);
   }
 
   @Override
+  public void initialiseServerSide() {
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    initialiseBothSides();
+    setCompleted(FunctionTag.INITIALISE_SERVER);
+  }
+
+  @Override
+  public void initialiseClientSide() {
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    initialiseBothSides();
+     setCompleted(FunctionTag.INITIALISE_CLIENT);
+  }
+
+  private void initialiseBothSides() {
+
+  }
+
+  @Override
+  public void notifyDataManagerChange(DataParameter<?> key) {
+    if (helperState != HelperState.INITIALISED) {
+      checkPreConditions(FunctionTag.DATAPARAMETER_RECEIVED);
+      receivedDataParameter(key);
+      setCompleted(FunctionTag.DATAPARAMETER_RECEIVED);
+    }
+  }
+
+
+  @Override
   public void onDeathUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
   }
 
   @Override
   public void onDeath() {
+    checkPreConditions(FunctionTag.VANILLA);
   }
 
   public SoundController getSoundController(World world) {
@@ -301,51 +338,6 @@ public class DragonBreathHelperP extends DragonHelper {
 
     return soundController;
   }
-
-//  @Deprecated
-//  public BreathWeaponEmitter getEmitter() {
-//    return breathWeaponEmitter;
-//  }
-//
-//  @Deprecated
-//  public BreathAffectedArea getBreathAffectedAreaFire() {
-//    return breathAffectedAreaFire;
-//  }
-//
-//  @Deprecated
-//  public BreathAffectedArea getBreathAffectedAreaNether() {
-//    return breathAffectedAreaNether;
-//  }
-//
-//  @Deprecated
-//  public BreathAffectedArea getBreathAffectedAreaIce() {
-//    return breathAffectedAreaIce;
-//  }
-//
-//  @Deprecated
-//  public BreathAffectedArea getBreathAffectedAreaEnd() {
-//    return breathAffectedAreaEnder;
-//  }
-//
-//  @Deprecated
-//  public BreathAffectedArea getbreathAffectedAreaHydro() {
-//    return breathAffectedAreaHydro;
-//  }
-//
-//  @Deprecated
-//  public BreathAffectedArea getbreathAffectedAreaWither() {
-//    return breathAffectedAreaWither;
-//  }
-//
-//  @Deprecated
-//  public BreathAffectedArea getbreathAffectedAreaPoison() {
-//    return breathAffectedAreaPoison;
-//  }
-//
-//  @Deprecated
-//  public BreathAffectedArea getbreathAffectedAreaAether() {
-//    return breathAffectedAreaAether;
-//  }
 
   // Callback link to provide the Sound generator with state information
   public class WeaponInfoLink implements SoundEffectBreathWeaponP.WeaponSoundUpdateLink {
@@ -589,7 +581,7 @@ public class DragonBreathHelperP extends DragonHelper {
    */
   private BreathWeaponTarget getTarget() {
     if (dragon.isClient()) {
-      String targetString = entityDataManager.get(dataParamBreathWeaponTarget);
+      String targetString = entityDataManager.get(DATA_BREATH_WEAPON_TARGET);
       BreathWeaponTarget target = BreathWeaponTarget.fromEncodedString(targetString);
       return target;
     } else {
@@ -614,8 +606,8 @@ public class DragonBreathHelperP extends DragonHelper {
 //  private final int DATA_WATCHER_BREATH_MODE;
   private final int BREATH_START_DURATION = 5; // ticks
   private final int BREATH_STOP_DURATION = 5; // ticks
-  private DataParameter<String> dataParamBreathWeaponTarget;
-  private DataParameter<Integer> dataParamBreathWeaponMode;
+//  private DataParameter<String> dataParamBreathWeaponTarget;
+//  private DataParameter<Integer> dataParamBreathWeaponMode;
   private SoundController soundController;
   private SoundEffectBreathWeaponP soundEffectBreathWeapon;
 //  @Deprecated
@@ -638,5 +630,9 @@ public class DragonBreathHelperP extends DragonHelper {
 //  @Deprecated
 //  private BreathAffectedArea breathAffectedAreaFire = null;
 //  private boolean useLegacy = true; //todo for debugging: was the last weapon used the primary (== legacy)
+
+  private static final DataParameter<String> DATA_BREATH_WEAPON_TARGET = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.STRING);
+  private static final DataParameter<Integer> DATA_BREATH_WEAPON_MODE = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
+
 
 }
