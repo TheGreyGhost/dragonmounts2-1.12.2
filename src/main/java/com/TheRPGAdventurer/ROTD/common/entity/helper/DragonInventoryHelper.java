@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 public class DragonInventoryHelper extends DragonHelper {
   public DragonInventoryHelper(EntityTameableDragon dragon) {
     super(dragon);
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
   public static void registerConfigurationTags()
@@ -38,24 +39,27 @@ public class DragonInventoryHelper extends DragonHelper {
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
     nbt.setBoolean(NBT_SADDLED, isSaddled());
     nbt.setInteger(NBT_ARMOR, this.getArmor());
     nbt.setBoolean(NBT_CHESTED, this.isChested());
     writeDragonInventory(nbt);
-
+    setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
     this.setSaddled(nbt.getBoolean(NBT_SADDLED));
     this.setChested(nbt.getBoolean(NBT_CHESTED));
     this.setArmor(nbt.getInteger(NBT_ARMOR));
     readDragonInventory(nbt);
-
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
   @Override
   public void registerDataParameters() {
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
     dataManager.register(ARMOR, 0);
     dataManager.register(BANNER1, ItemStack.EMPTY);
     dataManager.register(BANNER2, ItemStack.EMPTY);
@@ -63,22 +67,19 @@ public class DragonInventoryHelper extends DragonHelper {
     dataManager.register(BANNER4, ItemStack.EMPTY);
     dataManager.register(DATA_SADDLED, false);
     dataManager.register(CHESTED, false);
-
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
   @Override
   public void initialiseServerSide() {
-
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    setCompleted(FunctionTag.INITIALISE_SERVER);
   }
 
   @Override
   public void initialiseClientSide() {
-
-  }
-
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    setCompleted(FunctionTag.INITIALISE_CLIENT);
   }
 
   @Override
@@ -88,6 +89,7 @@ public class DragonInventoryHelper extends DragonHelper {
 
   @Override
   public void onDeath(DamageSource src) {
+    checkPreConditions(FunctionTag.VANILLA);
     if (dragonInv != null && !this.world.isRemote && !isTamed()) {
       for (int i = 0; i < dragonInv.getSizeInventory(); ++i) {
         ItemStack itemstack = dragonInv.getStackInSlot(i);
@@ -100,6 +102,7 @@ public class DragonInventoryHelper extends DragonHelper {
   }
   @Override
   public void onLivingUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
     if (hasChestVarChanged && dragonInv != null && !this.isChested()) {
       for (int i = ContainerDragon.chestStartIndex; i < 30; i++) {
         if (!dragonInv.getStackInSlot(i).isEmpty()) {

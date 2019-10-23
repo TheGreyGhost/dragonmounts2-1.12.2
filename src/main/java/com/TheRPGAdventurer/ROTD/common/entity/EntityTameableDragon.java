@@ -113,6 +113,7 @@ public class EntityTameableDragon extends EntityTameable {
     checkState(isServer(), "Attempted to explicitly construct EntityTameableDragon on client side.");
     configuration().setInitialConfiguration(breed, modifiers);
     helpers.values().forEach(DragonHelper::registerEntityAttributes);
+    helpers.values().forEach(DragonHelper::onExplicitConstruction);
     initialiseServerSide();
   }
 
@@ -198,7 +199,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   @Override
   public void notifyDataManagerChange(DataParameter<?> key) {
-    helpers.values().forEach(helper -> helper.notifyDataManagerChange(key));
+    helpers.values().forEach(helper -> helper.notifyDataManagerReceived(key));
     if (allDataParametersReceived) return;
     for (DragonHelper dragonHelper : helpers.values()) {
       if (!dragonHelper.allDataParametersReceived()) return;

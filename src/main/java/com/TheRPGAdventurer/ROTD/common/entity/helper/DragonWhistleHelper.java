@@ -2,6 +2,8 @@ package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,6 +20,7 @@ import org.apache.commons.lang3.NotImplementedException;
 public class DragonWhistleHelper extends DragonHelper {
   public DragonWhistleHelper(EntityTameableDragon dragon) {
     super(dragon);
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
   public static void registerConfigurationTags()
@@ -28,16 +31,18 @@ public class DragonWhistleHelper extends DragonHelper {
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
     nbt.setBoolean("unhovered", this.isUnHovered());
     nbt.setBoolean("followyaw", this.followYaw());
     nbt.setBoolean("firesupport", this.firesupport());
     //        nbt.setBoolean("unFluttered", this.isUnFluttered());
     nbt.setBoolean("ylocked", this.isYLocked());
-
+    setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
     this.setGoingDown(nbt.getBoolean("down"));
     this.setUnHovered(nbt.getBoolean("unhovered"));
     this.setYLocked(nbt.getBoolean("ylocked"));
@@ -45,11 +50,13 @@ public class DragonWhistleHelper extends DragonHelper {
     //        this.setUnFluttered(nbt.getBoolean("unFluttered"));
     this.setBoosting(nbt.getBoolean("boosting"));
     this.setfiresupport(nbt.getBoolean("firesupport"));
-
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
   @Override
   public void registerDataParameters() {
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
+
     dataManager.register(WHISTLE_STATE, (byte) 0);
     dataManager.register(WHISTLE, ItemStack.EMPTY);
     dataManager.register(BOOSTING, false);
@@ -57,32 +64,32 @@ public class DragonWhistleHelper extends DragonHelper {
     dataManager.register(Y_LOCKED, false);
     dataManager.register(FOLLOW_YAW, true);
     dataManager.register(FIRE_SUPPORT, false);
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
 
 
   }
 
   @Override
   public void initialiseServerSide() {
-
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    setCompleted(FunctionTag.INITIALISE_SERVER);
   }
 
   @Override
   public void initialiseClientSide() {
-
-  }
-
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    setCompleted(FunctionTag.INITIALISE_CLIENT);
   }
 
   @Override
   public void onConfigurationChange() {
+    checkPreConditions(FunctionTag.ON_CONFIG_CHANGE);
     throw new NotImplementedException("onConfigurationChange()");
   }
 
   @Override
   public void onLivingUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
     ItemStack whistle = this.getControllingWhistle();
     if (whistle != null && whistle.getTagCompound() != null && !whistle.getTagCompound().getUniqueId(DragonMounts.MODID + "dragon").equals(this.getUniqueID()) && whistle.hasTagCompound()) {
       this.setnothing(true);

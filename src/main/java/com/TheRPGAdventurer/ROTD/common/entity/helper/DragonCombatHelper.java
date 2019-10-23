@@ -27,6 +27,7 @@ import java.util.Optional;
 public class DragonCombatHelper extends DragonHelper {
   public DragonCombatHelper(EntityTameableDragon dragon) {
     super(dragon);
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
   public static void registerConfigurationTags()
@@ -37,30 +38,35 @@ public class DragonCombatHelper extends DragonHelper {
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
     nbt.setInteger("hunger", this.getHunger());
-
+    setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
     this.setHunger(nbt.getInteger("hunger"));
-
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
   @Override
   public void registerDataParameters() {
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
     dataManager.register(HUNGER, 0);
-
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
   @Override
   public void initialiseServerSide() {
-
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    setCompleted(FunctionTag.INITIALISE_SERVER);
   }
 
   @Override
   public void initialiseClientSide() {
-
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    setCompleted(FunctionTag.INITIALISE_CLIENT);
   }
 
   private void initialiseBothSides() {
@@ -69,17 +75,14 @@ public class DragonCombatHelper extends DragonHelper {
 
   }
 
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-
-  }
-
   public void onConfigurationChange() {
+    checkPreConditions(FunctionTag.ON_CONFIG_CHANGE);
     throw new NotImplementedException("onConfigurationChange()");
   }
 
   @Override
   public void onLivingUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
     if (this.ticksExisted % (DragonMounts.instance.getConfig().hungerDecrement) == 1) {
       if (this.getHunger() > 0) {
         this.setHunger(this.getHunger() - 1);

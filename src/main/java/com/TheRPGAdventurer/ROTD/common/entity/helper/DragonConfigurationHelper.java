@@ -92,26 +92,17 @@ public class DragonConfigurationHelper extends DragonHelper {
   }
 
   @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-    if (!intialisedDataParameters.containsKey(key)) return;
-    // if initialised, change configuration.  Ignore errors
-    // if not initialised, mark as received (once all are received, initialisation will be performed via initialiseClientSide)
-    if (helperState == HelperState.INITIALISED) {
-      DragonBreedNew newBreed;
-      Modifiers newModifiers;
-      try {
-        newBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(entityDataManager, DATAPARAM_BREED);
-        newModifiers = Modifiers.getStateFromDataParam(entityDataManager, DATAPARAM_MODIFIERS);
-      } catch (IllegalArgumentException iae) {
-        DragonMounts.loggerLimit.warn_once(iae.getMessage());
-        return;
-      }
-      changeConfiguration(newBreed, newModifiers);
-    } else {
-      checkPreConditions(FunctionTag.DATAPARAMETER_RECEIVED);
-      receivedDataParameter(key);
-      setCompleted(FunctionTag.DATAPARAMETER_RECEIVED);
+  protected void notifyDataManagerChange(DataParameter<?> key) {
+    DragonBreedNew newBreed;
+    Modifiers newModifiers;
+    try {
+      newBreed = DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getBreed(entityDataManager, DATAPARAM_BREED);
+      newModifiers = Modifiers.getStateFromDataParam(entityDataManager, DATAPARAM_MODIFIERS);
+    } catch (IllegalArgumentException iae) {
+      DragonMounts.loggerLimit.warn_once(iae.getMessage());
+      return;
     }
+    changeConfiguration(newBreed, newModifiers);
   }
 
   public static void registerConfigurationTags() { //todo initialise tags here
@@ -123,6 +114,10 @@ public class DragonConfigurationHelper extends DragonHelper {
     modifiers = newModifiers;
     setCompleted(FunctionTag.SET_INITIAL_CONFIGURATION);
   }
+
+  // This helper requires the explicit setInitialConfiguration
+  @Override
+  public void onExplicitConstruction() {}
 
   public void changeConfiguration(DragonBreedNew newBreed, Modifiers newModifiers) {
     checkPreConditions(FunctionTag.CHANGE_CONFIGURATION);

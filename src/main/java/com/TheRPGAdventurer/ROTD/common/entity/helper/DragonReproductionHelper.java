@@ -22,7 +22,6 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -124,15 +123,6 @@ public class DragonReproductionHelper extends DragonHelper {
   public void initialiseClientSide() {
     checkPreConditions(FunctionTag.INITIALISE_CLIENT);
     setCompleted(FunctionTag.INITIALISE_CLIENT);
-  }
-
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-    if (helperState != HelperState.INITIALISED) {
-      checkPreConditions(FunctionTag.DATAPARAMETER_RECEIVED);
-      receivedDataParameter(key);
-      setCompleted(FunctionTag.DATAPARAMETER_RECEIVED);
-    }
   }
 
   @Override

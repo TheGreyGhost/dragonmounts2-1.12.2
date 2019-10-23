@@ -158,16 +158,6 @@ public class DragonLifeStageHelper extends DragonHelper {
   }
 
   @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-    if (helperState != HelperState.INITIALISED) {
-      checkPreConditions(FunctionTag.DATAPARAMETER_RECEIVED);
-      receivedDataParameter(key);
-      setCompleted(FunctionTag.DATAPARAMETER_RECEIVED);
-    }
-    // don't need to update ticksSinceCreation since it's updated every tick in onLivingUpdate
-  }
-
-  @Override
   public void onConfigurationChange() {
     initialiseBothSides();
   }

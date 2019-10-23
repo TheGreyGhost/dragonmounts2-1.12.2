@@ -55,11 +55,13 @@ public class DragonInteractHelper extends DragonHelper {
 
   public DragonInteractHelper(EntityTameableDragon dragon) {
     super(dragon);
+    setCompleted(FunctionTag.CONSTRUCTOR);
 //    actions.add(new DragonInteract(dragon));
   }
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
     nbt.setBoolean(NBT_ALLOWOTHERPLAYERS, this.allowedOtherPlayers());
     //        nbt.setBoolean("sleeping", this.isSleeping()); //unused as of now
     nbt.setBoolean("HasHomePosition", this.hasHomePosition);
@@ -68,38 +70,38 @@ public class DragonInteractHelper extends DragonHelper {
       nbt.setInteger("HomeAreaY", homePos.getY());
       nbt.setInteger("HomeAreaZ", homePos.getZ());
     }
+    setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
     this.setToAllowedOtherPlayers(nbt.getBoolean(NBT_ALLOWOTHERPLAYERS));
     this.hasHomePosition = nbt.getBoolean("HasHomePosition");
     if (hasHomePosition && nbt.getInteger("HomeAreaX") != 0 && nbt.getInteger("HomeAreaY") != 0 && nbt.getInteger("HomeAreaZ") != 0) {
       homePos = new BlockPos(nbt.getInteger("HomeAreaX"), nbt.getInteger("HomeAreaY"), nbt.getInteger("HomeAreaZ"));
     }
-
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
   @Override
   public void registerDataParameters() {
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
     dataManager.register(ALLOW_OTHERPLAYERS, false);
 //    dataManager.register(GROWTH_PAUSED, false);
-
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
   @Override
   public void initialiseServerSide() {
-
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    setCompleted(FunctionTag.INITIALISE_SERVER);
   }
 
   @Override
   public void initialiseClientSide() {
-
-  }
-
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    setCompleted(FunctionTag.INITIALISE_CLIENT);
   }
 
   public void onConfigurationChange() {
@@ -108,6 +110,7 @@ public class DragonInteractHelper extends DragonHelper {
 
   @Override
   public void onLivingUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
     // set home position near owner when tamed
     if (isTamed()) {
       Entity owner = getOwner();

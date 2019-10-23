@@ -19,6 +19,7 @@ import org.apache.commons.lang3.NotImplementedException;
 public class DragonSoundsHelper extends DragonHelper {
   public DragonSoundsHelper(EntityTameableDragon dragon) {
     super(dragon);
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
   public static void registerConfigurationTags()
@@ -29,31 +30,33 @@ public class DragonSoundsHelper extends DragonHelper {
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
-
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
+    setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
-
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
   @Override
   public void registerDataParameters() {
-
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
   @Override
   public void initialiseServerSide() {
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    setCompleted(FunctionTag.INITIALISE_SERVER);
 
   }
 
   @Override
   public void initialiseClientSide() {
-
-  }
-
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    setCompleted(FunctionTag.INITIALISE_CLIENT);
 
   }
 
@@ -63,7 +66,8 @@ public class DragonSoundsHelper extends DragonHelper {
   }
 
   @Override
-  public void onEntityUpdate() {
+  public void onLivingUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
     if (getRNG().nextInt(800) == 1) roar();
   }
 

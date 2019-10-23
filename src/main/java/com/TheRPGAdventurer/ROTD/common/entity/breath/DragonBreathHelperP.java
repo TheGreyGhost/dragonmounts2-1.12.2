@@ -11,11 +11,9 @@ import com.TheRPGAdventurer.ROTD.common.entity.breath.weapons.*;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonHelper;
-import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -103,6 +101,7 @@ public class DragonBreathHelperP extends DragonHelper {
   }
 
   public void onConfigurationChange() {
+    setCompleted(FunctionTag.ON_CONFIG_CHANGE);
     throw new NotImplementedException("onConfigurationChange()");
   }
 
@@ -255,6 +254,7 @@ public class DragonBreathHelperP extends DragonHelper {
 
   @Override
   public void onLivingUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
     ++tickCounter;
     if (dragon.isClient()) {
       onLivingUpdateClient();
@@ -307,16 +307,6 @@ public class DragonBreathHelperP extends DragonHelper {
   private void initialiseBothSides() {
 
   }
-
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
-    if (helperState != HelperState.INITIALISED) {
-      checkPreConditions(FunctionTag.DATAPARAMETER_RECEIVED);
-      receivedDataParameter(key);
-      setCompleted(FunctionTag.DATAPARAMETER_RECEIVED);
-    }
-  }
-
 
   @Override
   public void onDeathUpdate() {

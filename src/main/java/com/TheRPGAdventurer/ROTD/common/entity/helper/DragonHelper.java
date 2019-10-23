@@ -9,7 +9,10 @@
  */
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
+import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -29,14 +32,18 @@ import static com.google.common.base.Preconditions.checkState;
  *   Usage:
  *   1) Implement the vanilla methods as appropriate
  *   2a) Add a static method public static void registerConfigurationTags() to register any configuration tags used by this helper
- *   2b) Add DragonHelperMyNewClass.registerConfigurationTags() to EntityTameableDragon.registerConfigurationTags()
+ *   2b) In EntityTameableDragon.registerConfigurationTags(), add a call to
+ *          DragonHelperMyNewClass.registerConfigurationTags()
  *   3) Implement the remaining methods to initialise the helper correctly:
  *    The initialisation sequence for the helper is:
  *    a) new DragonHelper(EntityTameableDragon)
  *    b) registerDataParameters() = register DataParameters; you should also add them to the initialisedDataParameters HashMap
  *    c) registerEntityAttributes - register IAttributes here.  Don't set the base values yet, this is deferred to initialiseServerSide below, once all helpers are initialised.
  *
- *    d1) server side only: either setInitialConfiguration (for a newly spawning entity) or readEntityFromNBT (when loading from disk)
+ *    d1) server side only: vanilla will set the initial configuration either using a non-default constructor or
+ *         readEntityFromNBT (when loading from disk)
+ *        if necessary for newly spawned entity, define a setInitialConfiguration() add a call to it into the
+ *           EntityTameableDragon explicit constructor.
  *    d2) server side only: initialiseServerSide to initialise all local data structures and Attributes from the DataParameters
  *    d3) server side only: onInitialSpawn() - for freshly spawned creatures only (vanilla does this in ItemMonsterPlacer).  Used to randomly vary attributes.
  *
@@ -51,7 +58,7 @@ import static com.google.common.base.Preconditions.checkState;
  *   checkPreConditions
  *   setCompleted
  *   allDataParametersReceived
- *   receivedDataParameter
+ *   markDataParameterAsInitialised
  *
  *   They are used as follows:
  *
@@ -63,7 +70,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  *   likewise for the other functions implemented by the DragonHelper.
  *
- *   receivedDataParameter(DataParameter) is used to notify when each data parameter has been received, so that
+ *   markDataParameterAsInitialised(DataParameter) is used to notify when each data parameter has been received, so that
  *     the helper state can be updated when ready.
  *
  * The sequence of states is:
@@ -78,7 +85,7 @@ import static com.google.common.base.Preconditions.checkState;
  *   INITIAL
  *   CONSTRUCTED
  *   ENTITY_INIT_DONE (after registerDataParameters() has been called).  Assembling config info from DataParameters.
- *   CLIENT_DATA_COMPLETE (after receivedDataParameter has been called for all DataParameters)
+ *   CLIENT_DATA_COMPLETE (after markDataParameterAsInitialised has been called for all DataParameters)
  *   INITIALISED (after initialiseClientSide() has been called)
  *
  */
@@ -104,10 +111,19 @@ public abstract class DragonHelper {
   public void registerEntityAttributes() {
   }
 
-  /**
-   * Initialise the helper - server side - called once all other helpers have loaded their configuration data (NBT etc),
-   *   but not guaranteed that all other helpers will be fully initialised.
+  /** called to inform the helper that the entity is being explicitly constructed (i.e. not loaded from NBT).
+   * Later, once all helpers are initialised, onInitialSpawn() will also be called.
+   * This function is a default in case the helper doesn't need an explicit setInitialConfiguration
    */
+  public void onExplicitConstruction() {
+    checkPreConditions(FunctionTag.SET_INITIAL_CONFIGURATION);
+    setCompleted(FunctionTag.SET_INITIAL_CONFIGURATION);
+  }
+
+    /**
+     * Initialise the helper - server side - called once all other helpers have loaded their configuration data (NBT etc),
+     *   but not guaranteed that all other helpers will be fully initialised.
+     */
   public abstract void initialiseServerSide();
 
   /**
@@ -119,6 +135,8 @@ public abstract class DragonHelper {
    */
   @Nullable
   public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+    checkPreConditions(FunctionTag.ON_INITIAL_SPAWN);
+    setCompleted(FunctionTag.ON_INITIAL_SPAWN);
     return livingdata;
   }
 
@@ -128,12 +146,6 @@ public abstract class DragonHelper {
    */
   public abstract void initialiseClientSide();
 
-  /** Called when a DataParameter has been received
-   *
-   * @param key
-   */
-  public abstract void notifyDataManagerChange(DataParameter<?> key);
-
   /**
    * Notify that the dragon configuration (breed and/or modifiers) has changed, i.e.
    * Called at the end of initialisation and then again whenever the breed/and or modifiers have been changed to new values
@@ -141,16 +153,42 @@ public abstract class DragonHelper {
    * Be careful not to trigger a recursive update (eg changing the modifier causes variants to change, which causes the modifier to change back, etc)
    */
   public void onConfigurationChange() {
+    checkPreConditions(FunctionTag.ON_CONFIG_CHANGE);
+  }
+
+  /** Called when a DataParameter has been received for this helper after initialisation has been completed
+   *
+   * @param key
+   */
+  protected void notifyDataManagerChange(DataParameter<?> key) {
   }
 
   public void onLivingUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
   }
 
   public void onDeathUpdate() {
+    checkPreConditions(FunctionTag.VANILLA);
   }
 
   public void onDeath() {
+    checkPreConditions(FunctionTag.VANILLA);
   }
+
+
+  /** Call this when a DataParameter has been received.
+   * 1) checks whether it is relevant to this helper.  If so;
+   * 2) If the helper isn't initialised yet, mark this dataparameter as received.
+   *    Otherwise, call notifyDataManagerChange to inform the helper of the change-after-initialisation
+   *
+   * @param key
+   */
+  public final void notifyDataManagerReceived(DataParameter<?> key) {
+    boolean shouldProcessFurther = notifyDataManagerChangeCommon(key);
+    if (!shouldProcessFurther) return;
+    notifyDataManagerChange(key);
+  }
+
 
   /** Should return true once the client side has received all the DataParameter it expects.
    * @return true once all expected DataParameter have been received
@@ -185,9 +223,30 @@ public abstract class DragonHelper {
     intialisedDataParameters.put(dataParameter, Boolean.FALSE);
   }
 
-  protected void receivedDataParameter(DataParameter dataParameter) {
+  /**
+   * Perform initial checks on the received key, and mark as received (for initialisation purposes).
+   * @param key
+   * @return true if the caller should process the key further (it's valid for this helper, and the helper is
+   *         fully initialised.)
+   */
+  protected boolean notifyDataManagerChangeCommon(DataParameter<?> key) {
+    if (!intialisedDataParameters.containsKey(key)) return false;
+    // if not initialised, mark as received (once all are received, initialisation will be performed via initialiseClientSide)
+    if (helperState == HelperState.INITIALISED) return true;
+
+    checkPreConditions(FunctionTag.DATAPARAMETER_RECEIVED);
+    markDataParameterAsInitialised(key);
+    setCompleted(FunctionTag.DATAPARAMETER_RECEIVED);
+    return false;
+  }
+
+  /**
+   *
+   * @param dataParameter
+   */
+  protected void markDataParameterAsInitialised(DataParameter dataParameter) {
     checkArgument(intialisedDataParameters.containsKey(dataParameter),
-            "DragonHelper.receivedDataParameter was called for DataParameter %s which was not expected", dataParameter.getId());
+            "DragonHelper.markDataParameterAsInitialised was called for DataParameter %s which was not expected", dataParameter.getId());
     if (helperState == HelperState.CLIENT_DATA_COMPLETE || helperState == HelperState.INITIALISED) return;
     intialisedDataParameters.put(dataParameter, Boolean.TRUE);
     if (intialisedDataParameters.values().contains(Boolean.FALSE)) return;
@@ -215,8 +274,8 @@ public abstract class DragonHelper {
         break;
       }
       case DATAPARAMETER_RECEIVED: {
-        checkState(dragon.isClient(), "DragonHelper.receivedDataParameter() was called from non-Client code");
-        checkState(helperState == HelperState.ENTITY_INIT_DONE, "Unexpected helperState when calling DragonHelper.receivedDataParameter():%s", helperState);
+        checkState(dragon.isClient(), "DragonHelper.markDataParameterAsInitialised() was called from non-Client code");
+        checkState(helperState == HelperState.ENTITY_INIT_DONE, "Unexpected helperState when calling DragonHelper.markDataParameterAsInitialised():%s", helperState);
         break;
       }
       case READ_FROM_NBT: {
@@ -276,7 +335,7 @@ public abstract class DragonHelper {
         break;
       }
       case DATAPARAMETER_RECEIVED: {
-        // do nothing: the state is updated in receivedDataParameter()
+        // do nothing: the state is updated in markDataParameterAsInitialised()
         break;
       }
       case INITIALISE_CLIENT: {

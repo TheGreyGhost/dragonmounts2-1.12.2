@@ -27,6 +27,7 @@ import java.util.List;
 public class DragonMovementHelper extends DragonHelper {
   public DragonMovementHelper(EntityTameableDragon dragon) {
     super(dragon);
+    setCompleted(FunctionTag.CONSTRUCTOR);
   }
 
   public static void registerConfigurationTags()
@@ -37,19 +38,22 @@ public class DragonMovementHelper extends DragonHelper {
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
+    checkPreConditions(FunctionTag.WRITE_TO_NBT);
     nbt.setBoolean("boosting", this.boosting());
     nbt.setBoolean("down", this.isGoingDown());
-
+    setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
-
+    checkPreConditions(FunctionTag.READ_FROM_NBT);
+    setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
   @Override
   public void registerDataParameters() {
-
+    checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
+    setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
   public void registerEntityAttributes() {
@@ -61,22 +65,19 @@ public class DragonMovementHelper extends DragonHelper {
 
   @Override
   public void initialiseServerSide() {
-
+    checkPreConditions(FunctionTag.INITIALISE_SERVER);
+    setCompleted(FunctionTag.INITIALISE_SERVER);
   }
 
   @Override
   public void initialiseClientSide() {
-
+    checkPreConditions(FunctionTag.INITIALISE_CLIENT);
+    setCompleted(FunctionTag.INITIALISE_SERVER);
   }
 
   private void initialiseBothSides() {
     getEntityAttribute(MOVEMENT_SPEED_AIR).setBaseValue(BASE_AIR_SPEED);
     getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(BASE_GROUND_SPEED);
-
-  }
-
-  @Override
-  public void notifyDataManagerChange(DataParameter<?> key) {
 
   }
 
