@@ -11,62 +11,35 @@ package com.TheRPGAdventurer.ROTD.common.entity;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
-import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.common.entity.ai.ground.EntityAIDragonSit;
 import com.TheRPGAdventurer.ROTD.common.entity.ai.path.PathNavigateFlying;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathHelperP;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
-import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.*;
 import com.TheRPGAdventurer.ROTD.common.entity.interact.DragonInteractHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
-import com.TheRPGAdventurer.ROTD.common.inits.*;
-import com.TheRPGAdventurer.ROTD.common.inventory.ContainerDragon;
-import com.TheRPGAdventurer.ROTD.common.network.MessageDragonExtras;
-import com.TheRPGAdventurer.ROTD.common.network.MessageDragonInventory;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
-import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.*;
-import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.init.MobEffects;
-import net.minecraft.inventory.ContainerHorseChest;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.IInventoryChangedListener;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketAnimation;
 import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -134,11 +107,6 @@ public class EntityTameableDragon extends EntityTameable {
   @Override
   protected void entityInit() {
     super.entityInit();
-
-    dataManager.register(DATA_FLYING, false);
-//    dataManager.register(DATA_BREATHING, false);
-//    dataManager.register(DATA_ALT_BREATHING, false);
-    dataManager.register(GOING_DOWN, false);
     addHelpers();
     helpers.values().forEach(DragonHelper::registerDataParameters);
   }
@@ -343,33 +311,8 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public void fall(float distance, float damageMultiplier) {
-    if (movement().shouldSufferFallDamager(distance, damageMultiplier)) {
+    if (movement().shouldSufferFallDamage(distance, damageMultiplier)) {
       super.fall(distance, damageMultiplier);
-    }
-  }
-
-  @SideOnly(Side.CLIENT)
-  public void updateKeys() {
-    Minecraft mc = Minecraft.getMinecraft();
-    if ((hasControllingPlayer(mc.player) && getControllingPlayer() != null) || (this.getRidingEntity() instanceof EntityPlayer && this.getRidingEntity() != null && this.getRidingEntity().equals(mc.player)) || (getOwner() != null && firesupport())) {
-      boolean breathKeyHeldDownPrimary = ModKeys.KEY_BREATH_PRIMARY.isKeyDown();
-      boolean breathKeyHeldDownSecondary = ModKeys.KEY_BREATH_SECONDARY.isKeyDown();
-      BreathWeaponTarget.WeaponUsed breathWeaponUsed = BreathWeaponTarget.WeaponUsed.NONE;
-      boolean breathKeyHeldDownEither = breathKeyHeldDownPrimary || breathKeyHeldDownSecondary;
-      if (breathKeyHeldDownPrimary) {
-        breathWeaponUsed = BreathWeaponTarget.WeaponUsed.PRIMARY;
-      } else if (breathKeyHeldDownSecondary) {
-        breathWeaponUsed = BreathWeaponTarget.WeaponUsed.SECONDARY;
-      }
-      DragonOrbControl.getInstance().setKeyBreathState(this, breathKeyHeldDownEither, breathWeaponUsed);
-
-      boolean isBoosting = ModKeys.BOOST.isKeyDown();
-      boolean isDown = ModKeys.DOWN.isKeyDown();
-      boolean unhover = ModKeys.KEY_HOVERCANCEL.isPressed();
-      boolean followyaw = ModKeys.FOLLOW_YAW.isPressed();
-      boolean locky = ModKeys.KEY_LOCKEDY.isPressed();
-
-      DragonMounts.NETWORK_WRAPPER.sendToServer(new MessageDragonExtras(getEntityId(), unhover, followyaw, locky, isBoosting, isDown));
     }
   }
 

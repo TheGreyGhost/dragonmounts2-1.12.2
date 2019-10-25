@@ -20,6 +20,7 @@ import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonHatchableEggRenderer;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
 import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
+import com.TheRPGAdventurer.ROTD.client.userinput.DragonRiderControls;
 import com.TheRPGAdventurer.ROTD.common.CommonProxy;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
@@ -162,6 +163,10 @@ public class ClientProxy extends CommonProxy {
     DragonOrbControl.createSingleton(getNetwork());
     DragonOrbControl.initialiseInterceptors();
     MinecraftForge.EVENT_BUS.register(DragonOrbControl.getInstance());
+
+    DragonRiderControls.createSingleton(getNetwork());
+    MinecraftForge.EVENT_BUS.register(DragonRiderControls.getInstance());
+
     MinecraftForge.EVENT_BUS.register(new TargetHighlighter());
     MinecraftForge.EVENT_BUS.register(new CentrepointCrosshairRenderer());
     //       FMLCommonHandler.instance().bus().register(new DragonEntityWatcher());  todo not required? if i remember correctly this is used to make a zoom in, thridpersonview i unused now now uing DragonViewEvent rpg

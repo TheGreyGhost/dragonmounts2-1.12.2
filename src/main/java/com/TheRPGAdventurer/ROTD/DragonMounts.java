@@ -12,20 +12,12 @@ package com.TheRPGAdventurer.ROTD;
 import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.CommonProxy;
-import com.TheRPGAdventurer.ROTD.common.event.EntityMountEventHandler;
-import com.TheRPGAdventurer.ROTD.common.event.IItemColorRegistration;
-import com.TheRPGAdventurer.ROTD.common.event.RegistryEventHandler;
 import com.TheRPGAdventurer.ROTD.common.inventory.tabs.CreativeTab;
 import com.TheRPGAdventurer.ROTD.common.network.*;
-import com.TheRPGAdventurer.ROTD.common.world.DragonMountsWorldGenerator;
-import com.TheRPGAdventurer.ROTD.util.MiscPlayerProperties;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.LoggerLimit;
-import net.ilexiconn.llibrary.server.entity.EntityPropertiesHandler;
 import net.ilexiconn.llibrary.server.network.NetworkWrapper;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -34,8 +26,6 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -61,7 +51,7 @@ public class DragonMounts {
   public static final LoggerLimit loggerLimit = new LoggerLimit(logger);
 
   @NetworkWrapper({MessageDragonInventory.class, MessageDragonWhistle.class, MessageDragonGuiSit.class,
-                   MessageDragonGuiLock.class, MessageDragonTeleport.class, MessageDragonExtras.class})
+                   MessageDragonGuiLock.class, MessageDragonTeleport.class, MessageDragonRiderControls.class})
   public static SimpleNetworkWrapper NETWORK_WRAPPER;
 
   @SidedProxy(serverSide = "com.TheRPGAdventurer.ROTD.common.ServerProxy", clientSide = "com.TheRPGAdventurer.ROTD.client.ClientProxy")

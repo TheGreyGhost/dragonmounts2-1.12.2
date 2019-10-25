@@ -1,17 +1,22 @@
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.inits.ModKeys;
+import com.TheRPGAdventurer.ROTD.common.network.MessageDragonRiderControls;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
@@ -87,8 +92,9 @@ public class DragonRidingHelper extends DragonHelper {
     if (getControllingPlayer() == null && !isFlying() && isSitting()) {
       removePassengers();
     }
-
-
+    if (dragon.isClient()) {
+      updateRidingPlayerKeys();
+    }
   }
 
   @Override
@@ -143,8 +149,9 @@ public class DragonRidingHelper extends DragonHelper {
     return false;
   }
 
-  public boolean hasControllingPlayer(EntityPlayer player) {
-    return this.getControllingPassenger() != null && this.getControllingPassenger() instanceof EntityPlayer
+  public boolean isThisTheControllingPlayer(EntityPlayer player) {
+    return this.getControllingPassenger() != null
+            && this.getControllingPassenger() instanceof EntityPlayer
             && this.getControllingPassenger().getUniqueID().equals(player.getUniqueID());
   }
 
@@ -272,7 +279,6 @@ public class DragonRidingHelper extends DragonHelper {
   public boolean canFitPassenger(Entity passenger) {
     return this.getPassengers().size() < dragonPhysicalModel.getMaxNumberOfPassengers(lifeStage().getLifeStage());
   }
-
 
   private static final DragonVariantTag WILL_RIDE_SHOULDER = DragonVariantTag.addTag("willrideshoulder", true,
           "will the dragon ride on the player's shoulder?").categories(DragonVariants.Category.BEHAVIOUR);

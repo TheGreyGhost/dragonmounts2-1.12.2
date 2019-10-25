@@ -57,6 +57,9 @@ public class DragonWhistleHelper extends DragonHelper {
   public void registerDataParameters() {
     checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
 
+    dataManager.register(DATA_FLYING, false);
+    dataManager.register(GOING_DOWN, false);
+
     dataManager.register(WHISTLE_STATE, (byte) 0);
     dataManager.register(WHISTLE, ItemStack.EMPTY);
     dataManager.register(BOOSTING, false);

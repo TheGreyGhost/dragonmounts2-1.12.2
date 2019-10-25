@@ -277,7 +277,7 @@ public class DragonMovementHelper extends DragonHelper {
    * @param damageMultiplier
    * @return
    */
-  public boolean  shouldSufferFallDamager(float distance, float damageMultiplier) {
+  public boolean shouldSufferFallDamage(float distance, float damageMultiplier) {
     return (!canFly());
   }
 

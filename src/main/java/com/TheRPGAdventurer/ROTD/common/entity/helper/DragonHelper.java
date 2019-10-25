@@ -178,8 +178,8 @@ public abstract class DragonHelper {
 
   /** Call this when a DataParameter has been received.
    * 1) checks whether it is relevant to this helper.  If so;
-   * 2) If the helper isn't initialised yet, mark this dataparameter as received.
-   *    Otherwise, call notifyDataManagerChange to inform the helper of the change-after-initialisation
+   * 2) If the helper isn't initialised yet, it marks this dataparameter as received.
+   *    Otherwise, calls notifyDataManagerChange to inform the helper of the change-after-initialisation
    *
    * @param key
    */
