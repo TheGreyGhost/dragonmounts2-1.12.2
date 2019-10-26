@@ -116,6 +116,11 @@ public class DragonInventoryHelper extends DragonHelper {
     }
   }
 
+  // is the dragon big enough to have an inventory?
+  public boolean isLargeEnoughForInventory() {
+    return true;
+  }
+
   // used to be called isChestedLeft
   public boolean isChested() {
     return dataManager.get(CHESTED);

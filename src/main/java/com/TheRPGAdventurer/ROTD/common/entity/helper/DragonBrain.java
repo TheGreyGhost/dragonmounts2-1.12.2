@@ -56,13 +56,30 @@ public class DragonBrain extends DragonHelper {
     }
   }
 
+  // returns true if the dragon will hunt mobs:
+  // - mature enough
+  // - aggressiveness level
+  public boolean attacksMobs() {
+    return false;
+  }
+
+//todo nuance this later: levels of aggressiveness etc
+
+  // returns true if the dragon knows how to hunt for food
+  // - mature enough
+  // - aggressiveness level
+  public boolean huntsForFood() {
+    return false;
+  }
+
+
   public void updateAITasks() {
     // only hatchlings are small enough for doors
     // (eggs don't move on their own anyway and are ignored)
     // guessed, based on EntityAIRestrictOpenDoor - break the door down, don't open it
     if (dragon.getNavigator() instanceof PathNavigateGround) {
       PathNavigateGround pathNavigateGround = (PathNavigateGround) dragon.getNavigator();
-      pathNavigateGround.setEnterDoors(dragon.isBaby());
+      pathNavigateGround.setEnterDoors(dragon.movement().willMoveThroughDoors());
     }
 
     // clear current navigation target
@@ -97,11 +114,12 @@ public class DragonBrain extends DragonHelper {
     } else {
       tasks.addTask(20, new EntityAISwimming(dragon)); // mutex 4
 
-      if (dragon.isBaby() && dragon.onGround) {
-        tasks.addTask(70, new EntityAILeapAtTarget(dragon, 0.7F)); // mutex 1
-        tasks.addTask(80, new EntityAIFollowParent(dragon, 1.4f));
-        tasks.addTask(90, new EntityAITempt(dragon, 0.75, false, OreDictionary.getOres("listAllfishraw").stream().map(ItemStack::getItem).collect(Collectors.toSet()))); // mutex 2+1
-      }
+//      if (dragon.isBaby() && dragon.onGround) {
+//        tasks.addTask(70, new EntityAILeapAtTarget(dragon, 0.7F)); // mutex 1
+//        tasks.addTask(80, new EntityAIFollowParent(dragon, 1.4f));
+//        tasks.addTask(90, new EntityAITempt(dragon, 0.75, false, OreDictionary.getOres("listAllfishraw").stream().map(ItemStack::getItem).collect(Collectors.toSet()))); // mutex 2+1
+//      }
+
       tasks.addTask(110, new EntityAIAttackMelee(dragon, 1, true)); // mutex 2+1
       tasks.addTask(120, new EntityAIDragonFollowOwner(dragon, 1, 14, 128)); // mutex 2+1
       tasks.addTask(130, new EntityAIDragonFollowOwnerElytraFlying(dragon)); // mutex 2+1
@@ -109,7 +127,7 @@ public class DragonBrain extends DragonHelper {
       tasks.addTask(160, new EntityAIDragonWatchIdle(dragon)); // mutex 2
       tasks.addTask(170, new EntityAIDragonWatchLiving(dragon, 16, 0.05f)); // mutex 2
     }
-    if (dragon.isAdult()) {
+    if (dragon.reproduction().hasReachedReproductiveAge() && dragon.reproduction().isFertile()) {
       tasks.addTask(140, new EntityAIDragonMate(dragon, 0.6)); // mutex 2+1
     }
 

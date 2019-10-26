@@ -29,7 +29,7 @@ public class ContainerDragon extends Container {
 
       @SideOnly(Side.CLIENT)
       public boolean isEnabled() {
-        return !dragon.isBaby();
+        return dragon.inventory().isLargeEnoughForInventory();
       }
 
     });

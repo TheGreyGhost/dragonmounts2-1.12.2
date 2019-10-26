@@ -51,10 +51,10 @@ public class EntityAIDragonFollowOwner extends EntityAIDragonBase {
     if (ownerCurrent instanceof EntityPlayer)
       if (((EntityPlayer) ownerCurrent).isSpectator()) return false;
     if (dragon.isSitting()) return false;
-    if (dragon.getDistance(ownerCurrent) < minDist && dragon.isAdult()) return false;
+    if (dragon.getDistance(ownerCurrent) < minDist) return false;
     owner = ownerCurrent;
 
-    return dragon.nothing();
+    return true;
   }
 
   /**
@@ -84,7 +84,7 @@ public class EntityAIDragonFollowOwner extends EntityAIDragonBase {
     if (pathNavigate instanceof PathNavigateGround) {
       PathNavigateGround pathNavigateGround = (PathNavigateGround) pathNavigate;
       this.avoidWater = ((PathNavigateGround) dragon.getNavigator()).getCanSwim();
-      dragon.getBrain().setAvoidsWater(avoidWater);
+      dragon.brain().setAvoidsWater(avoidWater);
     }
 
   }
@@ -99,7 +99,7 @@ public class EntityAIDragonFollowOwner extends EntityAIDragonBase {
     PathNavigate pathNavigate = dragon.getNavigator();
     if (pathNavigate instanceof PathNavigateGround) {
       PathNavigateGround pathNavigateGround = (PathNavigateGround) pathNavigate;
-      dragon.getBrain().setAvoidsWater(avoidWater);  // best guess, based on vanilla EntityAIFollowOwner
+      dragon.brain().setAvoidsWater(avoidWater);  // best guess, based on vanilla EntityAIFollowOwner
     }
   }
 

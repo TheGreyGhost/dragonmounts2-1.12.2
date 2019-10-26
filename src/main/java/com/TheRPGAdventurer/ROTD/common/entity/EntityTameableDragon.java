@@ -243,10 +243,6 @@ public class EntityTameableDragon extends EntityTameable {
 
   //---------------------
 
-  // base attributes
-  public static final double IN_AIR_THRESH = 10;
-  public int inAirTicks;
-  public int boostTicks;
   public int roarTicks;
   public EntityTameableDragonStats dragonStats = new EntityTameableDragonStats();
 
@@ -326,7 +322,7 @@ public class EntityTameableDragon extends EntityTameable {
     }
     super.onUpdate();
     if (world.isRemote) {
-      this.updateKeys();
+//      this.updateKeys();  // moved to DragonRiderControls witih clienttick
       dragonStats.onUpdate(this);
     }
   }
@@ -350,7 +346,6 @@ public class EntityTameableDragon extends EntityTameable {
     if (DebugSettings.isAnimationFrozen()) return;
 
     helpers.values().forEach(DragonHelper::onLivingUpdate);
-//    getBreed().onLivingUpdate(this);
 
     if (isServer()) {
       final float DUMMY_MOVETIME = 0;
@@ -360,54 +355,8 @@ public class EntityTameableDragon extends EntityTameable {
       animator.setLook(netYawHead, rotationPitch);
       animator.tickingUpdate();
       animator.animate();
-
-      // delay flying state for 10 ticks (0.5s)
-      if (onSolidGround()) {
-        inAirTicks = 0;
-      } else {
-        inAirTicks++;
-      }
-
-      if (boosting()) {
-        boostTicks++;
-      } else {
-        boostTicks--;
-      }
-
-      boolean flying = canFly() && inAirTicks > IN_AIR_THRESH && (!isInWater() || !isInLava() && getControllingPlayer() != null);
-      if (flying != isFlying()) {
-
-        // notify client
-        setFlying(flying);
-
-        // clear tasks (needs to be done before switching the navigator!)
-        //			getBrain().clearTasks();
-
-        // update AI follow range (needs to be updated before creating
-        // new PathNavigate!)
-        getEntityAttribute(FOLLOW_RANGE).setBaseValue(getDragonSpeed());
-
-        // update pathfinding method
-        if (isFlying()) {
-          navigator = new PathNavigateFlying(this, world);
-        } else {
-          navigator = new PathNavigateGround(this, world);
-        }
-
-        // tasks need to be updated after switching modes
-        getBrain().updateAITasks();
-
-      }
-
     } else {
       animator.tickingUpdate();
-    }
-
-    if (ticksSinceLastAttack >= 0) { // used for jaw animation
-      ++ticksSinceLastAttack;
-      if (ticksSinceLastAttack > 1000) {
-        ticksSinceLastAttack = -1; // reset at arbitrary large value
-      }
     }
 
     if (roarTicks >= 0) { // used for jaw animation
@@ -422,21 +371,11 @@ public class EntityTameableDragon extends EntityTameable {
 //            this.equalizeYaw(this.getControllingPlayer());
 //        }
 
-    // if we're breathing at a target, look at it
-    if (isUsingBreathWeapon()) {
-      Vec3d dragonEyePos = this.getPositionVector().addVector(0, this.getEyeHeight(), 0);
-      BreathWeaponTarget breathWeaponTarget = this.breathweapon().getPlayerSelectedTarget();
-      if (breathWeaponTarget != null) {
-        breathWeaponTarget.setEntityLook(this.world, this.getLookHelper(), dragonEyePos,
-                this.getHeadYawSpeed(), this.getHeadPitchSpeed());
-      }
-    }
+    doBlockCollisions();  //todo is this necessary?!
+//    List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().grow(0.2, -0.01, 0.2),  //todo what is this for?
+//            EntitySelectors.getTeamCollisionPredicate(this));
 
-    doBlockCollisions();
-    List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().grow(0.2, -0.01, 0.2),  //todo what is this for?
-            EntitySelectors.getTeamCollisionPredicate(this));
-
-    super.onLivingUpdate();
+    super.onLivingUpdate(); //todo why is this at the end, not the start?
   }
 
   public void spawnBodyParticle(EnumParticleTypes type) {
@@ -584,7 +523,7 @@ public class EntityTameableDragon extends EntityTameable {
   @Override
   public double getMountedYOffset() {
     final int DEFAULT_PASSENGER_NUMBER = 0;
-    return dragonPhysicalModel.getRiderPositionOffsetWC(getAgeScale(), getBodyPitch(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
+    return dragonPhysicalModel.getRiderPositionOffsetWC(getAgeScale(), movement().getBodyPitch(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
   }
 
   /**
@@ -592,7 +531,8 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public float getRenderSizeModifier() {
-    return getAgeScale() / (isChild() ? 0.5F : 1.0F);
+    return getAgeScale();
+//    return getAgeScale() / (isChild() ? 0.5F : 1.0F);
 //  0.5 isChild() correction is required due to the code in Render::renderShadow which shrinks the shadow for a child
 //    if (entityIn instanceof EntityLiving)
 //    {
@@ -699,7 +639,7 @@ public class EntityTameableDragon extends EntityTameable {
   public DragonAnimator getAnimator() {
     return animator;
   }
-  public DragonBrain getBrain() {
+  public DragonBrain brain() {
     return getHelper(DragonBrain.class);
   }
   public DragonInteractHelper interactions() {
@@ -801,8 +741,10 @@ public class EntityTameableDragon extends EntityTameable {
   public int getGrowingAge() {
     return 0;
   }
-
-  // aging is handled by DragonLifeStageHelper, not the vanilla aging mechanics
+  @Override
+  public boolean isChild() {
+    return false;
+  }
   @Override
   public void setGrowingAge(int age) {
   }
@@ -824,19 +766,6 @@ public class EntityTameableDragon extends EntityTameable {
    */
   public float getAgeScale() {
     return lifeStage().getAgeScale();
-  }
-
-  public boolean isBaby() {
-    return lifeStage().isBaby();
-  }
-
-  public boolean isAdult() {
-    return lifeStage().isFullyGrown();
-  }
-
-  @Override
-  public boolean isChild() {
-    return lifeStage().isBaby();
   }
 
   /**

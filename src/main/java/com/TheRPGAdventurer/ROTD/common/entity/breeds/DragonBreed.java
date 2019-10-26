@@ -116,19 +116,20 @@ public abstract class DragonBreed {
   public abstract void onDeath(EntityTameableDragon dragon);
 
   public SoundEvent getLivingSound(EntityTameableDragon dragon) {
-    if (dragon.isBaby()) {
-      return ModSounds.ENTITY_DRAGON_HATCHLING_GROWL;
-    } else {
-      if (rand.nextInt(3) == 0) {
-        return ModSounds.ENTITY_DRAGON_GROWL;
-      } else {
-        return ModSounds.ENTITY_DRAGON_BREATHE;
-      }
-    }
+//    if (dragon.isBaby()) {
+//      return ModSounds.ENTITY_DRAGON_HATCHLING_GROWL;
+//    } else {
+//      if (rand.nextInt(3) == 0) {
+//        return ModSounds.ENTITY_DRAGON_GROWL;
+//      } else {
+//        return ModSounds.ENTITY_DRAGON_BREATHE;
+//      }
+//    }
   }
 
   public SoundEvent getRoarSoundEvent(EntityTameableDragon dragon) {
-    return dragon.isBaby() ? ModSounds.HATCHLING_DRAGON_ROAR : ModSounds.DRAGON_ROAR;
+//    return dragon.isBaby() ? ModSounds.HATCHLING_DRAGON_ROAR : ModSounds.DRAGON_ROAR;
+    return ModSounds.DRAGON_ROAR;
   }
 
   public SoundEvent getHurtSound() {
@@ -316,10 +317,10 @@ public abstract class DragonBreed {
       return;
     }
 
-    // only apply on adult dragons that don't fly
-    if (!dragon.isAdult() || dragon.isFlying()) {
-      return;
-    }
+//    // only apply on adult dragons that don't fly
+//    if (!dragon.isAdult() || dragon.isFlying()) {
+//      return;
+//    }
 
     // only apply if footprints are enabled
     float footprintChance = getFootprintChance();

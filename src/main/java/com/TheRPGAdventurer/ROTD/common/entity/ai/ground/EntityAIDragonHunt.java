@@ -26,7 +26,7 @@ public class EntityAIDragonHunt extends EntityAITargetNonTamed {
 
   @Override
   public boolean shouldExecute() {
-    return dragon.isAdult() && super.shouldExecute() && dragon.getHunger() < 100;
+    return dragon.brain().huntsForFood() && super.shouldExecute() && dragon.combat().getHunger() < 100;
   }
   private final EntityTameableDragon dragon;
 

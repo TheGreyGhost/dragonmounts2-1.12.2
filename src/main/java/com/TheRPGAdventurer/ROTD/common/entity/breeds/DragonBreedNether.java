@@ -16,12 +16,12 @@
 //
 //  @Override
 //  public void onEnable(EntityTameableDragon dragon) {
-//    dragon.getBrain().setAvoidsWater(true);
+//    dragon.brain().setAvoidsWater(true);
 //  }
 //
 //  @Override
 //  public void onDisable(EntityTameableDragon dragon) {
-//    dragon.getBrain().setAvoidsWater(false);
+//    dragon.brain().setAvoidsWater(false);
 //  }
 //
 //  @Override

@@ -93,6 +93,14 @@ public class DragonCombatHelper extends DragonHelper {
       this.removePotionEffect(MobEffects.WEAKNESS);
     }
 
+    if (ticksSinceLastAttack >= 0) { // used for jaw animation
+      ++ticksSinceLastAttack;
+      if (ticksSinceLastAttack > 1000) {
+        ticksSinceLastAttack = -1; // reset at arbitrary large value
+      }
+    }
+
+
 
   }
 

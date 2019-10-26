@@ -1,6 +1,10 @@
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.ai.path.PathNavigateFlying;
+import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathWeaponTarget;
+import com.TheRPGAdventurer.ROTD.common.network.MessageDragonRiderControls;
+import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -11,15 +15,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.server.SPacketAnimation;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Created by TGG on 21/10/2019.
@@ -112,6 +120,34 @@ public class DragonMovementHelper extends DragonHelper {
     this.prevRotationPitch = ((EntityPlayer) rider).prevRotationPitch;
   }
 
+  /**
+   * Server only: when a msg is received from the client with keypresses to control the dragon
+   * @param msg
+   */
+  public void onMessageDragonRiderControls(MessageDragonRiderControls msg) {
+    checkState(dragon.isServer(), "message received on client side; unexpected!");
+//    if (message.isHoverCancel) {
+//      dragon.setUnHovered(!dragon.isUnHovered());
+//      player.sendStatusMessage(new TextComponentTranslation(DMUtils.translateToLocal("msg.dragon.toggleHover") + (dragon.isUnHovered() ? ": On" : ": Off")), false);
+//    }
+//
+//    if (message.isFollowYaw) {
+//      dragon.setFollowYaw(!dragon.followYaw());
+//      player.sendStatusMessage(new TextComponentTranslation(DMUtils.translateToLocal("msg.dragon.toggleFollowYaw") + (dragon.followYaw() ? ": On" : ": Off")), false);
+//    }
+//
+//    if (message.locky) {
+//      dragon.setYLocked(!dragon.isYLocked());
+//      player.sendStatusMessage(new TextComponentTranslation(DMUtils.translateToLocal("msg.dragon.toggleYLock") + (dragon.isYLocked() ? ": On" : ": Off")), false);
+//    }
+//
+//    if (message.down) dragon.setGoingDown(true);
+//    else dragon.setGoingDown(false);
+//
+//    if (message.isBoosting) dragon.setBoosting(true);
+//    else dragon.setBoosting(false);
+
+  }
 
   public double getFlySpeed() {
     return this.boosting() ? 4 : 1;
@@ -291,6 +327,67 @@ public class DragonMovementHelper extends DragonHelper {
     return altitude;
   }
 
+  @Override
+  public void onLivingUpdate() {
+    // delay flying state for 10 ticks (0.5s)
+    if (onSolidGround()) {
+      inAirTicks = 0;
+    } else {
+      inAirTicks++;
+    }
+
+    if (boosting()) {
+      boostTicks++;
+    } else {
+      boostTicks--;
+    }
+
+    boolean flying = canFly() && inAirTicks > IN_AIR_THRESH && (!isInWater() || !isInLava() && getControllingPlayer() != null);
+    if (flying != isFlying()) {
+
+      // notify client
+      setFlying(flying);
+
+      // clear tasks (needs to be done before switching the navigator!)
+      //			brain().clearTasks();
+
+      // update AI follow range (needs to be updated before creating
+      // new PathNavigate!)
+      getEntityAttribute(FOLLOW_RANGE).setBaseValue(getDragonSpeed());
+
+      // update pathfinding method
+      if (isFlying()) {
+        navigator = new PathNavigateFlying(this, world);
+      } else {
+        navigator = new PathNavigateGround(this, world);
+      }
+
+      // tasks need to be updated after switching modes
+      getBrain().updateAITasks();
+
+    }
+
+    // if we're breathing at a target, look at it
+    if (isUsingBreathWeapon()) {
+      Vec3d dragonEyePos = this.getPositionVector().addVector(0, this.getEyeHeight(), 0);
+      BreathWeaponTarget breathWeaponTarget = this.breathweapon().getPlayerSelectedTarget();
+      if (breathWeaponTarget != null) {
+        breathWeaponTarget.setEntityLook(this.world, this.getLookHelper(), dragonEyePos,
+                this.getHeadYawSpeed(), this.getHeadPitchSpeed());
+      }
+    }
+
+
+  }
+
+  // Will the dragon go through doors?
+  //  - can it fit?
+  //  - does it want to?
+  public boolean willMoveThroughDoors() {
+    final double THRESHOLD_SIZE = 0.3;
+    return (dragon.width <= THRESHOLD_SIZE);
+  }
+
 
   /**
    * Checks if the blocks below the dragons hitbox is present and solid
@@ -400,6 +497,11 @@ public class DragonMovementHelper extends DragonHelper {
 
   public static final double BASE_GROUND_SPEED = 0.4;
   public static final double BASE_AIR_SPEED = 0.9;
+
+  // base attributes
+  public static final double IN_AIR_THRESH = 10;
+  public int inAirTicks;
+  public int boostTicks;
 
 
 }

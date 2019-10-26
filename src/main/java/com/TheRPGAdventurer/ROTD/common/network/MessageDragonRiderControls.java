@@ -65,27 +65,7 @@ public class MessageDragonRiderControls extends AbstractMessage<MessageDragonRid
     Entity entity = player.world.getEntityByID(message.dragonId);
     if (entity instanceof EntityTameableDragon) {
       EntityTameableDragon dragon = (EntityTameableDragon) entity;
-
-      if (message.isHoverCancel) {
-        dragon.setUnHovered(!dragon.isUnHovered());
-        player.sendStatusMessage(new TextComponentTranslation(DMUtils.translateToLocal("msg.dragon.toggleHover") + (dragon.isUnHovered() ? ": On" : ": Off")), false);
-      }
-
-      if (message.isFollowYaw) {
-        dragon.setFollowYaw(!dragon.followYaw());
-        player.sendStatusMessage(new TextComponentTranslation(DMUtils.translateToLocal("msg.dragon.toggleFollowYaw") + (dragon.followYaw() ? ": On" : ": Off")), false);
-      }
-
-      if (message.locky) {
-        dragon.setYLocked(!dragon.isYLocked());
-        player.sendStatusMessage(new TextComponentTranslation(DMUtils.translateToLocal("msg.dragon.toggleYLock") + (dragon.isYLocked() ? ": On" : ": Off")), false);
-      }
-
-      if (message.down) dragon.setGoingDown(true);
-      else dragon.setGoingDown(false);
-
-      if (message.isBoosting) dragon.setBoosting(true);
-      else dragon.setBoosting(false);
+      dragon.movement().onMessageDragonRiderControls(message);
     }
   }
   private int dragonId;

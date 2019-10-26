@@ -397,7 +397,7 @@ public class DragonLifeStageHelper extends DragonHelper {
 //    if (dragon.isClient()) {
 //    } else {
 //      // update AI
-//      dragon.getBrain().updateAITasks();
+//      dragon.brain().updateAITasks();
 //
 //      // update attribute modifier
 //      registerEntityAttributes();

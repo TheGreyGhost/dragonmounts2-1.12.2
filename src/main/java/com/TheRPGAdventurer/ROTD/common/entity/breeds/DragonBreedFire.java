@@ -16,7 +16,6 @@ import com.TheRPGAdventurer.ROTD.client.sound.SoundEffectBreathWeaponFireP;
 import com.TheRPGAdventurer.ROTD.client.sound.SoundEffectBreathWeaponP;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeFactory;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeFire;
-import com.TheRPGAdventurer.ROTD.common.entity.breath.nodes.BreathNodeP;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.weapons.BreathWeaponFireP;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.weapons.BreathWeaponP;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
@@ -24,8 +23,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
@@ -49,7 +46,7 @@ public class DragonBreedFire extends DragonBreed {
 
   @Override
   public void onEnable(EntityTameableDragon dragon) {
-    dragon.getBrain().setAvoidsWater(true);
+    dragon.brain().setAvoidsWater(true);
   }
 
 
@@ -60,7 +57,7 @@ public class DragonBreedFire extends DragonBreed {
   */
   @Override
   public void onDisable(EntityTameableDragon dragon) {
-    dragon.getBrain().setAvoidsWater(false);
+    dragon.brain().setAvoidsWater(false);
   }
 
   @Override
@@ -122,7 +119,7 @@ public class DragonBreedFire extends DragonBreed {
   }
 
   private void doParticles(EntityTameableDragon dragon) {
-    if (!dragon.isBaby()) {
+//    if (!dragon.isBaby()) {
       float s = dragon.getAgeScale() * 1.2f;
       for (double x1 = 0; x1 < s + 1; ++x1) {
         double x = dragon.posX + (rand.nextDouble() - 0.5) * (dragon.width - 0.65) * s;
@@ -131,7 +128,7 @@ public class DragonBreedFire extends DragonBreed {
 
         dragon.world.spawnParticle(EnumParticleTypes.FLAME, x, y, z, 0, 0, 0);
       }
-    }
+//    }
   }
 
 }

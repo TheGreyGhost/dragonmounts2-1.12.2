@@ -10,6 +10,7 @@ DragonReproductionHelper: Reproduction & mating
   - dragon is either male (default) or female.
   - only reproduce if in "love mode" (EntityAnimal vanilla)
   - the child breed is randomly either of the parents, and is named as a combination of the parents
+  - can only enter "love mode" if fertile and has high enough emotional maturity (hasReachedReproductiveAge)
 
 DragonInteractHelper: Player->Dragon interactions (as per vanilla) in
   - looks like originally intended to have one class per interaction but later decided not to.

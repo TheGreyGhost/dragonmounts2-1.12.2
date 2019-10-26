@@ -133,7 +133,7 @@ public class DragonInteractHelper extends DragonHelper {
                 /*
                  * Riding
                  */
-        if (dragon.canFitPassenger(player) && dragon.isTamed() && dragon.isSaddled() && !dragon.isBaby() && !player.isSneaking() && !hasInteractItemsEquipped(player)) {
+        if (dragon.canFitPassenger(player) && dragon.isTamed() && dragon.isSaddled()  && !player.isSneaking() && !hasInteractItemsEquipped(player)) {
           dragon.setRidingPlayer(player);
           return true;
         }
@@ -182,7 +182,9 @@ public class DragonInteractHelper extends DragonHelper {
           }
 
           // breed
-          if (dragon.isBreedingItem(item) && dragon.isAdult() && !dragon.isInLove()) {
+          if (dragon.isBreedingItem(item)
+              && dragon.reproduction().hasReachedReproductiveAge() && dragon.reproduction().isFertile()
+              && !dragon.isInLove()) {
             eatEvent(player);
             dragon.setInLove(player);
             return true;

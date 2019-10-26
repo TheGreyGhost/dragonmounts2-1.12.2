@@ -292,7 +292,8 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
   @Override
   protected ResourceLocation getEntityTexture(EntityTameableDragon dragon) {
     DefaultDragonBreedRenderer texture = getBreedRenderer(dragon);
-    return dragon.isMale() ? texture.getMaleBodyTexture(dragon.isBaby(), false) : texture.getFemaleBodyTexture(dragon.isBaby(), false);
+//    return dragon.isMale() ? texture.getMaleBodyTexture(dragon.isBaby(), false) : texture.getFemaleBodyTexture(dragon.isBaby(), false);
+    return dragon.isMale() ? texture.getMaleBodyTexture(false, false) : texture.getFemaleBodyTexture(false, false);
   }
   private final Map<EnumDragonBreed, DefaultDragonBreedRenderer> breedRenderers = new EnumMap<>(EnumDragonBreed.class);
 
