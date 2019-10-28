@@ -24,6 +24,7 @@ import com.TheRPGAdventurer.ROTD.client.userinput.DragonRiderControls;
 import com.TheRPGAdventurer.ROTD.common.CommonProxy;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.common.event.DragonViewEvent;
 import com.TheRPGAdventurer.ROTD.common.event.IItemColorRegistration;
 import com.TheRPGAdventurer.ROTD.common.inits.ModItems;
@@ -71,6 +72,7 @@ public class ClientProxy extends CommonProxy {
     MinecraftForge.EVENT_BUS.register(EggModels.getInstance());
 
     EggModels.getInstance().registerConfigurationTags();
+    DragonPhysicalModel.registerConfigurationTags();
 
 //    ClientRegistry.registerTileEntity(TileEntityDragonHatchableEgg.class, "dragonmounts:te_dragon_hatchable_egg", new TESRDragonHatchableEgg());
 //    final int DEFAULT_ITEM_SUBTYPE = 0;

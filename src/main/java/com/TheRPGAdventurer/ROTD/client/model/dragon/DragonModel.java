@@ -186,7 +186,7 @@ public class DragonModel extends AdvancedModelBase {
     animator.animate();
     updateFromAnimator(dragon);
 
-    ageScale = dragon.getAgeScale();
+    ageScale = dragon.lifeStage().getAgeScale();
 
     renderModel(dragon, scale);
   }
@@ -366,7 +366,7 @@ public class DragonModel extends AdvancedModelBase {
         float[] xGroundWalk = {0, 0, 0, 0};
 
         float cyclesMoved = DragonAnimator.getMoveDistanceBlocksX4()
-                / dragonPhysicalModel.getMoveDistancePerWalkAnimationCycleWC(dragon.getAgeScale()) / 4.0F;
+                / dragonPhysicalModel.getMoveDistancePerWalkAnimationCycleWC(dragon.lifeStage().getAgeScale()) / 4.0F;
 
         if (DebugSettings.isForceDragonWalk()) {
           cyclesMoved = DebugSettings.getForceDragonWalkCycles();
@@ -767,7 +767,7 @@ public class DragonModel extends AdvancedModelBase {
     dragonAnimator.animate();
 
     // update flags
-    bodyRidgePlateFrontmost.isHidden = dragon.isSaddled();
+    bodyRidgePlateFrontmost.isHidden = dragon.riding().isSaddled();
 
     // update offsets
     offsetX = dragonAnimator.getModelOffsetX();

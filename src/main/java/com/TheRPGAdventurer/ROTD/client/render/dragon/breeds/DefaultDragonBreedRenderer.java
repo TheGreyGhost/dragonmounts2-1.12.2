@@ -15,6 +15,8 @@ import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.layer.*;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.util.ResourceLocation;
 
@@ -112,10 +114,10 @@ public class DefaultDragonBreedRenderer implements DragonBreedRenderer {
     return saddleTexture;
   }
 
-  @Override
-  public ResourceLocation getEggTexture() {
-    return eggTexture;
-  }
+//  @Override
+//  public ResourceLocation getEggTexture() {
+//    return eggTexture;
+//  }
 
   @Override
   public ResourceLocation getDissolveTexture() {
@@ -156,5 +158,18 @@ public class DefaultDragonBreedRenderer implements DragonBreedRenderer {
   private final ResourceLocation eggTexture;
   private final ResourceLocation dissolveTexture;
   private final ResourceLocation chestTexture;
+
+  private static final DragonVariantTag BODY_TEXTURE = DragonVariantTag.addTag("basetexture", "textures/entities/dragon/defaultbreed/body.png",
+          "the texture used for the base body texture").categories(DragonVariants.Category.PHYSICAL_MODEL);
+  private static final DragonVariantTag GLOW_TEXTURE = DragonVariantTag.addTag("glowtexture", "textures/entities/dragon/defaultbreed/glow.png",
+          "the texture used for the glowing parts of the dragon (eg eyes)").categories(DragonVariants.Category.PHYSICAL_MODEL);
+  private static final DragonVariantTag SADDLE_TEXTURE = DragonVariantTag.addTag("saddletexture", "textures/entities/dragon/defaultbreed/saddle.png",
+          "the texture used for the saddle worn by the dragon").categories(DragonVariants.Category.PHYSICAL_MODEL);
+  private static final DragonVariantTag CHEST_TEXTURE = DragonVariantTag.addTag("chesttexture", "textures/entities/dragon/defaultbreed/chest.png",
+          "the texture used for saddlebags/chest carried by the dragon").categories(DragonVariants.Category.PHYSICAL_MODEL);
+  private static final DragonVariantTag DISSOLVE_TEXTURE = DragonVariantTag.addTag("dissolvetexture", "textures/entities/dragon/defaultbreed/dissolve.png",
+          "the texture used to make the dragon 'dissolve away'' when it dies").categories(DragonVariants.Category.PHYSICAL_MODEL);
+
+// todo later: implement texture as optional age-based array to allow for texture changing as dragon matures
 
 }

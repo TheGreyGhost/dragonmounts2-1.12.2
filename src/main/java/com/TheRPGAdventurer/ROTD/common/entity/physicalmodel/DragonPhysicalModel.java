@@ -2,7 +2,6 @@ package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
-import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.util.math.Vec3d;
@@ -40,6 +39,16 @@ public class DragonPhysicalModel {
   public DragonPhysicalModel(DragonBreedNew dragonBreedNew, Modifiers modifiers) {
     this.dragonVariants = dragonBreedNew.getDragonVariants();
     this.modifiers = modifiers;
+    this.modifiedCategory = new DragonVariants.ModifiedCategory(DragonVariants.Category.PHYSICAL_MODEL, modifiers);
+  }
+
+  /**
+   * Initialise all the configuration tags used by this helper
+   */
+  public static void registerConfigurationTags()
+  {
+    // dummy method for the tags themselves -the initialisation is all done in static initialisers
+//    DragonVariants.addVariantTagValidator(new EggModelsValidator());
   }
 
   public float getHitboxWidthWC(float ageScale) {
@@ -137,8 +146,9 @@ public class DragonPhysicalModel {
    *
    * @return
    */
-  public int getMaxNumberOfPassengers(DragonLifeStage dragonLifeStage) {
-    return 3;
+  public int getMaxNumberOfPassengers() {
+    return 1;
+//    return 3;
   }
 
   /**
@@ -256,15 +266,15 @@ public class DragonPhysicalModel {
   }
 
   public int getNumberOfTailSegments() {
-    return NUMBER_OF_TAIL_SEGMENTS;
+    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_TAIL_SEGMENTS);
   }
 
   public int getNumberOfNeckSegments() {
-    return NUMBER_OF_NECK_SEGMENTS;
+    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_NECK_SEGMENTS);
   }
 
   public int getNumberOfWingFingers() {
-    return NUMBER_OF_WING_FINGERS;
+    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_WING_FINGERS);
   }
 
   /**
@@ -327,11 +337,18 @@ public class DragonPhysicalModel {
   private Vec3d THROAT_OFFSET_FROM_HEAD_CENTRE_BC = new Vec3d(0, -6.0 / 16.0, 12 / 16.0);
   //Throat position relative to head centrepoint is [y=10, z=-12] in MC -  to be 2 MC beyond main head
 
-  private int NUMBER_OF_NECK_SEGMENTS = 7;
-  private int NUMBER_OF_WING_FINGERS = 4;
-  private int NUMBER_OF_TAIL_SEGMENTS = 12;
-
   private final DragonVariants dragonVariants;
   private final Modifiers modifiers;
+  private final DragonVariants.ModifiedCategory modifiedCategory;
+
+  private static final DragonVariantTag NUMBER_OF_NECK_SEGMENTS = DragonVariantTag.addTag("numberofnecksegments", 7, 0, 20,
+          "the number of segments in the dragon's neck").categories(DragonVariants.Category.PHYSICAL_MODEL);
+  private static final DragonVariantTag NUMBER_OF_WING_FINGERS = DragonVariantTag.addTag("numberofwingfingers", 4, 0, 20,
+          "the number of 'fingers' on each wing").categories(DragonVariants.Category.PHYSICAL_MODEL);
+  private static final DragonVariantTag NUMBER_OF_TAIL_SEGMENTS = DragonVariantTag.addTag("numberofwingfingers", 12, 0, 20,
+          "the number of segments in the tail").categories(DragonVariants.Category.PHYSICAL_MODEL);
+
+
+
 
 }

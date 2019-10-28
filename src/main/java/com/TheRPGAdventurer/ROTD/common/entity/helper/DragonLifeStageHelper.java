@@ -207,6 +207,14 @@ public class DragonLifeStageHelper extends DragonHelper {
     return size;
   }
 
+  /**
+   * Returns the physical size of the dragon as a fraction of the maximum size
+   * @return value between 0 -> 1
+   */
+  public float getAgeScale() {
+    return (float)(getPhysicalSize() / maximumSizeAtAnyAge);
+  }
+
   /** get the unmodified health points of the dragon at its current age
    * @return  health points
    */

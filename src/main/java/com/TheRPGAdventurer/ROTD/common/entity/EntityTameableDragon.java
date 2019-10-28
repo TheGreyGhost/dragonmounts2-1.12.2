@@ -131,10 +131,12 @@ public class EntityTameableDragon extends EntityTameable {
 
   private void initialiseBothSides() {
     dragonPhysicalModel = new DragonPhysicalModel(configuration().getDragonBreedNew(), configuration().getModifiers());
+    animator = new DragonAnimator(this);
   }
 
   private void onConfigurationChangeThis() {
     dragonPhysicalModel = new DragonPhysicalModel(configuration().getDragonBreedNew(), configuration().getModifiers());
+    animator = new DragonAnimator(this);
   }
 
   /** called to notify that the dragon configuration has changed.
@@ -222,10 +224,9 @@ public class EntityTameableDragon extends EntityTameable {
     if (isClient()) {
       // add client helpers
     }
-    // todo for now, leave animator and physicalmodel as non-helpers:
-    animator = new DragonAnimator(this);
     // just a default for now
     dragonPhysicalModel = new DragonPhysicalModel(DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed(), new Modifiers());
+    animator = new DragonAnimator(this);
 
     moveHelper = new DragonMoveHelper(this);   // not a DragonHelper despite the name; is vanilla
      // consider the other vanilla helpers from EntityLivingBase - (Look, Move, Jump, Body)
@@ -380,7 +381,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   public void spawnBodyParticle(EnumParticleTypes type) {
     double ox, oy, oz;
-    float s = this.getAgeScale() * 1.2f;
+    float s = this.lifeStage().getAgeScale() * 1.2f;
 
     switch (type) {
       case EXPLOSION_NORMAL:
@@ -416,7 +417,7 @@ public class EntityTameableDragon extends EntityTameable {
   }
 
   public void spawnBodyParticles(EnumParticleTypes type, int baseAmount) {
-    int amount = (int) (baseAmount * this.getAgeScale());
+    int amount = (int) (baseAmount * this.lifeStage().getAgeScale());
     for (int i = 0; i < amount; i++) {
       spawnBodyParticle(type);
     }
@@ -511,7 +512,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public float getEyeHeight() {
-    float eyeHeight = dragonPhysicalModel.getEyeHeightWC(getAgeScale(), isSitting());
+    float eyeHeight = dragonPhysicalModel.getEyeHeightWC(lifeStage().getAgeScale(), isSitting());
     return eyeHeight;
   }
 
@@ -523,7 +524,7 @@ public class EntityTameableDragon extends EntityTameable {
   @Override
   public double getMountedYOffset() {
     final int DEFAULT_PASSENGER_NUMBER = 0;
-    return dragonPhysicalModel.getRiderPositionOffsetWC(getAgeScale(), movement().getBodyPitch(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
+    return dragonPhysicalModel.getRiderPositionOffsetWC(lifeStage().getAgeScale(), movement().getBodyPitch(), isSitting(), DEFAULT_PASSENGER_NUMBER).y;
   }
 
   /**
@@ -531,7 +532,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public float getRenderSizeModifier() {
-    return getAgeScale();
+    return lifeStage().getAgeScale();
 //    return getAgeScale() / (isChild() ? 0.5F : 1.0F);
 //  0.5 isChild() correction is required due to the code in Render::renderShadow which shrinks the shadow for a child
 //    if (entityIn instanceof EntityLiving)
@@ -759,14 +760,14 @@ public class EntityTameableDragon extends EntityTameable {
     return riding().shouldDismountInWater(rider);
   }
 
-  /**
-   * Returns the size multiplier for the current age.
-   *
-   * @return scale
-   */
-  public float getAgeScale() {
-    return lifeStage().getAgeScale();
-  }
+//  /**
+//   * Returns the size multiplier for the current age.
+//   *
+//   * @return scale
+//   */
+//  public float getAgeScale() {
+//    return lifeStage().getAgeScale();
+//  }
 
   /**
    * Checks if this entity is running on a client.
@@ -819,11 +820,13 @@ public class EntityTameableDragon extends EntityTameable {
     return super.attackEntityFrom(source, damage);
   }
 
-  @Override
-  protected float updateDistance(float f1, float f2) {
-    dragonBodyHelper.updateRenderAngles();
-    return f2;
-  }
+// not needed? is an exact copy of the overriden function?
+//  @Override
+//  protected float updateDistance(float f1, float f2) {
+//    checkState(bodyHelper instanceof DragonBodyHelper, );
+//    dragonBodyHelper.updateRenderAngles();
+//    return f2;
+//  }
 
   @Override
   protected float getJumpUpwardsMotion() {

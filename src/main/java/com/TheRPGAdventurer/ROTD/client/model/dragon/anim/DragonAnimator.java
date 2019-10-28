@@ -140,7 +140,7 @@ public class DragonAnimator {
     // check if the wings are moving down and trigger the event
     boolean newWingsDown = cycleOfs > 1;
     if (newWingsDown && !wingsDown && flutter != 0) {
-      dragon.onWingsDown(speed);
+      dragon.sounds().onWingsDown(speed);
     }
     wingsDown = newWingsDown;
 
@@ -161,7 +161,7 @@ public class DragonAnimator {
    * Updates the animation state. Called on every tick.
    */
   public void tickingUpdate() {
-    setOnGround(!dragon.isFlying());
+    setOnGround(!dragon.movement().isFlying());
 
     if (DebugSettings.isAnimationFrozen()) {
       return;
@@ -232,7 +232,7 @@ public class DragonAnimator {
     DragonBreathHelperP.BreathState breathState = dragon.breathweapon().getCurrentBreathState();
     switch (breathState) {
       case IDLE: {  // breath is idle, handle bite attack
-        int ticksSinceLastAttack = dragon.getTicksSinceLastAttack();
+        int ticksSinceLastAttack = dragon.movement().getTicksSinceLastAttack();
         final int JAW_OPENING_TIME_FOR_ATTACK = 5;
         boolean jawFlag = (ticksSinceLastAttack >= 0 && ticksSinceLastAttack < JAW_OPENING_TIME_FOR_ATTACK);
         biteTimer.add(jawFlag ? 0.2f : -0.2f);
@@ -265,8 +265,9 @@ public class DragonAnimator {
     }
 
     // update speed transition
-    boolean nearGround = dragon.getAltitude() < dragon.height * 2;
-    boolean speedFlag = speedEnt > speedMax || onGround || nearGround || dragon.getPassengers().size() > 1 || dragon.isUnHovered() || (speedEnt > speedMax && dragon.boosting());
+    boolean nearGround = dragon.movement().getAltitude() < dragon.height * 2;
+    boolean speedFlag = speedEnt > speedMax || onGround || nearGround || dragon.getPassengers().size() > 1
+            || dragon.movement().isUnHovered() || (speedEnt > speedMax && dragon.movement().boosting());
     float speedValue = 0.05f;
     speedTimer.add(speedFlag ? speedValue : -speedValue);
 
@@ -413,8 +414,9 @@ public class DragonAnimator {
     float pitchMovingMax = 90;
     float pitchMoving = MathX.clamp(yTrail.get(pt, 5, 0) * 10, -pitchMovingMax, pitchMovingMax);
     float pitchHoverMax = 60;
-    boolean unhover = dragon.dragonInv.getStackInSlot(33) != null || dragon.dragonInv.getStackInSlot(34) != null
-            || dragon.getPassengers().size() > 1 || dragon.isUnHovered() || dragon.boosting();
+//    boolean unhover = dragon.dragonInv.getStackInSlot(33) != null || dragon.dragonInv.getStackInSlot(34) != null
+//            || dragon.getPassengers().size() > 1 || dragon.isUnHovered() || dragon.boosting();
+    boolean unhover = true;
     return Interpolation.smoothStep(pitchHoverMax, unhover ? 0 : pitchMoving, speed);
   }
 

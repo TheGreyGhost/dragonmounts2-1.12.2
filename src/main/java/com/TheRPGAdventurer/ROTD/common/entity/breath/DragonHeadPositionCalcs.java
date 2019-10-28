@@ -60,12 +60,12 @@ public class DragonHeadPositionCalcs {
     currentSegment.rotateAngleZ = 0;
 
     dragon.getAnimator().setLook(netLookYaw, lookPitch);
-    double health = dragon.getHealthRelative();
+    double health = dragon.combat().getHealthRelative();
     for (int i = 0; i < NUMBER_OF_NECK_SEGMENTS; i++) {
       float vertMulti = (i + 1) / (float) NUMBER_OF_NECK_SEGMENTS;
 
       float baseRotX = MathX.cos((float) i * 0.45f + animRadians) * 0.15f;
-      if (!dragon.isUsingBreathWeapon()) baseRotX *= MathX.lerp(0.2f, 1, flutter);
+      if (!dragon.breathweapon().isUsingBreathWeapon()) baseRotX *= MathX.lerp(0.2f, 1, flutter);
       baseRotX *= MathX.lerp(1, 0.2f, sit);
       float ofsRotX = MathX.sin(vertMulti * MathX.PI_F * 0.9f) * 0.63f; // 0.9
 
@@ -147,7 +147,7 @@ public class DragonHeadPositionCalcs {
     // add the entity origin in world coordinates
 
     float renderYawOffset = dragon.renderYawOffset;
-    float ageScale = dragon.getAgeScale();
+    float ageScale = dragon.lifeStage().getAgeScale();
 
     Vec3d throatOffsetWC = dragonPhysicalModel.getThroatOffsetFromHeadOriginWC(ageScale, head.rotateAngleX, head.rotateAngleY);
 
@@ -156,7 +156,7 @@ public class DragonHeadPositionCalcs {
     Vec3d headOffsetFromPitchOriginWC = dragonPhysicalModel.convertMCtoWC(ageScale, headOffsetFromPitchOriginMC);
     Vec3d headPlusThroatOffsetWC = headOffsetFromPitchOriginWC.add(throatOffsetWC);
 
-    float bodyPitchRadians = (float) Math.toRadians(dragon.getBodyPitch());
+    float bodyPitchRadians = (float) Math.toRadians(dragon.movement().getBodyPitch());
     //pitch up to match the body
     headOffsetFromPitchOriginWC = headPlusThroatOffsetWC.rotatePitch(bodyPitchRadians);
 
@@ -176,7 +176,7 @@ public class DragonHeadPositionCalcs {
    * @return the relative size of the head.  1.0 means normal size (adult).  Baby head is larger (eg 1.5)
    */
   public float getRelativeHeadSize() {
-    return dragonPhysicalModel.getRelativeHeadSize(dragon.getAgeScale());
+    return dragonPhysicalModel.getRelativeHeadSize(dragon.lifeStage().getAgeScale());
   }
 
   /**

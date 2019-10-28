@@ -15,6 +15,8 @@ import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DefaultDragonBreedR
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.client.model.ModelBanner;
@@ -281,7 +283,7 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
   @Override
   protected void preRenderCallback(EntityTameableDragon dragon, float partialTicks) {
     DragonPhysicalModel dragonPhysicalModel = dragon.getPhysicalModel();
-    float renderScale = dragonPhysicalModel.getRenderScaleFactor(dragon.getAgeScale());
+    float renderScale = dragonPhysicalModel.getRenderScaleFactor(dragon.lifeStage().getAgeScale());
     if (DebugSettings.isBoxDragon()) {
       renderScale = (float) DebugSettings.getDebugParameter("scale");
       if (renderScale < 0.01) renderScale = 1.0F;
@@ -296,6 +298,8 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
     return dragon.isMale() ? texture.getMaleBodyTexture(false, false) : texture.getFemaleBodyTexture(false, false);
   }
   private final Map<EnumDragonBreed, DefaultDragonBreedRenderer> breedRenderers = new EnumMap<>(EnumDragonBreed.class);
+
+
 
 }
 
