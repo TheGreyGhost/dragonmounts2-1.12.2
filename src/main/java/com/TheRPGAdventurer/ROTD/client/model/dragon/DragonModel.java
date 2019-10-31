@@ -12,10 +12,14 @@ package com.TheRPGAdventurer.ROTD.client.model.dragon;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonHeadPositionCalcs;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonConfigurationHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.SegmentSizePositionRotation;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.ilexiconn.llibrary.client.model.tools.AdvancedModelBase;
@@ -25,6 +29,11 @@ import net.minecraft.entity.EntityLivingBase;
 
 /**
  * Generic model for all winged tetrapod dragons.
+ *
+ * Does not contain any animation state information; this is stored in DragonAnimator
+ * It is fully defined by the Breed and modifiers that were used to create it.
+ * Although the constructor is provided with an EntityTameableDragon, it may later be called with other dragons that have the same
+ *   breed and modifiers.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  * @Modifier James Miller <TheRPGAdventurer.>
@@ -99,12 +108,13 @@ public class DragonModel extends AdvancedModelBase {
   public float offsetZ;
   public float pitch;
   public float ageScale;
-  public DragonModel(EnumDragonBreed breed) {
+  public DragonModel(DragonPhysicalModel dragonPhysicalModel) {
     textureWidth = 256;
     textureHeight = 256;
 
-    this.breed = breed;
-    this.dragonPhysicalModel = breed.getBreed().getDragonPhysicalModel();
+    this.dragonPhysicalModel = dragonPhysicalModel;
+
+    //todo copy parameters here from dragon configuration?
 
     setTextureOffset("body.body", 0, 0);
     setTextureOffset("body.ridgeplate", 0, 32);
@@ -348,7 +358,7 @@ public class DragonModel extends AdvancedModelBase {
       xAir = xAirAll[i % 2];
 
       // interpolate between sitting and standing
-      DragonAnimator.slerpArrays(xGroundStand[frontBackIdx], xGroundSit[frontBackIdx], xGround, sit);
+      DragonAnimator.slerpArrays(X_GROUND_STAND[frontBackIdx], X_GROUND_SIT[frontBackIdx], xGround, sit);
 
       // align the toes so they're always horizontal on the ground
       xGround[3] = -(xGround[0] + xGround[1] + xGround[2]);
@@ -383,14 +393,14 @@ public class DragonModel extends AdvancedModelBase {
         DragonAnimator.slerpArrays(xGround, xGroundWalk, xGround, walk);
       }
 
-      float yAir = yAirAll[frontBackIdx];
+      float yAir = Y_AIR_ALL[frontBackIdx];
       float yGround;
 
       // interpolate between sitting and standing
-      yGround = MathX.slerp(yGroundStand[frontBackIdx], yGroundSit[frontBackIdx], sit);
+      yGround = MathX.slerp(Y_GROUND_STAND[frontBackIdx], Y_GROUND_SIT[frontBackIdx], sit);
 
       // interpolate between standing and walking
-      yGround = MathX.slerp(yGround, yGroundWalk[frontBackIdx], walk);
+      yGround = MathX.slerp(yGround, Y_GROUND_WALK[frontBackIdx], walk);
 
       // interpolate between flying and grounded
       thigh.rotateAngleY = MathX.slerp(yAir, yGround, ground);
@@ -814,7 +824,6 @@ public class DragonModel extends AdvancedModelBase {
           {{0.9f, -2.1f, 1.8f, 0.6f}, // move up and forward
                   {-0.7f, 1.4f, -0.2f, 0} // move down and forward
           }};
-  private EnumDragonBreed breed;
   private DragonModelMode mode;
   private DragonPhysicalModel dragonPhysicalModel;
   private float relativeHeadScale; // the relative scaling for the head.  1.0 = normal size (Adult)
@@ -823,12 +832,12 @@ public class DragonModel extends AdvancedModelBase {
   // X rotation angles for ground
   // 1st dim - front, hind
   // 2nd dim - thigh, crus, foot, toe
-  private float[][] xGroundStand = {{0.8f, -1.5f, 1.3f, 0}, {-0.3f, 1.5f, -0.2f, 0},};
-  private float[][] xGroundSit = {{0.3f, -1.8f, 1.8f, 0}, {-0.8f, 1.8f, -0.9f, 0},};
+  private float[][] X_GROUND_STAND = {{0.8f, -1.5f, 1.3f, 0}, {-0.3f, 1.5f, -0.2f, 0},};
+  private float[][] X_GROUND_SIT = {{0.3f, -1.8f, 1.8f, 0}, {-0.8f, 1.8f, -0.9f, 0},};
   // Y rotation angles for ground, thigh only
-  private float[] yGroundStand = {-0.25f, 0.25f};
-  private float[] yGroundSit = {0.1f, 0.35f};
-  private float[] yGroundWalk = {-0.1f, 0.1f};
+  private float[] Y_GROUND_STAND = {-0.25f, 0.25f};
+  private float[] Y_GROUND_SIT = {0.1f, 0.35f};
+  private float[] Y_GROUND_WALK = {-0.1f, 0.1f};
   // final X rotation angles for air
   private float[] xAir;
   // X rotation angles for air
@@ -836,5 +845,5 @@ public class DragonModel extends AdvancedModelBase {
   // 2nd dim - thigh, crus, foot, toe
   private float[][] xAirAll = {{0, 0, 0, 0}, {0, 0, 0, 0}};
   // Y rotation angles for air, thigh only
-  private float[] yAirAll = {-0.1f, 0.1f};
+  private final float[] Y_AIR_ALL = {-0.1f, 0.1f};
 }

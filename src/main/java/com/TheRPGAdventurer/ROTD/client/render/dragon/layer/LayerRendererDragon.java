@@ -11,7 +11,7 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon.layer;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
-import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DefaultDragonBreedRenderer;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedPlusModifiersRenderer;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
@@ -27,7 +27,7 @@ import net.minecraft.util.ResourceLocation;
  */
 public abstract class LayerRendererDragon implements LayerRenderer<EntityTameableDragon> {
 
-  public LayerRendererDragon(DragonRenderer renderer, DefaultDragonBreedRenderer breedRenderer, DragonModel model) {
+  public LayerRendererDragon(DragonRenderer renderer, DragonBreedPlusModifiersRenderer breedRenderer, DragonModel model) {
     this.renderer = renderer;
     this.breedRenderer = breedRenderer;
     this.model = model;
@@ -79,6 +79,6 @@ public abstract class LayerRendererDragon implements LayerRenderer<EntityTameabl
     GlStateManager.enableLighting();
   }
   protected final DragonRenderer renderer;
-  protected final DefaultDragonBreedRenderer breedRenderer;
+  protected final DragonBreedPlusModifiersRenderer breedRenderer;
   protected final DragonModel model;
 }

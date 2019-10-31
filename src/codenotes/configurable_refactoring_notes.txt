@@ -95,6 +95,44 @@ ModifiedCategoryRanker:
       - one mc has one of the modifiers, the other has one which is wrong
       - one mc has one of the modifiers, the other has two, one of which is wrong
 
+-----------------
+Rendering
+state information in DragonAnimator
+what about model config info due to breed and variants?
+Need to spawn a new one every time we get a new combination?
+Yes - something which can tell if the rendering is compatible or not?
+
+Need to investigate rendering and model to understand how to refactor properly for breeds and variants.
+Layers
+Render
+DragonRenderer
+DragonDefaultBreedRenderer
+
+DragonRenderer is a RenderLiving
+ currently: creates a breedRenderer for each breed.
+   getBreedRenderer used by DragonRenderer in its vanilla methods
+
+  these are DefaultDragonBreedRenderers which just hold textures, layers, model
+    settings which vary by config: textures; model configuration (number of segments etc)
+
+    Need to update animator / copy
+
+    Model should contains no state info; but it does contain config info about # of spikes, etc
+    So when that changes, the model must change too.
+    How notified?  It isn't, it gets newly constructed each time config changes.
+    Contained by DefaultDragonBreedRenderer, which is contained by DragonRenderer, which is passed an EnitityTameableDragon.
+
+    What to do: DragonRenderer contains a cache of DefaultDragonBreedRenderers based on the dragon breed + modifiers
+
+
+
+
+
+
+
+
+
+
 
 
 

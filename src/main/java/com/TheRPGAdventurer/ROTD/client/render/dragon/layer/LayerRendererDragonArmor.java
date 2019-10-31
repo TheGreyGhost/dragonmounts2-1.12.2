@@ -3,7 +3,7 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon.layer;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
-import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DefaultDragonBreedRenderer;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedPlusModifiersRenderer;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import net.minecraft.util.ResourceLocation;
 
@@ -13,7 +13,7 @@ import net.minecraft.util.ResourceLocation;
 public class LayerRendererDragonArmor extends LayerRendererDragon {
 
   public LayerRendererDragonArmor(DragonRenderer renderer,
-                                  DefaultDragonBreedRenderer breedRenderer, DragonModel model) {
+                                  DragonBreedPlusModifiersRenderer breedRenderer, DragonModel model) {
     super(renderer, breedRenderer, model);
   }
 

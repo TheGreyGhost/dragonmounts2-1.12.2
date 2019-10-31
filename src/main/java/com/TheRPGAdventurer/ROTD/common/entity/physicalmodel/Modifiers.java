@@ -179,6 +179,18 @@ public class Modifiers implements Cloneable {
     }
   };
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || !(o instanceof Modifiers)) return false;
+    return this.appliedModifiers.equals(((Modifiers) o).appliedModifiers);
+  }
+
+  @Override
+  public int hashCode() {
+    return appliedModifiers.hashCode();
+  }
+
   private BitSet appliedModifiers = new BitSet(DragonVariants.Modifier.MAX_BIT_INDEX + 1);
 
 }

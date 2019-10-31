@@ -11,12 +11,10 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModelMode;
-import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DefaultDragonBreedRenderer;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedPlusModifiersRenderer;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
-import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import net.minecraft.client.model.ModelBanner;
@@ -24,9 +22,7 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 import java.awt.*;
@@ -44,7 +40,7 @@ import static org.lwjgl.opengl.GL11.*;
 public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 
   public static final String TEX_BASE = "textures/entities/dragon/";
-  public static final ResourceLocation ENDERCRYSTAL_BEAM_TEXTURES = new ResourceLocation("textures/entity/endercrystal/endercrystal_beam.png");
+//  public static final ResourceLocation ENDERCRYSTAL_BEAM_TEXTURES = new ResourceLocation("textures/entity/endercrystal/endercrystal_beam.png");
 
   public DragonRenderer(RenderManager renderManager) {
     super(renderManager, null, 2);
@@ -52,46 +48,46 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
     // create default breed renderers
     for (EnumDragonBreed breed : EnumDragonBreed.values()) {
       if (!breedRenderers.containsKey(breed)) {
-        breedRenderers.put(breed, new DefaultDragonBreedRenderer(this, breed));
+        breedRenderers.put(breed, new DragonBreedPlusModifiersRenderer(this, breed));
       }
     }
   }
 
-  public static void renderCrystalBeams(double p_188325_0_, double p_188325_2_, double p_188325_4_, float p_188325_6_, double p_188325_7_, double p_188325_9_, double p_188325_11_, int p_188325_13_, double p_188325_14_, double p_188325_16_, double p_188325_18_) {
-    float f = (float) (p_188325_14_ - p_188325_7_);
-    float f1 = (float) (p_188325_16_ - 1.0D - p_188325_9_);
-    float f2 = (float) (p_188325_18_ - p_188325_11_);
-    float f3 = MathHelper.sqrt(f * f + f2 * f2);
-    float f4 = MathHelper.sqrt(f * f + f1 * f1 + f2 * f2);
-    GlStateManager.pushMatrix();
-    GlStateManager.translate((float) p_188325_0_, (float) p_188325_2_ + 2.0F, (float) p_188325_4_);
-    GlStateManager.rotate((float) (-Math.atan2((double) f2, (double) f)) * (180F / (float) Math.PI) - 90.0F, 0.0F, 1.0F, 0.0F);
-    GlStateManager.rotate((float) (-Math.atan2((double) f3, (double) f1)) * (180F / (float) Math.PI) - 90.0F, 1.0F, 0.0F, 0.0F);
-    Tessellator tessellator = Tessellator.getInstance();
-    BufferBuilder bufferbuilder = tessellator.getBuffer();
-    RenderHelper.disableStandardItemLighting();
-    GlStateManager.disableCull();
-    GlStateManager.shadeModel(7425);
-    float f5 = 0.0F - ((float) p_188325_13_ + p_188325_6_) * 0.01F;
-    float f6 = MathHelper.sqrt(f * f + f1 * f1 + f2 * f2) / 32.0F - ((float) p_188325_13_ + p_188325_6_) * 0.01F;
-    bufferbuilder.begin(5, DefaultVertexFormats.POSITION_TEX_COLOR);
+//  public static void renderCrystalBeams(double p_188325_0_, double p_188325_2_, double p_188325_4_, float p_188325_6_, double p_188325_7_, double p_188325_9_, double p_188325_11_, int p_188325_13_, double p_188325_14_, double p_188325_16_, double p_188325_18_) {
+//    float f = (float) (p_188325_14_ - p_188325_7_);
+//    float f1 = (float) (p_188325_16_ - 1.0D - p_188325_9_);
+//    float f2 = (float) (p_188325_18_ - p_188325_11_);
+//    float f3 = MathHelper.sqrt(f * f + f2 * f2);
+//    float f4 = MathHelper.sqrt(f * f + f1 * f1 + f2 * f2);
+//    GlStateManager.pushMatrix();
+//    GlStateManager.translate((float) p_188325_0_, (float) p_188325_2_ + 2.0F, (float) p_188325_4_);
+//    GlStateManager.rotate((float) (-Math.atan2((double) f2, (double) f)) * (180F / (float) Math.PI) - 90.0F, 0.0F, 1.0F, 0.0F);
+//    GlStateManager.rotate((float) (-Math.atan2((double) f3, (double) f1)) * (180F / (float) Math.PI) - 90.0F, 1.0F, 0.0F, 0.0F);
+//    Tessellator tessellator = Tessellator.getInstance();
+//    BufferBuilder bufferbuilder = tessellator.getBuffer();
+//    RenderHelper.disableStandardItemLighting();
+//    GlStateManager.disableCull();
+//    GlStateManager.shadeModel(7425);
+//    float f5 = 0.0F - ((float) p_188325_13_ + p_188325_6_) * 0.01F;
+//    float f6 = MathHelper.sqrt(f * f + f1 * f1 + f2 * f2) / 32.0F - ((float) p_188325_13_ + p_188325_6_) * 0.01F;
+//    bufferbuilder.begin(5, DefaultVertexFormats.POSITION_TEX_COLOR);
+//
+//    for (int j = 0; j <= 8; ++j) {
+//      float f7 = MathHelper.sin((float) (j % 8) * ((float) Math.PI * 2F) / 8.0F) * 0.75F;
+//      float f8 = MathHelper.cos((float) (j % 8) * ((float) Math.PI * 2F) / 8.0F) * 0.75F;
+//      float f9 = (float) (j % 8) / 8.0F;
+//      bufferbuilder.pos((double) (f7 * 0.2F), (double) (f8 * 0.2F), 0.0D).tex((double) f9, (double) f5).color(0, 0, 0, 255).endVertex();
+//      bufferbuilder.pos((double) f7, (double) f8, (double) f4).tex((double) f9, (double) f6).color(255, 255, 255, 255).endVertex();
+//    }
+//
+//    tessellator.draw();
+//    GlStateManager.enableCull();
+//    GlStateManager.shadeModel(7424);
+//    RenderHelper.enableStandardItemLighting();
+//    GlStateManager.popMatrix();
+//  }
 
-    for (int j = 0; j <= 8; ++j) {
-      float f7 = MathHelper.sin((float) (j % 8) * ((float) Math.PI * 2F) / 8.0F) * 0.75F;
-      float f8 = MathHelper.cos((float) (j % 8) * ((float) Math.PI * 2F) / 8.0F) * 0.75F;
-      float f9 = (float) (j % 8) / 8.0F;
-      bufferbuilder.pos((double) (f7 * 0.2F), (double) (f8 * 0.2F), 0.0D).tex((double) f9, (double) f5).color(0, 0, 0, 255).endVertex();
-      bufferbuilder.pos((double) f7, (double) f8, (double) f4).tex((double) f9, (double) f6).color(255, 255, 255, 255).endVertex();
-    }
-
-    tessellator.draw();
-    GlStateManager.enableCull();
-    GlStateManager.shadeModel(7424);
-    RenderHelper.enableStandardItemLighting();
-    GlStateManager.popMatrix();
-  }
-
-  public DefaultDragonBreedRenderer getBreedRenderer(EntityTameableDragon dragon) {
+  public DragonBreedPlusModifiersRenderer getBreedRenderer(EntityTameableDragon dragon) {
     return breedRenderers.get(dragon.getBreedType());
   }
 
@@ -293,11 +289,11 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 
   @Override
   protected ResourceLocation getEntityTexture(EntityTameableDragon dragon) {
-    DefaultDragonBreedRenderer texture = getBreedRenderer(dragon);
+    DragonBreedPlusModifiersRenderer texture = getBreedRenderer(dragon);
 //    return dragon.isMale() ? texture.getMaleBodyTexture(dragon.isBaby(), false) : texture.getFemaleBodyTexture(dragon.isBaby(), false);
     return dragon.isMale() ? texture.getMaleBodyTexture(false, false) : texture.getFemaleBodyTexture(false, false);
   }
-  private final Map<EnumDragonBreed, DefaultDragonBreedRenderer> breedRenderers = new EnumMap<>(EnumDragonBreed.class);
+  private final Map<EnumDragonBreed, DragonBreedPlusModifiersRenderer> breedRenderers = new EnumMap<>(EnumDragonBreed.class);
 
 
 

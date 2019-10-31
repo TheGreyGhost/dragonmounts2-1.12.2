@@ -4,6 +4,7 @@ import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.util.debugging.DebugSettings;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -37,9 +38,11 @@ import net.minecraft.util.math.Vec3d;
 public class DragonPhysicalModel {
 
   public DragonPhysicalModel(DragonBreedNew dragonBreedNew, Modifiers modifiers) {
-    this.dragonVariants = dragonBreedNew.getDragonVariants();
-    this.modifiers = modifiers;
-    this.modifiedCategory = new DragonVariants.ModifiedCategory(DragonVariants.Category.PHYSICAL_MODEL, modifiers);
+    userConfiguredParameters = new UserConfiguredParameters(dragonBreedNew.getDragonVariants(), modifiers);
+
+//    this.dragonVariants = dragonBreedNew.getDragonVariants();
+//    this.modifiers = modifiers;
+//    this.modifiedCategory = new DragonVariants.ModifiedCategory(DragonVariants.Category.PHYSICAL_MODEL, modifiers);
   }
 
   /**
@@ -265,17 +268,17 @@ public class DragonPhysicalModel {
     return ageScale * MOVE_DISTANCE_PER_WALK_ANIMATION_CYCLE_BC * CONVERT_BC_TO_WC;
   }
 
-  public int getNumberOfTailSegments() {
-    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_TAIL_SEGMENTS);
-  }
-
-  public int getNumberOfNeckSegments() {
-    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_NECK_SEGMENTS);
-  }
-
-  public int getNumberOfWingFingers() {
-    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_WING_FINGERS);
-  }
+//  public int getNumberOfTailSegments() {
+////    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_TAIL_SEGMENTS);
+//  }
+//
+//  public int getNumberOfNeckSegments() {
+////    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_NECK_SEGMENTS);
+//  }
+//
+//  public int getNumberOfWingFingers() {
+////    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_WING_FINGERS);
+//  }
 
   /**
    * gets the position offset to use for a passenger at BASE size
@@ -337,9 +340,9 @@ public class DragonPhysicalModel {
   private Vec3d THROAT_OFFSET_FROM_HEAD_CENTRE_BC = new Vec3d(0, -6.0 / 16.0, 12 / 16.0);
   //Throat position relative to head centrepoint is [y=10, z=-12] in MC -  to be 2 MC beyond main head
 
-  private final DragonVariants dragonVariants;
-  private final Modifiers modifiers;
-  private final DragonVariants.ModifiedCategory modifiedCategory;
+//  private final DragonVariants dragonVariants;
+//  private final Modifiers modifiers;
+//  private final DragonVariants.ModifiedCategory modifiedCategory;
 
   private static final DragonVariantTag NUMBER_OF_NECK_SEGMENTS = DragonVariantTag.addTag("numberofnecksegments", 7, 0, 20,
           "the number of segments in the dragon's neck").categories(DragonVariants.Category.PHYSICAL_MODEL);
@@ -348,7 +351,32 @@ public class DragonPhysicalModel {
   private static final DragonVariantTag NUMBER_OF_TAIL_SEGMENTS = DragonVariantTag.addTag("numberofwingfingers", 12, 0, 20,
           "the number of segments in the tail").categories(DragonVariants.Category.PHYSICAL_MODEL);
 
+  // cluster the userConfiguredParameters together to make it easier for the renderer to access
+  public class UserConfiguredParameters {
+    public int number_of_neck_segments;
+    public int number_of_wing_fingers;
+    public int number_of_tail_segments;
+    public boolean dualRidges;  // if true: two ridgeplates (symmetrical about vertical); angle as below.
+    public float tailRidgeplateAngleFirst;  // angle of the ridgeplates on the tail: first plate (next to butt).  in degrees. vertical = 0
+    public float tailRidgeplateAngleLast;  // angle of the ridgeplates on the tail: last plate
+    public int firstSegmentWithRidgePlates; // 0 = buttmost, N-1 = tipmost
+    public int lastSegmentWithRidgePlates;
+    public boolean tailSpike;
+    public int thighThickness;
 
+    public UserConfiguredParameters(DragonVariants variants, Modifiers modifiers) {
+      DragonVariants.ModifiedCategory mc = new DragonVariants.ModifiedCategory(DragonVariants.Category.PHYSICAL_MODEL, modifiers);
 
+      number_of_neck_segments = (int)variants.getValueOrDefault(mc, NUMBER_OF_NECK_SEGMENTS);
+      number_of_wing_fingers = (int)variants.getValueOrDefault(mc, NUMBER_OF_WING_FINGERS);
+      number_of_tail_segments = (int)variants.getValueOrDefault(mc, NUMBER_OF_TAIL_SEGMENTS);
+    }
+  }
+
+  public UserConfiguredParameters getUserConfiguredParameters() {
+    return userConfiguredParameters;
+  }
+
+  private final UserConfiguredParameters userConfiguredParameters;
 
 }
