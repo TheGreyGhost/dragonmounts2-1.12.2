@@ -10,7 +10,6 @@
 package com.TheRPGAdventurer.ROTD.client;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
-import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiDragonDebug;
 import com.TheRPGAdventurer.ROTD.client.model.EggModels;
 import com.TheRPGAdventurer.ROTD.client.model.TEISRDragonHatchableEgg;
@@ -19,7 +18,7 @@ import com.TheRPGAdventurer.ROTD.client.other.TargetHighlighter;
 import com.TheRPGAdventurer.ROTD.client.render.TextureStitcherBreathFX;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonHatchableEggRenderer;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
-import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedPlusModifiersRenderer;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedWithModifiersRenderer;
 import com.TheRPGAdventurer.ROTD.client.userinput.DragonOrbControl;
 import com.TheRPGAdventurer.ROTD.client.userinput.DragonRiderControls;
 import com.TheRPGAdventurer.ROTD.common.CommonProxy;
@@ -44,8 +43,6 @@ import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -71,11 +68,11 @@ public class ClientProxy extends CommonProxy {
 
     OBJLoader.INSTANCE.addDomain(DragonMounts.MODID);
     MinecraftForge.EVENT_BUS.register(EggModels.getInstance());
-    MinecraftForge.EVENT_BUS.register(DragonBreedPlusModifiersRenderer.class);
+    MinecraftForge.EVENT_BUS.register(DragonBreedWithModifiersRenderer.class);
 
     EggModels.getInstance().registerConfigurationTags();
     DragonPhysicalModel.registerConfigurationTags();
-    DragonBreedPlusModifiersRenderer.registerConfigurationTags();
+    DragonBreedWithModifiersRenderer.registerConfigurationTags();
 
 //    ClientRegistry.registerTileEntity(TileEntityDragonHatchableEgg.class, "dragonmounts:te_dragon_hatchable_egg", new TESRDragonHatchableEgg());
 //    final int DEFAULT_ITEM_SUBTYPE = 0;

@@ -42,7 +42,7 @@ public class DragonPhysicalModel {
 
 //    this.dragonVariants = dragonBreedNew.getDragonVariants();
 //    this.modifiers = modifiers;
-//    this.modifiedCategory = new DragonVariants.ModifiedCategory(DragonVariants.Category.PHYSICAL_MODEL, modifiers);
+//    this.modifiers = new DragonVariants.ModifiedCategory(DragonVariants.Category.PHYSICAL_MODEL, modifiers);
   }
 
   /**
@@ -269,15 +269,15 @@ public class DragonPhysicalModel {
   }
 
 //  public int getNumberOfTailSegments() {
-////    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_TAIL_SEGMENTS);
+////    return (int)dragonVariants.getValueOrDefault(modifiers, NUMBER_OF_TAIL_SEGMENTS);
 //  }
 //
 //  public int getNumberOfNeckSegments() {
-////    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_NECK_SEGMENTS);
+////    return (int)dragonVariants.getValueOrDefault(modifiers, NUMBER_OF_NECK_SEGMENTS);
 //  }
 //
 //  public int getNumberOfWingFingers() {
-////    return (int)dragonVariants.getValueOrDefault(modifiedCategory, NUMBER_OF_WING_FINGERS);
+////    return (int)dragonVariants.getValueOrDefault(modifiers, NUMBER_OF_WING_FINGERS);
 //  }
 
   /**
@@ -342,7 +342,7 @@ public class DragonPhysicalModel {
 
 //  private final DragonVariants dragonVariants;
 //  private final Modifiers modifiers;
-//  private final DragonVariants.ModifiedCategory modifiedCategory;
+//  private final DragonVariants.ModifiedCategory modifiers;
 
   private static final DragonVariantTag NUMBER_OF_NECK_SEGMENTS = DragonVariantTag.addTag("numberofnecksegments", 7, 0, 20,
           "the number of segments in the dragon's neck").categories(DragonVariants.Category.PHYSICAL_MODEL);

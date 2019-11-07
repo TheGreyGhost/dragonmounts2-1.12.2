@@ -3,6 +3,9 @@ package com.TheRPGAdventurer.ROTD.common.entity.helper;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
+import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
@@ -23,6 +26,8 @@ import java.util.Optional;
 
 /**
  * Created by TGG on 20/10/2019.
+ *
+ * Contains functionality related to combat- damage and health.  AI is out of scope.
  */
 public class DragonCombatHelper extends DragonHelper {
   public DragonCombatHelper(EntityTameableDragon dragon) {
@@ -53,7 +58,7 @@ public class DragonCombatHelper extends DragonHelper {
   @Override
   public void registerDataParameters() {
     checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
-    dataManager.register(HUNGER, 0);
+    entityDataManager.register(HUNGER, 0);
     setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
 
@@ -182,13 +187,40 @@ public class DragonCombatHelper extends DragonHelper {
     getEntityAttribute(ATTACK_DAMAGE).setBaseValue(damage);
   }
 
-
-  public int getHunger() {
-    return dataManager.get(HUNGER);
+  /**
+   * retrieves the dragon's current hunger level
+   * @return the hunger level (0% -> 100%)
+   */
+  public float getHunger() {
+    if (dragon.isClient()) {
+      return entityDataManager.get(HUNGER);
+    }
+    return serverHungerLevel;
   }
 
-  public void setHunger(int hunger) {
-    this.dataManager.set(HUNGER, Math.min(100, hunger));
+  /**
+   * Sets the new hunger level - to be called on the server only
+   * @param hunger the new hunger level as a percentage; will be clamped to valid range
+   */
+  public void setHunger(float hunger) {
+    if (!assertServerSide("setHunger")) return;
+    serverHungerLevel = MathX.clamp(hunger, 0.0F, 100.0F);
+    entityDataManager.set(HUNGER, (int)serverHungerLevel);
+  }
+
+  /**
+   * Feed the dragon: restores hunger level and/or heals damage
+   * Server side only
+   * @param foodpoints the number of hunger level points to restore
+   */
+  public void feed(int foodpoints) {
+    if (!assertServerSide("setHunger")) return;
+    float percentFed = foodpoints / (float)dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, MAX_HUNGER);
+    float newHungerLevel = serverHungerLevel + percentFed;
+    setHunger(newHungerLevel);
+    float hungerSurplus = newHungerLevel - 100.0F;
+    if (hungerSurplus <= 0.0F) return;
+    dragon.heal(hungerSurplus / 100.0F * (float)dragon.lifeStage().getMaxHealth());
   }
 
   /**
@@ -287,8 +319,11 @@ public class DragonCombatHelper extends DragonHelper {
   }
 
 
-
+  // hunger is tracked internally as a float (also NBT load/save) but is transmitted to client as integer to avoid frequent updates
+  //  the units are percent
   private static final DataParameter<Integer> HUNGER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
+  private float serverHungerLevel;  // server side only: hunger level (0 --> 100%)
+
 
   public boolean isImmuneToDamage(DamageSource dmg) {
     if (immunities.isEmpty()) {
@@ -303,5 +338,20 @@ public class DragonCombatHelper extends DragonHelper {
 //  public static final double BASE_TOUGHNESS = 30.0D;
 public static final float RESISTANCE = 10.0f;
 
+  private static final DragonVariantTag MAX_HUNGER = DragonVariantTag.addTag("maxhungerunits", 100, 0.0, 500,
+          "the maximum hunger level of the full-size dragon? (vanilla player maximum = 20 units)").categories(DragonVariants.Category.METABOLISM);
+  private static final DragonVariantTag HUNGER_DECAY_RATE = DragonVariantTag.addTag("hungerdecayrate", 10, 0.0, 1000,
+          "the speed at which hunger level decreases (% of maximum per minute)").categories(DragonVariants.Category.METABOLISM);
+  private static final DragonVariantTag HUNGER_HEAL_THRESHOLD = DragonVariantTag.addTag("hungerhealthreshold", 85, 0.0, 101,
+          "when hunger level is above this threshold (%), the dragon regenerates health ").categories(DragonVariants.Category.METABOLISM);
+  private static final DragonVariantTag MAX_HEALTH_REGEN_RATE = DragonVariantTag.addTag("maxhealthregenrate", 75, 0.0, 1000,
+          "when hunger level is maximum, the dragon regenerates health at this rate (% per minute)").categories(DragonVariants.Category.METABOLISM);
 
+  private boolean assertServerSide(String functionName) {
+    if (dragon.isClient()) {
+      DragonMounts.loggerLimit.error_once("Unexpectedly called DragonCombatHelper::" + functionName + "() on client side");
+      return false;
+    }
+    return true;
+  }
 }

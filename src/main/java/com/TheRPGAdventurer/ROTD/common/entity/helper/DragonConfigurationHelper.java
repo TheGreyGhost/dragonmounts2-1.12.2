@@ -12,6 +12,7 @@ package com.TheRPGAdventurer.ROTD.common.entity.helper;
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedWithModifiers;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
@@ -85,9 +86,7 @@ public class DragonConfigurationHelper extends DragonHelper {
     } catch (IllegalArgumentException iae) {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
-    dragonBreedNew = newBreed;
-    modifiers = newModifiers;
-
+    dragonBreedWithModifiers = new DragonBreedWithModifiers(newBreed, newModifiers);
     setCompleted(FunctionTag.INITIALISE_CLIENT);
   }
 
@@ -110,8 +109,7 @@ public class DragonConfigurationHelper extends DragonHelper {
 
   public void setInitialConfiguration(DragonBreedNew newBreed, Modifiers newModifiers) {
     checkPreConditions(FunctionTag.SET_INITIAL_CONFIGURATION);
-    dragonBreedNew = newBreed;
-    modifiers = newModifiers;
+    dragonBreedWithModifiers = new DragonBreedWithModifiers(newBreed, newModifiers);
     setCompleted(FunctionTag.SET_INITIAL_CONFIGURATION);
   }
 
@@ -121,58 +119,57 @@ public class DragonConfigurationHelper extends DragonHelper {
 
   public void changeConfiguration(DragonBreedNew newBreed, Modifiers newModifiers) {
     checkPreConditions(FunctionTag.CHANGE_CONFIGURATION);
-    if (dragonBreedNew == newBreed && newModifiers.equals(modifiers)) return;
-    dragonBreedNew = newBreed;
-    modifiers = newModifiers;
+    if (dragonBreedWithModifiers.dragonBreedNew == newBreed && newModifiers.equals(dragonBreedWithModifiers.modifiers)) return;
+    dragonBreedWithModifiers = new DragonBreedWithModifiers(newBreed, newModifiers);
     notifyOfConfigurationChange();
   }
 
   public void changeConfiguration(DragonBreedNew newBreed) {
     checkPreConditions(FunctionTag.CHANGE_CONFIGURATION);
-    if (dragonBreedNew == newBreed) return;
-    dragonBreedNew = newBreed;
+    if (dragonBreedWithModifiers.dragonBreedNew == newBreed) return;
+    dragonBreedWithModifiers.dragonBreedNew = newBreed;
     notifyOfConfigurationChange();
   }
 
   public void changeConfiguration(Modifiers newModifiers) {
     checkPreConditions(FunctionTag.CHANGE_CONFIGURATION);
-    if (newModifiers.equals(modifiers)) return;
-    modifiers = newModifiers;
+    if (newModifiers.equals(dragonBreedWithModifiers.modifiers)) return;
+    dragonBreedWithModifiers.modifiers = newModifiers;
     notifyOfConfigurationChange();
   }
 
   public void addModifier(DragonVariants.Modifier modifier) {
     checkPreConditions(FunctionTag.CHANGE_CONFIGURATION);
-    Modifiers prevModifiers = modifiers.createCopy();
-    modifiers.add(modifier);
-    if (!prevModifiers.equals(modifiers)) {
+    Modifiers prevModifiers = dragonBreedWithModifiers.modifiers.createCopy();
+    dragonBreedWithModifiers.modifiers.add(modifier);
+    if (!prevModifiers.equals(dragonBreedWithModifiers.modifiers)) {
       notifyOfConfigurationChange();
     }
   }
 
   public void removeModifier(DragonVariants.Modifier modifier) {
     checkPreConditions(FunctionTag.CHANGE_CONFIGURATION);
-    Modifiers prevModifiers = modifiers.createCopy();
-    modifiers.remove(modifier);
-    if (!prevModifiers.equals(modifiers)) {
+    Modifiers prevModifiers = dragonBreedWithModifiers.modifiers.createCopy();
+    dragonBreedWithModifiers.modifiers.remove(modifier);
+    if (!prevModifiers.equals(dragonBreedWithModifiers.modifiers)) {
       notifyOfConfigurationChange();
     }
   }
 
   public boolean hasModifier(DragonVariants.Modifier modifier) {
     checkPreConditions(FunctionTag.VANILLA);
-    return modifiers.hasModifier(modifier);
+    return dragonBreedWithModifiers.modifiers.hasModifier(modifier);
   }
 
   public Modifiers getModifiers() {
     checkPreConditions(FunctionTag.VANILLA);
-    return modifiers.createCopy();
+    return dragonBreedWithModifiers.modifiers.createCopy();
   }
 
   public Object getVariantTagValue(DragonVariants.Category category, DragonVariantTag tag) {
     checkPreConditions(FunctionTag.VANILLA);
-    DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(category, modifiers);
-    return dragonBreedNew.getDragonVariants().getValueOrDefault(modifiedCategory, tag);
+    DragonVariants.ModifiedCategory modifiedCategory = new DragonVariants.ModifiedCategory(category, dragonBreedWithModifiers.modifiers);
+    return dragonBreedWithModifiers.dragonBreedNew.getDragonVariants().getValueOrDefault(modifiedCategory, tag);
   }
 
   private void notifyOfConfigurationChange() {
@@ -182,8 +179,8 @@ public class DragonConfigurationHelper extends DragonHelper {
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
     checkPreConditions(FunctionTag.WRITE_TO_NBT);
-    dragonBreedNew.writeToNBT(nbt);
-    modifiers.writeToNBT(nbt);
+    dragonBreedWithModifiers.dragonBreedNew.writeToNBT(nbt);
+    dragonBreedWithModifiers.modifiers.writeToNBT(nbt);
 
 //    NBTTagCompound breedPointTag = new NBTTagCompound();
 //    breedPoints.forEach((type, points) -> {
@@ -208,8 +205,8 @@ public class DragonConfigurationHelper extends DragonHelper {
     } catch (IllegalArgumentException iae) {
       DragonMounts.loggerLimit.warn_once(iae.getMessage());
     }
-    dragonBreedNew = newBreed;
-    modifiers = newModifiers;
+    dragonBreedWithModifiers.dragonBreedNew = newBreed;
+    dragonBreedWithModifiers.modifiers = newModifiers;
 
 //    // read breed name and convert it to the corresponding breed object
 //    String breedName = nbt.getString(NBT_BREED);
@@ -245,7 +242,9 @@ public class DragonConfigurationHelper extends DragonHelper {
 //    return EnumUtils.getEnum(EnumDragonBreed.class, breedName.toUpperCase());
 //  }
 
-  public DragonBreedNew getDragonBreedNew() {return dragonBreedNew;}
+  public DragonBreedNew getDragonBreedNew() {return dragonBreedWithModifiers.dragonBreedNew;}
+  public DragonBreedWithModifiers getDragonBreedWithModifiers() {return dragonBreedWithModifiers;}
+
 //
 //  public void setBreedType(EnumDragonBreed newType) {
 //    L.trace("setBreed({})", newType);
@@ -381,8 +380,9 @@ public class DragonConfigurationHelper extends DragonHelper {
   private static final int TICK_RATE_BLOCK = 20;
   private static final String NBT_BREED = "Breed";
   private static final String NBT_BREED_POINTS = "breedPoints";
-  private DragonBreedNew dragonBreedNew;
-  private Modifiers modifiers;
+  private DragonBreedWithModifiers dragonBreedWithModifiers;
+//  private DragonBreedNew dragonBreedNew;
+//  private Modifiers modifiers;
 
 //  private final Map<EnumDragonBreed, AtomicInteger> breedPoints = new EnumMap<>(EnumDragonBreed.class);
 

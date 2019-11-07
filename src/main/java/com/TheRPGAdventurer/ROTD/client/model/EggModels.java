@@ -245,6 +245,20 @@ public class EggModels {
     public DragonBreedNew dragonBreedNew;
     public DragonVariants.ModifiedCategory modifiedCategory;
     public EggModelState eggModelState;
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || !(o instanceof TripleKey)) return false;
+      TripleKey tripleKey2 = (TripleKey)o;
+      return this.dragonBreedNew.equals(tripleKey2.dragonBreedNew) && this.modifiedCategory.equals(tripleKey2.modifiedCategory)
+              && this.eggModelState.equals(tripleKey2.eggModelState);
+    }
+    @Override
+    public int hashCode() {
+      return (dragonBreedNew.hashCode() * 37 +  modifiedCategory.hashCode()) * 37 +  eggModelState.hashCode(); // simple but doesn't need to be optimised.
+    }
+
   }
 
 }

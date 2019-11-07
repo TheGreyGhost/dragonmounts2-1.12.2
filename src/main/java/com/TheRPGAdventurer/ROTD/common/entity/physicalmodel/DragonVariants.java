@@ -74,13 +74,13 @@ public class DragonVariants {
     BREATH_WEAPON_SECONDARY("breathweaponsecondary", 1, "This section is used to configure the secondary breath weapon"),
     PHYSICAL_MODEL("physicalmodel", 2, "Physical characteristics of the dragon model (appearance)"),
     LIFE_STAGE("lifestage", 3,
-          "The physical attributes of the dragon change with its age.  The dragon follows development stages similar to a human:\n" +
+          "The physical attributes of the dragon which change with its age.  The dragon follows development stages similar to a human:\n" +
           "HATCHLING (newly born), INFANT, CHILD, EARLY TEEN, LATE TEEN, ADULT\n" +
           "The age corresponding to stage XXXXX is given by the ageXXXXX tags.\n" +
           "The age of the dragon affects the following physical aspects:\n" +
           " 1) PhysicalSize (metres) - for the base dragon, this is the height of the top of the back\n" +
           " 2) PhysicalMaturity (0->100%) - the physical abilities of the dragon such as being able to fly,\n" +
-          " 3) EmotionalMaturity (0->100%) - the behaviour of the dragon eg sticking close to parent, running away from mobs\n" +
+          " 3) EmotionalMaturity (0->100%) - the behaviour of the dragon eg staying close to parent, running away from mobs\n" +
           " 4) BreathWeaponMaturity (0->100%) - the strength of the breath weapon\n" +
           " 5) AttackDamageMultiplier (0->100%) - physical attack damage\n" +
           " 6) HealthMultiplier (0->100%) - health\n" +
@@ -92,7 +92,9 @@ public class DragonVariants {
     ),
     EGG("egg", 4, "This section is used to configure the dragon's egg"),
     REPRODUCTION("reproduction", 5, "Settings related to reproduction / having children."),
-    BEHAVIOUR("behaviour", 6, "Settings related to general behaviour");
+    BEHAVIOUR("behaviour", 6, "Settings related to general behaviour"),
+    METABOLISM("metabolism", 7, "Settings related to food, potion effects, immunities")
+    ;
 
     /**
      * Checks if the given name has a corresponding Category
@@ -219,7 +221,7 @@ public class DragonVariants {
   public Object getValueOrDefault(ModifiedCategory modifiedCategory, DragonVariantTag tag) {
     // algorithm:
     // if the tag hasn't been applied at all, return the default value
-    // otherwise, find the best-matching modifiedcategory for the target modifiedCategory
+    // otherwise, find the best-matching modifiedcategory for the target modifiers
     //   if the match is acceptable (same category, and doesn't contain any modifiers not in the target
 
     if (!allAppliedTags.containsKey(tag)) return tag.getDefaultValue();

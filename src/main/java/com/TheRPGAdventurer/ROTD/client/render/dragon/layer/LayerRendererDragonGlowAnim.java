@@ -12,7 +12,7 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon.layer;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModelMode;
 import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
-import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedPlusModifiersRenderer;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedWithModifiersRenderer;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import net.minecraft.client.renderer.GlStateManager;
 
@@ -23,7 +23,7 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class LayerRendererDragonGlowAnim extends LayerRendererDragon {
 
-  public LayerRendererDragonGlowAnim(DragonRenderer renderer, DragonBreedPlusModifiersRenderer breedRenderer, DragonModel model) {
+  public LayerRendererDragonGlowAnim(DragonRenderer renderer, DragonBreedWithModifiersRenderer breedRenderer, DragonModel model) {
     super(renderer, breedRenderer, model);
   }
 

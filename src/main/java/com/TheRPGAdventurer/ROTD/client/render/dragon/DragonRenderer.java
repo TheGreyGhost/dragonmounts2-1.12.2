@@ -11,8 +11,8 @@ package com.TheRPGAdventurer.ROTD.client.render.dragon;
 
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModel;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.DragonModelMode;
-import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedPlusModifiersRenderer;
-import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
+import com.TheRPGAdventurer.ROTD.client.render.dragon.breeds.DragonBreedWithModifiersRenderer;
+import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedWithModifiers;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
 import com.TheRPGAdventurer.ROTD.util.debugging.CentrepointCrosshairRenderer;
@@ -26,7 +26,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 
 import java.awt.*;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,15 +42,17 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
   public static final String TEX_BASE = "textures/entities/dragon/";
 //  public static final ResourceLocation ENDERCRYSTAL_BEAM_TEXTURES = new ResourceLocation("textures/entity/endercrystal/endercrystal_beam.png");
 
-  public DragonRenderer(RenderManager renderManager) {
-    super(renderManager, null, 2);
+  private static final float SHADOW_SIZE = 2;
 
-    // create default breed renderers
-    for (EnumDragonBreed breed : EnumDragonBreed.values()) {
-      if (!breedRenderers.containsKey(breed)) {
-        breedRenderers.put(breed, new DragonBreedPlusModifiersRenderer(this, breed));
-      }
-    }
+  public DragonRenderer(RenderManager renderManager) {
+    super(renderManager, null, SHADOW_SIZE);
+//    breedRenderers = new
+//    // create default breed renderers
+//    for (EnumDragonBreed breed : EnumDragonBreed.values()) {
+//      if (!breedRenderers.containsKey(breed)) {
+//        breedRenderers.put(breed, new DragonBreedWithModifiersRenderer(this, breed));
+//      }
+//    }
   }
 
 //  public static void renderCrystalBeams(double p_188325_0_, double p_188325_2_, double p_188325_4_, float p_188325_6_, double p_188325_7_, double p_188325_9_, double p_188325_11_, int p_188325_13_, double p_188325_14_, double p_188325_16_, double p_188325_18_) {
@@ -87,8 +89,18 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 //    GlStateManager.popMatrix();
 //  }
 
-  public DragonBreedPlusModifiersRenderer getBreedRenderer(EntityTameableDragon dragon) {
-    return breedRenderers.get(dragon.getBreedType());
+  /**
+   * Get the renderer for this dragon; uses lazy initialisation
+   * @param dragon
+   * @return
+   */
+  public DragonBreedWithModifiersRenderer getBreedRenderer(EntityTameableDragon dragon) {
+    DragonBreedWithModifiers dbwm = dragon.configuration().getDragonBreedWithModifiers();
+    DragonBreedWithModifiersRenderer dbwmr = breedRenderers.get(dbwm);
+    if (dbwmr != null) return dbwmr;
+    dbwmr = new DragonBreedWithModifiersRenderer(this, dragon.getPhysicalModel(), dbwm);
+    breedRenderers.put(dbwm, dbwmr);
+    return dbwmr;
   }
 
   @Override
@@ -99,17 +111,17 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 
     // show body centre, rider positions, head position, throat position
     if (DebugSettings.isRenderDragonPoints()) {
-      float dragonScale = dragon.getAgeScale();
+      float dragonScale = dragon.lifeStage().getAgeScale();
       Vec3d dragonPos = dragon.getPositionVector();
       Vec3d point = dragon.getPhysicalModel().offsetOfOriginFromEntityPosWC(dragonScale, dragon.isSitting());
       point = point.rotateYaw(yaw).add(dragonPos);
       CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z, Color.WHITE);
-      for (int i = 0; i < dragon.getPhysicalModel().getMaxNumberOfPassengers(dragon.lifeStage().getLifeStage()); ++i) {
-        point = dragon.getPhysicalModel().getRiderPositionOffsetWC(dragonScale, dragon.getBodyPitch(), dragon.isSitting(), i);
+      for (int i = 0; i < dragon.getPhysicalModel().getMaxNumberOfPassengers(); ++i) {
+        point = dragon.getPhysicalModel().getRiderPositionOffsetWC(dragonScale, dragon.movement().getBodyPitch(), dragon.isSitting(), i);
         point = point.rotateYaw(-(float) Math.toRadians(yaw)).add(dragonPos);
         CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z, Color.BLUE);
       }
-      point = dragon.getPhysicalModel().getEyePositionWC(dragonScale, dragon.renderYawOffset, dragon.getBodyPitch(), dragon.isSitting());
+      point = dragon.getPhysicalModel().getEyePositionWC(dragonScale, dragon.renderYawOffset, dragon.movement().getBodyPitch(), dragon.isSitting());
       point = point.add(dragonPos);
       CentrepointCrosshairRenderer.addCentrepointToRenderWorld(point.x, point.y, point.z, Color.WHITE);
       Vec3d throat = dragon.getAnimator().getThroatPosition();
@@ -289,13 +301,11 @@ public class DragonRenderer extends RenderLiving<EntityTameableDragon> {
 
   @Override
   protected ResourceLocation getEntityTexture(EntityTameableDragon dragon) {
-    DragonBreedPlusModifiersRenderer texture = getBreedRenderer(dragon);
+    DragonBreedWithModifiersRenderer breedRenderer = getBreedRenderer(dragon);
 //    return dragon.isMale() ? texture.getMaleBodyTexture(dragon.isBaby(), false) : texture.getFemaleBodyTexture(dragon.isBaby(), false);
-    return dragon.isMale() ? texture.getMaleBodyTexture(false, false) : texture.getFemaleBodyTexture(false, false);
+    return breedRenderer.getBodyTexture();
   }
-  private final Map<EnumDragonBreed, DragonBreedPlusModifiersRenderer> breedRenderers = new EnumMap<>(EnumDragonBreed.class);
-
-
+  private final Map<DragonBreedWithModifiers, DragonBreedWithModifiersRenderer> breedRenderers = new HashMap<>();  // lazy initialisation
 
 }
 

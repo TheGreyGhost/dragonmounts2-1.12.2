@@ -29,6 +29,17 @@ Checks if the dragon is untamed, or tamed by someone else.
 Knows who the controlling player is.
 
 DragonCombatHelper: Health, attacks, damage (not including breath weapons)
+- implements hunger:
+  - will affect AI hunting
+  - dragon auto-heals when hunger is full or nearly full; is simpler implementation than player (no saturation or exhaustion):
+    a) when hunger is > threshold, then regenerate health proportional to (hunger - threshold) / (max hunger - threshold) * max_regen_rate
+    b) if dragon is fed when already full, heal an amount of damage proportional to hunger_fed * max_health / max_hunger
+    c) when hunger drops to zero, it doesn't cause health damage
+  configurables: MAX_HUNGER (units per health), HUNGER_DECAY_RATE (% per minute), HUNGER_HEAL_THRESHOLD (%), MAX_HEALTH_REGEN_RATE (% of max health per minute)
+  A dragon's max hunger is proportional to its health.  So when you feed it food, the amount of hunger restored (as a %) is greater for a small dragon than a large dragon.
+
+  see https://minecraft.gamepedia.com/Hunger
+  Modelled roughly on player values.
 
 DragonBreathHelper: breath weapon
 
