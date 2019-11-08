@@ -37,6 +37,8 @@ DragonCombatHelper: Health, attacks, damage (not including breath weapons)
     c) when hunger drops to zero, it doesn't cause health damage
   configurables: MAX_HUNGER (units per health), HUNGER_DECAY_RATE (% per minute), HUNGER_HEAL_THRESHOLD (%), MAX_HEALTH_REGEN_RATE (% of max health per minute)
   A dragon's max hunger is proportional to its health.  So when you feed it food, the amount of hunger restored (as a %) is greater for a small dragon than a large dragon.
+  When a dragon reaches full hunger, it stays full for FULLNESS_TIME before hunger starts to decrease again.
+
 
   see https://minecraft.gamepedia.com/Hunger
   Modelled roughly on player values.

@@ -122,6 +122,7 @@ public class DragonRidingHelper extends DragonHelper {
 //        this.isSittingOnShoulder = this.entity.setEntityOnShoulder(this.owner);
 //      }
 //    }
+    return false;
   }
 
 //------------------------ player riding on dragon ------------------
@@ -237,7 +238,6 @@ public class DragonRidingHelper extends DragonHelper {
    *
    * @param passenger
    */
-  @Override
   public void updatePassenger(Entity passenger) {
 //    if (this.isPassenger(passenger)) {
 //      List<Entity> passengers = getPassengers();
@@ -287,7 +287,7 @@ public class DragonRidingHelper extends DragonHelper {
   }
 
   public boolean canFitPassenger(Entity passenger) {
-    return dragon.getPassengers().size() < dragon.getPhysicalModel().getMaxNumberOfPassengers(dragon.lifeStage().getLifeStage());
+    return dragon.getPassengers().size() < dragon.getPhysicalModel().getMaxNumberOfPassengers();
   }
 
   private static final DragonVariantTag WILL_RIDE_SHOULDER = DragonVariantTag.addTag("willrideshoulder", true,

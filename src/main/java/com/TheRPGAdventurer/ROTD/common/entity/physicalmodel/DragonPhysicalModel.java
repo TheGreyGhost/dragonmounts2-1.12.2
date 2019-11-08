@@ -145,7 +145,7 @@ public class DragonPhysicalModel {
   }
 
   /**
-   * how many passengers can ride on this breed?
+   * how many passengers can ride on this dragon
    *
    * @return
    */

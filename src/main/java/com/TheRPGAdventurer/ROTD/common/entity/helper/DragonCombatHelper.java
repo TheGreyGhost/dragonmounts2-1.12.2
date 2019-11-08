@@ -17,6 +17,8 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -49,89 +51,22 @@ public class DragonCombatHelper extends DragonHelper {
     DragonVariants.addVariantTagValidator(new DragonCombatValidator());
   }
 
-  /**
-   * Validates the following aspects of the tags:
-   * 1) damage source names (immunity)
-   * If any errors are found, revert to the defaults and throw an error
-   */
-  public static class DragonCombatValidator implements DragonVariants.VariantTagValidator {
-    @Override
-    public void validateVariantTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
-      DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
-      if (!modifiedCategory.getCategory().equals(DragonVariants.Category.METABOLISM)) return;
-
-      if (validDamageSourceNames.isEmpty()) {
-        for (DamageSource damageSource : validDamageSources) {
-          validDamageSourceNames.add(damageSource.getDamageType());
-        }
-      }
-
-      String [] damageSourceNames = (String [])dragonVariants.getValueOrDefault(modifiedCategory, DAMAGE_SOURCE_IMMUNITIES);
-      ArrayList<String> badNames = new ArrayList<>();
-      for (String name : damageSourceNames) {
-        if (!validDamageSourceNames.contains(name)) {
-          badNames.add(name);
-        }
-      }
-      if (badNames.size() > 0) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("one or more damage source names were not found:");
-        boolean first = true;
-        for (String badItemName : badNames) {
-          if (!first) sb.append(",");
-          sb.append("\"");
-          sb.append(badItemName);
-          sb.append("\"");
-          first = false;
-        }
-        dragonVariants.removeTag(DragonVariants.Category.METABOLISM, DAMAGE_SOURCE_IMMUNITIES);
-        dragonVariantsErrors.addError(sb.toString());
-      }
-
-      String [] potionNames = (String [])dragonVariants.getValueOrDefault(modifiedCategory, POTION_IMMUNITIES);
-      badNames.clear();
-      for (String name : potionNames) {
-        Potion potion = Potion.REGISTRY.getObject(new ResourceLocation(name));
-        if (potion == null) {
-          badNames.add(name);
-        }
-      }
-      if (badNames.size() > 0) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("one or more potion names were not found:");
-        boolean first = true;
-        for (String badItemName : badNames) {
-          if (!first) sb.append(",");
-          sb.append("\"");
-          sb.append(badItemName);
-          sb.append("\"");
-          first = false;
-        }
-        dragonVariants.removeTag(DragonVariants.Category.METABOLISM, POTION_IMMUNITIES);
-        dragonVariantsErrors.addError(sb.toString());
-      }
-
-      if (dragonVariantsErrors.hasErrors()) {
-        throw new DragonVariantsException(dragonVariantsErrors);
-      }
-    }
-    @Override
-    public void initaliseResources(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
-      // do nothing - no resources to initialise
-    }
-  }
+  private final String NBT_HUNGER = "hunger";
+  private final String NBT_FULLNESS_TICKNESS_REMAINING = "fullnessticksremaining";
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
     checkPreConditions(FunctionTag.WRITE_TO_NBT);
-    nbt.setFloat("hunger", getHunger());
+    nbt.setFloat(NBT_HUNGER, getHunger());
+    nbt.setInteger(NBT_FULLNESS_TICKNESS_REMAINING, serverHungerFullnessTicksLeft);
     setCompleted(FunctionTag.WRITE_TO_NBT);
   }
 
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
     checkPreConditions(FunctionTag.READ_FROM_NBT);
-    this.setHunger(nbt.getFloat("hunger"));
+    this.setHunger(nbt.getFloat(NBT_HUNGER));
+    serverHungerFullnessTicksLeft = nbt.getInteger(NBT_FULLNESS_TICKNESS_REMAINING);
     setCompleted(FunctionTag.READ_FROM_NBT);
   }
 
@@ -186,6 +121,23 @@ public class DragonCombatHelper extends DragonHelper {
         DragonMounts.loggerLimit.error_once("Internal Error: unknown potion name:" + name);
       }
       potionImmunities.add(potion);
+    }
+
+    String [] foodItemsWhiteListNames = (String [])dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, FOOD_ITEMS_WHITELIST);
+    for (String name : foodItemsWhiteListNames) {
+      Item item = Item.REGISTRY.getObject(new ResourceLocation(name));
+      if (item == null) {
+        DragonMounts.loggerLimit.error_once("Internal Error: unknown food whitelist item name:" + name);
+      }
+      foodItemsWhiteList.add(item);
+    }
+    String [] foodItemsBlackListNames = (String [])dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, FOOD_ITEMS_BLACKLIST);
+    for (String name : foodItemsBlackListNames) {
+      Item item = Item.REGISTRY.getObject(new ResourceLocation(name));
+      if (item == null) {
+        DragonMounts.loggerLimit.error_once("Internal Error: unknown food blacklist item name:" + name);
+      }
+      foodItemsBlackList.add(item);
     }
 
     enumCreatureAttribute = EnumCreatureAttribute.UNDEFINED;
@@ -411,7 +363,10 @@ public class DragonCombatHelper extends DragonHelper {
   private TickTimer ticksSinceLastDamageTaken = new TickTimer();
   private TickTimer ticksSinceLastBite = new TickTimer();
 
-  // ----------- hunger and health -----------------
+  // ----------- food, hunger, and health -----------------
+
+  private final static float MIN_HUNGER_PERCENT = 0.0F;
+  private final static float MAX_HUNGER_PERCENT = 100.0F;
 
   /**
    * retrieves the dragon's current hunger level
@@ -425,6 +380,14 @@ public class DragonCombatHelper extends DragonHelper {
   }
 
   /**
+   * is the dragon hungry?
+   * @return true if the dragon is hungry
+   */
+  public boolean isHungry() {
+    return getHunger() < MAX_HUNGER_PERCENT;
+  }
+
+  /**
    * Sets the new hunger level - to be called on the server only.
    * Values sent to client are rounded to nearest percentage point
    * @param hunger the new hunger level as a percentage; will be clamped to valid range
@@ -432,10 +395,7 @@ public class DragonCombatHelper extends DragonHelper {
   public void setHunger(float hunger) {
     if (!assertServerSide("setHunger")) return;
 //    final float MINIMUM_SIGNIFICANT_DIFFERENCE = 1.0F;
-    final float MIN_HUNGER = 0.0F;
-    final float MAX_HUNGER = 100.0F;
-
-    serverHungerLevel = MathX.clamp(hunger, MIN_HUNGER, MAX_HUNGER);
+    serverHungerLevel = MathX.clamp(hunger, MIN_HUNGER_PERCENT, MAX_HUNGER_PERCENT);
 //    float dmHungerLevel = entityDataManager.get(HUNGER);
 //    if (serverHungerLevel == MIN_HUNGER || serverHungerLevel == MAX_HUNGER ||
 //        Math.abs(dmHungerLevel - serverHungerLevel) >= MINIMUM_SIGNIFICANT_DIFFERENCE) {
@@ -458,13 +418,50 @@ public class DragonCombatHelper extends DragonHelper {
    * @param foodpoints the number of hunger level points to restore
    */
   public void feed(int foodpoints) {
+    checkArgument(foodpoints >= 0);
     if (!assertServerSide("setHunger")) return;
     float percentFed = foodpoints / (float)dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, MAX_HUNGER);
     float newHungerLevel = serverHungerLevel + percentFed;
     setHunger(newHungerLevel);
+    if (newHungerLevel >= MAX_HUNGER_PERCENT) {
+
+    }
+
     float hungerSurplus = newHungerLevel - 100.0F;
     if (hungerSurplus <= 0.0F) return;
     healFraction(hungerSurplus / 100.0F * dragon.getMaxHealth());
+  }
+
+  /**
+   * Feed the dragon using the item:
+   *   restores hunger level and/or heals damage
+   * NOTE- does not affect the itemStack passed in.
+   * Server side only
+   * @param itemStack the item to feed to the dragon
+   * @return true if the dragon ate it; false otherwise.
+   */
+  public boolean feed(ItemStack itemStack) {
+    if (!willEatThisItem(itemStack.getItem())) return false;
+    if (!isHungry()) return false;
+    int foodpoints = 0;
+    if (itemStack.getItem() instanceof ItemFood) {
+      ItemFood itemFood = (ItemFood)itemStack.getItem();
+      foodpoints = itemFood.getHealAmount(itemStack);
+    }
+    if (foodpoints == 0) return true;
+
+    float percentFed = foodpoints / (float)dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, MAX_HUNGER);
+    float newHungerLevel = serverHungerLevel + percentFed;
+    setHunger(newHungerLevel);
+    if (newHungerLevel >= MAX_HUNGER_PERCENT) {
+      final int TICKS_PER_SECOND = 20;
+      serverHungerFullnessTicksLeft = (int)dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, FULLNESS_TIME) * TICKS_PER_SECOND;
+    }
+
+    float hungerSurplus = newHungerLevel - 100.0F;
+    if (hungerSurplus <= 0.0F) return true;
+    healFraction(hungerSurplus / 100.0F * dragon.getMaxHealth());
+    return true;
   }
 
   /**
@@ -474,6 +471,21 @@ public class DragonCombatHelper extends DragonHelper {
     return dragon.getHealth() > 0.0F && dragon.getHealth() < dragon.getMaxHealth();
   }
 
+  /**
+   * Will the dragon eat this item?
+   * Does not pay attention to whether the dragon is currently hungry or not
+   * @param item
+   * @return true if the dragon will eat it.
+   */
+  public boolean willEatThisItem(Item item) {
+    if (foodItemsWhiteList.contains(item)) return true;
+    if (foodItemsBlackList.contains(item)) return false;
+    if (item instanceof ItemFood
+        && (boolean)dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, EATS_ITEMFOOD)) {
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Change hunger level and heal damage as appropriate
@@ -494,10 +506,14 @@ public class DragonCombatHelper extends DragonHelper {
       healFraction(healAmount);
     }
 
-    float hungerRatePCperMin = (float)dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, HUNGER_DECAY_RATE);
-    hungerRatePCperMin *= 0.01 * DragonMounts.instance.getConfig().HUNGER_SPEED_MULTIPLIER_PERCENT;
-    float hungerDecrease = hungerRatePCperMin * 0.01F / TICKS_PER_MINUTE;
-    setHunger(serverHungerLevel - hungerDecrease);
+    if (serverHungerFullnessTicksLeft > 0) {
+      --serverHungerFullnessTicksLeft;
+    } else {
+      float hungerRatePCperMin = (float) dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, HUNGER_DECAY_RATE);
+      hungerRatePCperMin *= 0.01 * DragonMounts.instance.getConfig().HUNGER_SPEED_MULTIPLIER_PERCENT;
+      float hungerDecrease = hungerRatePCperMin * 0.01F / TICKS_PER_MINUTE;
+      setHunger(serverHungerLevel - hungerDecrease);
+    }
   }
 
   /**
@@ -518,6 +534,7 @@ public class DragonCombatHelper extends DragonHelper {
   //  the units are percent
   private static final DataParameter<Integer> HUNGER = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.VARINT);
   private float serverHungerLevel;  // server side only: hunger level (0 --> 100%)
+  private int serverHungerFullnessTicksLeft = 0;  // number of ticks remaining until hunger no longer stays at full
 
   private static final DragonVariantTag MAX_HUNGER = DragonVariantTag.addTag("maxhungerunits", 100, 0.0, 500,
           "the maximum hunger level of the full-size dragon? (vanilla player maximum = 20 units)").categories(DragonVariants.Category.METABOLISM);
@@ -527,6 +544,20 @@ public class DragonCombatHelper extends DragonHelper {
           "when hunger level is at or above this threshold (%), the dragon regenerates health ").categories(DragonVariants.Category.METABOLISM);
   private static final DragonVariantTag MAX_HEALTH_REGEN_RATE = DragonVariantTag.addTag("maxhealthregenrate", 75, 0.0, 1000,
           "when hunger level is maximum, the dragon regenerates health at this rate (% per minute)").categories(DragonVariants.Category.METABOLISM);
+  private static final DragonVariantTag FULLNESS_TIME = DragonVariantTag.addTag("fullnesstime", 60, 0, 1000,
+          "when hunger level is raised to maximum, the dragon stays full for this length of time (seconds)").categories(DragonVariants.Category.METABOLISM);
+
+  private static final String [] defaultFoodItemsWhitelist = {"item.wheat"};
+  private static final String [] defaultFoodItemsBlacklist = {"item.spider_eye", "item.poisonous_potato", "item.rotten_flesh"};
+  private static final DragonVariantTag FOOD_ITEMS_WHITELIST = DragonVariantTag.addTag("fooditemswhitelist", defaultFoodItemsWhitelist,
+          "list of items which the dragon will eat").categories(DragonVariants.Category.METABOLISM);
+  private static final DragonVariantTag FOOD_ITEMS_BLACKLIST = DragonVariantTag.addTag("fooditemsblacklist", defaultFoodItemsBlacklist,
+          "list of items which the dragon won't eat").categories(DragonVariants.Category.METABOLISM);
+  private static final DragonVariantTag EATS_ITEMFOOD = DragonVariantTag.addTag("fooditemsstandard", true,
+          "does the dragon eat standard food items?").categories(DragonVariants.Category.METABOLISM);
+
+  private Set<Item> foodItemsWhiteList = new HashSet<>();
+  private Set<Item> foodItemsBlackList = new HashSet<>();
 
   // ------------------ Immunities and attributes -----------------
 
@@ -611,6 +642,122 @@ public class DragonCombatHelper extends DragonHelper {
           DamageSource.FIREWORKS
         };
   private final static Set<String> validDamageSourceNames = new HashSet<>(validDamageSources.length);
+
+  /**
+   * Validates the following aspects of the tags:
+   * 1) damage source names (immunity)
+   * 2) potion immunities
+   * 3) food items
+   * If any errors are found, revert to the defaults and throw an error
+   */
+  public static class DragonCombatValidator implements DragonVariants.VariantTagValidator {
+    @Override
+    public void validateVariantTags(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
+      DragonVariantsException.DragonVariantsErrors dragonVariantsErrors = new DragonVariantsException.DragonVariantsErrors();
+      if (!modifiedCategory.getCategory().equals(DragonVariants.Category.METABOLISM)) return;
+
+      if (validDamageSourceNames.isEmpty()) {
+        for (DamageSource damageSource : validDamageSources) {
+          validDamageSourceNames.add(damageSource.getDamageType());
+        }
+      }
+
+      String [] damageSourceNames = (String [])dragonVariants.getValueOrDefault(modifiedCategory, DAMAGE_SOURCE_IMMUNITIES);
+      ArrayList<String> badNames = new ArrayList<>();
+      for (String name : damageSourceNames) {
+        if (!validDamageSourceNames.contains(name)) {
+          badNames.add(name);
+        }
+      }
+      if (badNames.size() > 0) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("one or more damage source names were not found:");
+        boolean first = true;
+        for (String badItemName : badNames) {
+          if (!first) sb.append(",");
+          sb.append("\"");
+          sb.append(badItemName);
+          sb.append("\"");
+          first = false;
+        }
+        dragonVariants.removeTag(DragonVariants.Category.METABOLISM, DAMAGE_SOURCE_IMMUNITIES);
+        dragonVariantsErrors.addError(sb.toString());
+      }
+
+      String [] potionNames = (String [])dragonVariants.getValueOrDefault(modifiedCategory, POTION_IMMUNITIES);
+      badNames.clear();
+      for (String name : potionNames) {
+        if (null == Potion.getPotionFromResourceLocation(name)) {
+          badNames.add(name);
+        }
+      }
+      if (badNames.size() > 0) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("one or more Potion names were not found:");
+        boolean first = true;
+        for (String badPotionName : badNames) {
+          if (!first) sb.append(",");
+          sb.append("\"");
+          sb.append(badPotionName);
+          sb.append("\"");
+          first = false;
+        }
+        dragonVariants.removeTag(DragonVariants.Category.METABOLISM, POTION_IMMUNITIES);
+        dragonVariantsErrors.addError(sb.toString());
+      }
+
+      String [] foodItemNames = (String [])dragonVariants.getValueOrDefault(modifiedCategory, FOOD_ITEMS_WHITELIST);
+      if (!areItemNamesValid(foodItemNames,dragonVariantsErrors,"Invalid item names:")) {
+        dragonVariants.removeTag(DragonVariants.Category.REPRODUCTION, FOOD_ITEMS_WHITELIST);
+      }
+      foodItemNames = (String [])dragonVariants.getValueOrDefault(modifiedCategory, FOOD_ITEMS_BLACKLIST);
+      if (!areItemNamesValid(foodItemNames,dragonVariantsErrors,"Invalid item names:")) {
+        dragonVariants.removeTag(DragonVariants.Category.REPRODUCTION, FOOD_ITEMS_BLACKLIST);
+      }
+
+      if (dragonVariantsErrors.hasErrors()) {
+        throw new DragonVariantsException(dragonVariantsErrors);
+      }
+    }
+    @Override
+    public void initaliseResources(DragonVariants dragonVariants, DragonVariants.ModifiedCategory modifiedCategory) throws IllegalArgumentException {
+      // do nothing - no resources to initialise
+    }
+
+    /**
+     * Check the list of itemnames to make sure all exist.
+     * If any do not exist, add them to the error message
+     * @param itemNames
+     * @param dragonVariantsErrors
+     * @param notFoundErrorMsg Error message prefix to be used
+     * @return true if all existed, false if any did not exist
+     */
+    private static boolean areItemNamesValid(String [] itemNames, DragonVariantsException.DragonVariantsErrors dragonVariantsErrors,
+                                                    String notFoundErrorMsg) {
+      ArrayList<String> badItemNames = new ArrayList<>();
+      for (String name : itemNames) {
+        Item item = Item.REGISTRY.getObject(new ResourceLocation(name));
+        if (item == null) {
+          badItemNames.add(name);
+        }
+      }
+      if (badItemNames.isEmpty()) return true;
+      StringBuilder sb = new StringBuilder();
+      sb.append(notFoundErrorMsg);
+      boolean first = true;
+      for (String badItemName : badItemNames) {
+        if (!first) sb.append(",");
+        sb.append("\"");
+        sb.append(badItemName);
+        sb.append("\"");
+        first = false;
+      }
+      dragonVariantsErrors.addError(sb.toString());
+      return false;
+    }
+  }
+
+
 
 }
 
