@@ -36,8 +36,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
@@ -170,7 +168,7 @@ public class DragonInteractHelper extends DragonHelper {
           }
 
           // heal
-          if (DragonMounts.instance.getConfig().hungerDecrement == 0) {
+          if (DragonMounts.instance.getConfig().HUNGER_SPEED_MULTIPLIER_PERCENT == 0) {
             eatEvent(player);
             dragon.heal(50);
             return true;

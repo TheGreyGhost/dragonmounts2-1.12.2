@@ -268,17 +268,18 @@ public class DragonReproductionHelper extends DragonHelper {
   }
 
   /**
-   * This function is used when two same-species animals in 'love mode' breed to
-   * generate the new baby animal.
+   * Vanilla createChild is not supported; custom AI is used instead
    */
+
   public EntityAgeable createChild(EntityAgeable mate) {
-    if (!(mate instanceof EntityTameableDragon)) {
-      DragonMounts.loggerLimit.warn_once("Called createChild when mate wasn't a dragon");
-      return null;
-    }
-    EntityTameableDragon dragonMate = (EntityTameableDragon)mate;
-    if (!this.reproduction().canMateWith(dragonMate)) return null;
-    return this.reproduction().createChild(dragonMate);
+    throw new UnsupportedOperationException("vanilla createChild not supported");
+//    if (!(mate instanceof EntityTameableDragon)) {
+//      DragonMounts.loggerLimit.warn_once("Called createChild when mate wasn't a dragon");
+//      return null;
+//    }
+//    EntityTameableDragon dragonMate = (EntityTameableDragon)mate;
+//    if (!canMateWith(dragonMate)) return null;
+//    return null;
   }
 
   public EntityDragonEgg createChild(EntityTameableDragon mate) {
@@ -425,9 +426,9 @@ public class DragonReproductionHelper extends DragonHelper {
   private static final Logger L = LogManager.getLogger();
 
   private static final DragonVariantTag REPRODUCTION_LOWER_LIMIT = DragonVariantTag.addTag("reproductionlowerlimit", 1, 0, 100,
-          "dragon can reproduce at least this many times").categories(DragonVariants.Category.REPRODUCTION);
-  private static final DragonVariantTag REPRODUCTION_UPPER_LIMIT = DragonVariantTag.addTag("reproductiorupperlimit", 5, 0, 100,
-          "dragon can reproduce at most this many times").categories(DragonVariants.Category.REPRODUCTION);
+          "dragon can reproduce at least this many times (lower limit for random number generation)").categories(DragonVariants.Category.REPRODUCTION);
+  private static final DragonVariantTag REPRODUCTION_UPPER_LIMIT = DragonVariantTag.addTag("reproductionupperlimit", 5, 0, 100,
+          "dragon can reproduce at most this many times (upper limit for random number generation)").categories(DragonVariants.Category.REPRODUCTION);
   private static final DragonVariantTag REPRODUCTION_EMOTIONAL_MATURITY_THRESHOLD = DragonVariantTag.addTag("emotionalmaturitythreshold", 75, 0, 100,
           "dragon cannot mate until its emotional maturity (%) is equal to this value or higher").categories(DragonVariants.Category.REPRODUCTION);
   private static final String [] defaultBreedingCodes = {"all"};

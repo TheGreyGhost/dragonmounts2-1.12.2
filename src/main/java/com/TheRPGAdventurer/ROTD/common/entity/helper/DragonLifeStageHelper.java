@@ -10,6 +10,7 @@
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
+import com.TheRPGAdventurer.ROTD.client.gui.DragonMountsConfig;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
@@ -57,7 +58,7 @@ import static net.minecraft.entity.SharedMonsterAttributes.*;
  * 2) Create the DragonLifeStageHelper as described in DragonHelper
  * 3) Call its update methods to keep it synchronised as described in DragonHelper
  *
- * Is responsible for setting MAX_HEALTH, ARMOR, ARMOR_TOUGHNESS and ATTACK_DAMAGE:
+ * Is responsible for setting MAX_HEALTH, ARMOR_MULTIPLIER_PERCENT, ARMOR_TOUGHNESS and ATTACK_DAMAGE:
  *    these are applied via the corresponding attributes by updating the base value
  *
  * Debug:
@@ -152,7 +153,7 @@ public class DragonLifeStageHelper extends DragonHelper {
     DragonConfigurationHelper dch = dragon.configuration();
     applyLifeStageChanges();
 //    dragon.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue((double) dch.getVariantTagValue(Category.LIFE_STAGE, ATTACKDAMAGEBASE));
-//    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURBASE));
+//    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR_MULTIPLIER_PERCENT).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURBASE));
 //    dragon.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, ARMOURTOUGHNESSBASE));
 //    dragon.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)dch.getVariantTagValue(Category.LIFE_STAGE, HEALTHBASE));
   }
@@ -701,6 +702,8 @@ public class DragonLifeStageHelper extends DragonHelper {
     lifeStageAges = getLifeStageAges(dragonVariants, modifiedCategory);
     adultAgeTicks = (int)(lifeStageAges[lifeStageAges.length - 1] * TICKS_PER_MINECRAFT_DAY); // guaranteed to fit into an int, due to tag max value
 
+    DragonMountsConfig dragonMountsConfig = DragonMounts.instance.getConfig();
+
     double [] init2 = {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_HATCHLING),
             (double)dragonVariants.getValueOrDefault(modifiedCategory, BREATHMATURITY_INFANT),
@@ -740,8 +743,9 @@ public class DragonLifeStageHelper extends DragonHelper {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEPERCENT_ADULT)
     };
     attackdamagePoints = multiplyArrayWithClipping(init5, 0.01, 0, 1);
-    attackdamage = multiplyArrayWithClipping(init5, 0.01 *
-                    (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEBASE),
+    attackdamage = multiplyArrayWithClipping(init5,
+                    0.01 * (double)dragonVariants.getValueOrDefault(modifiedCategory, ATTACKDAMAGEBASE)
+                    * 0.01 * dragonMountsConfig.DAMAGE_MULTIPLIER_PERCENT,
                     ATTACKDAMAGE_MIN, ATTACKDAMAGE_MAX);
 
     double [] init6 = {
@@ -753,8 +757,9 @@ public class DragonLifeStageHelper extends DragonHelper {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHPERCENT_ADULT)
     };
     healthPoints = multiplyArrayWithClipping(init6, 0.01, 0, 1);
-    health = multiplyArrayWithClipping(init6, 0.01 *
-                    (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHBASE),
+    health = multiplyArrayWithClipping(init6,
+                    0.01 * (double)dragonVariants.getValueOrDefault(modifiedCategory, HEALTHBASE)
+                    * 0.01 * dragonMountsConfig.HEALTH_MULTIPLIER_PERCENT,
                     HEALTH_MIN, HEALTH_MAX);
 
     double [] init7 = {
@@ -766,8 +771,9 @@ public class DragonLifeStageHelper extends DragonHelper {
             (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURPERCENT_ADULT)
     };
     armourPoints = multiplyArrayWithClipping(init7, 0.01, 0, 1);
-    armour = multiplyArrayWithClipping(init7, 0.01 *
-            (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURBASE),
+    armour = multiplyArrayWithClipping(init7,
+            0.01 * (double)dragonVariants.getValueOrDefault(modifiedCategory, ARMOURBASE)
+            * 0.01 * dragonMountsConfig.ARMOR_MULTIPLIER_PERCENT,
             ARMOUR_MIN, ARMOUR_MAX);
 
     double [] init8 = {

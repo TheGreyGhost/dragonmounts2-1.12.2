@@ -81,7 +81,7 @@
 //          }
 //
 //          // heal
-//          if (DragonMounts.instance.getConfig().hungerDecrement == 0) {
+//          if (DragonMounts.instance.getConfig().HUNGER_SPEED_MULTIPLIER_PERCENT == 0) {
 //            eatEvent(player);
 //            dragon.heal(50);
 //            return true;

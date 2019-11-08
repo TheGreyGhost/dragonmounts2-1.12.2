@@ -196,6 +196,15 @@ public class DragonRidingHelper extends DragonHelper {
   }
 
   /**
+   * Is this entity riding on the dragon?
+   * @param passenger
+   * @return Returns true if the given entity is riding on the dragon
+   */
+  public boolean hasThisPassenger(Entity passenger) {
+    return dragon.getPassengers().contains(passenger);
+  }
+
+  /**
    * This code is called when the dragon is riding on the shoulder of the player
    *
    * @param entityBeingRidden

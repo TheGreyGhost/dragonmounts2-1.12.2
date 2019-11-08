@@ -11,7 +11,6 @@ package com.TheRPGAdventurer.ROTD.client.gui;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.google.common.collect.Lists;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -38,11 +37,11 @@ public class DragonMountsConfig {
   public boolean canSpawnUnderGroundNest = true;
   public boolean canSpawnNetherNest = true;
   public boolean canSpawnEndNest = true;
-  public double ARMOR = 8F;
-  public double BASE_DAMAGE = 5.0F;
-  public double BASE_HEALTH = 90.0d;
-  public int REG_FACTOR = 75;
-  public int hungerDecrement = 3000;
+  public double ARMOR_MULTIPLIER_PERCENT = 100;
+  public double DAMAGE_MULTIPLIER_PERCENT = 100;
+  public double HEALTH_MULTIPLIER_PERCENT = 100;
+  public double HEALTH_REGEN_RATE_MULTIPLIER_PERCENT = 100;
+  public double HUNGER_SPEED_MULTIPLIER_PERCENT = 100;
   // chances
   public int FireNestRarity = 50;
   //	public static int ZombieNestRarity1  = 180;
@@ -177,29 +176,39 @@ public class DragonMountsConfig {
     disableBlockOverride = prop.getBoolean();
     propOrder.add(prop.getName());
 
-    prop = config.get(CATEGORY_MAIN, "Armor", ARMOR);
-    prop.setComment("Makes Dragons Tougher or Not");
-    ARMOR = prop.getDouble();
+    prop = config.get(CATEGORY_MAIN, "ArmorMultiplier", ARMOR_MULTIPLIER_PERCENT);
+    prop.setComment("Changes armour of all dragons (% multiplier).  100 = no change.");
+    prop.setMinValue(0.0);
+    prop.setMaxValue(400.0);
+    ARMOR_MULTIPLIER_PERCENT = prop.getDouble();
     propOrder.add(prop.getName());
 
-    prop = config.get(CATEGORY_MAIN, "Damage", BASE_DAMAGE);
-    prop.setComment("Damage for dragon attack");
-    BASE_DAMAGE = prop.getDouble();
+    prop = config.get(CATEGORY_MAIN, "DamageMultiplier", DAMAGE_MULTIPLIER_PERCENT);
+    prop.setComment("Changes bite attack damage of all dragons (% multiplier).  100 = no change.");
+    prop.setMinValue(0.0);
+    prop.setMaxValue(400.0);
+    DAMAGE_MULTIPLIER_PERCENT = prop.getDouble();
     propOrder.add(prop.getName());
 
-    prop = config.get(CATEGORY_MAIN, "Dragon Base Health", BASE_HEALTH);
-    prop.setComment("Dragon Base Health" + TextFormatting.ITALIC + " Note: Some Dragons have unique health values and are still affected by this");
-    BASE_HEALTH = prop.getDouble();
+    prop = config.get(CATEGORY_MAIN, "HealthMultiplier", HEALTH_MULTIPLIER_PERCENT);
+    prop.setComment("Changes health (# of hearts) of all dragons (% multiplier).  100 = no change.");
+    HEALTH_MULTIPLIER_PERCENT = prop.getDouble();
+    prop.setMinValue(0.0);
+    prop.setMaxValue(400.0);
     propOrder.add(prop.getName());
 
-    prop = config.get(CATEGORY_MAIN, "Health Regen Speed", REG_FACTOR);
-    prop.setComment("Higher numbers slower regen for dragons");
-    REG_FACTOR = prop.getInt();
+    prop = config.get(CATEGORY_MAIN, "HealthRegenMultiplier", HEALTH_REGEN_RATE_MULTIPLIER_PERCENT);
+    prop.setComment("Changes the rate of health regeneration of all dragons (% multiplier).  100 = no change.");
+    prop.setMinValue(0.0);
+    prop.setMaxValue(400.0);
+    HEALTH_REGEN_RATE_MULTIPLIER_PERCENT = prop.getDouble();
     propOrder.add(prop.getName());
 
-    prop = config.get(CATEGORY_MAIN, "Hunger Speed", hungerDecrement);
-    prop.setComment("More numbers slower, i.e. gets a number from the factor of (3000) to 1 per tick (millisecond) if it equals to 1 reduce hunger, set to zero for no hunger, dont make it too low or might crash the game");
-    hungerDecrement = prop.getInt();
+    prop = config.get(CATEGORY_MAIN, "HungerSpeedMultiplier", HUNGER_SPEED_MULTIPLIER_PERCENT);
+    prop.setComment("Changes the rate that hunger level decreases for all dragons (% multiplier).  100 = no change.");
+    prop.setMinValue(0.0);
+    prop.setMaxValue(400.0);
+    HUNGER_SPEED_MULTIPLIER_PERCENT = prop.getDouble();
     propOrder.add(prop.getName());
 
     prop = config.get(CATEGORY_MAIN, "can dragons despawn", canDragonDespawn);

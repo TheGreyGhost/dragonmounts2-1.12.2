@@ -8,6 +8,7 @@ import com.TheRPGAdventurer.ROTD.common.entity.breeds.EnumDragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonLifeStage;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonPhysicalModel;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
 import com.TheRPGAdventurer.ROTD.util.debugging.testclasses.TestForestBreath;
 import net.minecraft.block.BlockLadder;
 import net.minecraft.command.CommandClone;
@@ -166,7 +167,8 @@ public class TestRunner {
         break;
       }
       case 62: {
-        EntityTameableDragon dragon = DragonFactory.getDefaultDragonFactory().createDragon(worldIn, DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed());
+        EntityTameableDragon dragon = DragonFactory.getDefaultDragonFactory().createDragon(worldIn,
+                DragonBreedNew.DragonBreedsRegistry.getDefaultRegistry().getDefaultBreed(), new Modifiers());
         BreathNodeP.Power power = BreathNodeP.Power.SMALL;
         ++testCounter;
         Vec3d origin = new Vec3d(0, 24, 0);

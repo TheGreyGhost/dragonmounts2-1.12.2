@@ -2,6 +2,7 @@ package com.TheRPGAdventurer.ROTD.common.entity.breeds;
 
 import com.TheRPGAdventurer.ROTD.common.entity.EntityDragonEgg;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.Modifiers;
 import net.minecraft.world.World;
 
 /**
@@ -16,9 +17,9 @@ public class DragonFactory {
 
   public static DragonFactory getDefaultDragonFactory() {return defaultDragonFactory;}
 
-  public EntityTameableDragon createDragon(World world, DragonBreedNew dragonBreed) {
-    EntityTameableDragon newDragon = new EntityTameableDragon(world);
-    newDragon.initialise(dragonBreed);
+  public EntityTameableDragon createDragon(World world, DragonBreedNew dragonBreed, Modifiers modifiers) {
+    EntityTameableDragon newDragon = new EntityTameableDragon(world, dragonBreed, modifiers);
+//    newDragon.initialise(dragonBreed);
     return newDragon;
   }
 

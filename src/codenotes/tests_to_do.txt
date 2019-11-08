@@ -2,3 +2,5 @@ validation of BREEDING_ITEMS tag
 shoulder riding
 
 hunger and healing
+-fractional healing
+-decreases in hunger

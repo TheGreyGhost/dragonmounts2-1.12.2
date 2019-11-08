@@ -11,9 +11,6 @@ package com.TheRPGAdventurer.ROTD.common.entity;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.model.dragon.anim.DragonAnimator;
-import com.TheRPGAdventurer.ROTD.common.entity.ai.ground.EntityAIDragonSit;
-import com.TheRPGAdventurer.ROTD.common.entity.ai.path.PathNavigateFlying;
-import com.TheRPGAdventurer.ROTD.common.entity.breath.BreathWeaponTarget;
 import com.TheRPGAdventurer.ROTD.common.entity.breath.DragonBreathHelperP;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreedNew;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.*;
@@ -30,11 +27,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -248,27 +244,27 @@ public class EntityTameableDragon extends EntityTameable {
   public EntityTameableDragonStats dragonStats = new EntityTameableDragonStats();
 
 
-  /** initialise the dragon to the desired breed:
-   *  * if the caller has manually constructed the entity, need to call this method
-   *  * otherwise, the vanilla constructor will create it and call readFromNBT
-   * @param dragonBreed
-   */
-  public void initialise(DragonBreedNew dragonBreed) {
-    // enables walking over blocks
-    stepHeight = 1;
-
-    // set dimensions of full-grown dragon.  The actual width & height is multiplied by the dragon scale (setScale) in EntityAgeable
-    final float FULL_SIZE_DRAGON_SCALE = 1.0F;
-    float adultWidth = dragonPhysicalModel.getHitboxWidthWC(FULL_SIZE_DRAGON_SCALE);
-    float adultHeight = dragonPhysicalModel.getHitboxHeightWC(FULL_SIZE_DRAGON_SCALE);
-    setSize(adultWidth, adultHeight);           //todo: later - update it when breed changes
-
-    // init helpers
-    aiSit = new EntityAIDragonSit(this);
-    helpers.values().forEach(DragonHelper::registerEntityAttributes);
-
-//    InitializeDragonInventory();
-  }
+//  /** initialise the dragon to the desired breed:
+//   *  * if the caller has manually constructed the entity, need to call this method
+//   *  * otherwise, the vanilla constructor will create it and call readFromNBT
+//   * @param dragonBreed
+//   */
+//  public void initialise(DragonBreedWithModifiers dragonBreed) {
+//    // enables walking over blocks
+//    stepHeight = 1;
+//
+//    // set dimensions of full-grown dragon.  The actual width & height is multiplied by the dragon scale (setScale) in EntityAgeable
+//    final float FULL_SIZE_DRAGON_SCALE = 1.0F;
+//    float adultWidth = dragonPhysicalModel.getHitboxWidthWC(FULL_SIZE_DRAGON_SCALE);
+//    float adultHeight = dragonPhysicalModel.getHitboxHeightWC(FULL_SIZE_DRAGON_SCALE);
+//    setSize(adultWidth, adultHeight);           //todo: later - update it when breed changes
+//
+//    // init helpers
+//    aiSit = new EntityAIDragonSit(this);
+//    helpers.values().forEach(DragonHelper::registerEntityAttributes);
+//
+////    InitializeDragonInventory();
+//  }
 
   /**
    * (abstract) Protected helper method to write subclass entity data to NBT.
@@ -477,7 +473,7 @@ public class EntityTameableDragon extends EntityTameable {
     sounds().playStepSound(entityPos, block);
   }
 
-
+  @Override
   public void playSound(SoundEvent sound, float volume, float pitch) {
     sounds().playSound(sound, volume, pitch, false);
   }
@@ -584,11 +580,21 @@ public class EntityTameableDragon extends EntityTameable {
   }
 
   /**
-   * Called when an entity attacks
+   * Called when the dragon attacks another entity
    */
   @Override
   public boolean attackEntityAsMob(Entity entityIn) {
+    super.attackEntityAsMob(entityIn);                // just to set vanilla attack timer
     return combat().attackEntityAsMob(entityIn);
+  }
+
+  public void applyVanillaEnchantments(EntityLivingBase attacker, Entity victim) {
+    super.applyEnchantments(attacker, victim);
+  }
+
+  @Override
+  public boolean isPotionApplicable(PotionEffect potioneffectIn) {
+    return combat().isPotionApplicable(potioneffectIn);
   }
 
   /**
@@ -605,7 +611,7 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public boolean canRenderOnFire() {
-    return super.canRenderOnFire() && !combat().isImmuneToDamage(DamageSource.IN_FIRE);
+    return super.canRenderOnFire() && !combat().isImmuneToDamageType(DamageSource.IN_FIRE);
   }
 
   /**
@@ -699,7 +705,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   @Override
   public boolean isEntityInvulnerable(DamageSource src) {
-    return combat().isEntityInvulnerable(src);
+    return combat().isInvulnerableToThisDamageSource(src);
   }
 
   public int getDeathTime() {
@@ -794,12 +800,14 @@ public class EntityTameableDragon extends EntityTameable {
    */
   @Override
   public void onStruckByLightning(EntityLightningBolt lightningBolt) {
-    combat().onStruckByLightning(lightningBolt);
+    boolean shouldCallVanilla = combat().onStruckByLightning(lightningBolt);
+    if (!shouldCallVanilla) return;
+    super.onStruckByLightning(lightningBolt);
   }
 
   @Override
   public boolean shouldAttackEntity(EntityLivingBase target, EntityLivingBase owner) {
-    Optional<Boolean> shouldAttack = combat().shouldAttackEntity(target, owner);
+    Optional<Boolean> shouldAttack = combat().shouldAttackEntityOnBehalfOfOwner(target, owner);
     if (shouldAttack.isPresent()) return shouldAttack.get();
     return super.shouldAttackEntity(target, owner);
   }
