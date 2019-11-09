@@ -23,6 +23,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -46,7 +47,12 @@ import javax.annotation.Nullable;
  *   Was originally structured as Interaction base class with subclasses (one per type of action) but this is probably overkill
  *     so I just combined them all into one class.
  *
- *   deals with tamed
+ *   deals with
+ *   - tamed
+ *   - interaction between a player and a dragon that is tamed by someone else
+ *   - home position
+ *
+ *
  *
  */
 public class DragonInteractHelper extends DragonHelper {
@@ -60,13 +66,11 @@ public class DragonInteractHelper extends DragonHelper {
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
     checkPreConditions(FunctionTag.WRITE_TO_NBT);
-    nbt.setBoolean(NBT_ALLOWOTHERPLAYERS, this.allowedOtherPlayers());
+    nbt.setBoolean(NBT_ALLOW_OTHER_PLAYERS, this.allowedOtherPlayers());
     //        nbt.setBoolean("sleeping", this.isSleeping()); //unused as of now
-    nbt.setBoolean("HasHomePosition", this.hasHomePosition);
+    nbt.setBoolean(NBT_HAS_HOME_POSITION, this.hasHomePosition);
     if (homePos != null && this.hasHomePosition) {
-      nbt.setInteger("HomeAreaX", homePos.getX());
-      nbt.setInteger("HomeAreaY", homePos.getY());
-      nbt.setInteger("HomeAreaZ", homePos.getZ());
+      nbt.setTag(NBT_HOME_POSITION, NBTUtil.createPosTag(homePos));
     }
     setCompleted(FunctionTag.WRITE_TO_NBT);
   }
@@ -74,10 +78,12 @@ public class DragonInteractHelper extends DragonHelper {
   @Override
   public void readFromNBT(NBTTagCompound nbt) {
     checkPreConditions(FunctionTag.READ_FROM_NBT);
-    this.setToAllowedOtherPlayers(nbt.getBoolean(NBT_ALLOWOTHERPLAYERS));
-    this.hasHomePosition = nbt.getBoolean("HasHomePosition");
-    if (hasHomePosition && nbt.getInteger("HomeAreaX") != 0 && nbt.getInteger("HomeAreaY") != 0 && nbt.getInteger("HomeAreaZ") != 0) {
-      homePos = new BlockPos(nbt.getInteger("HomeAreaX"), nbt.getInteger("HomeAreaY"), nbt.getInteger("HomeAreaZ"));
+    this.setToAllowedOtherPlayers(nbt.getBoolean(NBT_ALLOW_OTHER_PLAYERS));
+    this.hasHomePosition = nbt.getBoolean(NBT_HAS_HOME_POSITION);
+    if (nbt.hasKey("BeamTarget", 10)) {
+      this.homePos = NBTUtil.getPosFromTag(nbt.getCompoundTag(NBT_HOME_POSITION));
+    } else {
+      this.homePos = new BlockPos(0,0,0);
     }
     setCompleted(FunctionTag.READ_FROM_NBT);
   }
@@ -85,7 +91,7 @@ public class DragonInteractHelper extends DragonHelper {
   @Override
   public void registerDataParameters() {
     checkPreConditions(FunctionTag.REGISTER_DATA_PARAMETERS);
-    dataManager.register(ALLOW_OTHERPLAYERS, false);
+    entityDataManager.register(DATAPARAM_ALLOW_OTHER_PLAYERS, false);
 //    dataManager.register(GROWTH_PAUSED, false);
     setCompleted(FunctionTag.REGISTER_DATA_PARAMETERS);
   }
@@ -110,14 +116,13 @@ public class DragonInteractHelper extends DragonHelper {
   public void onLivingUpdate() {
     checkPreConditions(FunctionTag.VANILLA);
     // set home position near owner when tamed
-    if (isTamed()) {
-      Entity owner = getOwner();
+    if (dragon.isTamed()) {
+      Entity owner = dragon.getOwner();
       if (owner != null) {
         setHomePosAndDistance(owner.getPosition(), HOME_RADIUS);
       }
     }
   }
-
 
   public static void registerConfigurationTags() { //todo initialise tags here
   }
@@ -325,11 +330,11 @@ public class DragonInteractHelper extends DragonHelper {
   }
 
   public boolean allowedOtherPlayers() {
-    return this.dataManager.get(ALLOW_OTHERPLAYERS);
+    return this.dataManager.get(DATAPARAM_ALLOW_OTHER_PLAYERS);
   }
 
   public void setToAllowedOtherPlayers(boolean allow) {
-    dataManager.set(ALLOW_OTHERPLAYERS, allow);
+    dataManager.set(DATAPARAM_ALLOW_OTHER_PLAYERS, allow);
   }
 
   public void tamedFor(EntityPlayer player, boolean successful) {
@@ -347,20 +352,21 @@ public class DragonInteractHelper extends DragonHelper {
   }
 
   public boolean isTamedFor(EntityPlayer player) {
-    return isTamed() && isOwner(player);
+    return dragon.isTamed() && dragon.isOwner(player);
   }
 
-private static final DataParameter<Boolean> ALLOW_OTHERPLAYERS = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
+  private static final DataParameter<Boolean> DATAPARAM_ALLOW_OTHER_PLAYERS = EntityDataManager.createKey(EntityTameableDragon.class, DataSerializers.BOOLEAN);
 
-private static final String NBT_ALLOWOTHERPLAYERS = "AllowOtherPlayers";
+  private static final String NBT_ALLOW_OTHER_PLAYERS = "AllowOtherPlayers";
+  private static final String NBT_HAS_HOME_POSITION = "HasHomePosition";
+  private static final String NBT_HOME_POSITION = "HomePosition";
+  //    private final List<DragonInteractBase> actions = new ArrayList<>();
 
-//    private final List<DragonInteractBase> actions = new ArrayList<>();
+  public static final double BASE_FOLLOW_RANGE = 70;
+  public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
+  public static final int HOME_RADIUS = 64;
 
-public static final double BASE_FOLLOW_RANGE = 70;
-public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
-public static final int HOME_RADIUS = 64;
-
-public boolean hasHomePosition = false;
-public BlockPos homePos;
-
+  // server side only
+  private boolean hasHomePosition = false;
+  private BlockPos homePos;
 }
