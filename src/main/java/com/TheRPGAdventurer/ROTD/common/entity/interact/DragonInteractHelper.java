@@ -32,8 +32,6 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
@@ -50,9 +48,12 @@ import javax.annotation.Nullable;
  *   deals with
  *   - tamed
  *   - interaction between a player and a dragon that is tamed by someone else
- *   - home position
+ *   - home position - previously used to follow the owner but that's not what it's intended for in vanilla.  Vanilla uses it for (eg) villagers returning to their village
+ *      AI task is used to follow owner instead.
+ *     Currently - home isn't used for anything.  Maybe future use = to stay near a nest or an egg?
  *
- *
+ *  Interact is responsible for identifying which interaction is appropriate, and consuming the item if appropriate.
+ *    The other helpers are responsible for change the dragon state in response to the interaction.
  *
  */
 public class DragonInteractHelper extends DragonHelper {
@@ -115,107 +116,114 @@ public class DragonInteractHelper extends DragonHelper {
   @Override
   public void onLivingUpdate() {
     checkPreConditions(FunctionTag.VANILLA);
-    // set home position near owner when tamed
-    if (dragon.isTamed()) {
-      Entity owner = dragon.getOwner();
-      if (owner != null) {
-        setHomePosAndDistance(owner.getPosition(), HOME_RADIUS);
-      }
-    }
+//    // set home position near owner when tamed      /
+//    if (dragon.isTamed()) {
+//      Entity owner = dragon.getOwner();
+//      if (owner != null) {
+//        dragon.setHomePosAndDistance(owner.getPosition(), HOME_RADIUS);
+//      }
+//    }
   }
 
   public static void registerConfigurationTags() { //todo initialise tags here
   }
 
+  /**
+   * I think this is called on both server and client
+   * @param player
+   * @param item
+   * @return
+   */
   public boolean interact(EntityPlayer player, ItemStack item) {
-    if (dragon.isServer()) {
-      if (attemptBreedingInteraction(player, item)) return true;
+
+    // interactions:
+//    - dragon whistle - various
+//            - bone: dragon sits
+//    - stick: dragon sits
+//    - food: instanceof ItemFood-->
+//            - fish or dragonfood->
+//    * if untamed -> random chance of taming
+//            * depending on hungerDecrement config: either heal dragon, or raise its hunger satiation
+//    * if fully satiated, and this is a breeding item, set dragon in love
+//            - shrinking food or growing food, to pause or restart growth.
+//    - click without interacting item -> riding (not sneaking) or dragon GUI (with sneaking)
+
+    if (attemptBreedingInteraction(player, item)) return true;
 
 
-      if (isAllowed(player)) {
-                /*
-                 * Riding
-                 */
-        if (dragon.canFitPassenger(player) && dragon.isTamed() && dragon.isSaddled()  && !player.isSneaking() && !hasInteractItemsEquipped(player)) {
-          dragon.setRidingPlayer(player);
-          return true;
-        }
 
-                /*
-                 * GUI
-                 */
-        if (player.isSneaking() && dragon.isTamedFor(player) && !hasInteractItemsEquipped(player)) {
-          // Dragon Inventory
-          dragon.openGUI(player, GuiHandler.GUI_DRAGON);
-          return true;
-        }
-      }
 
-            /*
-             * Sit
-             */
-      if (dragon.isTamed() && (DMUtils.hasEquipped(player, Items.STICK) || DMUtils.hasEquipped(player, Items.BONE)) && dragon.onGround) {
-        dragon.getAISit().setSitting(!dragon.isSitting());
-        dragon.getNavigator().clearPath();
+    if (isAllowed(player)) {
+              /*
+               * Riding
+               */
+      if (dragon.canFitPassenger(player) && dragon.isTamed() && dragon.isSaddled()  && !player.isSneaking() && !hasInteractItemsEquipped(player)) {
+        dragon.setRidingPlayer(player);
         return true;
       }
 
-            /*
-             * Consume
-             */
-      if (DMUtils.hasEquippedFood(player)) {
-        if (DMUtils.consumeFish(player) || DMUtils.consumeEquippedArray(player, DragonBreed.getFoodItems())) {
-          // Taming
-          if (!dragon.isTamed()) {
-            dragon.tamedFor(player, dragon.getRNG().nextInt(5) == 0);
-            eatEvent(player);
-            return true;
-          }
+              /*
+               * GUI
+               */
+      if (player.isSneaking() && dragon.isTamedFor(player) && !hasInteractItemsEquipped(player)) {
+        // Dragon Inventory
+        dragon.openGUI(player, GuiHandler.GUI_DRAGON);
+        return true;
+      }
+    }
 
-          // heal
-          if (DragonMounts.instance.getConfig().HUNGER_SPEED_MULTIPLIER_PERCENT == 0) {
-            eatEvent(player);
-            dragon.heal(50);
-            return true;
-            //  hunger
-          } else if (dragon.getHunger() < 100) {
-            eatEvent(player);
-            dragon.setHunger(dragon.getHunger() + (DMUtils.getFoodPoints(player)));
-            return true;
-          }
+          /*
+           * Sit
+           */
+    if (dragon.isTamed() && (DMUtils.hasEquipped(player, Items.STICK) || DMUtils.hasEquipped(player, Items.BONE)) && dragon.onGround) {
+      dragon.getAISit().setSitting(!dragon.isSitting());
+      dragon.getNavigator().clearPath();
+      return true;
+    }
 
-          // breed
-          if (dragon.isBreedingItem(item)
-              && dragon.reproduction().hasReachedReproductiveAge() && dragon.reproduction().isFertile()
-              && !dragon.isInLove()) {
-            eatEvent(player);
-            dragon.setInLove(player);
-            return true;
-          }
-          return true;
-        }
-
-        // Stop Growth
-        ItemFood shrinking = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getShrinkingFood());
-        if (shrinking != null) {
-          dragon.setGrowthPaused(true);
-          eatEvent(player);
-          player.sendStatusMessage(new TextComponentTranslation("dragon.growth.paused"), true);
-          return true;
-        }
-        // Continue growth
-        ItemFood growing = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getGrowingFood());
-        if (growing != null) {
-          dragon.setGrowthPaused(false);
+          /*
+           * Consume
+           */
+    if (DMUtils.hasEquippedFood(player)) {
+      if (DMUtils.consumeFish(player) || DMUtils.consumeEquippedArray(player, DragonBreed.getFoodItems())) {
+        // Taming
+        if (!dragon.isTamed()) {
+          dragon.tamedFor(player, dragon.getRNG().nextInt(5) == 0);
           eatEvent(player);
           return true;
         }
+
+        // heal
+        if (DragonMounts.instance.getConfig().HUNGER_SPEED_MULTIPLIER_PERCENT == 0) {
+          eatEvent(player);
+          dragon.heal(50);
+          return true;
+          //  hunger
+        } else if (dragon.getHunger() < 100) {
+          eatEvent(player);
+          dragon.setHunger(dragon.getHunger() + (DMUtils.getFoodPoints(player)));
+          return true;
+        }
+
+     }
+
+      // Stop Growth
+      ItemFood shrinking = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getShrinkingFood());
+      if (shrinking != null) {
+        dragon.setGrowthPaused(true);
+        eatEvent(player);
+        player.sendStatusMessage(new TextComponentTranslation("dragon.growth.paused"), true);
+        return true;
+      }
+      // Continue growth
+      ItemFood growing = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getGrowingFood());
+      if (growing != null) {
+        dragon.setGrowthPaused(false);
+        eatEvent(player);
+        return true;
       }
     }
     return false;
-
-
-
   }
 
   @Nullable
@@ -239,10 +247,22 @@ public class DragonInteractHelper extends DragonHelper {
       if (dragon.isBreedingItem(itemstack) && dragon.reproduction().canReproduce() && !dragon.isInLove()) {
         itemstack.shrink(1);
         dragon.setInLove(player);
+        eatEvent(player);
         return true;
       }
     }
     return false;
+
+//    // breed
+//    if (dragon.isBreedingItem(item)
+//            && dragon.reproduction().hasReachedReproductiveAge() && dragon.reproduction().isFertile()
+//            && !dragon.isInLove()) {
+//      eatEvent(player);
+//      dragon.setInLove(player);
+//      return true;
+//    }
+//    return true;
+
   }
 
   /**
@@ -272,38 +292,41 @@ public class DragonInteractHelper extends DragonHelper {
     return true;
   }
 
-
+  /** I think this is called on both server and client
+   *
+   * @param player
+   * @param hand
+   * @return
+   */
   public boolean processInteract(EntityPlayer player, EnumHand hand) {
     ItemStack item = player.getHeldItem(hand);
+//    ItemStack itemstack = player.getHeldItem(hand);
+//
+//   remove milking dragon for now
+//    if (itemstack.getItem() == Items.BUCKET && !player.capabilities.isCreativeMode && !this.isChild() && DragonMounts.instance.getConfig().canMilk) {
+//      player.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
+//      itemstack.shrink(1);
+//
+//      if (itemstack.isEmpty()) {
+//        player.setHeldItem(hand, new ItemStack(Items.MILK_BUCKET));
+//      } else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MILK_BUCKET))) {
+//        player.dropItem(new ItemStack(Items.MILK_BUCKET), false);
+//      }
+//
+//      return true;
+//    }
+    if (dragon.getHealth() <= 0) return false;
 
-    ItemStack itemstack = player.getHeldItem(hand);
-
-    if (itemstack.getItem() == Items.BUCKET && !player.capabilities.isCreativeMode && !this.isChild() && DragonMounts.instance.getConfig().canMilk) {
-      player.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
-      itemstack.shrink(1);
-
-      if (itemstack.isEmpty()) {
-        player.setHeldItem(hand, new ItemStack(Items.MILK_BUCKET));
-      } else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MILK_BUCKET))) {
-        player.dropItem(new ItemStack(Items.MILK_BUCKET), false);
-      }
-
-      return true;
-    }
-
-    if (getHealth() <= 0) return false;
-
-
-    return getInteractHelper().interact(player, item);
+    return interact(player, item);
   }
 
-  @SideOnly(Side.CLIENT)
   private void eatEvent(EntityPlayer player) {
     dragon.playSound(dragon.getEatSound(), 0.6f, 0.75f);
-    spawnItemCrackParticles(DMUtils.consumeEquipped(player, DragonBreed.getFoodItems()));
+    spawnMouthChewingItemParticles(DMUtils.consumeEquipped(player, DragonBreed.getFoodItems()));
   }
 
-  private void spawnItemCrackParticles(Item item) {
+  private void spawnMouthChewingItemParticles(Item item) {
+    if (!dragon.isClient()) return;
     for (int i = 0; i < 15; i++) {
       double motionX = dragon.getRNG().nextGaussian() * 0.07D;
       double motionY = dragon.getRNG().nextGaussian() * 0.07D;
