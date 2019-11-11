@@ -80,7 +80,7 @@ public class DragonInteractHelper extends DragonHelper {
     checkPreConditions(FunctionTag.READ_FROM_NBT);
     this.setToAllowedOtherPlayers(nbt.getBoolean(NBT_ALLOW_OTHER_PLAYERS));
     this.hasHomePosition = nbt.getBoolean(NBT_HAS_HOME_POSITION);
-    if (nbt.hasKey("BeamTarget", 10)) {
+    if (nbt.hasKey(NBT_HOME_POSITION, 10)) {
       this.homePos = NBTUtil.getPosFromTag(nbt.getCompoundTag(NBT_HOME_POSITION));
     } else {
       this.homePos = new BlockPos(0,0,0);
