@@ -436,13 +436,16 @@ public class DragonCombatHelper extends DragonHelper {
    * Feed the dragon using the item:
    *   restores hunger level and/or heals damage
    * NOTE- does not affect the itemStack passed in.
-   * Server side only
+   * Only updates hunger and food on the server side.
+   * Client side: performs success checks only
    * @param itemStack the item to feed to the dragon
    * @return true if the dragon ate it; false otherwise.
    */
   public boolean feed(ItemStack itemStack) {
-    if (!willEatThisItem(itemStack.getItem())) return false;
-    if (!isHungry()) return false;
+    if (!considersThisItemEdible(itemStack.getItem())) return false;
+    if (!isHungry() && !needsHealing()) return false;
+    if (!dragon.isServer()) return true;
+
     int foodpoints = 0;
     if (itemStack.getItem() instanceof ItemFood) {
       ItemFood itemFood = (ItemFood)itemStack.getItem();
@@ -450,7 +453,7 @@ public class DragonCombatHelper extends DragonHelper {
     }
     if (foodpoints == 0) return true;
 
-    float percentFed = foodpoints / (float)dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, MAX_HUNGER);
+    float percentFed = 100.0F * foodpoints / (float)dragon.configuration().getVariantTagValue(DragonVariants.Category.METABOLISM, MAX_HUNGER);
     float newHungerLevel = serverHungerLevel + percentFed;
     setHunger(newHungerLevel);
     if (newHungerLevel >= MAX_HUNGER_PERCENT) {
@@ -477,7 +480,7 @@ public class DragonCombatHelper extends DragonHelper {
    * @param item
    * @return true if the dragon will eat it.
    */
-  public boolean willEatThisItem(Item item) {
+  public boolean considersThisItemEdible(Item item) {
     if (foodItemsWhiteList.contains(item)) return true;
     if (foodItemsBlackList.contains(item)) return false;
     if (item instanceof ItemFood

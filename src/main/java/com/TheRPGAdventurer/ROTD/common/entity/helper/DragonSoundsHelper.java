@@ -87,7 +87,7 @@ public class DragonSoundsHelper extends DragonHelper {
     return getBreed().getStepSound();
   }
 
-  public SoundEvent getEatSound() {
+  public SoundEvent playEatSound() {
     return getBreed().getEatSound();
   }
 

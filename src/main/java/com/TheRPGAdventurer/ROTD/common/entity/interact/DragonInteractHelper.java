@@ -14,13 +14,13 @@ import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonHelper;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.util.DMUtils;
+import com.TheRPGAdventurer.ROTD.util.EntityState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
@@ -125,7 +125,7 @@ public class DragonInteractHelper extends DragonHelper {
 //    }
   }
 
-  public static void registerConfigurationTags() { //todo initialise tags here
+  public static void registerConfigurationTags() { // static initialisers register the tags
   }
 
   /**
@@ -137,21 +137,57 @@ public class DragonInteractHelper extends DragonHelper {
   public boolean interact(EntityPlayer player, ItemStack item) {
 
     // interactions:
-//    - dragon whistle - various
-//            - bone: dragon sits
-//    - stick: dragon sits
-//    - food: instanceof ItemFood-->
-//            - fish or dragonfood->
-//    * if untamed -> random chance of taming
-//            * depending on hungerDecrement config: either heal dragon, or raise its hunger satiation
+//   1) First checks to see if the item is a type that the dragon will eat
+//      If not, proceed to (2)
+//      If so, check if the dragon is hungry, or is not hungry but requires healing
+//        If so, eats the item and exits.
+//        If not, proceed to (2)
+//   2) Checks to see if the item is a breeding item
+//      If not, proceeds to (3)
+//      If so, checks to see if the dragon is not in love already, and is capable of breeding.
+//        If so, put the dragon into love mode and consume the item
+//      Exit.
+//   3)
+
+//    - dragon whistle - various NOT IMPLEMENTED YET
+//    - bone: dragon sits NOT IMPLEMENTED YET
+//    - stick: dragon sits NOT IMPLEMENTED YET
+//    - food:
+//        heals dragon
+//        if dragon is untamed -> random chance of taming
+//
+
 //    * if fully satiated, and this is a breeding item, set dragon in love
 //            - shrinking food or growing food, to pause or restart growth.
 //    - click without interacting item -> riding (not sneaking) or dragon GUI (with sneaking)
+//    - growing or shrinking item : NOT IMPLEMENTED
+    if (dragon.combat().considersThisItemEdible(item.getItem())) {
+      if (!dragon.isTamed()) {
+        attemptToTame(player, item);
+        return true;
+      } else {
+        if (dragon.combat().feed(item)) return true;
+      }
+    }
 
-    if (attemptBreedingInteraction(player, item)) return true;
+    if (dragon.reproduction().isBreedingItem(item)) {
+      if (attemptBreedingInteraction(player, item)) return true;
+      return false;
+    }
 
+//   Not sure how the whistle interaction was supposed to work
 
+//
+//          /*
+//           * Sit
+//           */
+//    if (dragon.isTamed() && (DMUtils.hasEquipped(player, Items.STICK) || DMUtils.hasEquipped(player, Items.BONE)) && dragon.onGround) {
+//      dragon.getAISit().setSitting(!dragon.isSitting());
+//      dragon.getNavigator().clearPath();
+//      return true;
+//    }
 
+  SEE NOTES IN FEATURELOCATIONS ON WHAT TO IMPLEMENT NEXT
 
     if (isAllowed(player)) {
               /*
@@ -172,56 +208,23 @@ public class DragonInteractHelper extends DragonHelper {
       }
     }
 
-          /*
-           * Sit
-           */
-    if (dragon.isTamed() && (DMUtils.hasEquipped(player, Items.STICK) || DMUtils.hasEquipped(player, Items.BONE)) && dragon.onGround) {
-      dragon.getAISit().setSitting(!dragon.isSitting());
-      dragon.getNavigator().clearPath();
-      return true;
-    }
+          /*/
 
-          /*
-           * Consume
-           */
-    if (DMUtils.hasEquippedFood(player)) {
-      if (DMUtils.consumeFish(player) || DMUtils.consumeEquippedArray(player, DragonBreed.getFoodItems())) {
-        // Taming
-        if (!dragon.isTamed()) {
-          dragon.tamedFor(player, dragon.getRNG().nextInt(5) == 0);
-          eatEvent(player);
-          return true;
-        }
-
-        // heal
-        if (DragonMounts.instance.getConfig().HUNGER_SPEED_MULTIPLIER_PERCENT == 0) {
-          eatEvent(player);
-          dragon.heal(50);
-          return true;
-          //  hunger
-        } else if (dragon.getHunger() < 100) {
-          eatEvent(player);
-          dragon.setHunger(dragon.getHunger() + (DMUtils.getFoodPoints(player)));
-          return true;
-        }
-
-     }
-
-      // Stop Growth
-      ItemFood shrinking = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getShrinkingFood());
-      if (shrinking != null) {
-        dragon.setGrowthPaused(true);
-        eatEvent(player);
-        player.sendStatusMessage(new TextComponentTranslation("dragon.growth.paused"), true);
-        return true;
-      }
-      // Continue growth
-      ItemFood growing = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getGrowingFood());
-      if (growing != null) {
-        dragon.setGrowthPaused(false);
-        eatEvent(player);
-        return true;
-      }
+//      // Stop Growth
+//      ItemFood shrinking = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getShrinkingFood());
+//      if (shrinking != null) {
+//        dragon.setGrowthPaused(true);
+//        eatEvent(player);
+//        player.sendStatusMessage(new TextComponentTranslation("dragon.growth.paused"), true);
+//        return true;
+//      }
+//      // Continue growth
+//      ItemFood growing = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getGrowingFood());
+//      if (growing != null) {
+//        dragon.setGrowthPaused(false);
+//        eatEvent(player);
+//        return true;
+//      }
     }
     return false;
   }
@@ -238,18 +241,16 @@ public class DragonInteractHelper extends DragonHelper {
 
   /**
    * attempt to use this item to put the dragon into love mode
+   * if successful, dragon eats it
    * @param player
    * @param itemstack
    * @return true if success
    */
   private boolean attemptBreedingInteraction(EntityPlayer player, ItemStack itemstack) {
-    if (!itemstack.isEmpty()) {
-      if (dragon.isBreedingItem(itemstack) && dragon.reproduction().canReproduce() && !dragon.isInLove()) {
-        itemstack.shrink(1);
-        dragon.setInLove(player);
-        eatEvent(player);
-        return true;
-      }
+    if (dragon.isBreedingItem(itemstack) && dragon.reproduction().canReproduce() && !dragon.isInLove()) {
+      dragon.setInLove(player);
+      consumeItem(player, itemstack);
+      return true;
     }
     return false;
 
@@ -263,6 +264,19 @@ public class DragonInteractHelper extends DragonHelper {
 //    }
 //    return true;
 
+  }
+
+  /**
+   * Attempts to tame the dragon.  Consumes the item even if unsuccessful.
+   * @param player
+   * @return true for successful taming
+   */
+  private boolean attemptToTame(EntityPlayer player, ItemStack itemStack) {
+    double tameChance = (double)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, CHANCE_OF_TAMING_SUCCESS);
+    boolean successfulTaming = (dragon.getRNG().nextDouble() < tameChance / 100.0);
+    onTameAttempt(player, successfulTaming);
+    consumeItem(player, itemStack);
+    return successfulTaming;
   }
 
   /**
@@ -320,9 +334,11 @@ public class DragonInteractHelper extends DragonHelper {
     return interact(player, item);
   }
 
-  private void eatEvent(EntityPlayer player) {
-    dragon.playSound(dragon.getEatSound(), 0.6f, 0.75f);
-    spawnMouthChewingItemParticles(DMUtils.consumeEquipped(player, DragonBreed.getFoodItems()));
+  private void consumeItem(EntityPlayer player, ItemStack itemStack) {
+    dragon.sounds().playEatSound();
+//    dragon.playSound(dragon.getEatSound(), 0.6f, 0.75f);
+    spawnMouthChewingItemParticles(itemStack.getItem());
+    itemStack.shrink(1);
   }
 
   private void spawnMouthChewingItemParticles(Item item) {
@@ -360,17 +376,24 @@ public class DragonInteractHelper extends DragonHelper {
     dataManager.set(DATAPARAM_ALLOW_OTHER_PLAYERS, allow);
   }
 
-  public void tamedFor(EntityPlayer player, boolean successful) {
+  /**
+   * Implements the outcome of a tame attempt (successful or failed)
+   * Based on code from EntityWolf.processInteract()
+   * @param player
+   * @param successful
+   */
+  public void onTameAttempt(EntityPlayer player, boolean successful) {
+    if (!dragon.isServer()) return;
     if (successful) {
       dragon.setTamed(true);
-      navigator.clearPath(); // replacement for setPathToEntity(null);
-      setAttackTarget(null);
-      setOwnerId(player.getUniqueID());
-      playTameEffect(true);
-      world.setEntityState(this, (byte) 7);
+      dragon.getNavigator().clearPath(); // replacement for setPathToEntity(null);
+      dragon.setAttackTarget(null);
+      dragon.setOwnerId(player.getUniqueID());
+//      dragon.playTameEffect(true);  this effect is played by the setEntityState sent to the client
+     dragon.world.setEntityState(dragon, EntityState.TAME_ATTEMPT_SUCCEEDED.getMagicNumber());
     } else {
-      playTameEffect(false);
-      world.setEntityState(this, (byte) 6);
+//      playTameEffect(false);
+      dragon.world.setEntityState(dragon, EntityState.TAME_ATTEMPT_FAILED.getMagicNumber());
     }
   }
 
@@ -392,4 +415,9 @@ public class DragonInteractHelper extends DragonHelper {
   // server side only
   private boolean hasHomePosition = false;
   private BlockPos homePos;
+
+  private static final DragonVariantTag CHANCE_OF_TAMING_SUCCESS = DragonVariantTag.addTag("chanceoftamingsuccess", 25, 0, 100,
+          "the chance that feeding the dragon will tame it (%)").categories(DragonVariants.Category.BEHAVIOUR);
+
+
 }

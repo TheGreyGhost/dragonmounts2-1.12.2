@@ -8,6 +8,8 @@ package com.TheRPGAdventurer.ROTD.util;
  *
  */
 public enum EntityState {
+  TAME_ATTEMPT_FAILED((byte)6),
+  TAME_ATTEMPT_SUCCEEDED((byte)7),
   KNOCKBACK((byte)30);
 
 

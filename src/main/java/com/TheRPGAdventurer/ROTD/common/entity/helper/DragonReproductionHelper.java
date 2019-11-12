@@ -213,6 +213,7 @@ public class DragonReproductionHelper extends DragonHelper {
    * (wheat, carrots or seeds depending on the animal type)
    */
   public boolean isBreedingItem(ItemStack item) {
+    if (item.isEmpty()) return false;
     String itemName = item.getUnlocalizedName();
     boolean found = Arrays.asList(dragon.configuration().getVariantTagValue(DragonVariants.Category.REPRODUCTION, BREEDING_ITEMS)).contains(itemName);
     return found;

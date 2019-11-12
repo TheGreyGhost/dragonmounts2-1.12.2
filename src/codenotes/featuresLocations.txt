@@ -28,6 +28,27 @@ Valid interactions for:
 Checks if the dragon is untamed, or tamed by someone else.
 Knows who the controlling player is.
 
+Interactions:
+   1) First checks to see if the item is a type that the dragon will eat
+      If not, proceed to (2)
+      If so:
+      If the dragon isn't tamed, eat the item and give a random chance of taming.
+      If the dragon is already tamed, check if the dragon is hungry, or is not hungry but requires healing
+        If so, eats the item and exits.
+        If not, proceed to (2)
+   2) Checks to see if the item is a breeding item
+      If not, proceeds to (3)
+      If so, checks to see if the dragon is not in love already, and is capable of breeding.
+        If so, put the dragon into love mode and consume the item
+      Exit.
+   3) If the item is neither food nor breeding, and the player isn't holding shift (sneaking), attempt to mount the dragon:
+      If the dragon isn't tamed, give a warning message
+      If the dragon is tamed for someone else, and has not been told to allow other players, give a warning message
+      If the dragon isn't saddled, give a warning message
+
+
+
+
 DragonCombatHelper: Health, attacks, damage (not including breath weapons)
 - implements hunger:
   - will affect AI hunting
@@ -36,8 +57,11 @@ DragonCombatHelper: Health, attacks, damage (not including breath weapons)
     b) if dragon is fed when already full, heal an amount of damage proportional to hunger_fed * max_health / max_hunger
     c) when hunger drops to zero, it doesn't cause health damage
   configurables: MAX_HUNGER (units per health), HUNGER_DECAY_RATE (% per minute), HUNGER_HEAL_THRESHOLD (%), MAX_HEALTH_REGEN_RATE (% of max health per minute)
-  A dragon's max hunger is proportional to its health.  So when you feed it food, the amount of hunger restored (as a %) is greater for a small dragon than a large dragon.
+  A dragon's max hunger is proportional to its health.  So when you feed it food, the amount of hunger restored (as a %) is greater for a small dragon than a large dragon.  Or in other
+    words, a larger dragon needs more food than a smaller dragon.
   When a dragon reaches full hunger, it stays full for FULLNESS_TIME before hunger starts to decrease again.
+
+
 
 
   see https://minecraft.gamepedia.com/Hunger
