@@ -41,10 +41,15 @@ Interactions:
       If so, checks to see if the dragon is not in love already, and is capable of breeding.
         If so, put the dragon into love mode and consume the item
       Exit.
-   3) If the item is neither food nor breeding, and the player isn't holding shift (sneaking), attempt to mount the dragon:
-      If the dragon isn't tamed, give a warning message
-      If the dragon is tamed for someone else, and has not been told to allow other players, give a warning message
+
+   If the item is food and/or breeding- exit at this point.
+
+   3) If the dragon isn't tamed, give a warning message and exit.
+   4) If the dragon is tamed for someone else, and has not been told to allow other players, give a warning message and exit
+   5) If the item is a saddle, and the dragon isn't already saddled, saddle it
+   4) If the item is neither food nor breeding, and the player isn't holding shift (sneaking), attempt to mount the dragon:
       If the dragon isn't saddled, give a warning message
+   5) If the item is neither food nor breeding, and the player is holding shift, open the dragon GUI
 
 
 

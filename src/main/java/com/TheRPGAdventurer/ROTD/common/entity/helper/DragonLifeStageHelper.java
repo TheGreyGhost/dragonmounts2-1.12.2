@@ -501,8 +501,8 @@ public class DragonLifeStageHelper extends DragonHelper {
           "in minecraft days").categories(Category.LIFE_STAGE);
 
   // see 190804-GrowthProfile and AgeProfile for explanation
-  private static final double SIZE_MIN = 0.01;  // size is in metres to the top of the dragon's back
-  private static final double SIZE_MAX = 10.0;
+  public static final double SIZE_MIN = 0.01;  // size is in metres to the top of the dragon's back
+  public static final double SIZE_MAX = 10.0;
 
   private static final DragonVariantTag GROWTHRATE_HATCHLING = DragonVariantTag.addTag("growthrate0hatchling", 10.0, -1000, 1000,
           "relative growth rate while a hatchling").categories(Category.LIFE_STAGE);   // relative growth rate

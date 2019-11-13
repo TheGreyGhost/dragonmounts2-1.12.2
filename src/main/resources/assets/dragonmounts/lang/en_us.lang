@@ -160,9 +160,14 @@ item.whistle.nullBlockPos=Cannot Teleport There
 ##
 # Messages
 ##
-dragon.locked=This Dragon has been locked by the Owner
-dragon.notTamed=This Dragon is not Tamed
-dragon.notOwned=You do not own this dragon
+dragon.msg.locked=This Dragon has been locked by the Owner
+dragon.msg.notTamed=This Dragon is not Tamed
+dragon.msg.notOwned=You do not own this dragon
+dragon.msg.willNotAcceptSaddle=This dragon will not let you saddle it
+dragon.msg.tooSmallForSaddle=This dragon is currently too small to wear a saddle
+dragon.msg.willNotRideOnShoulder=This dragon does not want to ride on your shoulder
+dragon.msg.tooBigForShoulder=This dragon is too big to ride on your shoulder
+dragon.msg.isnotsaddled=You must put a saddle on the dragon before you can ride it
 entity.dragon.tooYoung=Dragon is too young for that, let it grow
 egg.cantHatchEnd.DragonMounts=Dragon Eggs cannot be hatched in The End
 dragon.growth.paused=Poisonous potatoes stops dragon growth, use carrots to continue growth

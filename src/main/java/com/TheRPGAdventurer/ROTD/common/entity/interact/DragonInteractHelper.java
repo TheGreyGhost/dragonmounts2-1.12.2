@@ -9,16 +9,13 @@
  */
 package com.TheRPGAdventurer.ROTD.common.entity.interact;
 
-import com.TheRPGAdventurer.ROTD.DragonMounts;
 import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
 import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
-import com.TheRPGAdventurer.ROTD.util.DMUtils;
 import com.TheRPGAdventurer.ROTD.util.EntityState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -33,8 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.commons.lang3.NotImplementedException;
-
-import javax.annotation.Nullable;
 
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
@@ -131,49 +126,34 @@ public class DragonInteractHelper extends DragonHelper {
   /**
    * I think this is called on both server and client
    * @param player
-   * @param item
+   * @param itemStack
    * @return
    */
-  public boolean interact(EntityPlayer player, ItemStack item) {
+  public boolean interact(EntityPlayer player, ItemStack itemStack) {
 
     // interactions:
-//   1) First checks to see if the item is a type that the dragon will eat
-//      If not, proceed to (2)
-//      If so, check if the dragon is hungry, or is not hungry but requires healing
-//        If so, eats the item and exits.
-//        If not, proceed to (2)
-//   2) Checks to see if the item is a breeding item
-//      If not, proceeds to (3)
-//      If so, checks to see if the dragon is not in love already, and is capable of breeding.
-//        If so, put the dragon into love mode and consume the item
-//      Exit.
-//   3)
-
-//    - dragon whistle - various NOT IMPLEMENTED YET
-//    - bone: dragon sits NOT IMPLEMENTED YET
-//    - stick: dragon sits NOT IMPLEMENTED YET
-//    - food:
-//        heals dragon
-//        if dragon is untamed -> random chance of taming
-//
-
-//    * if fully satiated, and this is a breeding item, set dragon in love
-//            - shrinking food or growing food, to pause or restart growth.
-//    - click without interacting item -> riding (not sneaking) or dragon GUI (with sneaking)
-//    - growing or shrinking item : NOT IMPLEMENTED
-    if (dragon.combat().considersThisItemEdible(item.getItem())) {
+    // see featureLocations.txt for logic
+    boolean foodOrBreedItem = false;
+    if (dragon.combat().considersThisItemEdible(itemStack.getItem())) {
+      foodOrBreedItem = true;
       if (!dragon.isTamed()) {
-        attemptToTame(player, item);
+        attemptToTame(player, itemStack);
         return true;
       } else {
-        if (dragon.combat().feed(item)) return true;
+        if (dragon.combat().feed(itemStack)) {
+          consumeItem(player, itemStack);
+          return true;
+        }
       }
     }
 
-    if (dragon.reproduction().isBreedingItem(item)) {
-      if (attemptBreedingInteraction(player, item)) return true;
+    if (dragon.reproduction().isBreedingItem(itemStack)) {
+      foodOrBreedItem = true;
+      if (attemptBreedingInteraction(player, itemStack)) return true;
       return false;
     }
+
+    if (foodOrBreedItem) return false;
 
 //   Not sure how the whistle interaction was supposed to work
 
@@ -187,9 +167,35 @@ public class DragonInteractHelper extends DragonHelper {
 //      return true;
 //    }
 
-  SEE NOTES IN FEATURELOCATIONS ON WHAT TO IMPLEMENT NEXT
+    if (!dragon.isTamed()) {
+      sendDragonNotTamedMessage(player);
+      return false;
+    }
+    if (!isTamedFor(player) && !allowedOtherPlayers()) {
+      sendDragonLockedMessage(player);
+      return false;
+    }
 
-    if (isAllowed(player)) {
+    if (dragon.riding().isASaddle(itemStack)) {
+      boolean success = dragon.riding().attemptToSaddle(player, itemStack);
+      if (!success) return false;
+      consumeItem(player, itemStack);
+      return true;
+    }
+
+    if (dragon.inventory().isOpenGUIkeyPressed(player)) {
+      // Dragon Inventory
+      dragon.inventory().openGUI(player, GuiHandler.GUI_DRAGON);
+      return true;
+    }
+
+    if ()
+
+    // attempt to mount the dragon
+    if (!dragon.riding().isSaddled()) {
+      player.sendStatusMessage(new TextComponentTranslation("dragon.msg.isnotsaddled"), true);
+      return false;
+    }
               /*
                * Riding
                */
@@ -202,12 +208,9 @@ public class DragonInteractHelper extends DragonHelper {
                * GUI
                */
       if (player.isSneaking() && dragon.isTamedFor(player) && !hasInteractItemsEquipped(player)) {
-        // Dragon Inventory
-        dragon.openGUI(player, GuiHandler.GUI_DRAGON);
-        return true;
       }
     }
-
+    return false;
           /*/
 
 //      // Stop Growth
@@ -356,24 +359,21 @@ public class DragonInteractHelper extends DragonHelper {
     }
   }
 
-  protected boolean isAllowed(EntityPlayer player) {
-    boolean hasFood = DMUtils.consumeEquippedArray(player, DragonBreed.getFoodItems()) || DMUtils.consumeFish(player);
-
-    if (!dragon.isTamed() && !hasFood) {
-      player.sendStatusMessage(new TextComponentTranslation("dragon.notTamed"), true);
-      return dragon.isTamedFor(player);
-    } else if (!dragon.allowedOtherPlayers() && !dragon.isTamedFor(player) && dragon.isTamed() && !(dragon.getHealthRelative() < 1 && hasFood)) {
-      player.sendStatusMessage(new TextComponentTranslation("dragon.locked"), true);
-      return dragon.isTamedFor(player);
-    } else return true;
+  private void sendDragonNotTamedMessage(EntityPlayer player) {
+    player.sendStatusMessage(new TextComponentTranslation("dragon.msg.notTamed"), true);
   }
 
+  private void sendDragonLockedMessage(EntityPlayer player) {
+    player.sendStatusMessage(new TextComponentTranslation("dragon.msg.locked"), true);
+  }
+
+
   public boolean allowedOtherPlayers() {
-    return this.dataManager.get(DATAPARAM_ALLOW_OTHER_PLAYERS);
+    return entityDataManager.get(DATAPARAM_ALLOW_OTHER_PLAYERS);
   }
 
   public void setToAllowedOtherPlayers(boolean allow) {
-    dataManager.set(DATAPARAM_ALLOW_OTHER_PLAYERS, allow);
+    entityDataManager.set(DATAPARAM_ALLOW_OTHER_PLAYERS, allow);
   }
 
   /**

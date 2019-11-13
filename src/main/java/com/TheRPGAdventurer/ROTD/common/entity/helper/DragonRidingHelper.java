@@ -12,9 +12,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.NotImplementedException;
@@ -82,6 +85,20 @@ public class DragonRidingHelper extends DragonHelper {
   @Override
   public void onLivingUpdate() {
     checkPreConditions(FunctionTag.VANILLA);
+
+    EntityLivingBase owner = dragon.getOwner();
+    EntityPlayer player = (owner instanceof EntityPlayer) ? (EntityPlayer)owner : null;
+
+    // if dragon is too small for a saddle but is currently wearing one, remove it.
+    if (isSaddled()) {
+      boolean bigEnough = warnIfTooSmallForSaddle(player);
+      if (!bigEnough) {
+        dragon.inventory().setSaddleItem(ItemStack.EMPTY);
+      }
+    }
+
+    if (canRideOnPlayersShoulder(player))
+
 //    if (this.getRidingEntity() instanceof EntityLivingBase) {
 //      EntityLivingBase ridingEntity = (EntityLivingBase) this.getRidingEntity();
 //      if (ridingEntity.isElytraFlying() && ridingEntity != null) {
@@ -103,6 +120,19 @@ public class DragonRidingHelper extends DragonHelper {
 //    removePassengers();
   }
 
+  public boolean canRideOnPlayersShoulder(EntityPlayer player) {
+    if (true != (boolean)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, WILL_RIDE_SHOULDER)) {
+      player.sendStatusMessage(new TextComponentTranslation("dragon.msg.willNotRideOnShoulder"), true);
+      return false;
+    }
+    if (!warnIfTooBigForShoulderRide(player)) return false;
+    return true;
+  }
+
+  public boolean isRidingOnPlayersShoulder(EntityPlayer player) {
+    if (player == null) return false;
+    if (player.getLeftShoulderEntity())
+  }
 
   /**
    * Attempt to place the dragon onto one of the player's shoulders
@@ -136,12 +166,64 @@ public class DragonRidingHelper extends DragonHelper {
 //    return dataManager.get(DATA_SADDLED);
   }
 
+//  /**
+//   * Set or remove the saddle of the
+//   */
+//  public void setSaddled(boolean saddled) {
+////    L.trace("setSaddled({})", saddled);
+////    dataManager.set(DATA_SADDLED, saddled);
+//  }
+
   /**
-   * Set or remove the saddle of the
+   * Is this a suitable saddle for the dragon?
+   * @param itemstack
+   * @return
    */
-  public void setSaddled(boolean saddled) {
-//    L.trace("setSaddled({})", saddled);
-//    dataManager.set(DATA_SADDLED, saddled);
+  public boolean isASaddle(ItemStack itemstack) {
+    return itemstack.getItem() == Items.SADDLE;
+  }
+
+  /** Attempt to place this saddle on the dragon.
+   * Does not alter the itemstack
+   *
+   * @param player
+   * @param itemStack
+   * @return if succeeded, false otherwise
+   */
+  public boolean attemptToSaddle(EntityPlayer player, ItemStack itemStack) {
+    if (!isASaddle(itemStack)) return false;
+    if (!(boolean)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, WILL_ACCEPT_SADDLE)) {
+      player.sendStatusMessage(new TextComponentTranslation("dragon.msg.willNotAcceptSaddle"), true);
+      return false;
+    }
+    boolean bigEnough = warnIfTooSmallForSaddle(player);
+    if (!bigEnough) return false;
+    boolean success = dragon.inventory().setSaddleItem(itemStack);
+    return success;
+  }
+
+  private boolean warnIfTooSmallForSaddle(EntityPlayer player) {
+    double minimumSize = (double)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, MINIMUM_SIZE_FOR_SADDLE);
+    double currentSize = dragon.lifeStage().getPhysicalSize();
+    if (currentSize < minimumSize) {
+      if (player != null) {
+        player.sendStatusMessage(new TextComponentTranslation("dragon.msg.tooSmallForSaddle"), true);
+      }
+      return false;
+    }
+    return true;
+  }
+
+  private boolean warnIfTooBigForShoulderRide(EntityPlayer player) {
+    double maximumSize = (double)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, MAXIMUM_SIZE_FOR_SHOULDER_RIDE);
+    double currentSize = dragon.lifeStage().getPhysicalSize();
+    if (currentSize > maximumSize) {
+      if (player != null) {
+        player.sendStatusMessage(new TextComponentTranslation("dragon.msg.tooBigForShoulder"), true);
+      }
+      return false;
+    }
+    return true;
   }
 
 
@@ -293,5 +375,16 @@ public class DragonRidingHelper extends DragonHelper {
   private static final DragonVariantTag WILL_RIDE_SHOULDER = DragonVariantTag.addTag("willrideshoulder", true,
           "will the dragon ride on the player's shoulder?").categories(DragonVariants.Category.BEHAVIOUR);
 
+  private static final DragonVariantTag MAXIMUM_SIZE_FOR_SHOULDER_RIDE = DragonVariantTag.addTag("maximumsizeforshoulderride",
+          0.2, DragonLifeStageHelper.SIZE_MIN, DragonLifeStageHelper.SIZE_MAX,
+          "the dragon will only ride on the player's shoulder if the height of its back is less than this height, in metres").categories(DragonVariants.Category.BEHAVIOUR);
+
+
+  private static final DragonVariantTag MINIMUM_SIZE_FOR_SADDLE = DragonVariantTag.addTag("minimumsizeforsaddle",
+          0.5, DragonLifeStageHelper.SIZE_MIN, DragonLifeStageHelper.SIZE_MAX,
+          "you can only saddle a dragon if the height of its back is as least this high, in metres").categories(DragonVariants.Category.BEHAVIOUR);
+
+  private static final DragonVariantTag WILL_ACCEPT_SADDLE = DragonVariantTag.addTag("willacceptsaddle", true,
+          "can the dragon be saddled?").categories(DragonVariants.Category.BEHAVIOUR);
 
 }

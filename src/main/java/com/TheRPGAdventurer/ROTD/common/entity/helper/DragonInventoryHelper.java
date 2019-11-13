@@ -131,6 +131,23 @@ public class DragonInventoryHelper extends DragonHelper {
     hasChestVarChanged = true;
   }
 
+  public boolean isSaddled() {return entityDataManager.get(DATA_SADDLED);}
+
+  /**
+   * Sets the saddle to the given item
+   * @param itemStack the saddle; or empty to remove saddle
+   * @return true for success
+   */
+  public boolean setSaddleItem(ItemStack itemStack) {
+    if (itemStack.isEmpty()) {
+      entityDataManager.set(DATA_SADDLED, false);
+      return true; //todo spawn the existing saddle as an item
+    }
+    if (!dragon.riding().isASaddle(itemStack)) return false;
+    entityDataManager.set(DATA_SADDLED, true);
+    return true;
+  }
+
   public ItemStack getBanner1() {
     return dataManager.get(BANNER1);
   }
@@ -174,6 +191,14 @@ public class DragonInventoryHelper extends DragonHelper {
 
   public void setArmor(int armorType) {
     this.dataManager.set(ARMOR, armorType);
+  }
+
+  /**
+   * The player just interacted with the dragon, should we attempt to mount it, or open the inventory GUI?
+   * @return
+   */
+  public boolean isOpenGUIkeyPressed(EntityPlayer player) {
+    return player.isSneaking();
   }
 
   /**
