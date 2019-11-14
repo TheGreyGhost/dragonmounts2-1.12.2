@@ -439,13 +439,23 @@ public class DragonVariants {
     // define in decreasing order of priority.  In case of ambiguity, the highest priority modifier is used, eg
     //   the earliest in the list
     // Mutex = mutually exclusive flags.  If two flags have any mutex bits in common, they cannot both be applied at the same time
+    //  bit 0x01 = gender
+    //  bit 0x08 = fertile
+    //  bit 0x10 = age (life stage)
     MALE("male", 0x01, 0),
     FEMALE("female", 0x01, 1),
     DEBUG1("debug1", 0x02, 2, true),
     DEBUG2("debug2", 0x04, 3, true),
-    FERTILE("fertile", 0x02, 4),
-    INFERTILE("infertile", 0x03, 5);
-    ; // may add other modifiers in future
+    FERTILE("fertile", 0x08, 4),
+    INFERTILE("infertile", 0x08, 5),
+    HATCHLING("hatchling", 0x10, 6),
+    INFANT("infant", 0x10, 7),
+    CHILD("child", 0x10, 8),
+    EARLYTEEN("earlyteen", 0x10, 9),
+    LATETEEN("lateteen", 0x10, 10),
+    ADULT("adult", 0x10, 11);
+
+    // may add other modifiers in future
 
     private String textname;
     private int mutexFlags;

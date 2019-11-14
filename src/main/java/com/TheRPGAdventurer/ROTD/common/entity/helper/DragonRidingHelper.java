@@ -97,7 +97,9 @@ public class DragonRidingHelper extends DragonHelper {
       }
     }
 
-    if (canRideOnPlayersShoulder(player))
+//    if (canRideOnPlayersShoulder(player)) {
+//
+//    }
 
 //    if (this.getRidingEntity() instanceof EntityLivingBase) {
 //      EntityLivingBase ridingEntity = (EntityLivingBase) this.getRidingEntity();
@@ -120,6 +122,18 @@ public class DragonRidingHelper extends DragonHelper {
 //    removePassengers();
   }
 
+  /**
+   * When the player clicks on the dragon, should we interpret that as an attempt to place the dragon on player's
+   *   shoulder, or an attempt to mount the dragon.
+   * Is based on the size.
+   */
+  public enum PossibleRidingMode {RIDE_ON_SHOULDER, PLAYER_CAN_RIDE, NEITHER};
+  public PossibleRidingMode getPossibleRidingMode(EntityPlayer player) {
+    if (!isTooBigForShoulderRide(player)) return PossibleRidingMode.RIDE_ON_SHOULDER;
+    if (!isTooSmallForSaddle(player)) return PossibleRidingMode.PLAYER_CAN_RIDE;
+    return PossibleRidingMode.NEITHER;
+  }
+
   public boolean canRideOnPlayersShoulder(EntityPlayer player) {
     if (true != (boolean)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, WILL_RIDE_SHOULDER)) {
       player.sendStatusMessage(new TextComponentTranslation("dragon.msg.willNotRideOnShoulder"), true);
@@ -131,7 +145,7 @@ public class DragonRidingHelper extends DragonHelper {
 
   public boolean isRidingOnPlayersShoulder(EntityPlayer player) {
     if (player == null) return false;
-    if (player.getLeftShoulderEntity())
+    return false; // todo implement later
   }
 
   /**
@@ -140,6 +154,8 @@ public class DragonRidingHelper extends DragonHelper {
    * @return
    */
   public boolean attemptToPlaceOnShoulder(EntityPlayer entityPlayer) {
+    if (!warnIfTooBigForShoulderRide(entityPlayer)) return false;
+    System.out.println("PLaced on shoulder");  //todo to be implemented
 //    if (!dragon.isTamedFor(entityPlayer)) return false;
 //    if (dragon.getRidingEntity() == entityPlayer) return false;
 //    if (true != (boolean)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, WILL_RIDE_SHOULDER)) return false;
@@ -152,7 +168,22 @@ public class DragonRidingHelper extends DragonHelper {
 //        this.isSittingOnShoulder = this.entity.setEntityOnShoulder(this.owner);
 //      }
 //    }
-    return false;
+//    // if the dragon is small enough, put it on the player's shoulder
+//    if (!dragon.isTamedFor(player) || player.isSneaking()) return false;
+//
+//
+//
+//    dragon.setSitting(false);
+//    dragon.startRiding(player, true);
+//    return true;
+//  }
+//
+//  if (player.isPassenger(this)) {
+//    return false;
+//  }
+//
+//
+  return false;
   }
 
 //------------------------ player riding on dragon ------------------
@@ -202,10 +233,39 @@ public class DragonRidingHelper extends DragonHelper {
     return success;
   }
 
+  /** attempt to mount the player onto the dragon; send a warning message if failed
+   * @param player
+   * @return true for success
+   */
+  public boolean attemptToMountDragon(EntityPlayer player) {
+    if (!isSaddled()) {
+      player.sendStatusMessage(new TextComponentTranslation("dragon.msg.isnotsaddled"), true);
+      return false;
+    }
+    if (!dragon.isTamed()) {
+      dragon.interactions().sendDragonNotTamedMessage(player);
+      return false;
+    }
+    if (!dragon.interactions().isTamedFor(player) && !dragon.interactions().allowedOtherPlayers()) {
+      dragon.interactions().sendDragonLockedMessage(player);
+      return false;
+    }
+    System.out.println("Mount player onto dragon"); //todo implement
+    return true;
+  }
+
+  @Nullable
+  public EntityPlayer getPlayerWhoIsSteering() {
+    Entity entity = dragon.getPassengers().isEmpty() ? null : dragon.getPassengers().get(0);
+    if (entity instanceof EntityPlayer) {
+      return (EntityPlayer) entity;
+    } else {
+      return null;
+    }
+  }
+
   private boolean warnIfTooSmallForSaddle(EntityPlayer player) {
-    double minimumSize = (double)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, MINIMUM_SIZE_FOR_SADDLE);
-    double currentSize = dragon.lifeStage().getPhysicalSize();
-    if (currentSize < minimumSize) {
+    if (isTooSmallForSaddle(player)) {
       if (player != null) {
         player.sendStatusMessage(new TextComponentTranslation("dragon.msg.tooSmallForSaddle"), true);
       }
@@ -214,16 +274,26 @@ public class DragonRidingHelper extends DragonHelper {
     return true;
   }
 
-  private boolean warnIfTooBigForShoulderRide(EntityPlayer player) {
-    double maximumSize = (double)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, MAXIMUM_SIZE_FOR_SHOULDER_RIDE);
+  private boolean isTooSmallForSaddle(EntityPlayer player) {
+    double minimumSize = (double)dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, MINIMUM_SIZE_FOR_SADDLE);
     double currentSize = dragon.lifeStage().getPhysicalSize();
-    if (currentSize > maximumSize) {
+    return (currentSize < minimumSize);
+  }
+
+  private boolean warnIfTooBigForShoulderRide(EntityPlayer player) {
+    if (isTooBigForShoulderRide(player)) {
       if (player != null) {
         player.sendStatusMessage(new TextComponentTranslation("dragon.msg.tooBigForShoulder"), true);
       }
       return false;
     }
     return true;
+  }
+
+  private boolean isTooBigForShoulderRide(EntityPlayer player) {
+    double maximumSize = (double) dragon.configuration().getVariantTagValue(DragonVariants.Category.BEHAVIOUR, MAXIMUM_SIZE_FOR_SHOULDER_RIDE);
+    double currentSize = dragon.lifeStage().getPhysicalSize();
+    return (currentSize > maximumSize);
   }
 
 
@@ -234,9 +304,10 @@ public class DragonRidingHelper extends DragonHelper {
   }
 
   public boolean isThisTheControllingPlayer(EntityPlayer player) {
-    return this.getControllingPassenger() != null
-            && this.getControllingPassenger() instanceof EntityPlayer
-            && this.getControllingPassenger().getUniqueID().equals(player.getUniqueID());
+    Entity controllingPassenger = getPlayerWhoIsSteering();
+    return controllingPassenger != null
+            && controllingPassenger instanceof EntityPlayer
+            && controllingPassenger.getUniqueID().equals(player.getUniqueID());
   }
 
   public void setRidingPlayer(EntityPlayer player) {
@@ -265,11 +336,6 @@ public class DragonRidingHelper extends DragonHelper {
 //      this.renderYawOffset = this.rotationYaw;
 //      this.rotationYawHead = this.renderYawOffset;
 //    }
-  }
-
-  @Nullable
-  public Entity getControllingPassenger() {
-    return dragon.getPassengers().isEmpty() ? null : dragon.getPassengers().get(0);
   }
 
   public boolean isRidingAboveGround(Entity entityBeingRidden) {

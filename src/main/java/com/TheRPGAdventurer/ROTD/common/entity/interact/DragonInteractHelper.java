@@ -11,11 +11,11 @@ package com.TheRPGAdventurer.ROTD.common.entity.interact;
 
 import com.TheRPGAdventurer.ROTD.client.gui.GuiHandler;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
-import com.TheRPGAdventurer.ROTD.common.entity.breeds.DragonBreed;
 import com.TheRPGAdventurer.ROTD.common.entity.helper.DragonHelper;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.util.EntityState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -30,6 +30,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.commons.lang3.NotImplementedException;
+
+import javax.annotation.Nullable;
 
 /**
  * @author Nico Bergemann <barracuda415 at yahoo.de>
@@ -189,29 +191,19 @@ public class DragonInteractHelper extends DragonHelper {
       return true;
     }
 
-    if ()
-
-    // attempt to mount the dragon
-    if (!dragon.riding().isSaddled()) {
-      player.sendStatusMessage(new TextComponentTranslation("dragon.msg.isnotsaddled"), true);
-      return false;
-    }
-              /*
-               * Riding
-               */
-      if (dragon.canFitPassenger(player) && dragon.isTamed() && dragon.isSaddled()  && !player.isSneaking() && !hasInteractItemsEquipped(player)) {
-        dragon.setRidingPlayer(player);
-        return true;
+    // attempt to put the dragon on player's shoulder if it's small enough (assume
+    switch (dragon.riding().getPossibleRidingMode(player)) {
+      case RIDE_ON_SHOULDER: {
+        boolean success = dragon.riding().attemptToPlaceOnShoulder(player);
+        return success;
       }
-
-              /*
-               * GUI
-               */
-      if (player.isSneaking() && dragon.isTamedFor(player) && !hasInteractItemsEquipped(player)) {
+      case PLAYER_CAN_RIDE: {
+        boolean success = dragon.riding().attemptToMountDragon(player);
+        return success;
       }
-    }
-    return false;
-          /*/
+      case NEITHER: {
+        return false;
+      }
 
 //      // Stop Growth
 //      ItemFood shrinking = (ItemFood) DMUtils.consumeEquipped(player, dragon.getBreed().getShrinkingFood());
@@ -230,16 +222,6 @@ public class DragonInteractHelper extends DragonHelper {
 //      }
     }
     return false;
-  }
-
-  @Nullable
-  public EntityPlayer getControllingPlayer() {
-    Entity entity = this.getPassengers().isEmpty() ? null : getPassengers().get(0);
-    if (entity instanceof EntityPlayer) {
-      return (EntityPlayer) entity;
-    } else {
-      return null;
-    }
   }
 
   /**
@@ -280,29 +262,6 @@ public class DragonInteractHelper extends DragonHelper {
     onTameAttempt(player, successfulTaming);
     consumeItem(player, itemStack);
     return successfulTaming;
-  }
-
-  /**
-   * attempt to put the dragon on the player's shoulder (like a parrot)
-   * @param player
-   * @param itemStack
-   * @return
-   */
-  private boolean attemptRideOnShoulder(EntityPlayer player, ItemStack itemStack) {
-    // if the dragon is small enough, put it on the player's shoulder
-    if (!dragon.isTamedFor(player) || player.isSneaking()) return false;
-
-
-
-      dragon.setSitting(false);
-      dragon.startRiding(player, true);
-      return true;
-    }
-
-    if (player.isPassenger(this)) {
-      return false;
-    }
-
   }
 
   public boolean canBeLeashedTo(EntityPlayer player) {
@@ -359,11 +318,11 @@ public class DragonInteractHelper extends DragonHelper {
     }
   }
 
-  private void sendDragonNotTamedMessage(EntityPlayer player) {
+  public void sendDragonNotTamedMessage(EntityPlayer player) {
     player.sendStatusMessage(new TextComponentTranslation("dragon.msg.notTamed"), true);
   }
 
-  private void sendDragonLockedMessage(EntityPlayer player) {
+  public void sendDragonLockedMessage(EntityPlayer player) {
     player.sendStatusMessage(new TextComponentTranslation("dragon.msg.locked"), true);
   }
 

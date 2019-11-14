@@ -33,6 +33,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static net.minecraft.entity.SharedMonsterAttributes.*;
 
 /**
@@ -244,9 +247,18 @@ public class DragonLifeStageHelper extends DragonHelper {
    * get the text label for this age (infant, child, etc)
    * @return
    */
-  public String getAgeLabel() {
+  public String getAgeLabelText() {
     double index = Interpolation.findIndex(getTicksSinceCreation() / TICKS_PER_MINECRAFT_DAY, lifeStageAges);
     return ageLabels[(int)index].getTextLabel();
+  }
+
+  /**
+   * get the label for this age (infant, child, etc)
+   * @return
+   */
+  public AgeLabel getAgeLabel() {
+    double index = Interpolation.findIndex(getTicksSinceCreation() / TICKS_PER_MINECRAFT_DAY, lifeStageAges);
+    return ageLabels[(int)index];
   }
 
 //  /**
@@ -365,11 +377,20 @@ public class DragonLifeStageHelper extends DragonHelper {
 //                  .build();
 
 
+
+  private void updateLifestageModifiers() {
+    AgeLabel ageLabel = getAgeLabel();
+    boolean hasThisAgeLabel = dragon.configuration().hasModifier(ageLabel.getModifier());
+    if (hasThisAgeLabel) return;
+    dragon.configuration().addModifier(ageLabel.getModifier());
+  }
+
   private void applyLifeStageChanges() {
     applyLifeStageAttributeChange(MAX_HEALTH, getMaxHealth());
     applyLifeStageAttributeChange(ATTACK_DAMAGE, getAttackDamage());
     applyLifeStageAttributeChange(ARMOR, getArmour());
     applyLifeStageAttributeChange(ARMOR_TOUGHNESS, getArmourToughness());
+    updateLifestageModifiers();
   }
 
   private final double SIGNIFICANT_DIFFERENCE = 0.01; // only update the new value if it is significantly different to the old one
@@ -427,19 +448,22 @@ public class DragonLifeStageHelper extends DragonHelper {
 
   private enum AgeLabel {
 
-    HATCHLING("hatchling"),
-    INFANT("infant"),
-    CHILD("child"),
-    EARLYTEEN("earlyteen"),
-    LATETEEN("lateteen"),
-    ADULT("adult");
+    HATCHLING("hatchling", DragonVariants.Modifier.HATCHLING),
+    INFANT("infant", DragonVariants.Modifier.INFANT),
+    CHILD("child", DragonVariants.Modifier.CHILD),
+    EARLYTEEN("earlyteen", DragonVariants.Modifier.EARLYTEEN),
+    LATETEEN("lateteen", DragonVariants.Modifier.LATETEEN),
+    ADULT("adult", DragonVariants.Modifier.ADULT);
 
     public String getTextLabel() {return textLabel;}
+    public DragonVariants.Modifier getModifier() {return modifier;}
 
-    AgeLabel(String textlabel) {
+    AgeLabel(String textlabel, DragonVariants.Modifier modifier) {
       this.textLabel = textlabel;
+      this.modifier = modifier;
     }
     private String textLabel;
+    private DragonVariants.Modifier modifier;
   }
 
 //  private void updateAgeScale() {

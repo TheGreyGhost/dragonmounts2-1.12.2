@@ -685,7 +685,7 @@ public class EntityTameableDragon extends EntityTameable {
 
   @Nullable
   public Entity getControllingPassenger() {
-    return this.getPassengers().isEmpty() ? null : getPassengers().get(0);
+    return riding().getPlayerWhoIsSteering();
   }
 
   @Override

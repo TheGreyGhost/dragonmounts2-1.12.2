@@ -1,5 +1,9 @@
 DragonLifeStageHelper: Max health, attack damage, armour
  - aging, stop/start growth
+ - applies the lifestage modifiers.
+ - the lifestage modifiers are intended for discrete/sudden changes, such as a different sound, or different texture
+    they're not intended to be used for health, armour, attack damage, breath weapon properties, etc.  If used for these
+    purposes they may give unexpected results...
 
 DragonConfigurationHelper: Storing all breed+modifier configuration information
 
@@ -81,6 +85,17 @@ DragonRidingHelper:
   - player riding on dragon
 
 DragonSoundsHelper: general sounds that the dragon makes
+  roar = periodic roar while idle
+  eat = sound when eating
+  hurt
+  wings
+  step
+  swim
+  sneeze
+  death
+  growl (aggressive)
+  ambient
+
 
 DragonWhistleHelper: control of the dragon by the whistle
 
