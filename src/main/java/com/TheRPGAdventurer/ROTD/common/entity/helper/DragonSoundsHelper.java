@@ -1,6 +1,9 @@
 package com.TheRPGAdventurer.ROTD.common.entity.helper;
 
+import com.TheRPGAdventurer.ROTD.client.render.dragon.DragonRenderer;
 import com.TheRPGAdventurer.ROTD.common.entity.EntityTameableDragon;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariantTag;
+import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants;
 import com.TheRPGAdventurer.ROTD.util.math.MathX;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -27,6 +30,9 @@ public class DragonSoundsHelper extends DragonHelper {
     // the initialisation of the tags is all done in their static initialisers
     //    DragonVariants.addVariantTagValidator(new DragonReproductionValidator());
   }
+
+  public static final String SOUND_BASE = "sounds/mob/dragon/";
+
 
   @Override
   public void writeToNBT(NBTTagCompound nbt) {
@@ -197,6 +203,30 @@ public class DragonSoundsHelper extends DragonHelper {
     }
   }
 
+  private static final master volume
+
+  private static final DragonVariantTag SOUND_ROAR = DragonVariantTag.addTag("roarsounds", new String[] {"defaultbreed/roar.ogg"},
+          "dragon roar (no particular trigger) ; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_EAT = DragonVariantTag.addTag("eatsounds", new String[] {"defaultbreed/roar.ogg"},
+          "chewing sound; base path is" + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_HURT = DragonVariantTag.addTag("hurtsounds", new String[] {"defaultbreed/roar.ogg"},
+          "sound when dragon takes damage; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_WINGS_FLAP = DragonVariantTag.addTag("wingflapsounds", new String[] {"defaultbreed/roar.ogg"},
+          "sound of flapping wings; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_FOOTSTEP = DragonVariantTag.addTag("footstepsounds", new String[] {"defaultbreed/roar.ogg"},
+          "footstep sounds; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_SWIM = DragonVariantTag.addTag("swimsounds", new String[] {"defaultbreed/roar.ogg"},
+          "swimming sounds; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_SNEEZE = DragonVariantTag.addTag("sneezesounds", new String[] {"defaultbreed/roar.ogg"},
+          "sound of the dragon sneezing; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_DEATH = DragonVariantTag.addTag("deathsounds", new String[] {"defaultbreed/roar.ogg"},
+          "sounds when the dragon dies; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_GROWL = DragonVariantTag.addTag("growlsounds", new String[] {"defaultbreed/roar.ogg"},
+          "sounds made when the dragon is aggressive / attacking; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+  private static final DragonVariantTag SOUND_AMBIENT = DragonVariantTag.addTag("ambientsounds", new String[] {"defaultbreed/roar.ogg"},
+          "ambient / background sounds emitted by the dragon; base path is " + SOUND_BASE).categories(DragonVariants.Category.SOUNDS);
+
+  frequency of roaring? sneezing?
 
 
 }

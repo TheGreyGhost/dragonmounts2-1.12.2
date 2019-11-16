@@ -251,8 +251,6 @@ public class DragonBreedWithModifiersRenderer {
   private static final DragonVariantTag DISSOLVE_TEXTURE = DragonVariantTag.addTag("dissolvetexture", "defaultbreed/dissolve.png",
           "the texture used to make the dragon 'dissolve away'' when it dies; base path is " + DragonRenderer.TEX_BASE).categories(DragonVariants.Category.PHYSICAL_MODEL);
 
-// todo later: implement texture as optional age-based array to allow for texture changing as dragon matures
-//
 //  private enum InternalState {INIT, HAVE_INITIALISED_RESOURCES, REGISTERED_MODELS};
 //  private InternalState internalState = InternalState.INIT;  // just for debugging / assertion
 

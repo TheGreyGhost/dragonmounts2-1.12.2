@@ -93,7 +93,8 @@ public class DragonVariants {
     EGG("egg", 4, "This section is used to configure the dragon's egg"),
     REPRODUCTION("reproduction", 5, "Settings related to reproduction / having children."),
     BEHAVIOUR("behaviour", 6, "Settings related to general behaviour"),
-    METABOLISM("metabolism", 7, "Settings related to food and hunger, potion effects, immunities")
+    METABOLISM("metabolism", 7, "Settings related to food and hunger, potion effects, immunities"),
+    SOUNDS("sounds", 7, "This section configures sound effects")
     ;
 
     /**
