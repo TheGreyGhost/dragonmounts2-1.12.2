@@ -88,13 +88,16 @@ public class DragonVariants {
           " 8) ArmourToughnessMultiplier (0->100%) - armour toughness\n" +
           " For each of these, the shape of the curve is given by corresponding tags, linearly interpolated.\n" +
           " e.g. if ageinfant is 1.0 days, healthpercentinfant = 20.0, agechild is 2.0 days, and healthpercentchild = 50.0,\n" +
-          "   then healthpercent at 1.5 days of age is 35.0\n"
+          "   then healthpercent at 1.5 days of age is 35.0"
     ),
     EGG("egg", 4, "This section is used to configure the dragon's egg"),
     REPRODUCTION("reproduction", 5, "Settings related to reproduction / having children."),
     BEHAVIOUR("behaviour", 6, "Settings related to general behaviour"),
     METABOLISM("metabolism", 7, "Settings related to food and hunger, potion effects, immunities"),
-    SOUNDS("sounds", 7, "This section configures sound effects")
+    SOUNDS("sounds", 7, "This section configures sound effects.\n" +
+            "Each sound effect name is an array of either:\n" +
+            "  path to the .ogg file, eg '{\"defaultbreed/roar1.ogg\", \"defaultbreed/roar2.ogg\"}', or\n" +
+            "  a minecraft sound effect, eg '{\"entity.generic.eat\"}'")
     ;
 
     /**
