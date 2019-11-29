@@ -9,6 +9,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @ObjectHolder(DragonMounts.MODID)
 public class ModSounds {
 
@@ -69,6 +72,27 @@ public class ModSounds {
   @ObjectHolder("item.gender_switch")
   public static final SoundEvent DRAGON_SWITCH = createSoundEvent("item.gender_switch");
 
+  /**
+   * Retrieves the SoundEvent for a given filename; or default if not found
+   * @param soundFilename
+   * @return
+   */
+  public static SoundEvent getSoundEventOrDefault(String soundFilename) {
+    SoundEvent foundSoundEvent = soundEvents.get(soundFilename);
+    return (foundSoundEvent == null) ? SILENCE : foundSoundEvent;
+  }
+
+  /**
+   * Add a sound to the master registry, so the corresponding SoundEvent can be retrieved later on
+   * @param soundFilename
+   */
+  public static void addSound(String soundFilename) {
+    if (!soundEvents.containsKey(soundFilename)) {
+      SoundEvent newSoundEvent = createSoundEvent(soundFilename);
+      soundEvents.put(soundFilename, newSoundEvent);
+    }
+  }
+
   public final String getJsonName() {
     return DragonMounts.MODID + ":" + jsonName;
   }
@@ -101,6 +125,10 @@ public class ModSounds {
       SoundEffectName.registerAllSounds();
     }
   }
+
+  private static Map<String, SoundEvent> soundEvents = new HashMap<>();
+
+  static private SoundEvent SILENCE = SoundEffectName.SILENCE.getSoundEvent();
 
   private ModSounds(String i_jsonName) {
     jsonName = i_jsonName;

@@ -2,9 +2,8 @@ package com.TheRPGAdventurer.ROTD.common.entity.physicalmodel;
 
 import com.TheRPGAdventurer.ROTD.DragonMounts;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
+
 import com.TheRPGAdventurer.ROTD.common.entity.physicalmodel.DragonVariants.Category;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -107,6 +106,16 @@ public class DragonVariantTag implements Comparable<DragonVariantTag> {
   public DragonVariantTag values(String... values) {
     for (String value : values)
       permissibleValues.add(value);
+    return this;
+  }
+
+  /**
+   * Adds this tag to the given registry
+   * @param registry
+   * @return returns the same tag to allow chaining
+   */
+  public DragonVariantTag addToRegistry(Map<String, DragonVariantTag> registry, String name) {
+    registry.put(name, this);
     return this;
   }
 
